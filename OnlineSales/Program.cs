@@ -1,4 +1,8 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿// <copyright file="Program.cs" company="WavePoint Co. Ltd.">
+// Licensed under the MIT license. See LICENSE file in the samples root for full license information.
+// </copyright>
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
