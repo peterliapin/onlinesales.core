@@ -5,4 +5,4 @@ services:
     image: ${DOCKER_REGISTRY-}onlinesales
     build:
       context: .
-      dockerfile: src/OnlineSales/Dockerfile
+      dockerfile: ../src/OnlineSales/Dockerfile
