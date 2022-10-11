@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  onlinesales:
+    image: ${DOCKER_REGISTRY-}onlinesales
+    build:
+      context: .
+      dockerfile: src/OnlineSales/Dockerfile
