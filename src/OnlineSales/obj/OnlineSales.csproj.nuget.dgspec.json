@@ -39,6 +39,14 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Elasticsearch.Net": {
+              "target": "Package",
+              "version": "[7.17.4, )"
+            },
+            "NEST": {
+              "target": "Package",
+              "version": "[7.17.4, )"
+            },
             "Serilog.AspNetCore": {
               "target": "Package",
               "version": "[6.0.1, )"
