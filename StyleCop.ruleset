@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="RuleSet to disable redundant StyleCop recommendations" ToolsVersion="14.0">
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
+    <Rule Id="SA1633" Action="None" /> <!-- File should have header -->
+    <Rule Id="SA0001" Action="None" /> <!-- XML comments -->
+  </Rules>
+</RuleSet>
