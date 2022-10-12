@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="OnlineSales ruleset for code analyzers" ToolsVersion="14.0">
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
-    <Rule Id="CS1591" Action="None" />
+    <Rule Id="CS1591" Action="None" /> <!-- Missing XML comment for publicly visible type or member -->
   </Rules>    
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
