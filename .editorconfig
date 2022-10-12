@@ -4,7 +4,7 @@ root = true
 [*]
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
 indent_style = space
-insert_final_newline = true
+insert_final_newline = false
 trim_trailing_whitespace = true
 
 # Code files
