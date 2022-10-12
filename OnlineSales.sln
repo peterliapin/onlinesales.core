@@ -7,7 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Tests", "src\On
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D24DF77-6D65-4C52-9D3D-0360F878B445}"
 	ProjectSection(SolutionItems) = preProject
-		stylecop.json = stylecop.json
 		LICENSE = LICENSE
 		Directory.Build.targets = Directory.Build.targets
 		.editorconfig = .editorconfig
