@@ -1,8 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="RuleSet to disable redundant StyleCop recommendations" ToolsVersion="14.0">
+<RuleSet Name="OnlineSales ruleset for code analyzers" ToolsVersion="14.0">
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CS1591" Action="None" />
+  </Rules>    
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
-    <Rule Id="SA1633" Action="None" /> <!-- File should have header -->
     <Rule Id="SA0001" Action="None" /> <!-- XML comments -->
   </Rules>
 </RuleSet>
