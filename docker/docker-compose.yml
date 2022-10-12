@@ -12,8 +12,6 @@ services:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
-    networks:
-      - onlinesalesnetwork
 
   kibana:
     container_name: kibana
@@ -23,9 +21,7 @@ services:
     depends_on:
       - elasticsearch
     environment:
-      - ELASTICSEARCH_URL=http://localhost:9200
-    networks:
-      - onlinesalesnetwork
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
 
   postgres:
     container_name: postgres
@@ -44,16 +40,12 @@ services:
       start_period: 10s
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - onlinesalesnetwork
 
   onlinesales:
     image: ${DOCKER_REGISTRY-}onlinesales
     build:
       context: .
       dockerfile: ../src/OnlineSales/Dockerfile
-    networks:
-      - onlinesalesnetwork
 
 networks:
   onlinesalesnetwork:
