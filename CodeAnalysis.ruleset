@@ -4,7 +4,9 @@
     <Rule Id="CS1591" Action="None" /> <!-- Missing XML comment for publicly visible type or member -->
   </Rules>    
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="S125" Action="None" /> <!-- Remove this commented out code -->
+    <Rule Id="SA1518" Action="None" /> <!-- Code should not contain blank lines at the end of the file -->
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
-    <Rule Id="SA0001" Action="None" /> <!-- XML comments -->
+    <Rule Id="SA0001" Action="None" /> <!-- XML comments -->    
   </Rules>
 </RuleSet>
