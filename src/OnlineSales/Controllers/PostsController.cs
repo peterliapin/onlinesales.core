@@ -9,32 +9,11 @@ using OnlineSales.Models;
 namespace OnlineSales.Controllers;
 
 [Route("api/[controller]")]
-public class PostsController : Controller
+public class PostsController : BaseController<Post>
 {
-    private readonly ApiDbContext dbContext;
-
     public PostsController(ApiDbContext dbContext)
+        : base(dbContext)
     {
-        this.dbContext = dbContext;
-    }
-
-    // GET: api/posts
-    [HttpGet]
-    public IEnumerable<Post> Get()
-    {
-        var posts = this.dbContext.Posts!.ToList<Post>();
-        return posts;
-    }
-
-    // GET api/posts/5
-    [HttpGet("{id}")]
-    public Post Get(string id)
-    {
-        var post = (from p in this.dbContext.Posts
-                    where p.Id == id
-                    select p).First();
-
-        return post;
     }
 
     // POST api/posts

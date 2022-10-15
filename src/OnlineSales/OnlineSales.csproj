@@ -35,6 +35,7 @@
     <Folder Include="DTOs\" />
     <Folder Include="Data\" />
     <Folder Include="Repositories\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="DTOs\" />
@@ -43,5 +44,6 @@
     <None Remove="Data\" />
     <None Remove="Migrations\.editorconfig" />
     <None Remove="Repositories\" />
+    <None Remove="Migrations\" />
   </ItemGroup>
 </Project>

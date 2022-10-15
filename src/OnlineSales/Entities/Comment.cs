@@ -14,9 +14,7 @@ public enum CommentStatus
 }
 
 public class Comment : BaseEntity
-{
-    public string ParentId { get; set; } = string.Empty;
-
+{   
     public string AuthorName { get; set; } = string.Empty;
 
     public string AuthorEmail { get; set; } = string.Empty;
@@ -36,9 +34,14 @@ public class Comment : BaseEntity
 
     public CommentStatus Approved { get; set; } = CommentStatus.NOTAPPROVED;
 
-    public string PostId { get; set; } = string.Empty;
+    public int PostId { get; set; }
 
     [Required]
     [ForeignKey("PostId")]
     public virtual Post? Post { get; set; }
+
+    public int ParentId { get; set; }
+
+    [ForeignKey("ParentId")]
+    public virtual Comment? Parent { get; set; }
 }
