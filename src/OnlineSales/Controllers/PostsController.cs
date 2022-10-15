@@ -15,25 +15,4 @@ public class PostsController : BaseController<Post>
         : base(dbContext)
     {
     }
-
-    // POST api/posts
-    [HttpPost]
-    public void Post([FromBody] Post value)
-    {
-        throw new NotSupportedException();
-    }
-
-    // PUT api/posts/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] Post value)
-    {
-        throw new NotSupportedException();
-    }
-
-    // DELETE api/posts/5
-    [HttpDelete("{id}")]
-    public void Delete(int id)
-    {
-        throw new NotSupportedException();
-    }
 }

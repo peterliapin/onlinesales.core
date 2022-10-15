@@ -9,6 +9,7 @@
     <Rule Id="SA1518" Action="None" /> <!-- Code should not contain blank lines at the end of the file -->
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
     <Rule Id="SA1028" Action="None" /> <!-- Code should not contain trailing whitespace -->
-    <Rule Id="SA1401" Action="None" /> <!-- Field should be private -->
+    <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
+    <Rule Id="SA1401" Action="None" /> <!-- Field should be private -->     
   </Rules>
 </RuleSet>

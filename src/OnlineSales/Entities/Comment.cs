@@ -3,6 +3,8 @@
 // </copyright>
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace OnlineSales.Models;
 
@@ -34,14 +36,16 @@ public class Comment : BaseEntity
 
     public CommentStatus Approved { get; set; } = CommentStatus.NOTAPPROVED;
 
-    public int PostId { get; set; }
-
     [Required]
-    [ForeignKey("PostId")]
+    public int PostId { get; set; }
+    
+    [JsonIgnore]
+    [ForeignKey("PostId")]    
     public virtual Post? Post { get; set; }
 
-    public int ParentId { get; set; }
+    public int? ParentId { get; set; }
 
+    [JsonIgnore]
     [ForeignKey("ParentId")]
     public virtual Comment? Parent { get; set; }
 }

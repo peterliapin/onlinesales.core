@@ -1,17 +1,13 @@
 ﻿// <copyright file="Program.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using OnlineSales;
 using OnlineSales.Data;
 using Serilog;
-using Serilog.Events;
 using Serilog.Exceptions;
-using Serilog.Formatting.Json;
 using Serilog.Sinks.Elasticsearch;
-using Serilog.Sinks.File;
-using System.Diagnostics;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +20,14 @@ builder.Services.Configure<RouteOptions>(options =>
     options.LowercaseUrls = true;
     options.LowercaseQueryStrings = true;
 });
+
+builder.Services
+    .AddMvc()
+    .AddJsonOptions(opts =>
+    {
+        var enumConverter = new JsonStringEnumConverter();
+        opts.JsonSerializerOptions.Converters.Add(enumConverter);
+    });
 
 // Add services to the container.
 builder.Services.AddControllers();
