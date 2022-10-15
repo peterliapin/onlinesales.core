@@ -10,6 +10,7 @@ trim_trailing_whitespace = true
 # Code files
 [*.{cs,csx,vb,vbx}]
 indent_size = 4
+dotnet_sort_system_directives_first = true
 
 # Xml project files
 [*.{xml,csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
