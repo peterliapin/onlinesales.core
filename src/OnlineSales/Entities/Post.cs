@@ -29,10 +29,6 @@ public class Post : BaseEntity
     [Required]
     public string Author { get; set; } = string.Empty;
 
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
     [Required]
     public string Lang { get; set; } = string.Empty;
 

@@ -10,6 +10,9 @@
     <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
     <Rule Id="SA1028" Action="None" /> <!-- Code should not contain trailing whitespace -->
     <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
-    <Rule Id="SA1401" Action="None" /> <!-- Field should be private -->     
+    <Rule Id="S1135" Action="None" /> <!-- Complete the task associated to this 'TODO' comment. -->
+    <Rule Id="SA1401" Action="None" /> <!-- Field should be private -->
+    <Rule Id="SA1512" Action="None" /> <!-- Single-line comments should not be followed by blank line -->
+    <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
   </Rules>
 </RuleSet>

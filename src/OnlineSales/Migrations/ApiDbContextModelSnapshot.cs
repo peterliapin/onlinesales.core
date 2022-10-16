@@ -35,20 +35,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("approved");
 
-                    b.Property<string>("AuthorAgent")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("author_agent");
-
                     b.Property<string>("AuthorEmail")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("author_email");
-
-                    b.Property<string>("AuthorIP")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("author_ip");
 
                     b.Property<string>("AuthorName")
                         .IsRequired()
@@ -64,6 +54,16 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedByIP")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
                     b.Property<int?>("ParentId")
                         .HasColumnType("integer")
                         .HasColumnName("parent_id");
@@ -72,9 +72,17 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("post_id");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
                         .HasName("pk_comments");
@@ -130,6 +138,16 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedByIP")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text")
@@ -160,9 +178,17 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("title");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
                         .HasName("pk_posts");

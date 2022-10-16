@@ -19,21 +19,13 @@ public class Comment : BaseEntity
 {   
     public string AuthorName { get; set; } = string.Empty;
 
+    [EmailAddress]
     public string AuthorEmail { get; set; } = string.Empty;
-
-    [Required]
-    public string AuthorIP { get; set; } = string.Empty;
-
-    [Required]
-    public string AuthorAgent { get; set; } = string.Empty;
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
+    
     [Required]
     public string Content { get; set; } = string.Empty;
 
+    [JsonIgnore]
     public CommentStatus Approved { get; set; } = CommentStatus.NOTAPPROVED;
 
     [Required]

@@ -24,12 +24,16 @@ namespace OnlineSales.Migrations
                     slug = table.Column<string>(type: "text", nullable: false),
                     template = table.Column<string>(type: "text", nullable: false),
                     author = table.Column<string>(type: "text", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     lang = table.Column<string>(type: "text", nullable: false),
                     categories = table.Column<string>(type: "text", nullable: false),
                     tags = table.Column<string>(type: "text", nullable: false),
-                    allow_comments = table.Column<bool>(type: "boolean", nullable: false)
+                    allow_comments = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_by_ip = table.Column<string>(type: "text", nullable: false),
+                    created_by_user_agent = table.Column<string>(type: "text", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    updated_by_ip = table.Column<string>(type: "text", nullable: true),
+                    updated_by_user_agent = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,14 +48,16 @@ namespace OnlineSales.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     author_name = table.Column<string>(type: "text", nullable: false),
                     author_email = table.Column<string>(type: "text", nullable: false),
-                    author_ip = table.Column<string>(type: "text", nullable: false),
-                    author_agent = table.Column<string>(type: "text", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     content = table.Column<string>(type: "text", nullable: false),
                     approved = table.Column<int>(type: "integer", nullable: false),
                     post_id = table.Column<int>(type: "integer", nullable: false),
-                    parent_id = table.Column<int>(type: "integer", nullable: true)
+                    parent_id = table.Column<int>(type: "integer", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    created_by_ip = table.Column<string>(type: "text", nullable: false),
+                    created_by_user_agent = table.Column<string>(type: "text", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    updated_by_ip = table.Column<string>(type: "text", nullable: true),
+                    updated_by_user_agent = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
