@@ -47,10 +47,6 @@ services:
       context: .
       dockerfile: ../src/OnlineSales/Dockerfile
 
-networks:
-  onlinesalesnetwork:
-    driver: bridge
-
 volumes:
   elasticsearch-data:
   postgres-data:
