@@ -52,6 +52,8 @@ namespace OnlineSales.Controllers
 
         // POST api/{entity}s
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<T>> Post([FromBody] T value)
         {
             if (!ModelState.IsValid)
@@ -63,14 +65,23 @@ namespace OnlineSales.Controllers
 
             await dbContext.SaveChangesAsync();
 
-            return value;
+            return CreatedAtAction("GetOne", value);
         }
 
         // PUT api/posts/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Post value)
+        public async Task<ActionResult<T>> Put(int id, [FromBody] T value)
         {
-            throw new NotSupportedException();
+            var result = await (from p in this.dbSet
+                               where p.Id == id
+                               select p).FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok();
         }
 
         // DELETE api/posts/5

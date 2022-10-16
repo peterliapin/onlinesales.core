@@ -38,7 +38,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddEntityFrameworkNpgsql()
-    .AddDbContext<ApiDbContext>(opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
+    .AddDbContext<ApiDbContext>(
+        opt => opt
+        .UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"))
+        .UseSnakeCaseNamingConvention());
 
 var app = builder.Build();
 

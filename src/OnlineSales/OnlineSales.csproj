@@ -28,6 +28,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,5 +46,6 @@
     <None Remove="Migrations\.editorconfig" />
     <None Remove="Repositories\" />
     <None Remove="Migrations\" />
+    <None Remove="EFCore.NamingConventions" />
   </ItemGroup>
 </Project>
