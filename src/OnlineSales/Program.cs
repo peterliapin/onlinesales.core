@@ -1,6 +1,7 @@
 ﻿// <copyright file="Program.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,8 @@ builder.Services
         var enumConverter = new JsonStringEnumConverter();
         opts.JsonSerializerOptions.Converters.Add(enumConverter);
     });
+
+builder.Services.AddAutoMapper(typeof(Program));
 
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(

@@ -1,6 +1,7 @@
 ﻿// <copyright file="BaseController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
@@ -9,16 +10,20 @@ using OnlineSales.Models;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T> : Controller
-        where T : BaseEntity
+    public class BaseController<T, TC, TU> : Controller
+        where T : BaseEntity, new()
+        where TC : class
+        where TU : class
     {
         protected readonly DbSet<T> dbSet;
         protected readonly DbContext dbContext;
+        protected readonly IMapper mapper;
 
-        public BaseController(ApiDbContext dbContext)
+        public BaseController(ApiDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
+            this.mapper = mapper;
         }
 
         // GET api/{entity}s/
@@ -54,59 +59,82 @@ namespace OnlineSales.Controllers
         // POST api/{entity}s
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<T>> Post([FromBody] T value)
+        public async Task<ActionResult<T>> Post([FromBody] TC value)
         {
-            value.CreatedAt = DateTime.UtcNow;
-            value.CreatedByIP = GetClientIP();
-            value.CreatedByUserAgent = GetUserAgent();
-
             if (!ModelState.IsValid)
             {
                 return UnprocessableEntity(ModelState);
             }
 
-            dbSet.Add(value);
+            var newValue = mapper.Map<T>(value);
+
+            newValue.CreatedAt = DateTime.UtcNow;
+            newValue.CreatedByIP = GetClientIP();
+            newValue.CreatedByUserAgent = GetUserAgent();
+
+            var result = await dbSet.AddAsync(newValue);
 
             await dbContext.SaveChangesAsync();
              
-            return CreatedAtAction(nameof(GetOne), new { id = value.Id }, value);
+            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
         }
 
         // PUT api/posts/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<T>> Put(int id, [FromBody] T value)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<T>> Put(int id, [FromBody] TU value)
         {
-            value.UpdatedAt = DateTime.UtcNow;
-            value.UpdatedByIP = GetClientIP();
-            value.UpdatedByUserAgent = GetUserAgent();
-
-            ModelState.ClearValidationState(nameof(T));
-
-            var existingValue = await (from p in this.dbSet
-                                where p.Id == id
-                                select p).FirstOrDefaultAsync();
-
-            if (existingValue == null)
-            {
-                return NotFound();
-            }
-
-            if (!TryValidateModel(value, nameof(T)))
+            if (!ModelState.IsValid)
             {
                 return UnprocessableEntity(ModelState);
             }
 
-            // TODO: mapping fom value to existingValue should go here
+            var existingEntity = await (from p in this.dbSet
+                                        where p.Id == id
+                                        select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
+            {
+                return NotFound();
+            }
+
+            mapper.Map(value, existingEntity);
+
+            existingEntity.UpdatedAt = DateTime.UtcNow;
+            existingEntity.UpdatedByIP = GetClientIP();
+            existingEntity.UpdatedByUserAgent = GetUserAgent();
+
+            await dbContext.SaveChangesAsync();
 
             return Ok();
         }
 
         // DELETE api/posts/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Delete(int id)
         {
-            throw new NotSupportedException();
+            var existingEntity = await (from p in this.dbSet
+                                       where p.Id == id
+                                       select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
+            {
+                return NotFound();
+            }
+
+            dbContext.Remove(existingEntity);
+
+            await dbContext.SaveChangesAsync();
+
+            return NoContent();
         }
 
         private string GetClientIP()

@@ -10,6 +10,10 @@ namespace OnlineSales.Models;
 
 public class BaseEntity
 {
+    public BaseEntity()
+    {
+    }
+
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
