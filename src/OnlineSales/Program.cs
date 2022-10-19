@@ -5,93 +5,108 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace OnlineSales;
 
-ConfigureLogs();
-
-builder.Host.UseSerilog();
-
-builder.Services.Configure<RouteOptions>(options =>
+public class Program
 {
-    options.LowercaseUrls = true;
-    options.LowercaseQueryStrings = true;
-});
-
-builder.Services
-    .AddMvc()
-    .AddJsonOptions(opts =>
+    public static void Main(string[] args)
     {
-        var enumConverter = new JsonStringEnumConverter();
-        opts.JsonSerializerOptions.Converters.Add(enumConverter);
-    });
+        var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAutoMapper(typeof(Program));
+        var servicesConfig = builder.Configuration.Get<AppSettings>();
 
-// Add services to the container.
-builder.Services.AddControllers().AddJsonOptions(
-    options => options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+        ConfigureLogs(servicesConfig.ElasticSearch.Url);
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+        builder.Host.UseSerilog();
 
-builder.Services.AddSwaggerGen();
+        ConfigureConventions(builder);
 
-builder.Services.AddEntityFrameworkNpgsql()
-    .AddDbContext<ApiDbContext>(
-        opt => opt
-        .UseNpgsql(
-            builder.Configuration.GetConnectionString("PostgresConnection"),
-            b => b.MigrationsHistoryTable("_migrations"))
-        .UseSnakeCaseNamingConvention());
+        builder.Services.AddAutoMapper(typeof(Program));
 
-var app = builder.Build();
+        builder.Services.AddEndpointsApiExplorer();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+        builder.Services.AddSwaggerGen();
 
-app.UseHttpsRedirection();
+        ConfigurePostgres(builder, servicesConfig.Postgres);
 
-app.UseAuthorization();
+        var app = builder.Build();
 
-app.MapControllers();
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
-app.Run();
+        app.UseHttpsRedirection();
 
-void ConfigureLogs()
-{
-    var configuration = new ConfigurationBuilder()
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .Build();
+        app.UseAuthorization();
 
-    Log.Logger = new LoggerConfiguration()
-        .Enrich.FromLogContext()
-        .Enrich.WithExceptionDetails()
-        .WriteTo.Debug()
-        .WriteTo.Console()
-        .WriteTo.Elasticsearch(ConfigureELK(configuration))
-        .CreateLogger();
-}
+        app.MapControllers();
 
-ElasticsearchSinkOptions ConfigureELK(IConfigurationRoot configuration)
-{
-    var uri = new Uri(configuration["ELKConfiguration:Uri"]);
+        app.Run();
+    }
 
-    var assemblyName = Assembly.GetExecutingAssembly().GetName()
-        !.Name!.ToLower();
-
-    return new ElasticsearchSinkOptions(uri)
+    private static void ConfigureLogs(string elasticSearchUrl)
     {
-        AutoRegisterTemplate = true,
-        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-        IndexFormat = $"{assemblyName}-logs",
-    };
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .Enrich.WithExceptionDetails()
+            .WriteTo.Debug()
+            .WriteTo.Console()
+            .WriteTo.Elasticsearch(ConfigureELK(elasticSearchUrl))
+            .CreateLogger();
+    }
+
+    private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
+    {
+        var uri = new Uri(elasticSearchUrl);
+
+        var assemblyName = Assembly.GetExecutingAssembly().GetName()
+            !.Name!.ToLower();
+
+        return new ElasticsearchSinkOptions(uri)
+        {
+            AutoRegisterTemplate = true,
+            AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
+            IndexFormat = $"{assemblyName}-logs",
+        };
+    }
+
+    private static void ConfigureConventions(WebApplicationBuilder builder)
+    {
+        builder.Services.Configure<RouteOptions>(options =>
+        {
+            options.LowercaseUrls = true;
+            options.LowercaseQueryStrings = true;
+        });
+
+        builder.Services
+            .AddMvc()
+            .AddJsonOptions(opts =>
+            {
+                var enumConverter = new JsonStringEnumConverter();
+                opts.JsonSerializerOptions.Converters.Add(enumConverter);
+            });
+
+        builder.Services.AddControllers().AddJsonOptions(
+            options => options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+    }
+
+    private static void ConfigurePostgres(WebApplicationBuilder builder, PostgresConfig config)
+    {
+        builder.Services.AddEntityFrameworkNpgsql()
+            .AddDbContext<ApiDbContext>(
+                opt => opt
+                .UseNpgsql(
+                    config.ConnectionString,
+                    b => b.MigrationsHistoryTable("_migrations"))
+                .UseSnakeCaseNamingConvention());
+    }
 }

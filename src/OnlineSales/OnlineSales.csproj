@@ -38,6 +38,7 @@
     <Folder Include="Data\" />
     <Folder Include="Repositories\" />
     <Folder Include="Migrations\" />
+    <Folder Include="Configuration\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="DTOs\" />
@@ -49,5 +50,7 @@
     <None Remove="Migrations\" />
     <None Remove="EFCore.NamingConventions" />
     <None Remove="AutoMapper.Extensions.Microsoft.DependencyInjection" />
+    <None Remove="SonarAnalyzer.CSharp" />
+    <None Remove="Configuration\" />
   </ItemGroup>
 </Project>
