@@ -23,9 +23,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Microsoft.AspNetCore.Mvc.Testing" />
+    <ProjectReference Include="..\OnlineSales\OnlineSales.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OnlineSales\OnlineSales.csproj" />
+    <Content Include="appsettings.tests.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="TestEntities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestEntities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

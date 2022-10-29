@@ -15,15 +15,28 @@ namespace OnlineSales;
 
 public class Program
 {
+    private static readonly List<string> AppSettingsFiles = new List<string>();
+
+    private static WebApplication? app;
+
+    public static WebApplication? GetApp()
+    {
+        return app;
+    }
+
+    public static void AddAppSettingsJsonFile(string path)
+    {
+        AppSettingsFiles.Add(path);
+    }
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        var servicesConfig = builder.Configuration.Get<AppSettings>();
-
-        ConfigureLogs(servicesConfig.ElasticSearch.Url);
-
-        builder.Host.UseSerilog();
+        AppSettingsFiles.ForEach(path =>
+        {
+            builder.Configuration.AddJsonFile(path, false, true);
+        });
 
         ConfigureConventions(builder);
 
@@ -33,9 +46,13 @@ public class Program
 
         builder.Services.AddSwaggerGen();
 
-        ConfigurePostgres(builder, servicesConfig.Postgres);
+        ConfigurePostgres(builder);
 
-        var app = builder.Build();
+        ConfigureLogs(builder);
+
+        builder.Host.UseSerilog();
+
+        app = builder.Build();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -45,27 +62,29 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
         app.UseAuthorization();
-
         app.MapControllers();
 
         app.Run();
     }
 
-    private static void ConfigureLogs(string elasticSearchUrl)
+    private static void ConfigureLogs(WebApplicationBuilder builder)
     {
+        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticSearchConfig>();
+
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .WriteTo.Debug()
             .WriteTo.Console()
-            .WriteTo.Elasticsearch(ConfigureELK(elasticSearchUrl))
+            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
             .CreateLogger();
     }
 
     private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
-    {
+    {      
         var uri = new Uri(elasticSearchUrl);
 
         var assemblyName = Assembly.GetExecutingAssembly().GetName()
@@ -99,14 +118,18 @@ public class Program
             options => options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
     }
 
-    private static void ConfigurePostgres(WebApplicationBuilder builder, PostgresConfig config)
+    private static void ConfigurePostgres(WebApplicationBuilder builder)
     {
         builder.Services.AddEntityFrameworkNpgsql()
             .AddDbContext<ApiDbContext>(
-                opt => opt
-                .UseNpgsql(
-                    config.ConnectionString,
-                    b => b.MigrationsHistoryTable("_migrations"))
-                .UseSnakeCaseNamingConvention());
+                opt =>
+                {
+                    var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+                    opt.UseNpgsql(
+                        postgresConfig.ConnectionString,
+                        b => b.MigrationsHistoryTable("_migrations"))
+                    .UseSnakeCaseNamingConvention();
+                });
     }
 }

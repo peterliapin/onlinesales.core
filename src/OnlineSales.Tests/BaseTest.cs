@@ -2,35 +2,47 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 
 namespace OnlineSales.Tests;
 
 public class BaseTest : IDisposable
 {
-    protected static WebApplicationFactory<Program> application = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                ConfigureBuilder(builder);
-            });
-
-    protected readonly HttpClient client;
+    protected static readonly TestApplication App = new TestApplication();
+    protected readonly HttpClient Client;
 
     public BaseTest()
     {
-        client = application.CreateClient();
+        Client = App.CreateClient();
+        App.CleanDatabase();
     }
 
     public virtual void Dispose()
     {
-        client.Dispose();
+        Client.Dispose();
     }
 
-    private static void ConfigureBuilder(IWebHostBuilder builder)
+    protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
-        // nothing here yet   
+        var response = await Client.GetAsync(url);
+
+        Assert.Equal(expectedCode, response.StatusCode);
+
+        return response;
+    }
+
+    protected async Task<HttpResponseMessage> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    {
+        var payloadString = JsonSerializer.Serialize(payload);
+
+        var content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+
+        var response = await Client.PostAsync(url, content);
+
+        Assert.Equal(expectedCode, response.StatusCode);
+
+        return response;
     }
 }
-

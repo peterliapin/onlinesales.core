@@ -30,6 +30,7 @@
     </PackageReference>
     <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.10" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,18 +40,5 @@
     <Folder Include="Repositories\" />
     <Folder Include="Migrations\" />
     <Folder Include="Configuration\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="DTOs\" />
-    <None Remove="Microsoft.EntityFrameworkCore.Design" />
-    <None Remove="Microsoft.EntityFrameworkCore.Tools" />
-    <None Remove="Data\" />
-    <None Remove="Migrations\.editorconfig" />
-    <None Remove="Repositories\" />
-    <None Remove="Migrations\" />
-    <None Remove="EFCore.NamingConventions" />
-    <None Remove="AutoMapper.Extensions.Microsoft.DependencyInjection" />
-    <None Remove="SonarAnalyzer.CSharp" />
-    <None Remove="Configuration\" />
   </ItemGroup>
 </Project>

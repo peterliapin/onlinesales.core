@@ -1,0 +1,30 @@
+﻿version: '3.4'
+
+services:
+  elasticsearch-test:
+    container_name: elasticsearch-test
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
+    ports:
+      - 19200:9200
+    volumes:
+      - elasticsearch-test-data:/usr/share/elasticsearch/datafile
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+
+  postgres-test:
+    container_name: postgres-test
+    image: postgres:14.5
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PWD}
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+
+volumes:
+  elasticsearch-test-data:
+  postgres-test-data:
