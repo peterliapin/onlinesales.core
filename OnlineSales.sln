@@ -21,8 +21,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-compose", "docker-compose", "{FA384976-BE97-4044-85A4-8EF1853C948B}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose\docker-compose.yml = docker-compose\docker-compose.yml
-		docker-compose\.dockerignore = docker-compose\.dockerignore
 		docker-compose\docker-compose.tests.yml = docker-compose\docker-compose.tests.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".azure", ".azure", "{AE9A37ED-8F02-4029-8E64-9C15CCF270F1}"
+	ProjectSection(SolutionItems) = preProject
+		.azure\azure-pipelines.yml = .azure\azure-pipelines.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F133E555-B1C4-4F85-BAC2-EAE06321E5C1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A85646EC-7DEC-4627-8EEA-D5D9C7A181B1}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 	EndProjectSection
 EndProject
 Global
@@ -57,5 +68,8 @@ Global
 		$0.TextStylePolicy = $3
 		$3.inheritsSet = null
 		$3.scope = text/x-json
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A85646EC-7DEC-4627-8EEA-D5D9C7A181B1} = {F133E555-B1C4-4F85-BAC2-EAE06321E5C1}
 	EndGlobalSection
 EndGlobal

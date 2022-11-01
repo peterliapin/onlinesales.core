@@ -8,5 +8,7 @@ OnlineSale is a light-weight, extendable headless CMS written in .NET 6. It is u
 - [GIAnalyzer Add-in for Excel](https://gianalyzer.com) - turns your Excel into a powerful financial software
 - [TagPoint](https://tagpoint.co.uk) - easy-to-use app to take care of your facilities | assets | services
 
-## Local (Developer's) setup
+## Getting Started
+
+
 
