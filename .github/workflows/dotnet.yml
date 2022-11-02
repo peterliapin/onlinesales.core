@@ -17,17 +17,22 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x        
+
     - name: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
       run: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
+
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Build
       run: dotnet build --no-restore
+
     - name: Test
       run: dotnet test --no-build --logger "trx" --verbosity d --results-directory "./"
-    - name: Test Reporter
+
+    - name: Test Reporter      
       uses: dorny/test-reporter@v1.6.0
       if: success() || failure()
-      with:
+      with:        
         reporter: dotnet-trx
         path: ./*.trx

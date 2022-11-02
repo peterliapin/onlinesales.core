@@ -6,7 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
-using OnlineSales.Models;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 

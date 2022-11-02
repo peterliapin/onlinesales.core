@@ -3,7 +3,7 @@
 // </copyright>
 
 using AutoMapper;
-using OnlineSales.Models;
+using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -12,11 +12,15 @@ public class AutoMapperProfiles : Profile
     public AutoMapperProfiles()
     {
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
-        CreateMap<Comment, CommentUpdateDto>().ReverseMap()
+        CreateMap<Comment, CommentUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<CommentUpdateDto, Comment>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
-        CreateMap<Post, PostCreateDto>().ReverseMap();
-        CreateMap<Post, PostUpdateDto>().ReverseMap()
+        CreateMap<PostCreateDto, Post>().ReverseMap();
+        CreateMap<PostUpdateDto, Post>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Post, PostUpdateDto>()            
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 

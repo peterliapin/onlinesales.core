@@ -3,4 +3,6 @@
 // </copyright>
 
 global using System;
+global using OnlineSales.Tests.Environment;
+global using OnlineSales.Tests.TestEntities;
 global using Xunit;

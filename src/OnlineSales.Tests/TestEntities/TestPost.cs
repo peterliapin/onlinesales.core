@@ -6,9 +6,9 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestPost : PostCreateDto
+public class TestPostCreateDto : PostCreateDto
 {
-    public TestPost()
+    public TestPostCreateDto()
     {
         Slug = "Test Slug " + new Random().Next(0, 50000).ToString() + " - " + DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString();
         Template = "Test Template";
@@ -23,5 +23,9 @@ public class TestPost : PostCreateDto
         Tags = "Sample Tags";
         AllowComments = true;
     }
+}
+
+public class TestPostUpdateDto : PostUpdateDto
+{
 }
 

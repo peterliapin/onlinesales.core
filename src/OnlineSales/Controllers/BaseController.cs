@@ -1,12 +1,13 @@
 ﻿// <copyright file="BaseController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using OnlineSales.Data;
-using OnlineSales.Models;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers
 {
@@ -89,29 +90,39 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<T>> Put(int id, [FromBody] TU value)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return UnprocessableEntity(ModelState);
+                if (!ModelState.IsValid)
+                {
+                    return UnprocessableEntity(ModelState);
+                }
+
+                var existingEntity = await (from p in this.dbSet
+                                            where p.Id == id
+                                            select p).FirstOrDefaultAsync();
+
+                if (existingEntity == null)
+                {
+                    return NotFound();
+                }
+
+                mapper.Map(value, existingEntity);
+
+                existingEntity.UpdatedAt = DateTime.UtcNow;
+                existingEntity.UpdatedByIP = GetClientIP();
+                existingEntity.UpdatedByUserAgent = GetUserAgent();
+
+                await dbContext.SaveChangesAsync();
+
+                return Ok();
             }
-
-            var existingEntity = await (from p in this.dbSet
-                                        where p.Id == id
-                                        select p).FirstOrDefaultAsync();
-
-            if (existingEntity == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return Problem(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: ex.Message,
+                    detail: ex.StackTrace);
             }
-
-            mapper.Map(value, existingEntity);
-
-            existingEntity.UpdatedAt = DateTime.UtcNow;
-            existingEntity.UpdatedByIP = GetClientIP();
-            existingEntity.UpdatedByUserAgent = GetUserAgent();
-
-            await dbContext.SaveChangesAsync();
-
-            return Ok();
         }
 
         // DELETE api/posts/5

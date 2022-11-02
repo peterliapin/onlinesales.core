@@ -1,8 +1,9 @@
 ﻿// <copyright file="ApiDbContext.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Models;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Data;
 

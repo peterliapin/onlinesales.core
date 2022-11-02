@@ -2,19 +2,41 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net;
-using OnlineSales.Tests.TestEntities;
+using FluentAssertions;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
 public class PostTests : BaseTest
 {
     [Fact]
-    public async Task CreatePostTest()
+    public async Task CreateAndGetPostTest()
     {
-        var post = new TestPost();
+        var testPost = new TestPostCreateDto();
 
-        await PostTest("/api/posts", post, HttpStatusCode.Created);
+        var newPostUrl = await PostTest("/api/posts", testPost);
+
+        var post = await GetTest<Post>(newPostUrl);
+
+        post.Should().BeEquivalentTo(testPost);
+    }
+
+    [Fact]
+    public async Task UpdatePostTitleTest()
+    {
+        var testPost = new TestPostCreateDto();
+
+        var newPostUrl = await PostTest("/api/posts", testPost);
+
+        var updatedPost = new TestPostUpdateDto();
+
+        testPost.Title = updatedPost.Title = "Test Updated Title (via test suit)";
+
+        await PutTest(newPostUrl, updatedPost);
+
+        var post = await GetTest<Post>(newPostUrl);
+
+        post.Should().BeEquivalentTo(testPost);
     }
 }
 

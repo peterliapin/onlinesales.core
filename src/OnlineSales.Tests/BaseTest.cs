@@ -5,13 +5,26 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using FluentAssertions;
 
 namespace OnlineSales.Tests;
 
 public class BaseTest : IDisposable
 {
+    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+    };
+
     protected static readonly TestApplication App = new TestApplication();
     protected readonly HttpClient Client;
+
+    static BaseTest()
+    {
+        SerializeOptions.Converters.Add(new JsonStringEnumConverter());
+    }
 
     public BaseTest()
     {
@@ -24,6 +37,26 @@ public class BaseTest : IDisposable
         Client.Dispose();
     }
 
+    protected static string SerializePayload(object payload)
+    {
+        return JsonSerializer.Serialize(payload, SerializeOptions);
+    }
+
+    protected static T? DeserializePayload<T>(string content)
+        where T : class
+    {
+        var result = JsonSerializer.Deserialize<T>(content, SerializeOptions);
+
+        return result;
+    }
+
+    protected static StringContent PayloadToStringContent(object payload)
+    {
+        var payloadString = SerializePayload(payload);
+
+        return new StringContent(payloadString, Encoding.UTF8, "application/json");
+    }
+
     protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
         var response = await Client.GetAsync(url);
@@ -33,13 +66,36 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected async Task<HttpResponseMessage> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
+        where T : class
     {
-        var payloadString = JsonSerializer.Serialize(payload);
+        var response = await GetTest(url, expectedCode);
 
-        var content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+        var content = await response.Content.ReadAsStringAsync();
+
+        return DeserializePayload<T>(content);
+    }
+
+    protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created)
+    {
+        var content = PayloadToStringContent(payload);
 
         var response = await Client.PostAsync(url, content);
+
+        Assert.Equal(expectedCode, response.StatusCode);
+
+        var location = response.Headers?.Location?.LocalPath ?? string.Empty;
+
+        location.Should().StartWith(url);
+
+        return location;
+    }
+
+    protected async Task<HttpResponseMessage> PutTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    {
+        var content = PayloadToStringContent(payload);
+
+        var response = await Client.PutAsync(url, content);
 
         Assert.Equal(expectedCode, response.StatusCode);
 

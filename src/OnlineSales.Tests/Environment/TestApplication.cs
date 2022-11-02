@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OnlineSales.Data;
 
-namespace OnlineSales.Tests;
+namespace OnlineSales.Tests.Environment;
 
 public class TestApplication : WebApplicationFactory<Program>
 {

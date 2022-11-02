@@ -112,10 +112,8 @@ public class Program
             {
                 var enumConverter = new JsonStringEnumConverter();
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
+                opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
-
-        builder.Services.AddControllers().AddJsonOptions(
-            options => options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
     }
 
     private static void ConfigurePostgres(WebApplicationBuilder builder)
