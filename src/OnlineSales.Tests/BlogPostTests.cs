@@ -10,6 +10,12 @@ namespace OnlineSales.Tests;
 public class PostTests : BaseTest
 {
     [Fact]
+    public async Task GetPostNotFoundTest()
+    {
+        await GetTest("/api/posts/404", HttpStatusCode.NotFound);
+    }
+
+    [Fact]
     public async Task CreateAndGetPostTest()
     {
         var testPost = new TestPostCreateDto();
@@ -22,7 +28,13 @@ public class PostTests : BaseTest
     }
 
     [Fact]
-    public async Task UpdatePostTitleTest()
+    public async Task UpdatePostNotFoundTest()
+    {
+        await PatchTest("/api/posts/404", new { }, HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreateAndUpdatePostTitleTest()
     {
         var testPost = new TestPostCreateDto();
 
@@ -32,11 +44,29 @@ public class PostTests : BaseTest
 
         testPost.Title = updatedPost.Title = "Test Updated Title (via test suit)";
 
-        await PutTest(newPostUrl, updatedPost);
+        await PatchTest(newPostUrl, updatedPost);
 
         var post = await GetTest<Post>(newPostUrl);
 
         post.Should().BeEquivalentTo(testPost);
+    }
+
+    [Fact]
+    public async Task DeletePostNotFoundTest()
+    {
+        await DeleteTest("/api/posts/404", HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreateAndDeletePostTest()
+    {
+        var testPost = new TestPostCreateDto();
+
+        var newPostUrl = await PostTest("/api/posts", testPost);
+
+        await DeleteTest(newPostUrl);
+
+        await GetTest(newPostUrl, HttpStatusCode.NotFound);
     }
 }
 

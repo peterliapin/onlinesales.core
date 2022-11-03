@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -45,9 +44,16 @@ public class BaseTest : IDisposable
     protected static T? DeserializePayload<T>(string content)
         where T : class
     {
-        var result = JsonSerializer.Deserialize<T>(content, SerializeOptions);
+        if (string.IsNullOrEmpty(content))
+        {
+            return null;
+        }
+        else
+        {
+            var result = JsonSerializer.Deserialize<T>(content, SerializeOptions);
 
-        return result;
+            return result;
+        }
     }
 
     protected static StringContent PayloadToStringContent(object payload)
@@ -61,7 +67,7 @@ public class BaseTest : IDisposable
     {
         var response = await Client.GetAsync(url);
 
-        Assert.Equal(expectedCode, response.StatusCode);
+        response.StatusCode.Should().Be(expectedCode);
 
         return response;
     }
@@ -82,7 +88,7 @@ public class BaseTest : IDisposable
 
         var response = await Client.PostAsync(url, content);
 
-        Assert.Equal(expectedCode, response.StatusCode);
+        response.StatusCode.Should().Be(expectedCode);
 
         var location = response.Headers?.Location?.LocalPath ?? string.Empty;
 
@@ -91,13 +97,22 @@ public class BaseTest : IDisposable
         return location;
     }
 
-    protected async Task<HttpResponseMessage> PutTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    protected async Task<HttpResponseMessage> PatchTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
         var content = PayloadToStringContent(payload);
 
-        var response = await Client.PutAsync(url, content);
+        var response = await Client.PatchAsync(url, content);
 
-        Assert.Equal(expectedCode, response.StatusCode);
+        response.StatusCode.Should().Be(expectedCode);
+
+        return response;
+    }
+
+    protected async Task<HttpResponseMessage> DeleteTest(string url, HttpStatusCode expectedCode = HttpStatusCode.NoContent)
+    {
+        var response = await Client.DeleteAsync(url);
+
+        response.StatusCode.Should().Be(expectedCode);
 
         return response;
     }

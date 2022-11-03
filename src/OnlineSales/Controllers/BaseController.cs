@@ -83,12 +83,12 @@ namespace OnlineSales.Controllers
         }
 
         // PUT api/posts/5
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<T>> Put(int id, [FromBody] TU value)
+        public async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
         {
             try
             {
