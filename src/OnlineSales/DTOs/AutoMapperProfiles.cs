@@ -11,6 +11,8 @@ public class AutoMapperProfiles : Profile
 {
     public AutoMapperProfiles()
     {
+        CreateMap<bool?, bool>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<int?, int>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
