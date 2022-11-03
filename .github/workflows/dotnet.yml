@@ -8,11 +8,12 @@ on:
 
 jobs:
   build:
-
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -33,6 +34,7 @@ jobs:
     - name: Test Reporter      
       uses: dorny/test-reporter@v1.6.0
       if: success() || failure()
-      with:        
-        reporter: dotnet-trx
+      with:   
+        name: TRX Tests
         path: ./*.trx
+        reporter: dotnet-trx
