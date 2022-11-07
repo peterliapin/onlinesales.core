@@ -14,6 +14,11 @@ namespace OnlineSales.Backend.Infrastructure
 
         public static void Init()
         {
+            if (!Directory.Exists(PluginsFolder))
+            {
+                Directory.CreateDirectory(PluginsFolder);
+            }
+
             var paths = Directory.GetFiles(PluginsFolder, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
             foreach (var path in paths)
             {
