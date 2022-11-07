@@ -1,0 +1,1 @@
+Lightweight, extendable headless CMS for product websites written in .NET 6
