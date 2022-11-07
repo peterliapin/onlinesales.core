@@ -33,7 +33,7 @@ jobs:
       run: dotnet build --configuration $BUILD_CONFIG -p:Version=1.0.0 --no-restore
 
     - name: Test
-      run: dotnet test **\*.Tests.nupkg --no-build --logger "trx" --verbosity d --results-directory "./"
+      run: dotnet test --no-build --logger "trx" --verbosity d --results-directory "./"
 
     - name: Test Reporter      
       uses: dorny/test-reporter@v1.6.0
