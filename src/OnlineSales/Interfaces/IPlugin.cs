@@ -16,6 +16,5 @@ namespace OnlineSales.Interfaces
         public Task OnInitialize();
 
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration);
-
     }
 }
