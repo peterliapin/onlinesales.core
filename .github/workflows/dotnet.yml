@@ -10,14 +10,23 @@ jobs:
   build:
     name: Build & Test
     runs-on: ubuntu-latest
-
+    permissions:
+      checks: write
+      contents: read
+    env:
+      BUILD_CONFIG: 'Release'
     steps:
     - uses: actions/checkout@v3
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x        
+        dotnet-version: 6.0.x
+
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-version: 'latest'
 
     - name: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
       run: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
@@ -26,10 +35,10 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration $BUILD_CONFIG -p:Version=1.0.0 --no-restore
 
     - name: Test
-      run: dotnet test --no-build --logger "trx" --verbosity d --results-directory "./"
+      run: dotnet test --no-build --configuration $BUILD_CONFIG --logger "trx" --verbosity d --results-directory "./"
 
     - name: Test Reporter      
       uses: dorny/test-reporter@v1.6.0
@@ -38,3 +47,7 @@ jobs:
         name: TRX Tests
         path: ./*.trx
         reporter: dotnet-trx
+
+    - name: Publish
+      if: success()
+      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

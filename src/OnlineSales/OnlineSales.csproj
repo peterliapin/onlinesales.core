@@ -8,6 +8,23 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DockerComposeProjectPath>../../docker/docker-compose.dcproj</DockerComposeProjectPath>
     <UserSecretsId>98270385-43f2-4d3c-98d5-02d0d77fc2d9</UserSecretsId>
+    <AssemblyName>OnlineSales</AssemblyName>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>OnlineSales</PackageId>
+    <Title>OnlineSales</Title>
+    <Authors>WavePoint Co. Ltd.</Authors>
+    <Company>WavePoint Co. Ltd.</Company>
+    <Product>OnlineSales</Product>
+    <Copyright>@ 2022 WavePoint Co. Ltd.</Copyright>
+    <PackageProjectUrl>https://github.com/peterliapin/onlinesales-backend</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/peterliapin/onlinesales-backend</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>sales, commerce, backend</PackageTags>
+    <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,8 +54,16 @@
     <Folder Include="Controllers\" />
     <Folder Include="DTOs\" />
     <Folder Include="Data\" />
+    <Folder Include="Models\" />
     <Folder Include="Repositories\" />
     <Folder Include="Migrations\" />
     <Folder Include="Configuration\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>
