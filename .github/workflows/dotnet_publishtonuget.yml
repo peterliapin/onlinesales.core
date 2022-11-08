@@ -18,7 +18,12 @@ jobs:
       BUILD_CONFIG: 'Release'
     steps:
     - uses: actions/checkout@v3
-
+    
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=value;]$(echo ${GITHUB_REF#refs/heads/v})"
+      id: branch_name
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -36,7 +41,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration $BUILD_CONFIG -p:Version=${GITHUB_REF#refs/heads/v} --no-restore
+      run: dotnet build --configuration $BUILD_CONFIG -p:Version=${{ steps.branch_name.outputs.value }} --no-restore
 
     - name: Test
       run: dotnet test --no-build --configuration $BUILD_CONFIG --logger "trx" --verbosity d --results-directory "./"
