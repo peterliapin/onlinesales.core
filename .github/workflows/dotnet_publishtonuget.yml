@@ -21,7 +21,7 @@ jobs:
     
     - name: Extract branch name
       shell: bash
-      run: echo "##[set-output name=value;]$(echo ${GITHUB_REF#refs/heads/v})"
+      run: echo "##[set-output name=value;]$(echo ${GITHUB_REF#refs/tags/v})"
       id: branch_name
       
     - name: Setup .NET
