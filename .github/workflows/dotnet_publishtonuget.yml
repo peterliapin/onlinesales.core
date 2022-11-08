@@ -36,7 +36,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration $BUILD_CONFIG -p:Version=1.0.0 --no-restore
+      run: dotnet build --configuration $BUILD_CONFIG -p:Version=${GITHUB_REF#refs/heads/v} --no-restore
 
     - name: Test
       run: dotnet test --no-build --configuration $BUILD_CONFIG --logger "trx" --verbosity d --results-directory "./"
