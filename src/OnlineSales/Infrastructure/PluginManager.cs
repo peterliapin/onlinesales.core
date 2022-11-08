@@ -16,7 +16,7 @@ public static class PluginManager
     {
         if (!Directory.Exists(PluginsFolder))
         {
-            Directory.CreateDirectory(PluginsFolder);
+            return;
         }
 
         var paths = Directory.GetFiles(PluginsFolder, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
