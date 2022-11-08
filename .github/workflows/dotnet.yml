@@ -23,11 +23,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    - name: Setup NuGet
-      uses: nuget/setup-nuget@v1
-      with:
-        nuget-version: 'latest'
-
     - name: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
       run: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
 
@@ -47,7 +42,3 @@ jobs:
         name: TRX Tests
         path: ./*.trx
         reporter: dotnet-trx
-
-    - name: Publish
-      if: success()
-      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
