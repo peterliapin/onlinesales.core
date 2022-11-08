@@ -17,6 +17,5 @@ namespace OnlineSales.Interfaces
 
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration);
 
-        public Task OnShutdown();
     }
 }
