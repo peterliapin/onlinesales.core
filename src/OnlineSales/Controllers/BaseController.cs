@@ -148,14 +148,14 @@ namespace OnlineSales.Controllers
             return NoContent();
         }
 
-        private string GetClientIP()
+        private string? GetClientIP()
         {
-            return HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? string.Empty;
+            return HttpContext?.Connection?.RemoteIpAddress?.ToString();
         }
 
-        private string GetUserAgent()
+        private string? GetUserAgent()
         {
-            return HttpContext?.Request?.Headers[HeaderNames.UserAgent] ?? string.Empty;
+            return HttpContext?.Request?.Headers[HeaderNames.UserAgent];
         }
     }
 }
