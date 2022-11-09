@@ -5,6 +5,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.Backend.Infrastructure;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using Serilog;
@@ -33,12 +34,18 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        ConfigureLogs(builder);
+
+        PluginManager.Init();
+
         AppSettingsFiles.ForEach(path =>
         {
             builder.Configuration.AddJsonFile(path, false, true);
         });
 
         ConfigureConventions(builder);
+
+        ConfigureControllers(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
 
@@ -47,8 +54,6 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         ConfigurePostgres(builder);
-
-        ConfigureLogs(builder);
 
         builder.Host.UseSerilog();
 
@@ -105,15 +110,22 @@ public class Program
             options.LowercaseUrls = true;
             options.LowercaseQueryStrings = true;
         });
+    }
 
-        builder.Services
-            .AddMvc()
+    private static void ConfigureControllers(WebApplicationBuilder builder)
+    {
+        var controllersBuilder = builder.Services.AddControllers()
             .AddJsonOptions(opts =>
             {
                 var enumConverter = new JsonStringEnumConverter();
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
+        foreach (var plugin in PluginManager.GetPluginList())
+        {
+            controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();
+            plugin.ConfigureServices(builder.Services, builder.Configuration);
+        }
     }
 
     private static void ConfigurePostgres(WebApplicationBuilder builder)
