@@ -12,7 +12,7 @@
     "OnlineSales": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:47756",
+      "applicationUrl": "http://localhost:11359",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

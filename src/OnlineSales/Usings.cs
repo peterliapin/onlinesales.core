@@ -3,3 +3,4 @@
 // </copyright>
 
 global using System;
+global using OnlineSales.Exceptions;

@@ -76,16 +76,21 @@ public class Program
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
-    {
-        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticSearchConfig>();
-
-        Log.Logger = new LoggerConfiguration()
+    {       
+        var loggerConfiguration = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .WriteTo.Debug()
-            .WriteTo.Console()
-            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
-            .CreateLogger();
+            .WriteTo.Console();
+
+        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticSearchConfig>();
+
+        if (elasticConfig != null)
+        {
+            loggerConfiguration = loggerConfiguration.WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url));
+        }
+
+        Log.Logger = loggerConfiguration.CreateLogger();
     }
 
     private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
@@ -135,6 +140,11 @@ public class Program
                 opt =>
                 {
                     var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+                    if (postgresConfig == null)
+                    {
+                        throw new ConfigurationMissingException("Postgres configuraiton is mandatory.");
+                    }
 
                     opt.UseNpgsql(
                         postgresConfig.ConnectionString,
