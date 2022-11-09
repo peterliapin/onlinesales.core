@@ -3,6 +3,7 @@
 // </copyright>
 
 using FluentAssertions;
+using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
@@ -40,7 +41,7 @@ public class PostTests : BaseTest
 
         var newPostUrl = await PostTest("/api/posts", testPost);
 
-        var updatedPost = new TestPostUpdateDto();
+        var updatedPost = new PostUpdateDto();
 
         testPost.Title = updatedPost.Title = "Test Updated Title (via test suit)";
 

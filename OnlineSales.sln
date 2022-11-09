@@ -68,6 +68,7 @@ Global
 		$0.TextStylePolicy = $3
 		$3.inheritsSet = null
 		$3.scope = text/x-json
+		version = 0.0.1
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A85646EC-7DEC-4627-8EEA-D5D9C7A181B1} = {F133E555-B1C4-4F85-BAC2-EAE06321E5C1}

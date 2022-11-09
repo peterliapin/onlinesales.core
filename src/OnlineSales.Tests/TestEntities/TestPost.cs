@@ -24,8 +24,3 @@ public class TestPostCreateDto : PostCreateDto
         AllowComments = true;
     }
 }
-
-public class TestPostUpdateDto : PostUpdateDto
-{
-}
-
