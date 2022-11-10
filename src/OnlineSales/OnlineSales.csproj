@@ -55,7 +55,6 @@
     <Folder Include="Controllers\" />
     <Folder Include="DTOs\" />
     <Folder Include="Data\" />
-    <Folder Include="Models\" />
     <Folder Include="Repositories\" />
     <Folder Include="Migrations\" />
     <Folder Include="Configuration\" />
