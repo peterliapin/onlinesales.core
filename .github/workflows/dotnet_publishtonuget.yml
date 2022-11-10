@@ -51,13 +51,12 @@ jobs:
     - name: Test
       run: dotnet test --no-build --configuration $BUILD_CONFIG --logger "trx" --verbosity d --results-directory "./"
 
-    - name: Test Reporter      
-      uses: dorny/test-reporter@v1.6.0
-      if: success() || failure()
-      with:   
-        name: TRX Tests
+    - name: Upload test results
+    - uses: actions/upload-artifact@v3  
+      if: success() || failure()        
+      with:
+        name: test-results
         path: ./*.trx
-        reporter: dotnet-trx
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
