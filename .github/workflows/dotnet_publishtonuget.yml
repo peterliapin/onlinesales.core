@@ -68,7 +68,7 @@ jobs:
         context: ./
         file: src/OnlineSales/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_API_USERNAME }}/onlinesales:latest, ${{ secrets.DOCKER_API_USERNAME }}/onlinesales:${{ steps.branch_name.outputs.value }}
+        tags: wavepoint/onlinesales:latest, wavepoint/onlinesales:${{ steps.branch_name.outputs.value }}
     
     - name: Publish to NuGet
       if: success()
