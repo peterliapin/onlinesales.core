@@ -13,7 +13,7 @@ namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
     [Migration("20221109160239_Customer")]
-    partial class Customer
+    partial class customer
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
