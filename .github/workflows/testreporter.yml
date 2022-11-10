@@ -1,0 +1,16 @@
+name: 'Test Reporter'
+on:
+  workflow_run:
+    workflows: ['.NET Build and Test', '.NET NuGet & Docker Publish']                     # runs after CI workflow
+    types:
+      - completed
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: dorny/test-reporter@v1.6.0
+        with:   
+          name: TRX Tests
+          artifact: test-results                                                          # artifact name
+          path: '*.trx'                                                                   # Path to test results (inside artifact .zip)
+          reporter: dotnet-trx                                                            #Format of test results
