@@ -1,6 +1,6 @@
 # OnlineSales
 
-OnlineSale is a light-weight, extendable headless CMS written in .NET 6. It is used to manage content for software product sites as well as automate processes like free trial activation, license generation, automated sales of licenses from website, customer journey tracking and more.
+OnlineSale is a light-weight, extendable headless CMS written in .NET 7. It is used to manage content for software product sites as well as automate processes like free trial activation, license generation, automated sales of licenses from website, customer journey tracking and more.
 
 ## Sites powered by OnlineSales
 
