@@ -16,7 +16,6 @@ jobs:
       contents: read
     env:
       BUILD_CONFIG: 'Release'
-      DOCKER_API_USERNAME: 'wavepointhub'
     steps:
     - uses: actions/checkout@v3
     
