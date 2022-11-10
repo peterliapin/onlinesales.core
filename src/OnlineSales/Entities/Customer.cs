@@ -13,7 +13,7 @@ namespace OnlineSales.Entities
         public string? FirstName { get; set; }
 
         [Required]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         public string? CompanyName { get; set; }
 
