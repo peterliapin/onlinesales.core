@@ -1,0 +1,43 @@
+name: .NET Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+    env:
+      BUILD_CONFIG: 'Release'
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+
+    - name: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
+      run: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration $BUILD_CONFIG -p:Version=1.0.0 --no-restore
+
+    - name: Test
+      run: dotnet test --no-build --configuration $BUILD_CONFIG --logger "trx" --verbosity d --results-directory "./"
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3  
+      if: success() || failure()        
+      with:
+        name: test-results
+        path: ./*.trx
