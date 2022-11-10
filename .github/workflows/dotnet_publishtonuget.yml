@@ -64,7 +64,7 @@ jobs:
       
     - name: Build & Push Docker image with latest tag
       uses: docker/build-push-action@v3
-      if: ${{ !contains(${{ steps.branch_name.outputs.value }}, 'pre') }} 
+      if: ${{ !contains(steps.branch_name.outputs.value, 'pre') }} 
       with:
         context: ./
         file: src/OnlineSales/Dockerfile
@@ -73,7 +73,7 @@ jobs:
         
     - name: Build & Push Docker image without latest tag
       uses: docker/build-push-action@v3
-      if: ${{ contains(${{ steps.branch_name.outputs.value }}, 'pre') }} 
+      if: ${{ contains(steps.branch_name.outputs.value, 'pre') }} 
       with:
         context: ./
         file: src/OnlineSales/Dockerfile
