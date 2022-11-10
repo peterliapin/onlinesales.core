@@ -61,13 +61,24 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    - name: Build & Push Docker image
+      
+    - name: Build & Push Docker image with latest tag
       uses: docker/build-push-action@v3
+      if: ${{ !contains(${{ steps.branch_name.outputs.value }}, 'pre') }} 
       with:
         context: ./
         file: src/OnlineSales/Dockerfile
         push: true
         tags: wavepoint/onlinesales:latest, wavepoint/onlinesales:${{ steps.branch_name.outputs.value }}
+        
+    - name: Build & Push Docker image without latest tag
+      uses: docker/build-push-action@v3
+      if: ${{ contains(${{ steps.branch_name.outputs.value }}, 'pre') }} 
+      with:
+        context: ./
+        file: src/OnlineSales/Dockerfile
+        push: true
+        tags: wavepoint/onlinesales:${{ steps.branch_name.outputs.value }}
     
     - name: Publish to NuGet
       if: success()
