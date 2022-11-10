@@ -35,18 +35,6 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  onlinesales:
-    container_name: onlinesales
-    image: wavepoint/onlinesales:latest
-    environment:
-      POSTGRES__SERVER: postgres
-      POSTGRES__USERNAME: ${PG_USER}
-      POSTGRES__PASSWORD: ${PG_PWD} 
-      ELASTICSEARCH__SERVER: elasticsearch
-    ports: 
-      - 80:80
-      - 443:443
-
 volumes:
   elasticsearch-data:
   postgres-data:

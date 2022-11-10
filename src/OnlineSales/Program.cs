@@ -143,7 +143,7 @@ public class Program
 
                     if (postgresConfig == null)
                     {
-                        throw new ConfigurationMissingException("Postgres configuraiton is mandatory.");
+                        throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
                     }
 
                     opt.UseNpgsql(
