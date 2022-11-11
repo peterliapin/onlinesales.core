@@ -20,4 +20,8 @@ public class ApiDbContext : DbContext
     public virtual DbSet<Comment>? Comments { get; set; }
 
     public virtual DbSet<Customer>? Customers { get; set; }
+
+    public virtual DbSet<Order>? Orders { get; set; }
+
+    public virtual DbSet<OrderItem>? OrderItems { get; set; }
 }
