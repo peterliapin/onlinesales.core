@@ -1,0 +1,65 @@
+version: '3.4'
+
+services:
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/datafile
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.17.6
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.5
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PWD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  onlinesales:
+    container_name: onlinesales
+    image: wavepoint/onlinesales:latest
+    environment:
+      POSTGRES__SERVER: postgres
+      POSTGRES__USERNAME: ${PG_USER}
+      POSTGRES__PASSWORD: ${PG_PWD} 
+      ELASTICSEARCH__SERVER: elasticsearch
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - ${NGINXPATH}:/etc/nginx/
+      - ${NGINXLOGSPATH}:/var/log/nginx
+      - ${NGINXWWWPATH}:/var/www
+      - ${LETSENCRYPTPATH}:/etc/letsencrypt/
+    depends_on:
+      onlinesales:
+        condition: service_started
+      kibana:
+        condition: service_started
+
+volumes:
+  elasticsearch-data:
+  postgres-data:
