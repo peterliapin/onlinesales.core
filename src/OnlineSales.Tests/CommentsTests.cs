@@ -7,8 +7,7 @@ using System.Net;
 namespace OnlineSales.Tests;
 
 public class CommentsTests : BaseTest
-{
-    [Fact]
+{    
     public async Task GetCommentsTest()
     {
         await GetTest("/api/comments", HttpStatusCode.OK);

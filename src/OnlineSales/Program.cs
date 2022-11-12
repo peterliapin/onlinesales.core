@@ -5,9 +5,9 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Backend.Infrastructure;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.Infrastructure;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
@@ -55,6 +55,8 @@ public class Program
 
         ConfigurePostgres(builder);
 
+        ConfigureElasticsearch(builder);
+
         builder.Host.UseSerilog();
 
         app = builder.Build();
@@ -76,21 +78,21 @@ public class Program
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
-    {       
-        var loggerConfiguration = new LoggerConfiguration()
+    {
+        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticsearchConfig>();
+
+        if (elasticConfig == null)
+        {
+            throw new MissingConfigurationException("Elasticsearch configuraiton is mandatory.");
+        }
+
+        Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .WriteTo.Debug()
-            .WriteTo.Console();
-
-        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticSearchConfig>();
-
-        if (elasticConfig != null)
-        {
-            loggerConfiguration = loggerConfiguration.WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url));
-        }
-
-        Log.Logger = loggerConfiguration.CreateLogger();
+            .WriteTo.Console()
+            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
+            .CreateLogger();
     }
 
     private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
@@ -151,5 +153,17 @@ public class Program
                         b => b.MigrationsHistoryTable("_migrations"))
                     .UseSnakeCaseNamingConvention();
                 });
+    }
+
+    private static void ConfigureElasticsearch(WebApplicationBuilder builder)
+    {
+        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticsearchConfig>();
+
+        if (elasticConfig == null)
+        {
+            throw new MissingConfigurationException("Elasticsearch configuraiton is mandatory.");
+        }
+
+        builder.Services.AddElasticsearch(elasticConfig);
     }
 }

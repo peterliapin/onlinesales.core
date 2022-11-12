@@ -6,7 +6,8 @@ using System.Runtime.Loader;
 using OnlineSales.Interfaces;
 using Serilog;
 
-namespace OnlineSales.Backend.Infrastructure;
+namespace OnlineSales.Infrastructure;
+
 public static class PluginManager
 {
     private static readonly string PluginsFolder = "plugins";

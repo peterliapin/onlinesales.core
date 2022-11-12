@@ -28,7 +28,7 @@ public class PostgresConfig : BaseServiceConfig
     }
 }
 
-public class ElasticSearchConfig : BaseServiceConfig
+public class ElasticsearchConfig : BaseServiceConfig
 {
     public bool UseHttps { get; set; } = false;
 
@@ -50,7 +50,7 @@ public class AppSettings
 {
     public PostgresConfig Postgres { get; set; } = new PostgresConfig();
 
-    public ElasticSearchConfig ElasticSearch { get; set; } = new ElasticSearchConfig();
+    public ElasticsearchConfig ElasticSearch { get; set; } = new ElasticsearchConfig();
 
     public SmtpServerConfig SmtpServer { get; set; } = new SmtpServerConfig();
 }
