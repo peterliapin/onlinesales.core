@@ -4,3 +4,4 @@
 
 global using System;
 global using OnlineSales.Exceptions;
+global using Serilog;

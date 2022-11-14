@@ -34,14 +34,14 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        ConfigureLogs(builder);
-
-        PluginManager.Init();
-
         AppSettingsFiles.ForEach(path =>
         {
             builder.Configuration.AddJsonFile(path, false, true);
         });
+
+        ConfigureLogs(builder);
+        
+        PluginManager.Init();
 
         ConfigureConventions(builder);
 
@@ -89,7 +89,7 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
-            .WriteTo.Debug()
+            // .WriteTo.Debug()
             .WriteTo.Console()
             .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
             .CreateLogger();

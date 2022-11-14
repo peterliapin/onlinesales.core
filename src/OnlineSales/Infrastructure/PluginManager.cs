@@ -4,7 +4,6 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using OnlineSales.Interfaces;
-using Serilog;
 
 namespace OnlineSales.Infrastructure;
 
@@ -29,7 +28,7 @@ public static class PluginManager
             }
             catch (Exception ex)
             {
-                Serilog.Log.Warning(ex, "[PluginManager][Error]");
+                Log.Warning(ex, "[PluginManager][Error]");
             }
         }
 
@@ -52,6 +51,7 @@ public static class PluginManager
     private static IPlugin LoadPlugin(string fullPath)
     {
         var fileName = Path.GetFileName(fullPath);
+
         var asm = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPath);
         if (asm == null)
         {
