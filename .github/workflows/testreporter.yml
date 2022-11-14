@@ -12,5 +12,6 @@ jobs:
         with:   
           name: TRX Tests
           artifact: test-results                                                          # artifact name
+          fail-on-error: false                                                            # Supress error on failed tests
           path: '*.trx'                                                                   # Path to test results (inside artifact .zip)
           reporter: dotnet-trx                                                            #Format of test results
