@@ -68,5 +68,8 @@ public class Order : BaseEntity
     /// Gets or sets a value indicating whether true for test orders. False of regular orders.
     /// </summary>
     public bool TestOrder { get; set; } = false;
+
+    [Column(TypeName = "jsonb")]
+    public string? Data { get; set; }
 }
 
