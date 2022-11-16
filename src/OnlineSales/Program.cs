@@ -4,11 +4,12 @@
 
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
-using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
 
@@ -55,17 +56,18 @@ public class Program
 
         ConfigurePostgres(builder);
 
-        ConfigureElasticsearch(builder);
-
-        builder.Host.UseSerilog();
+        ConfigureElasticsearch(builder);        
 
         app = builder.Build();
+
+        MigrateOnStartIfRequired(app, builder);
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseODataRouteDebug();
         }
 
         app.UseHttpsRedirection();
@@ -75,6 +77,20 @@ public class Program
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
+    {
+        var migrateOnStart = builder.Configuration.GetValue<bool>("MigrateOnStart");
+
+        if (migrateOnStart)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+                context.Database.Migrate();
+            }
+        }
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
@@ -89,10 +105,11 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
-            // .WriteTo.Debug()
             .WriteTo.Console()
             .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
             .CreateLogger();
+
+        builder.Host.UseSerilog();
     }
 
     private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
@@ -127,7 +144,12 @@ public class Program
                 var enumConverter = new JsonStringEnumConverter();
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            });
+            })
+            .AddOData(options => options
+                .Select().Filter().OrderBy()
+                .SetMaxTop(10).Expand().Count()
+                .SkipToken());
+
         foreach (var plugin in PluginManager.GetPluginList())
         {
             controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();

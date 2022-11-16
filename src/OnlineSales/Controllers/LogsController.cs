@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.Entities;
@@ -27,7 +28,9 @@ public class LogsController : Controller
     {
         try
         {
-            var logRecords = (await elasticClient.SearchAsync<LogRecord>())
+            var logRecords = (
+                    await elasticClient.SearchAsync<LogRecord>(
+                        s => s.Size(20).Skip(10)))
                 .Documents.ToList();
 
             return Ok(logRecords);

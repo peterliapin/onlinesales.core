@@ -12,7 +12,8 @@
     "OnlineSales": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:54288",
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:33971",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
