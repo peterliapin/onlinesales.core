@@ -5,6 +5,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
@@ -48,6 +49,8 @@ public class Program
         ConfigureControllers(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
+
+        builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>(); 
 
         builder.Services.AddEndpointsApiExplorer();
 

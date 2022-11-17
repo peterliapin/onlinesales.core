@@ -1,15 +1,17 @@
 ﻿// <copyright file="PluginManager.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.AspNetCore.Hosting.Server;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
 
 public static class PluginManager
 {
-    private static readonly string PluginsFolder = "plugins";
+    private static readonly string PluginsFolder = "./bin/debug/net7.0/plugins";
     private static readonly List<IPlugin> PluginList = new List<IPlugin>();
 
     public static void Init()
