@@ -11,17 +11,21 @@ namespace OnlineSales.Infrastructure;
 
 public static class PluginManager
 {
-    private static readonly string PluginsFolder = "./bin/debug/net7.0/plugins";
+    // private static readonly string PluginsFolder = "./bin/debug/net7.0/plugins";
+    private static readonly string PluginsFolder = "plugins";
     private static readonly List<IPlugin> PluginList = new List<IPlugin>();
 
     public static void Init()
     {
-        if (!Directory.Exists(PluginsFolder))
+        string? executePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string pluginCombined = executePath + "\\" + PluginsFolder;
+
+        if (!Directory.Exists(pluginCombined))
         {
             return;
         }
 
-        var paths = Directory.GetFiles(PluginsFolder, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
+        var paths = Directory.GetFiles(pluginCombined, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
         foreach (var path in paths)
         {
             try
