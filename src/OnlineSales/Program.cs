@@ -6,8 +6,6 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Nest;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
