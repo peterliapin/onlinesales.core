@@ -458,3 +458,4 @@ logs/
 
 #.env files should never be commited
 .env
+/src/OnlineSales/appsettings.json
