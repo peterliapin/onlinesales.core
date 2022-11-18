@@ -55,6 +55,7 @@
     <PackageReference Include="EFCore.NamingConventions" Version="7.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +67,9 @@
     <Folder Include="Exceptions\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Microsoft.AspNetCore.OData" />
+  </ItemGroup>
   <ItemGroup>
     <None Update="plugins\XLToolsPlugin.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -40,12 +40,12 @@ services:
     image: wavepoint/onlinesales:latest
     environment:
       POSTGRES__SERVER: postgres
+      POSTGRES__DATABASE: ${PG_DB}
       POSTGRES__USERNAME: ${PG_USER}
       POSTGRES__PASSWORD: ${PG_PWD} 
       ELASTICSEARCH__SERVER: elasticsearch
     ports: 
       - 80:80
-      - 443:443
 
 volumes:
   elasticsearch-data:

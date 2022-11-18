@@ -4,6 +4,7 @@
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using OnlineSales.Data;
@@ -29,17 +30,19 @@ namespace OnlineSales.Controllers
 
         // GET api/{entity}s/
         [HttpGet]
+        [EnableQuery(PageSize = 10)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<List<T>>> GetAll()
+        public virtual ActionResult<IQueryable<T>> GetAll()
         {
-            object? result = await this.dbSet!.ToListAsync();
+            var result = this.dbSet!.AsQueryable<T>();
             
             return Ok(result);
         }
 
         // GET api/{entity}s/5
         [HttpGet("{id}")]
+        [EnableQuery]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
