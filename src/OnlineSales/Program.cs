@@ -50,7 +50,7 @@ public class Program
 
         builder.Services.AddAutoMapper(typeof(Program));
 
-        builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>(); 
+        builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddEndpointsApiExplorer();
 
