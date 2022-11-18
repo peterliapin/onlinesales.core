@@ -71,12 +71,6 @@
     <None Remove="Microsoft.AspNetCore.OData" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="plugins\XLToolsPlugin.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="plugins\XLToolsPlugin.pdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

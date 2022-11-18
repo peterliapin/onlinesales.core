@@ -49,8 +49,6 @@ public class Program
 
         builder.Services.AddAutoMapper(typeof(Program));
 
-        builder.Services.AddHttpContextAccessor();
-
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddSwaggerGen();
