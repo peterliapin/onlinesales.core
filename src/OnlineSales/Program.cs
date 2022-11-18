@@ -10,6 +10,8 @@ using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
+using OnlineSales.Interfaces;
+using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
 
@@ -56,7 +58,9 @@ public class Program
 
         ConfigurePostgres(builder);
 
-        ConfigureElasticsearch(builder);        
+        ConfigureElasticsearch(builder);
+
+        ConfigureQuartz(builder);
 
         app = builder.Build();
 
@@ -187,5 +191,22 @@ public class Program
         }
 
         builder.Services.AddElasticsearch(elasticConfig);
+    }
+
+    private static void ConfigureQuartz(WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<ITask, CoreTaskScheduler>();
+
+        builder.Services.AddQuartz(q =>
+        {
+            q.UseMicrosoftDependencyInjectionJobFactory();
+
+            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+
+            q.AddTrigger(opts =>
+                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule("0/5 * * * * ?"));
+        });
+
+        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     }
 }
