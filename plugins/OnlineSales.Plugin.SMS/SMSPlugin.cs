@@ -11,12 +11,6 @@ public class SmsPlugin : IPlugin
 {
     public void Configure(IServiceCollection services, IConfiguration configuration)
     {
-        throw new NotImplementedException();
-    }
-
-    public void Dispose()
-    {
-        throw new NotImplementedException();
+        // nothing here
     }
 }
-

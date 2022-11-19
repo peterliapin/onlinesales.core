@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Interfaces
 {
-    public interface IPlugin : IDisposable
+    public interface IPlugin
     {
         public void Configure(IServiceCollection services, IConfiguration configuration);
     }

@@ -29,7 +29,6 @@
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
     <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
@@ -50,6 +49,7 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.18.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,6 +63,8 @@
 
   <ItemGroup>
     <None Remove="Microsoft.AspNetCore.OData" />
+    <None Remove="NSwag.Core" />
+    <None Remove="NSwag.AspNetCore" />
   </ItemGroup>
   <ItemGroup>
     <None Update="README.md">
