@@ -1,6 +1,7 @@
 ﻿// <copyright file="PluginManager.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using System.Reflection;
 using System.Runtime.Loader;
 using OnlineSales.Interfaces;
@@ -9,43 +10,38 @@ namespace OnlineSales.Infrastructure;
 
 public static class PluginManager
 {
-    private static readonly string PluginsFolder = "plugins";
+    private static readonly string PluginsFolder = Path.Combine(AppContext.BaseDirectory, "plugins");
     private static readonly List<IPlugin> PluginList = new List<IPlugin>();
 
     public static void Init()
-    {
-        if (!Directory.Exists(PluginsFolder))
+    {       
+        if (Directory.Exists(PluginsFolder))
         {
-            return;
-        }
+            Log.Information("Loading plugins from the folder {0}", PluginsFolder);
 
-        var paths = Directory.GetFiles(PluginsFolder, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
-        foreach (var path in paths)
-        {
-            try
+            var paths = Directory.GetFiles(PluginsFolder, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
+
+            foreach (var path in paths)
             {
-                PluginList.Add(LoadPlugin(path));
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "[PluginManager][Error]");
+                try
+                {
+                    PluginList.Add(LoadPlugin(path));
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "[PluginManager][Error]");
+                }
             }
         }
-
-        foreach (var plugin in PluginList)
+        else
         {
-            plugin.OnInitialize().Wait();
+            Log.Information("Plugins folder does not exists ({0})", PluginsFolder);
         }
     }
 
     public static List<IPlugin> GetPluginList()
     {
         return PluginList;
-    }
-
-    public static string[] GetPluginsSettingsPaths()
-    {
-        return PluginList.Select(p => p.SettingsPath).ToArray();
     }
 
     private static IPlugin LoadPlugin(string fullPath)

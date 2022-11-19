@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>OnlineSales.Plugin.AzureAD</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="pluginsettings.json" />
+    <None Remove="Microsoft.Extensions.Configuration.UserSecrets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="pluginsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
+  </ItemGroup>
+</Project>

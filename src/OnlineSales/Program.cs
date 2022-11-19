@@ -45,18 +45,13 @@ public class Program
         PluginManager.Init();
 
         ConfigureConventions(builder);
-
         ConfigureControllers(builder);
+        ConfigurePostgres(builder);
+        ConfigureElasticsearch(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
-
         builder.Services.AddEndpointsApiExplorer();
-
         builder.Services.AddSwaggerGen();
-
-        ConfigurePostgres(builder);
-
-        ConfigureElasticsearch(builder);        
 
         app = builder.Build();
 
@@ -153,7 +148,7 @@ public class Program
         foreach (var plugin in PluginManager.GetPluginList())
         {
             controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();
-            plugin.ConfigureServices(builder.Services, builder.Configuration);
+            plugin.Configure(builder.Services, builder.Configuration);
         }
     }
 

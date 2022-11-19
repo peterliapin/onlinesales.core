@@ -6,16 +6,6 @@ namespace OnlineSales.Interfaces
 {
     public interface IPlugin : IDisposable
     {
-        public string Name { get; }
-
-        public string Description { get; }
-
-        public string Version { get; }
-
-        public string SettingsPath { get; }
-
-        public Task OnInitialize();
-
-        public void ConfigureServices(IServiceCollection services, IConfiguration configuration);
+        public void Configure(IServiceCollection services, IConfiguration configuration);
     }
 }

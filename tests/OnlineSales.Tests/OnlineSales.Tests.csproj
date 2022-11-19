@@ -28,9 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OnlineSales\OnlineSales.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="appsettings.tests.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -43,5 +40,8 @@
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
   </ItemGroup>
 </Project>
