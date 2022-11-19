@@ -7,10 +7,10 @@
     <AssemblyName>OnlineSales.Plugin.AzureAD</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="pluginsettings.json" />
-    <None Remove="Microsoft.Extensions.Configuration.UserSecrets" />
-  </ItemGroup>
+  <PropertyGroup>
+    <OutputPath>..\..\src\OnlineSales\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="pluginsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
