@@ -24,6 +24,7 @@
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageVersion>$(ReleaseVersion)</PackageVersion>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
