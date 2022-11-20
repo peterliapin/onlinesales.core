@@ -5,6 +5,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ReleaseVersion>1.0.6-pre</ReleaseVersion>
   </PropertyGroup>
 
   <PropertyGroup>
