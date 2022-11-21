@@ -29,7 +29,7 @@ public class MessagesController : Controller
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Fullfillment(
+    public async Task<ActionResult> SendSms(
         [FromBody]SmsDetailsDto smsDetails,
         [FromHeader(Name = "Authentication")]string accessToken)
     {

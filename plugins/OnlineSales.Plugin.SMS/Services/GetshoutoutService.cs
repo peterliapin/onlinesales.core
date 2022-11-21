@@ -42,7 +42,7 @@ public class GetshoutoutService : ISmsService
             },
             Destinations = new List<string>
             {
-                recipient.Substring(1, recipient.Length - 1),
+                recipient.Substring(1, recipient.Length - 1), // removes "+" in front of the number as the Getshoutout does not want it
             },
         };
 
