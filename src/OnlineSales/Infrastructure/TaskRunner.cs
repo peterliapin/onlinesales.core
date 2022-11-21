@@ -22,41 +22,36 @@ namespace OnlineSales.Infrastructure
             this.tasks = tasks;
         }
 
-        public static TaskExecutionLog GetTestScheduleJob()
-        {
-            var job = new TaskExecutionLog()
-            {
-                Id = 1,
-
-                ScheduledExecutionTime = DateTime.UtcNow,
-            };
-
-            return job;
-        }
-
         public async Task Execute(IJobExecutionContext context)
         {
-            Console.WriteLine("Task runner started");
-
-            foreach (var task in tasks)
+            try
             {
-                var currentJob = await AddOrGetPendingTaskLog(task);
+                Console.WriteLine("Task runner started");
 
-                if (!IsRightTimeToExecute(currentJob))
+                foreach (var task in tasks)
                 {
-                    return;
+                    var currentJob = await AddOrGetPendingTaskLog(task);
+
+                    if (!IsRightTimeToExecute(currentJob, task))
+                    {
+                        return;
+                    }
+
+                    var isCompleted = await task.Execute(currentJob);
+
+                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING);
                 }
-
-                var isCompleted = await task.Execute(currentJob);
-
-                UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING); 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskLog(ITask task)
         {
             var pendingTask = await dbContext.TaskExecutionLogs!.
-                FirstAsync(taskLog => taskLog.Status == TaskExecutionStatus.PENDING && taskLog.TaskName == task.Name);
+                FirstOrDefaultAsync(taskLog => taskLog.Status == TaskExecutionStatus.PENDING && taskLog.TaskName == task.Name);
 
             if (pendingTask is not null)
             {
@@ -66,9 +61,9 @@ namespace OnlineSales.Infrastructure
             pendingTask = new TaskExecutionLog()
             {
                 TaskName = task.Name,
-                ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule),
+                ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
                 Status = TaskExecutionStatus.PENDING,
-                RetryCount = 0,
+                RetryCount = -1,
             };
 
             await dbContext.TaskExecutionLogs!.AddAsync(pendingTask);
@@ -77,27 +72,42 @@ namespace OnlineSales.Infrastructure
             return pendingTask;
         }
 
-        private void UpdateTaskExecutionLog(TaskExecutionLog job, TaskExecutionStatus status)
+        private async Task UpdateTaskExecutionLog(TaskExecutionLog job, TaskExecutionStatus status)
         {
-            // job status update
             job.Status = status;
-            Console.WriteLine($"Task runner completed for job id {job.Id}");
-        }
+            job.ActualExecutionTime = DateTime.UtcNow;
 
-        private bool IsRightTimeToExecute(TaskExecutionLog job)
-        {
-            if (job.ScheduledExecutionTime <= DateTime.UtcNow)
+            if (status == TaskExecutionStatus.PENDING)
             {
-                return true;
+                job.RetryCount = ++job.RetryCount;
             }
 
-            return false;
+            dbContext!.TaskExecutionLogs!.Update(job);
+            await dbContext.SaveChangesAsync();
         }
 
-        private DateTime GetExecutionTimeByCronSchedule(string cronSchedule)
+        private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)
         {
-            Debug.WriteLine($"{cronSchedule}");
-            return DateTime.UtcNow;
+            if (job.RetryCount == task.RetryCount)
+            {
+                return false;
+            }
+
+            if (job.RetryCount > -1)
+            {
+                return job.ActualExecutionTime.AddMinutes(task.RetryInterval) <= DateTime.UtcNow;
+            }
+
+            return job.ScheduledExecutionTime <= DateTime.UtcNow;
+        }
+
+        private DateTime GetExecutionTimeByCronSchedule(string cronSchedule, DateTime baseExecutionTime)
+        {
+            CronExpression expression = new CronExpression(cronSchedule);
+
+            var nextRunTime = expression.GetNextValidTimeAfter(baseExecutionTime);
+
+            return nextRunTime!.Value.UtcDateTime;
         }
     }
 }

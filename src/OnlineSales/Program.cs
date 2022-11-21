@@ -195,8 +195,6 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<ITask, CoreTaskScheduler>();
-
         builder.Services.AddQuartz(q =>
         {
             q.UseMicrosoftDependencyInjectionJobFactory();
@@ -204,7 +202,7 @@ public class Program
             q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 
             q.AddTrigger(opts =>
-                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule("0/5 * * * * ?"));
+                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
         });
 
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
