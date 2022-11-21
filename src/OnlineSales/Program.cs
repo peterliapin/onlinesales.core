@@ -12,6 +12,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
+using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
 
@@ -52,6 +53,7 @@ public class Program
         ConfigureControllers(builder);
         ConfigurePostgres(builder);
         ConfigureElasticsearch(builder);
+        ConfigureQuartz(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -207,5 +209,20 @@ public class Program
         {
             swaggerConfigurator.ConfigureSwagger(settings);
         }
+    }
+
+    private static void ConfigureQuartz(WebApplicationBuilder builder)
+    {
+        builder.Services.AddQuartz(q =>
+        {
+            q.UseMicrosoftDependencyInjectionJobFactory();
+
+            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+
+            q.AddTrigger(opts =>
+                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
+        });
+
+        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     }
 }
