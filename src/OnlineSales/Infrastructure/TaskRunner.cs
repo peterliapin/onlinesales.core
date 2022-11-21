@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -24,27 +23,18 @@ namespace OnlineSales.Infrastructure
 
         public async Task Execute(IJobExecutionContext context)
         {
-            try
+            foreach (var task in tasks)
             {
-                Console.WriteLine("Task runner started");
+                var currentJob = await AddOrGetPendingTaskLog(task);
 
-                foreach (var task in tasks)
+                if (!IsRightTimeToExecute(currentJob, task))
                 {
-                    var currentJob = await AddOrGetPendingTaskLog(task);
-
-                    if (!IsRightTimeToExecute(currentJob, task))
-                    {
-                        return;
-                    }
-
-                    var isCompleted = await task.Execute(currentJob);
-
-                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING);
+                    return;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+
+                var isCompleted = await task.Execute(currentJob);
+
+                await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING);
             }
         }
 

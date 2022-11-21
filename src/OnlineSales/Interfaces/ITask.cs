@@ -10,10 +10,16 @@ namespace OnlineSales.Interfaces
     {
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets cron expression based schedule.
+        /// </summary>
         public string CronSchedule { get; set; }
 
         public int RetryCount { get; set; }
 
+        /// <summary>
+        /// Gets or sets retry interval in minutes.
+        /// </summary>
         public int RetryInterval { get; set; }
 
         Task<bool> Execute(TaskExecutionLog currentJob);
