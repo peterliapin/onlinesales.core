@@ -23,22 +23,29 @@ namespace OnlineSales.Infrastructure
 
         public async Task Execute(IJobExecutionContext context)
         {
-            foreach (var task in tasks)
+            try
             {
-                var currentJob = await AddOrGetPendingTaskLog(task);
-
-                if (!IsRightTimeToExecute(currentJob, task))
+                foreach (var task in tasks)
                 {
-                    return;
+                    var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+
+                    if (!IsRightTimeToExecute(currentJob, task))
+                    {
+                        return;
+                    }
+
+                    var isCompleted = await task.Execute(currentJob);
+
+                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING);
                 }
-
-                var isCompleted = await task.Execute(currentJob);
-
-                await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error executing task runner");
             }
         }
 
-        private async Task<TaskExecutionLog> AddOrGetPendingTaskLog(ITask task)
+        private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
         {
             var pendingTask = await dbContext.TaskExecutionLogs!.
                 FirstOrDefaultAsync(taskLog => taskLog.Status == TaskExecutionStatus.PENDING && taskLog.TaskName == task.Name);
