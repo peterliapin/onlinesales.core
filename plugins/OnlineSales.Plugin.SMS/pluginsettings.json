@@ -12,7 +12,8 @@
       "Password": "$GATEWAYS__SMSC__PASSWORD"
     },
     "Getshoutout": {
-      "ApiUrl": "https://api.getshoutout.com/coreservice/messages",
+      "ApiUrl": "https://api.getshoutout.com",
+      "SenderId": "$GATEWAYS__GETSHOUTOUT__SENDERID",
       "ApiKey": "$GATEWAYS__GETSHOUTOUT_APIKEY"
     }
   },

@@ -3,10 +3,10 @@
 // </copyright>
 
 using OnlineSales.Infrastructure;
-using OnlineSales.Plugin.SMS.Configuration;
+using OnlineSales.Plugin.Sms.Configuration;
 using Serilog;
 
-namespace OnlineSales.Plugin.SMS.Services;
+namespace OnlineSales.Plugin.Sms.Services;
 
 public class SmscService : ISmsService
 {

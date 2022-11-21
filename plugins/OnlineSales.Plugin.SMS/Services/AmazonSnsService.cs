@@ -3,10 +3,10 @@
 // </copyright>
 
 using OnlineSales.Interfaces;
-using OnlineSales.Plugin.SMS.Configuration;
+using OnlineSales.Plugin.Sms.Configuration;
 using Serilog;
 
-namespace OnlineSales.Plugin.SMS.Services;
+namespace OnlineSales.Plugin.Sms.Services;
 
 public class AmazonSnsGatewayService : ISmsService
 {

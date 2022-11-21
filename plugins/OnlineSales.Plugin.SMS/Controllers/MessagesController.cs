@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
-using OnlineSales.Plugin.SMS.DTOs;
+using OnlineSales.Plugin.Sms.DTOs;
 using PhoneNumbers;
 
-namespace OnlineSales.Plugin.SMS.Controllers;
+namespace OnlineSales.Plugin.Sms.Controllers;
 
 [Route("api/messages")]
 public class MessagesController : Controller

@@ -4,10 +4,10 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OnlineSales.Plugin.SMS.Configuration;
-using OnlineSales.Plugin.SMS.Services;
+using OnlineSales.Plugin.Sms.Configuration;
+using OnlineSales.Plugin.Sms.Services;
 
-namespace OnlineSales.Plugin.SMS;
+namespace OnlineSales.Plugin.Sms;
 
 public class SmsPlugin : IPlugin
 {

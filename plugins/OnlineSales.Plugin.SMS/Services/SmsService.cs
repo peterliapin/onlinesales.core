@@ -4,11 +4,11 @@
 
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Infrastructure;
-using OnlineSales.Plugin.SMS.Configuration;
-using OnlineSales.Plugin.SMS.Exceptions;
+using OnlineSales.Plugin.Sms.Configuration;
+using OnlineSales.Plugin.Sms.Exceptions;
 using PhoneNumbers;
 
-namespace OnlineSales.Plugin.SMS.Services;
+namespace OnlineSales.Plugin.Sms.Services;
 
 public class SmsService : ISmsService
 {

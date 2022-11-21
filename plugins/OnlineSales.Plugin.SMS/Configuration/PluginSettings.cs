@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-namespace OnlineSales.Plugin.SMS.Configuration;
+namespace OnlineSales.Plugin.Sms.Configuration;
 
 public class PluginSettings
 {
@@ -46,6 +46,8 @@ public class AmazonSnsConfig
 /// </summary>
 public class GetshoutoutConfig
 {
+    public string SenderId { get; set; } = string.Empty;
+
     public string ApiUrl { get; set; } = string.Empty;
 
     public string ApiKey { get; set; } = string.Empty;
