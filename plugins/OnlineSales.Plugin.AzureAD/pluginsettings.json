@@ -1,0 +1,13 @@
+﻿{
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "$AZUREAD__TENANTID",
+    "Domain": "$AZUREAD__DOMAIN",
+    "ClientId": "$AZUREAD__CLIENTID",
+    "Scope": "$AZUREAD__SCOPE",
+    "ClientSecret": "$AZUREAD__CLIENTSECRET",
+    "GroupsMapping": {
+      "Administrators": "$AZUREAD__USERGROUPSMAPPING__ADMINISTRATORSGROUPID"
+    }
+  }
+}

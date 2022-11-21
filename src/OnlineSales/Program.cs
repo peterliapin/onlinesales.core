@@ -7,11 +7,11 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Nest;
+using NSwag.Generation.AspNetCore;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
-using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
 
@@ -43,24 +43,19 @@ public class Program
         });
 
         ConfigureLogs(builder);
-        
-        PluginManager.Init();
+        ConfigurePlugins(builder);
+
+        builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
+        builder.Configuration.AddEnvironmentVariables();
 
         ConfigureConventions(builder);
-
         ConfigureControllers(builder);
-
-        builder.Services.AddAutoMapper(typeof(Program));
-
-        builder.Services.AddEndpointsApiExplorer();
-
-        builder.Services.AddSwaggerGen();
-
         ConfigurePostgres(builder);
-
         ConfigureElasticsearch(builder);
 
-        ConfigureQuartz(builder);
+        builder.Services.AddAutoMapper(typeof(Program));
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerDocument(ConfigureSwagger);
 
         app = builder.Build();
 
@@ -69,10 +64,11 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
             app.UseODataRouteDebug();
         }
+
+        app.UseOpenApi();
+        app.UseSwaggerUi3();
 
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
@@ -81,20 +77,6 @@ public class Program
         app.MapControllers();
 
         app.Run();
-    }
-
-    private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
-    {
-        var migrateOnStart = builder.Configuration.GetValue<bool>("MigrateOnStart");
-
-        if (migrateOnStart)
-        {
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-                context.Database.Migrate();
-            }
-        }
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
@@ -117,7 +99,7 @@ public class Program
     }
 
     private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
-    {      
+    {
         var uri = new Uri(elasticSearchUrl);
 
         var assemblyName = Assembly.GetExecutingAssembly().GetName()
@@ -129,6 +111,25 @@ public class Program
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
             IndexFormat = $"{assemblyName}-logs",
         };
+    }
+
+    private static void ConfigurePlugins(WebApplicationBuilder builder)
+    {
+        PluginManager.Init(builder.Configuration);
+    }
+
+    private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
+    {
+        var migrateOnStart = builder.Configuration.GetValue<bool>("MigrateOnStart");
+
+        if (migrateOnStart)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+                context.Database.Migrate();
+            }
+        }
     }
 
     private static void ConfigureConventions(WebApplicationBuilder builder)
@@ -157,7 +158,7 @@ public class Program
         foreach (var plugin in PluginManager.GetPluginList())
         {
             controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();
-            plugin.ConfigureServices(builder.Services, builder.Configuration);
+            plugin.Configure(builder.Services, builder.Configuration);
         }
     }
 
@@ -193,18 +194,18 @@ public class Program
         builder.Services.AddElasticsearch(elasticConfig);
     }
 
-    private static void ConfigureQuartz(WebApplicationBuilder builder)
+    private static void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     {
-        builder.Services.AddQuartz(q =>
+        settings.Title = "OnlineSales API";
+        settings.Version = typeof(Program).Assembly.GetName().Version!.ToString() ?? "1.0.0";
+
+        var swaggerConfigurators = from p in PluginManager.GetPluginList()
+                                   where p is ISwaggerConfigurator
+                                   select p as ISwaggerConfigurator;
+
+        foreach (var swaggerConfigurator in swaggerConfigurators)
         {
-            q.UseMicrosoftDependencyInjectionJobFactory();
-
-            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
-
-            q.AddTrigger(opts =>
-                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
-        });
-
-        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+            swaggerConfigurator.ConfigureSwagger(settings);
+        }
     }
 }

@@ -7,7 +7,7 @@ services:
     ports:
       - 9200:9200
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/datafile
+      - elasticsearch-data:/usr/share/elasticsearch/data
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"

@@ -1,40 +1,33 @@
 ﻿// <copyright file="PluginManager.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Extensions.Configuration;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
 
 public static class PluginManager
 {
-    private static readonly string PluginsFolder = "plugins";
+    private static readonly string PluginsFolder = Path.Combine(AppContext.BaseDirectory, "plugins");
     private static readonly List<IPlugin> PluginList = new List<IPlugin>();
 
-    public static void Init()
+    public static void Init(IConfigurationBuilder configurationBuilder)
     {
-        if (!Directory.Exists(PluginsFolder))
-        {
-            return;
-        }
+        var pluginsDirectory = new DirectoryInfo(PluginsFolder);
 
-        var paths = Directory.GetFiles(PluginsFolder, "*.dll").Select(p => Path.GetFullPath(p)).ToArray();
-        foreach (var path in paths)
+        if (pluginsDirectory.Exists)
         {
-            try
-            {
-                PluginList.Add(LoadPlugin(path));
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "[PluginManager][Error]");
-            }
-        }
+            Log.Information("Loading plugins from the folder {0}", PluginsFolder);
 
-        foreach (var plugin in PluginList)
+            LoadPlugins(pluginsDirectory, configurationBuilder);
+        }
+        else
         {
-            plugin.OnInitialize().Wait();
+            Log.Information("Plugins folder does not exists ({0})", PluginsFolder);
         }
     }
 
@@ -43,16 +36,45 @@ public static class PluginManager
         return PluginList;
     }
 
-    public static string[] GetPluginsSettingsPaths()
+    private static void LoadPlugins(DirectoryInfo pluginsDirectory, IConfigurationBuilder configurationBuilder)
     {
-        return PluginList.Select(p => p.SettingsPath).ToArray();
+        foreach (var pluginDirectory in pluginsDirectory.GetDirectories())
+        {
+            var pluginDllName = pluginDirectory.Name + ".dll";
+
+            var pluginInfo = pluginDirectory.GetFiles(pluginDllName).FirstOrDefault();
+            var pluginSettingsInfo = pluginDirectory.GetFiles("pluginsettings.json").FirstOrDefault();
+
+            if (pluginSettingsInfo != null)
+            {
+                Log.Information("Loading plugin settings from {0}", pluginSettingsInfo.FullName);
+                configurationBuilder.AddJsonFile(pluginSettingsInfo.FullName);
+            }
+
+            if (pluginInfo != null)
+            {
+                try
+                {
+                    var plugin = LoadPlugin(pluginInfo.FullName, pluginDirectory);
+                    PluginList.Add(plugin);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, "[PluginManager][Error]");
+                }
+            }
+            else
+            {
+                Log.Warning("Plugin directory {0} does not have a plugin DLL named {1}", pluginDirectory.FullName, pluginDllName);
+            }
+        }
     }
 
-    private static IPlugin LoadPlugin(string fullPath)
+    private static IPlugin LoadPlugin(string fullPluginDllPath, DirectoryInfo pluginDirectory)
     {
-        var fileName = Path.GetFileName(fullPath);
+        var fileName = Path.GetFileName(fullPluginDllPath);
 
-        var asm = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPath);
+        var asm = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPluginDllPath);
         if (asm == null)
         {
             throw new InvalidProgramException($"Failed to load plugin '{fileName}'");
@@ -69,6 +91,20 @@ public static class PluginManager
         {
             throw new InvalidProgramException($"Failed to init plugin '{fileName}'");
         }
+
+        AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
+        {
+            var assembleFileInfo = pluginDirectory.GetFiles(assemblyName.Name + ".dll").FirstOrDefault();
+
+            if (assembleFileInfo != null)
+            {
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assembleFileInfo.FullName);
+            }
+            else
+            {
+                return null;
+            }
+        };
 
         return entrypoint;
     }
