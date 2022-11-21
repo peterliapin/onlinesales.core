@@ -1,4 +1,5 @@
 ﻿{
+  "SmsAccessKey": "$SMSACCESSKEY",
   "Gateways": {
     "AmazonSns": {
       "AccessKeyId": "$GATEWAYS__AMAZONSNS__ACCESSKEYID",
@@ -6,21 +7,27 @@
       "DefaultRegion": "$GATEWAYS__AMAZONSNS__DEFAULTREGION"
     },
     "Smsc": {
+      "ApiUrl": "https://smsc.ru/sys/send.php",
       "Login": "$GATEWAYS__SMSC__LOGIN",
       "Password": "$GATEWAYS__SMSC__PASSWORD"
     },
-    "Twilio": {
-      "AccountSid": "$GATEWAYS__TWILIO__ACCOUNTSID",
-      "AuthToken": "$GATEWAYS__TWILIO__AUTHTOKEN"
-    },
     "Getshoutout": {
+      "ApiUrl": "https://api.getshoutout.com/coreservice/messages",
       "ApiKey": "$GATEWAYS__GETSHOUTOUT_APIKEY"
     }
   },
-  "CountryGateways": {
-    "default": "AmazonSns",
-    "+7": "Smsc",
-    "+94": "Getshoutout",
-    "+44": "AmazonSns"
-  }
+  "CountryGateways": [
+    {
+      "Code": "default",
+      "Gateway": "AmazonSns"
+    },
+    {
+      "Code": "+94",
+      "Gateway": "Getshoutout"
+    },
+    {
+      "Code": "+7",
+      "Gateway": "Smsc"
+    }
+  ]
 }
