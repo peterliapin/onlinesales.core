@@ -8,19 +8,19 @@ namespace OnlineSales.Interfaces
 {
     public interface ITask
     {
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
-        /// Gets or sets cron expression based schedule.
+        /// Gets cron expression based schedule.
         /// </summary>
-        public string CronSchedule { get; set; }
+        public string CronSchedule { get; }
 
-        public int RetryCount { get; set; }
+        public int RetryCount { get; }
 
         /// <summary>
-        /// Gets or sets retry interval in minutes.
+        /// Gets retry interval in minutes.
         /// </summary>
-        public int RetryInterval { get; set; }
+        public int RetryInterval { get; }
 
         Task<bool> Execute(TaskExecutionLog currentJob);
     }
