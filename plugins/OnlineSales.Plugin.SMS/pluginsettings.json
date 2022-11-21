@@ -1,2 +1,26 @@
 ﻿{
+  "Gateways": {
+    "AmazonSns": {
+      "AccessKeyId": "$GATEWAYS__AMAZONSNS__ACCESSKEYID",
+      "SecretAccessKey": "$GATEWAYS__AMAZONSNS__SECRETACCESSKEY",
+      "DefaultRegion": "$GATEWAYS__AMAZONSNS__DEFAULTREGION"
+    },
+    "Smsc": {
+      "Login": "$GATEWAYS__SMSC__LOGIN",
+      "Password": "$GATEWAYS__SMSC__PASSWORD"
+    },
+    "Twilio": {
+      "AccountSid": "$GATEWAYS__TWILIO__ACCOUNTSID",
+      "AuthToken": "$GATEWAYS__TWILIO__AUTHTOKEN"
+    },
+    "Getshoutout": {
+      "ApiKey": "$GATEWAYS__GETSHOUTOUT_APIKEY"
+    }
+  },
+  "CountryGateways": {
+    "default": "AmazonSns",
+    "+7": "Smsc",
+    "+94": "Getshoutout",
+    "+44": "AmazonSns"
+  }
 }
