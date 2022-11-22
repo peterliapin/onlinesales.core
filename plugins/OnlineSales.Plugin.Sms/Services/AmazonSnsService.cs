@@ -40,7 +40,7 @@ public class AmazonSnsGatewayService : ISmsService
         PublishRequest request = new PublishRequest
         {
             Message = message,
-            PhoneNumber = "+94778926711",
+            PhoneNumber = recipient,
             MessageAttributes = messageAttributes,
         };
 
