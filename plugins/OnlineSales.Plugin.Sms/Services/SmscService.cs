@@ -2,8 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.Infrastructure;
+using System.Reflection;
+using System.Web;
+using Newtonsoft.Json;
 using OnlineSales.Plugin.Sms.Configuration;
+using OnlineSales.Plugin.Sms.Exceptions;
 using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Services;
@@ -17,13 +20,28 @@ public class SmscService : ISmsService
         this.smscConfig = smscConfig;
     }
 
-    public Task SendAsync(string recipient, string message)
+    public async Task SendAsync(string recipient, string message)
     {
-        Log.Information("Sms message sent to {0} via Smsc gateway: {1}", recipient, message);
+        var responseString = string.Empty;
+        var args =
+            $"login={HttpUtility.UrlEncode(smscConfig.Login)}" +
+            $"psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
+            $"&phones={HttpUtility.UrlEncode(recipient)}" +
+            $"&mes={HttpUtility.UrlEncode(message)}" +
+            "&fmt=3" + // Use JSON return format
+            "&charset=utf-8";
 
-        // TODO: Implement real SMS handling via smsc.ru
+        using (var httpClient = new HttpClient())
+        {
+            var response = await httpClient.GetAsync(smscConfig.ApiUrl + "?" + args);
+            responseString = await response.Content.ReadAsStringAsync();
+        }
 
-        return Task.Delay(0);
+        dynamic jsonResponseObject = JsonConvert.DeserializeObject(responseString);
+        if (jsonResponseObject["error"] != null)
+        {
+            throw new SmscException($"Failed to send message to {recipient} ( {jsonResponseObject["error"]} )");
+        }
     }
 }
 
