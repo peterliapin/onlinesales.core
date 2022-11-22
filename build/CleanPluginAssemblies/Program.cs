@@ -4,9 +4,9 @@
 
 Console.WriteLine("Target CleanPluginAssemblies");
 
-string hostBuildFolder = args[0];
+string hostBuildFolder = args[0].Trim("'\"".ToCharArray());
 
-string pluginBuildOutputFolder = args[1];
+string pluginBuildOutputFolder = args[1].Trim("'\"".ToCharArray());
 
 var hostBuildFolderInfo = new DirectoryInfo(hostBuildFolder);
 
