@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Reflection;
 using System.Web;
 using Newtonsoft.Json;
 using OnlineSales.Plugin.Sms.Configuration;
+using OnlineSales.Plugin.Sms.Exceptions;
 using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Services;
@@ -20,22 +22,14 @@ public class SmscService : ISmsService
 
     public async Task SendAsync(string recipient, string message)
     {
-        Log.Information("Sms message sent to {0} via Smsc gateway: {1}", recipient, message);
-
-        await SmscSend(recipient, message);
-    }
-
-    private async Task<string> SmscSend(string phone, string message, string sender = "")
-    {
         var responseString = string.Empty;
         var args =
             $"login={HttpUtility.UrlEncode(smscConfig.Login)}" +
             $"psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
-            $"{(sender == string.Empty ? string.Empty : HttpUtility.UrlEncode(sender))}" +
-            $"&phones={HttpUtility.UrlEncode(phone)}" +
+            $"&phones={HttpUtility.UrlEncode(recipient)}" +
             $"&mes={HttpUtility.UrlEncode(message)}" +
-            "fmt=3" + // Use JSON return format
-            "charset=utf-8";
+            "&fmt=3" + // Use JSON return format
+            "&charset=utf-8";
 
         using (var httpClient = new HttpClient())
         {
@@ -46,10 +40,8 @@ public class SmscService : ISmsService
         dynamic jsonResponseObject = JsonConvert.DeserializeObject(responseString);
         if (jsonResponseObject["error"] != null)
         {
-            Log.Error("Failed to send message to {0} ( {1} )", phone, jsonResponseObject["error"]);
+            throw new SmscException($"Failed to send message to {recipient} ( {jsonResponseObject["error"]} )");
         }
-
-        return responseString;
     }
 }
 
