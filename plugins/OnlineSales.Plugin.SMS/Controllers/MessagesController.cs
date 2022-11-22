@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Sms.DTOs;
 using PhoneNumbers;
+using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Controllers;
 
@@ -64,6 +65,8 @@ public class MessagesController : Controller
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
+
             return Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
                 title: ex.Message,
