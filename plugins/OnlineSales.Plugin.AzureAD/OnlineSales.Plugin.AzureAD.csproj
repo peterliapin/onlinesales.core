@@ -20,9 +20,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
+    <ClearPluginAssemblies Include="$(SolutionDir)\build\CleanPluginAssemblies\CleanPluginAssemblies.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="1.25.8" />
   </ItemGroup>
+
+  <Target Name="CleanPluginAssemblies" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugin build output folder -->
+    <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginBuildOutputFolder=$(OutputPath);HostBuildOutputFolder=$(OutputPath)../../" Targets="CleanPluginAssemblies" />
+  </Target>
 </Project>
