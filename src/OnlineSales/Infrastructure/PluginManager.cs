@@ -74,7 +74,22 @@ public static class PluginManager
     {
         var fileName = Path.GetFileName(fullPluginDllPath);
 
+        AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
+        {
+            var assembleFileInfo = pluginDirectory.GetFiles(assemblyName.Name + ".dll").FirstOrDefault();
+
+            if (assembleFileInfo != null)
+            {
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assembleFileInfo.FullName);
+            }
+            else
+            {
+                return null;
+            }
+        };
+
         var asm = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPluginDllPath);
+
         if (asm == null)
         {
             throw new InvalidProgramException($"Failed to load plugin '{fileName}'");
@@ -91,20 +106,6 @@ public static class PluginManager
         {
             throw new InvalidProgramException($"Failed to init plugin '{fileName}'");
         }
-
-        AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
-        {
-            var assembleFileInfo = pluginDirectory.GetFiles(assemblyName.Name + ".dll").FirstOrDefault();
-
-            if (assembleFileInfo != null)
-            {
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assembleFileInfo.FullName);
-            }
-            else
-            {
-                return null;
-            }
-        };
 
         return entrypoint;
     }

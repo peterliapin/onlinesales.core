@@ -3,6 +3,7 @@
 // </copyright>
 
 using Amazon;
+using Amazon.Runtime;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using OnlineSales.Interfaces;
@@ -22,26 +23,9 @@ public class AmazonSnsGatewayService : ISmsService
 
     public async Task SendAsync(string recipient, string message)
     {
-        // string awsKeyId = "AKIAQOCM6Q5CFR5VOUNU";
-        // string awsKeySecret = "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";
-
-        /* var awsCredentials = new BasicAWSCredentials(awsKeyId, awsKeySecret);
-         AmazonSimpleNotificationServiceClient snsClient = new AmazonSimpleNotificationServiceClient(awsCredentials);
-         PublishRequest publishRequest = new ();
-
-         publishRequest.Message = "This is a test message from API";
-         publishRequest.PhoneNumber = "+94778926711";
-
-         publishRequest.MessageAttributes.Add("AWS.SNS.SMS.SMSType", new MessageAttributeValue { StringValue = "Transactional", DataType = "string" });
-
-         PublishResponse response = await snsClient.PublishAsync(publishRequest);
-
-         Log.Information("Sms message sent to {0} via AmazonSns gateway: {1} Metea Data {2}", recipient, message, response.ResponseMetadata.ToString());*/
-
-        // TODO: Implement real SMS handling via AWS
-
-        var accessKey = "AKIAQOCM6Q5CFR5VOUNU";
-        var secretKey = "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";
+        var accessKey = amazonSns.AccessKeyId;
+        var secretKey = amazonSns.SecretAccessKey;
+        //RegionEndpoint region = RegionEndpoint.Equals();
         var client = new AmazonSimpleNotificationServiceClient(accessKey, secretKey, RegionEndpoint.USEast1);
         var messageAttributes = new Dictionary<string, MessageAttributeValue>();
         var smsType = new MessageAttributeValue
@@ -59,9 +43,11 @@ public class AmazonSnsGatewayService : ISmsService
             MessageAttributes = messageAttributes,
         };
 
-        await client.PublishAsync(request);
+        var response = await client.PublishAsync(request);
 
-         // return Task.Delay(0);
+        Log.Information("Sms message sent to {0} via AmazonSns gateway: {1} HttpStatus Code {2} Message Id {3}", recipient, message, response.HttpStatusCode.ToString(), response.MessageId.ToString());
+
+        // return Task.Delay(0);
     }
 }
 
