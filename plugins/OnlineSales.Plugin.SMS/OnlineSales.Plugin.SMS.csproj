@@ -19,8 +19,14 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
+    <ClearPluginAssemblies Include="$(SolutionDir)\build\CleanPluginAssemblies\CleanPluginAssemblies.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="libphonenumber-csharp" Version="8.13.0" />
   </ItemGroup>
+
+  <Target Name="CleanPluginAssemblies" AfterTargets="Build">
+    <!-- Delete unnecessary libraries from plugin build output folder -->
+    <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginBuildOutputFolder=$(OutputPath);HostBuildOutputFolder=$(OutputPath)../../" Targets="CleanPluginAssemblies" />
+  </Target>
 </Project>
