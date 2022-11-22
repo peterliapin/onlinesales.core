@@ -25,8 +25,9 @@ public class AmazonSnsGatewayService : ISmsService
     {
         var accessKey = amazonSns.AccessKeyId;
         var secretKey = amazonSns.SecretAccessKey;
-        //RegionEndpoint region = RegionEndpoint.Equals();
-        var client = new AmazonSimpleNotificationServiceClient(accessKey, secretKey, RegionEndpoint.USEast1);
+        RegionEndpoint region = RegionEndpoint.GetBySystemName(amazonSns.DefaultRegion);
+
+        var client = new AmazonSimpleNotificationServiceClient(accessKey, secretKey, region);
         var messageAttributes = new Dictionary<string, MessageAttributeValue>();
         var smsType = new MessageAttributeValue
         {
