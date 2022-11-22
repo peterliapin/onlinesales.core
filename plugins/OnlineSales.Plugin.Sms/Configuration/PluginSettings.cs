@@ -58,10 +58,12 @@ public class GetshoutoutConfig
 /// </summary>
 public class SmscConfig
 {
-    public string ApiUrl { get; set; } = string.Empty;
+    public string SenderId { get; set; } = string.Empty;
+
+    public string ApiUrl { get; set; } = string.Empty;    
 
     public string Login { get; set; } = string.Empty;
 
-    public string Password { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;    
 }
     

@@ -123,8 +123,7 @@ namespace OnlineSales.Controllers
             {
                 return Problem(
                     statusCode: StatusCodes.Status500InternalServerError,
-                    title: ex.Message,
-                    detail: ex.StackTrace);
+                    title: ex.Message);
             }
         }
 

@@ -28,6 +28,7 @@ public class SmscService : ISmsService
             $"&psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
             $"&phones={HttpUtility.UrlEncode(recipient)}" +
             $"&mes={HttpUtility.UrlEncode(message)}" +
+            $"&sender={HttpUtility.UrlEncode(smscConfig.SenderId)}" +
             "&fmt=3" + // Use JSON return format
             "&charset=utf-8";
 

@@ -8,6 +8,7 @@
     },
     "Smsc": {
       "ApiUrl": "https://smsc.ru/sys/send.php",
+      "SenderId": "$GATEWAYS__SMSC__SENDERID",
       "Login": "$GATEWAYS__SMSC__LOGIN",
       "Password": "$GATEWAYS__SMSC__PASSWORD"
     },
