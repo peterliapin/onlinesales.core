@@ -25,7 +25,7 @@ public class SmscService : ISmsService
         var responseString = string.Empty;
         var args =
             $"login={HttpUtility.UrlEncode(smscConfig.Login)}" +
-            $"psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
+            $"&psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
             $"&phones={HttpUtility.UrlEncode(recipient)}" +
             $"&mes={HttpUtility.UrlEncode(message)}" +
             "&fmt=3" + // Use JSON return format
