@@ -1,0 +1,9 @@
+﻿{
+  "EmailConfiguration": {
+    "SmtpServer": "$EMAIL__SMTPSERVER",
+    "Port": "$EMAIL__PORT",
+    "Username": "$EMAIL__USERNAME",
+    "Password": "$EMAIL__PASSWORD",
+    "UseSsl": "true"
+  }
+}
