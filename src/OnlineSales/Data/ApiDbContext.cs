@@ -26,4 +26,6 @@ public class ApiDbContext : DbContext
     public virtual DbSet<OrderItem>? OrderItems { get; set; }
 
     public virtual DbSet<TaskExecutionLog>? TaskExecutionLogs { get; set; }
+
+    public virtual DbSet<UploadedImage>? UploadedImages { get; set; }
 }

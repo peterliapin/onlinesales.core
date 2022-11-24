@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221124102433_uploaded_images_table_creation")]
+    partial class uploadedimagestablecreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -524,11 +527,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("CreatedByUserAgent")
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
-
-                    b.Property<string>("FileExtension")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("file_extension");
 
                     b.Property<string>("FileName")
                         .IsRequired()
