@@ -35,29 +35,29 @@ public class EmailService : IEmailService
 
         try
         {
-            await client.ConnectAsync(pluginSettings.EmailConfiguration.SmtpServer, pluginSettings.EmailConfiguration.Port, pluginSettings.EmailConfiguration.UseSsl);
+            await client.ConnectAsync(pluginSettings.Email.SmtpServer, pluginSettings.Email.Port, pluginSettings.Email.UseSsl);
 
-            await client.AuthenticateAsync(new NetworkCredential(pluginSettings.EmailConfiguration.Username, pluginSettings.EmailConfiguration.Password));
+            await client.AuthenticateAsync(new NetworkCredential(pluginSettings.Email.Username, pluginSettings.Email.Password));
 
             await client.SendAsync(await GenerateEmailBody(subject, fromEmail, fromName, recipients, body, attachments));
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            Log.Error(ex, "Error sending emails");
+            Log.Error(exception, "Error sending emails");
 
-            switch (ex)
+            switch (exception)
             {
                 case AuthenticationException:
-                    throw new EmailException("Error in authentication", ex.InnerException);
+                    throw new EmailException("Error in authentication", exception);
 
                 case ServiceNotAuthenticatedException:
-                    throw new EmailException("Error in authentication", ex.InnerException);
+                    throw new EmailException("Error in authentication", exception);
 
                 case ServiceNotConnectedException:
-                    throw new EmailException("Error connecting to smtp host", ex.InnerException);
+                    throw new EmailException("Error connecting to smtp host", exception);
 
                 default:
-                    throw new EmailException("Error sending emails", ex.InnerException);
+                    throw new EmailException("Error sending emails", exception);
             }
         }
         finally

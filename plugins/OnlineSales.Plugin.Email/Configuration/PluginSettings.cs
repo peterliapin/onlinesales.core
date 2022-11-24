@@ -6,10 +6,10 @@ namespace OnlineSales.Plugin.Email.Configuration;
 
 public class PluginSettings
 {
-    public EmailConfiguration EmailConfiguration { get; set; } = new EmailConfiguration();
+    public EmailConfig Email { get; set; } = new EmailConfig();
 }
 
-public class EmailConfiguration
+public class EmailConfig
 {
     public string SmtpServer { get; set; } = string.Empty;
 
