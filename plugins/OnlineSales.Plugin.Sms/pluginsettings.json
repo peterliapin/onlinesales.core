@@ -1,24 +1,24 @@
 ﻿{
   "SmsAccessKey": "$SMSACCESSKEY",
-  "Gateways": {
+  "SmsGateways": {
     "AmazonSns": {
-      "AccessKeyId": "$GATEWAYS__AMAZONSNS__ACCESSKEYID",
-      "SecretAccessKey": "$GATEWAYS__AMAZONSNS__SECRETACCESSKEY",
-      "DefaultRegion": "$GATEWAYS__AMAZONSNS__DEFAULTREGION"
+      "AccessKeyId": "$SMSGATEWAYS__AMAZONSNS__ACCESSKEYID",
+      "SecretAccessKey": "$SMSGATEWAYS__AMAZONSNS__SECRETACCESSKEY",
+      "DefaultRegion": "$SMSGATEWAYS__AMAZONSNS__DEFAULTREGION"
     },
     "Smsc": {
       "ApiUrl": "https://smsc.ru/sys/send.php",
-      "SenderId": "$GATEWAYS__SMSC__SENDERID",
-      "Login": "$GATEWAYS__SMSC__LOGIN",
-      "Password": "$GATEWAYS__SMSC__PASSWORD"
+      "SenderId": "$SMSGATEWAYS__SMSC__SENDERID",
+      "Login": "$SMSGATEWAYS__SMSC__LOGIN",
+      "Password": "$SMSGATEWAYS__SMSC__PASSWORD"
     },
     "Getshoutout": {
       "ApiUrl": "https://api.getshoutout.com",
-      "SenderId": "$GATEWAYS__GETSHOUTOUT__SENDERID",
-      "ApiKey": "$GATEWAYS__GETSHOUTOUT_APIKEY"
+      "SenderId": "$SMSGATEWAYS__GETSHOUTOUT__SENDERID",
+      "ApiKey": "$SMSGATEWAYS__GETSHOUTOUT_APIKEY"
     }
   },
-  "CountryGateways": [
+  "SmsCountryGateways": [
     {
       "Code": "default",
       "Gateway": "AmazonSns"

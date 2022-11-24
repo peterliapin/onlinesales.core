@@ -3,10 +3,8 @@
 // </copyright>
 
 using Amazon;
-using Amazon.Runtime;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
-using OnlineSales.Interfaces;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Exceptions;
 using Serilog;
