@@ -1,3 +1,4 @@
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33103.184
@@ -33,9 +34,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F133
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{A85646EC-7DEC-4627-8EEA-D5D9C7A181B1}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build_and_test.yml = .github\workflows\build_and_test.yml
-		.github\workflows\build_test_and_publish.yml = .github\workflows\build_test_and_publish.yml
 		.github\workflows\testreporter.yml = .github\workflows\testreporter.yml
+		.github\workflows\build_test_and_publish.yml = .github\workflows\build_test_and_publish.yml
+		.github\workflows\build_and_test.yml = .github\workflows\build_and_test.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{0F2716C8-A043-4743-A8AD-54B86635D567}"
