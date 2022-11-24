@@ -94,24 +94,21 @@ public class Program
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .WriteTo.Console()
-            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
+            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig))
             .CreateLogger();
 
         builder.Host.UseSerilog();
     }
 
-    private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
+    private static ElasticsearchSinkOptions ConfigureELK(ElasticsearchConfig elasticConfig)
     {
-        var uri = new Uri(elasticSearchUrl);
-
-        var assemblyName = Assembly.GetExecutingAssembly().GetName()
-            !.Name!.ToLower();
+        var uri = new Uri(elasticConfig.Url);
 
         return new ElasticsearchSinkOptions(uri)
         {
             AutoRegisterTemplate = true,
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-            IndexFormat = $"{assemblyName}-logs",
+            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
         };
     }
 

@@ -10,12 +10,12 @@ namespace OnlineSales.Infrastructure;
 
 public static class ElasticsearchExtension
 {
-    public static void AddElasticsearch(this IServiceCollection services, ElasticsearchConfig elasticsearchConfig)
+    public static void AddElasticsearch(this IServiceCollection services, ElasticsearchConfig elasticConfig)
     {
-        var settings = new ConnectionSettings(new Uri(elasticsearchConfig.Url));
+        var settings = new ConnectionSettings(new Uri(elasticConfig.Url));
 
         settings.DefaultMappingFor<LogRecord>(m => m
-            .IndexName("onlinesales-logs"));
+            .IndexName($"{elasticConfig.IndexPrefix}-logs"));
 
         var client = new ElasticClient(settings);
 
