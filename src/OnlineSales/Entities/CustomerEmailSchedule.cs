@@ -26,6 +26,9 @@ namespace OnlineSales.Entities
         [ForeignKey("CustomerId")]
         public virtual Customer? Customer { get; set; }
 
+        /// <summary>
+        /// Gets or sets reference to EmailSchedule table.
+        /// </summary>
         [Required]
         public int EmaiScheduleId { get; set; }
 
