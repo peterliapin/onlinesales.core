@@ -55,8 +55,11 @@ public static class PluginManager
             {
                 try
                 {
-                    var plugin = LoadPlugin(pluginInfo.FullName, pluginDirectory);
+                    var plugin = LoadPlugin(pluginInfo.FullName, pluginDirectory);                    
+
                     PluginList.Add(plugin);
+
+                    Log.Information("Plugin {0} successfully loaded from {1}", pluginDllName, pluginDirectory.FullName);
                 }
                 catch (Exception ex)
                 {
