@@ -1,4 +1,4 @@
-﻿// <copyright file="ImageDtos.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="ImageCreateDto.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -8,7 +8,7 @@ using OnlineSales.CustomValidations;
 
 namespace OnlineSales.DTOs
 {
-    public class ImageDtos
+    public class ImageCreateDto
     {
         [Required]
         [FileSizeValidateAttribute(10485760, ErrorMessage = "Max file size exceeded")]
