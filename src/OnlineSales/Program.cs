@@ -127,6 +127,13 @@ public class Program
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
                 context.Database.Migrate();
+
+                var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
+
+                foreach (var pluginContext in pluginContexts)
+                {
+                    pluginContext.Database.Migrate();
+                }
             }
         }
     }
