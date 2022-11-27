@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace OnlineSales.Entities;
 
+[Table("log_record")]
 public class LogRecord
 {
     [DataMember(Name = "@timestamp")]

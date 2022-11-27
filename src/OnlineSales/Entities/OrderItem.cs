@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace OnlineSales.Entities;
 
+[Table("order_item")]
 public class OrderItem : BaseEntity
 {
     /// <summary>

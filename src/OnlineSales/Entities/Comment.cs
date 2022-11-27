@@ -15,6 +15,7 @@ public enum CommentStatus
     SPAM = 2,
 }
 
+[Table("comment")]
 public class Comment : BaseEntity
 {   
     public string AuthorName { get; set; } = string.Empty;

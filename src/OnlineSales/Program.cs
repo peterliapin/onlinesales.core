@@ -163,22 +163,7 @@ public class Program
 
     private static void ConfigurePostgres(WebApplicationBuilder builder)
     {
-        builder.Services.AddEntityFrameworkNpgsql()
-            .AddDbContext<ApiDbContext>(
-                opt =>
-                {
-                    var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-                    if (postgresConfig == null)
-                    {
-                        throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
-                    }
-
-                    opt.UseNpgsql(
-                        postgresConfig.ConnectionString,
-                        b => b.MigrationsHistoryTable("_migrations"))
-                    .UseSnakeCaseNamingConvention();
-                });
+        builder.Services.AddDbContext<ApiDbContext>();
     }
 
     private static void ConfigureElasticsearch(WebApplicationBuilder builder)
