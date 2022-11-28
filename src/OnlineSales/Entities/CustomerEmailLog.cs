@@ -30,11 +30,11 @@ namespace OnlineSales.Entities
         /// Gets or sets reference to the EmailTemplate table.
         /// </summary>
         [Required]
-        public int EmailId { get; set; }
+        public int TemplateId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("EmailTemplateId")]
-        public EmailTemplate? Email { get; set; }
+        public EmailTemplate? Template { get; set; }
 
         public EmailStatus Status { get; set; }
     }
