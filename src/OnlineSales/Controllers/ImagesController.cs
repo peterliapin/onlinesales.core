@@ -2,19 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.IO;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using Microsoft.Net.Http.Headers;
-using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using Quartz.Util;
-using YamlDotNet.Core.Tokens;
 
 namespace OnlineSales.Controllers
 {

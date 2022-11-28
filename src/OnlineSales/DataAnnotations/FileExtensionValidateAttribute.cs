@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
-using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
 
 namespace OnlineSales.DataAnnotations
 {

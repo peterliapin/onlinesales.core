@@ -3,8 +3,6 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.Entities;
 
