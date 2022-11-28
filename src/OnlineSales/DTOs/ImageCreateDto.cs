@@ -11,8 +11,8 @@ namespace OnlineSales.DTOs
     public class ImageCreateDto
     {
         [Required]
-        [FileSizeValidateAttribute(10485760, ErrorMessage = "Max file size exceeded")]
-        [FileExtensionValidateAttribute(".jpg;.png;.gif", ErrorMessage = "Extension is not valid")]
+        [FileSizeValidate("Image")]
+        [FileExtensionValidate("Image")]
         public IFormFile? Image { get; set; }
 
         [Required]

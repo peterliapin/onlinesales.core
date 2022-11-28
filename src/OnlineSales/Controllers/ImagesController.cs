@@ -9,10 +9,12 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.Net.Http.Headers;
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using Quartz.Util;
+using YamlDotNet.Core.Tokens;
 
 namespace OnlineSales.Controllers
 {
@@ -29,9 +31,16 @@ namespace OnlineSales.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Post([FromForm] ImageCreateDto imageCreateDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return UnprocessableEntity(ModelState);
+            }
+
             var provider = new FileExtensionContentTypeProvider();
 
             string incomingFileName = imageCreateDto.Image!.FileName;
@@ -39,13 +48,14 @@ namespace OnlineSales.Controllers
             long incomingFileSize = imageCreateDto.Image!.Length; // bytes
             string? incomingFileMimeType = string.Empty;
 
-            provider.TryGetContentType(incomingFileName, out incomingFileMimeType);
+            if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
+            {
+                return BadRequest("MIME of the file not identified.");
+            }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
             byte[] imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
-
-            string baseUrl = $"{Request.Scheme}://{Request.Host.Value}{Request.Path}";
 
             Image uploadedImage = new ()
             {
@@ -55,22 +65,19 @@ namespace OnlineSales.Controllers
                 MimeType = incomingFileMimeType!,
                 ScopeUId = imageCreateDto.ScopeId,
                 Extension = incomingFileExtension,
-                CreatedAt = DateTime.UtcNow,
-                CreatedByIP = GetClientIP(),
-                CreatedByUserAgent = GetUserAgent(),
             };
 
             await apiDbContext.Images!.AddAsync(uploadedImage);
-
             await apiDbContext.SaveChangesAsync();
 
-            return Ok(new { ImageUrl = baseUrl + "/" + imageCreateDto.ScopeId + "/" + incomingFileName });
+            return CreatedAtAction(nameof(Get), new { scopeId = imageCreateDto.ScopeId, fileName = incomingFileName }, imageCreateDto);
         }
 
         [Route("{scopeId}/{fileName}")]
-        [ResponseCache(VaryByHeader = "User-Agent", Duration = 120)]
+        [ResponseCache(CacheProfileName = "ImageResponse")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get(string scopeId, string fileName)
         {
@@ -92,16 +99,6 @@ namespace OnlineSales.Controllers
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName); 
-        }
-
-        private string? GetClientIP()
-        {
-            return HttpContext?.Connection?.RemoteIpAddress?.ToString();
-        }
-
-        private string? GetUserAgent()
-        {
-            return HttpContext?.Request?.Headers[HeaderNames.UserAgent];
         }
     }
 }

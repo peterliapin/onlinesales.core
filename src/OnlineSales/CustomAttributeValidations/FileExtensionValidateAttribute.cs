@@ -3,46 +3,53 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using AutoMapper.Configuration;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
+using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
 
 namespace OnlineSales.CustomAttributeValidations
 {
     public class FileExtensionValidateAttribute : ValidationAttribute
     {
-        private readonly string validExtensions;
+        private readonly string type;
 
-        public FileExtensionValidateAttribute(string validExtensions)
+        public FileExtensionValidateAttribute(string type)
         {
-            this.validExtensions = validExtensions;
+            this.type = type;
         }
 
-        public override bool IsValid(object? value)
+        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            bool ok = false;
+            string[] listOfExt;
 
-            var extString = validExtensions;
-            var listOfExt = extString.Split(';').ToList();
+            if (type.Equals("Image"))
+            {
+                var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
+                listOfExt = configuration.Value.Extensions;
+            }
+            else
+            {
+                return new ValidationResult("Invalid request type (check annotation)");
+            }
 
             var file = value as IFormFile;
 
             if (file == null)
             {
-                return true;
+                return new ValidationResult("Invalid file");
             }
 
             string currentExt = Path.GetExtension(file.FileName.ToLower());
 
             var hasMatchingExt = from ext in listOfExt! where ext == currentExt select ext;
 
-            if (hasMatchingExt.Any())
+            if (!hasMatchingExt.Any())
             {
-                ok = true;
-            }
-            else
-            {
-                ok = false;
+                return new ValidationResult("Invalid file extension");
             }
 
-            return ok;
+            return ValidationResult.Success!;
         }
     }
 }
