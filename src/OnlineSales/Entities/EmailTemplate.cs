@@ -20,10 +20,10 @@ namespace OnlineSales.Entities
         public string Template { get; set; } = string.Empty;
 
         [Required]
-        public int EmailGroupId { get; set; }
+        public int GroupId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("EmailGroupId")]
-        public virtual EmailGroup? EmailGroup { get; set; }
+        public virtual EmailGroup? Group { get; set; }
     }
 }

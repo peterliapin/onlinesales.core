@@ -17,7 +17,7 @@ namespace OnlineSales.Entities
     public class CustomerEmailSchedule : BaseEntity
     {
         /// <summary>
-        /// Gets or sets reference to a customer table.
+        /// Gets or sets reference to the customer table.
         /// </summary>
         [Required]
         public int CustomerId { get; set; }
@@ -27,14 +27,14 @@ namespace OnlineSales.Entities
         public virtual Customer? Customer { get; set; }
 
         /// <summary>
-        /// Gets or sets reference to EmailSchedule table.
+        /// Gets or sets reference to the EmailSchedule table.
         /// </summary>
         [Required]
-        public int EmaiScheduleId { get; set; }
+        public int ScheduleId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("EmailScheduleId")]
-        public EmailSchedule? EmailSchedule { get; set; }
+        public EmailSchedule? Schedule { get; set; }
 
         /// <summary>
         /// Gets or sets the status of the completion of sending all emails assigned to the schedule.

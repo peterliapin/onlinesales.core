@@ -17,25 +17,25 @@ namespace OnlineSales.Entities
     public class CustomerEmailLog : BaseEntity
     {
         /// <summary>
-        /// Gets or sets reference to CustomerEmailSchedule table.
+        /// Gets or sets reference to the CustomerEmailSchedule table.
         /// </summary>
         [Required]
-        public int CustomerEmailScheduleId { get; set; }
+        public int ScheduleId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("CustomerEmailScheduleId")]
-        public CustomerEmailSchedule? EmailSchedule { get; set; }
+        public CustomerEmailSchedule? Schedule { get; set; }
 
         /// <summary>
-        /// Gets or sets reference to EmailTemplate table.
+        /// Gets or sets reference to the EmailTemplate table.
         /// </summary>
         [Required]
-        public int EmailTemplateId { get; set; }
+        public int EmailId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("EmailTemplateId")]
         public EmailTemplate? Email { get; set; }
 
-        public EmailStatus EmailStatus { get; set; }
+        public EmailStatus Status { get; set; }
     }
 }
