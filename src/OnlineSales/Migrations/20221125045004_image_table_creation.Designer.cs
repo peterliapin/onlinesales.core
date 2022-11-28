@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221125045004_image_table_creation")]
+    partial class imagetablecreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,15 +86,15 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_comment");
+                        .HasName("pk_comments");
 
                     b.HasIndex("ParentId")
-                        .HasDatabaseName("ix_comment_parent_id");
+                        .HasDatabaseName("ix_comments_parent_id");
 
                     b.HasIndex("PostId")
-                        .HasDatabaseName("ix_comment_post_id");
+                        .HasDatabaseName("ix_comments_post_id");
 
-                    b.ToTable("comment", (string)null);
+                    b.ToTable("comments", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Customer", b =>
@@ -177,9 +180,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("zip");
 
                     b.HasKey("Id")
-                        .HasName("pk_customer");
+                        .HasName("pk_customers");
 
-                    b.ToTable("customer", (string)null);
+                    b.ToTable("customers", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Image", b =>
@@ -330,12 +333,12 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_order");
+                        .HasName("pk_orders");
 
                     b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
+                        .HasDatabaseName("ix_orders_customer_id");
 
-                    b.ToTable("order", (string)null);
+                    b.ToTable("orders", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
@@ -403,12 +406,12 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_order_item");
+                        .HasName("pk_order_items");
 
                     b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_item_order_id");
+                        .HasDatabaseName("ix_order_items_order_id");
 
-                    b.ToTable("order_item", (string)null);
+                    b.ToTable("order_items", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Post", b =>
@@ -504,9 +507,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_post");
+                        .HasName("pk_posts");
 
-                    b.ToTable("post", (string)null);
+                    b.ToTable("posts", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
@@ -567,9 +570,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_task_execution_log");
+                        .HasName("pk_task_execution_logs");
 
-                    b.ToTable("task_execution_log", (string)null);
+                    b.ToTable("task_execution_logs", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
@@ -577,14 +580,14 @@ namespace OnlineSales.Migrations
                     b.HasOne("OnlineSales.Entities.Comment", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
-                        .HasConstraintName("fk_comment_comment_parent_id");
+                        .HasConstraintName("fk_comments_comments_parent_id");
 
                     b.HasOne("OnlineSales.Entities.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_comment_post_post_id");
+                        .HasConstraintName("fk_comments_posts_post_id");
 
                     b.Navigation("Parent");
 
@@ -598,7 +601,7 @@ namespace OnlineSales.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_customer_customer_id");
+                        .HasConstraintName("fk_orders_customers_customer_id");
 
                     b.Navigation("Customer");
                 });
@@ -610,7 +613,7 @@ namespace OnlineSales.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_item_order_order_id");
+                        .HasConstraintName("fk_order_items_orders_order_id");
 
                     b.Navigation("Customer");
                 });
