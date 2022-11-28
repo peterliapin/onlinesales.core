@@ -4,16 +4,16 @@
 
 namespace OnlineSales.Plugin.Sms.Configuration;
 
-public class PluginSettings
+public class PluginConfig
 {
     public string SmsAccessKey { get; set; } = string.Empty;
 
-    public Gateways Gateways { get; set; } = new Gateways();
+    public GatewaysConfig Gateways { get; set; } = new GatewaysConfig();
 
-    public List<CountryGateway> CountryGateways { get; set; } = new List<CountryGateway>();
+    public List<CountryGatewayConfig> CountryGateways { get; set; } = new List<CountryGatewayConfig>();
 }
 
-public class Gateways
+public class GatewaysConfig
 {
     public AmazonSnsConfig AmazonSns { get; set; } = new AmazonSnsConfig();
 
@@ -22,7 +22,7 @@ public class Gateways
     public GetshoutoutConfig Getshoutout { get; set; } = new GetshoutoutConfig();
 }
 
-public class CountryGateway
+public class CountryGatewayConfig
 {
     public string Code { get; set; } = string.Empty;
 

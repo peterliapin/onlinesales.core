@@ -12,13 +12,13 @@ namespace OnlineSales.Plugin.Sms.Services;
 
 public class SmsService : ISmsService
 {
-    private readonly PluginSettings pluginSettings = new PluginSettings();
+    private readonly PluginConfig pluginSettings = new PluginConfig();
     private readonly Dictionary<string, ISmsService> countrySmsServices = new Dictionary<string, ISmsService>();
     private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
 
     public SmsService(IConfiguration configuration)
     {
-        var settings = configuration.Get<PluginSettings>();
+        var settings = configuration.Get<PluginConfig>();
 
         if (settings != null)
         {

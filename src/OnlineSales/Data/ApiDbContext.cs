@@ -3,7 +3,7 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
+using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
@@ -13,9 +13,25 @@ public class ApiDbContext : DbContext
 {
     private readonly IHttpContextHelper httpContextHelper;
 
-    public ApiDbContext(DbContextOptions<ApiDbContext> options, IHttpContextHelper httpContextHelper)
+    protected readonly IConfiguration configuration;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ApiDbContext"/> class.
+    /// Constructor with no parameters and manual configuration building is required for the case when you would like to use ApiDbContext as a base class for a new context (let's say in a plugin).
+    /// </summary>
+    public ApiDbContext()
+    {
+        this.configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", false)
+            .AddEnvironmentVariables()
+            .AddUserSecrets(typeof(Program).Assembly)
+            .Build();
+    }
+
+    public ApiDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options)
     {
+        this.configuration = configuration;
         this.httpContextHelper = httpContextHelper;
         // nothing here yet
     }
@@ -61,4 +77,19 @@ public class ApiDbContext : DbContext
 
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     } 
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+        if (postgresConfig == null)
+        {
+            throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
+        }
+
+        optionsBuilder.UseNpgsql(
+            postgresConfig.ConnectionString,
+            b => b.MigrationsHistoryTable("_migrations"))
+        .UseSnakeCaseNamingConvention();
+    }
 }

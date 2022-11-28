@@ -34,6 +34,8 @@ public class ElasticsearchConfig : BaseServiceConfig
 {
     public bool UseHttps { get; set; } = false;
 
+    public string IndexPrefix { get; set; } = string.Empty;
+
     public string Url
     {
         get

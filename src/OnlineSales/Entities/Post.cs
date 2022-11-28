@@ -3,9 +3,11 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineSales.Entities;
 
+[Table("post")]
 public class Post : BaseEntity
 {
     [Required]

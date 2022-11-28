@@ -103,24 +103,21 @@ public class Program
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .WriteTo.Console()
-            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig.Url))
+            .WriteTo.Elasticsearch(ConfigureELK(elasticConfig))
             .CreateLogger();
 
         builder.Host.UseSerilog();
     }
 
-    private static ElasticsearchSinkOptions ConfigureELK(string elasticSearchUrl)
+    private static ElasticsearchSinkOptions ConfigureELK(ElasticsearchConfig elasticConfig)
     {
-        var uri = new Uri(elasticSearchUrl);
-
-        var assemblyName = Assembly.GetExecutingAssembly().GetName()
-            !.Name!.ToLower();
+        var uri = new Uri(elasticConfig.Url);
 
         return new ElasticsearchSinkOptions(uri)
         {
             AutoRegisterTemplate = true,
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-            IndexFormat = $"{assemblyName}-logs",
+            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
         };
     }
 
@@ -139,6 +136,13 @@ public class Program
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
                 context.Database.Migrate();
+
+                var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
+
+                foreach (var pluginContext in pluginContexts)
+                {
+                    pluginContext.Database.Migrate();
+                }
             }
         }
     }
@@ -175,22 +179,7 @@ public class Program
 
     private static void ConfigurePostgres(WebApplicationBuilder builder)
     {
-        builder.Services.AddEntityFrameworkNpgsql()
-            .AddDbContext<ApiDbContext>(
-                opt =>
-                {
-                    var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-                    if (postgresConfig == null)
-                    {
-                        throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
-                    }
-
-                    opt.UseNpgsql(
-                        postgresConfig.ConnectionString,
-                        b => b.MigrationsHistoryTable("_migrations"))
-                    .UseSnakeCaseNamingConvention();
-                });
+        builder.Services.AddDbContext<ApiDbContext>();
     }
 
     private static void ConfigureElasticsearch(WebApplicationBuilder builder)

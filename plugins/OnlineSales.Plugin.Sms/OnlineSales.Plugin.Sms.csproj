@@ -22,7 +22,7 @@
     <ClearPluginAssemblies Include="$(SolutionDir)\build\CleanPluginAssemblies\CleanPluginAssemblies.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.100.21" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.100.22" />
     <PackageReference Include="libphonenumber-csharp" Version="8.13.0" />
   </ItemGroup>
 

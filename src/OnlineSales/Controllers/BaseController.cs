@@ -12,7 +12,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T, TC, TU> : Controller
+    public class BaseController<T, TC, TU> : ControllerBase
         where T : BaseEntity, new()
         where TC : class
         where TU : class

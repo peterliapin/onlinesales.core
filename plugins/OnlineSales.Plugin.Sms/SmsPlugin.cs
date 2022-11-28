@@ -11,15 +11,15 @@ namespace OnlineSales.Plugin.Sms;
 
 public class SmsPlugin : IPlugin
 {
-    public static PluginSettings Settings { get; private set; } = new PluginSettings();
+    public static PluginConfig Configuration { get; private set; } = new PluginConfig();
 
     public void Configure(IServiceCollection services, IConfiguration configuration)
     {
-        var pluginSettings = configuration.Get<PluginSettings>();
+        var pluginConfig = configuration.Get<PluginConfig>();
 
-        if (pluginSettings != null)
+        if (pluginConfig != null)
         {
-            Settings = pluginSettings;
+            Configuration = pluginConfig;
         }
 
         services.AddSingleton<ISmsService, SmsService>();

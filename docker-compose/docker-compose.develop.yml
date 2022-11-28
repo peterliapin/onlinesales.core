@@ -27,9 +27,9 @@ services:
     container_name: postgres
     image: postgres:14.5
     environment:
-      POSTGRES_DB: ${PG_DB}
-      POSTGRES_USER: ${PG_USER}
-      POSTGRES_PASSWORD: ${PG_PWD}
+      POSTGRES_DB: onlinesales
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:

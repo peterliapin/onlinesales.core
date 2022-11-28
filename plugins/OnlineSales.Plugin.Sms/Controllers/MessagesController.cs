@@ -36,7 +36,7 @@ public class MessagesController : Controller
     {
         try
         {
-            if (accessToken == null || accessToken.Replace("Bearer ", string.Empty) != SmsPlugin.Settings.SmsAccessKey)
+            if (accessToken == null || accessToken.Replace("Bearer ", string.Empty) != SmsPlugin.Configuration.SmsAccessKey)
             {
                 return new UnauthorizedResult();
             }
