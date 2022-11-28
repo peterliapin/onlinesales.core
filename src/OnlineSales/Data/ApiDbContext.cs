@@ -11,9 +11,9 @@ namespace OnlineSales.Data;
 
 public class ApiDbContext : DbContext
 {
-    private readonly IHttpContextHelper httpContextHelper;
-
     protected readonly IConfiguration configuration;
+
+    private readonly IHttpContextHelper? httpContextHelper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiDbContext"/> class.
@@ -63,15 +63,15 @@ public class ApiDbContext : DbContext
             if (entityEntry.State == EntityState.Modified)
             {
                 ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).UpdatedByIP = httpContextHelper.IpAddress;
-                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper.UserAgent;
+                ((BaseEntity)entityEntry.Entity).UpdatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
             }
 
             if (entityEntry.State == EntityState.Added)
             {
                 ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).CreatedByIP = httpContextHelper.IpAddress;
-                ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper.UserAgent;
+                ((BaseEntity)entityEntry.Entity).CreatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
             }
         }
 
