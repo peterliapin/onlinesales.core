@@ -3,12 +3,11 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using AutoMapper.Configuration;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContext;
 
-namespace OnlineSales.CustomAttributeValidations
+namespace OnlineSales.DataAnnotations
 {
     public class FileExtensionValidateAttribute : ValidationAttribute
     {

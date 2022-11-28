@@ -3,8 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using OnlineSales.CustomAttributeValidations;
-using OnlineSales.CustomValidations;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs
 {

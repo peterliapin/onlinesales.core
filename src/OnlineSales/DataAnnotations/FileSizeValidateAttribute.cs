@@ -4,11 +4,9 @@
 
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
-using Nest;
 using OnlineSales.Configuration;
-using Serilog.Sinks.File;
 
-namespace OnlineSales.CustomValidations
+namespace OnlineSales.DataAnnotations
 {
     public class FileSizeValidateAttribute : ValidationAttribute
     {
@@ -72,8 +70,6 @@ namespace OnlineSales.CustomValidations
             {
                 return new ValidationResult("Config Error, Measurement is invalid");
             }
-
-            Log.Information(measurement);
 
             var file = value as IFormFile;
 

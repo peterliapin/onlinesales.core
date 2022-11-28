@@ -33,7 +33,6 @@ public class ApiDbContext : DbContext
     {
         this.configuration = configuration;
         this.httpContextHelper = httpContextHelper;
-        // nothing here yet
     }
 
     public virtual DbSet<Post>? Posts { get; set; }

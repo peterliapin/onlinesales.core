@@ -2,16 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using NSwag.Generation.AspNetCore;
 using OnlineSales.Configuration;
-using OnlineSales.CustomAttributeValidations;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
