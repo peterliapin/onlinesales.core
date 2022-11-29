@@ -66,6 +66,9 @@ public class SmsService : ISmsService
                 case "NotifyLk":
                     gatewayService = new NotifyLkService(pluginSettings.SmsGateways.NotifyLk);
                     break;
+                case "Getshoutout":
+                    gatewayService = new GetshoutoutService(pluginSettings.SmsGateways.Getshoutout);
+                    break;
                 case "AmazonSns":
                     gatewayService = new AmazonSnsGatewayService(pluginSettings.SmsGateways.AmazonSns);
                     break;  
