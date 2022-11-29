@@ -16,6 +16,12 @@
       "ApiUrl": "https://api.getshoutout.com",
       "SenderId": "$SMSGATEWAYS__GETSHOUTOUT__SENDERID",
       "ApiKey": "$SMSGATEWAYS__GETSHOUTOUT_APIKEY"
+    },
+    "NotifyLk": {
+      "ApiUrl": "https://app.notify.lk/api/v1/send",
+      "SenderId": "$SMSGATEWAYS__NOTIFYLK__SENDERID",
+      "ApiKey": "$SMSGATEWAYS__NOTIFYLK__APIKEY",
+      "UserId": "$SMSGATEWAYS__NOTIFYLK__USERID"
     }
   },
   "SmsCountryGateways": [
@@ -25,7 +31,7 @@
     },
     {
       "Code": "+94",
-      "Gateway": "Getshoutout"
+      "Gateway": "NotifyLk"
     },
     {
       "Code": "+7",
