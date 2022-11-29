@@ -3,9 +3,11 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineSales.Entities
 {
+    [Table("email_group")]
     public class EmailGroup : BaseEntity
     {
         /// <summary>
