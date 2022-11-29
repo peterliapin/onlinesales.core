@@ -64,7 +64,7 @@ namespace OnlineSales.Controllers
             await apiDbContext.Images!.AddAsync(uploadedImage);
             await apiDbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { scopeId = imageCreateDto.ScopeUid, fileName = incomingFileName }, imageCreateDto);
+            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, imageCreateDto);
         }
 
         [Route("{scopeUid}/{fileName}")]
