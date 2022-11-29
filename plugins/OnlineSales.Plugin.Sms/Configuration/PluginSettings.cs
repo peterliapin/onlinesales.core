@@ -20,6 +20,8 @@ public class GatewaysConfig
     public SmscConfig Smsc { get; set; } = new SmscConfig();
 
     public GetshoutoutConfig Getshoutout { get; set; } = new GetshoutoutConfig();
+
+    public NotifyLkConfig NotifyLk { get; set; } = new NotifyLkConfig();
 }
 
 public class CountryGatewayConfig
@@ -51,6 +53,20 @@ public class GetshoutoutConfig
     public string ApiUrl { get; set; } = string.Empty;
 
     public string ApiKey { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// API Documentation: https://developer.notify.lk/api-endpoints/.
+/// </summary>
+public class NotifyLkConfig
+{
+    public string SenderId { get; set; } = string.Empty;
+
+    public string ApiUrl { get; set; } = string.Empty;
+
+    public string ApiKey { get; set; } = string.Empty;
+
+    public string UserId { get; set; } = string.Empty;
 }
 
 /// <summary>
