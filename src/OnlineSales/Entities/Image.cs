@@ -9,7 +9,7 @@ namespace OnlineSales.Entities
     public class Image : BaseEntity
     {
         [Required]
-        public string ScopeUId { get; set; } = string.Empty;
+        public string ScopeUid { get; set; } = string.Empty;
 
         public string Name { get; set; } = string.Empty;
 
