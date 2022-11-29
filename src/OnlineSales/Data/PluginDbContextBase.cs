@@ -12,23 +12,18 @@ public abstract class PluginDbContextBase : ApiDbContext
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Comment>()
-            .ToTable("comment", t => t.ExcludeFromMigrations());
+        var items = modelBuilder.Model.GetEntityTypes();
 
-        modelBuilder.Entity<Customer>()
-            .ToTable("customer", t => t.ExcludeFromMigrations());
-
-        modelBuilder.Entity<Order>()
-            .ToTable("order", t => t.ExcludeFromMigrations());
-
-        modelBuilder.Entity<OrderItem>()
-            .ToTable("order_item", t => t.ExcludeFromMigrations());
-
-        modelBuilder.Entity<Post>()
-            .ToTable("post", t => t.ExcludeFromMigrations());
-
-        modelBuilder.Entity<TaskExecutionLog>()
-            .ToTable("task_execution_log", t => t.ExcludeFromMigrations());
+#pragma warning disable S3267
+        foreach (var item in items)
+        {
+            if (item.ClrType.IsSubclassOf(typeof(BaseEntity)))
+            {
+                item.SetIsTableExcludedFromMigrations(true);
+            }
+        }
+#pragma warning restore S3267
+       
     }
 }
 
