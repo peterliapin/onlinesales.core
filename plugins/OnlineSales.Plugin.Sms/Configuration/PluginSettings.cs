@@ -8,9 +8,9 @@ public class PluginConfig
 {
     public string SmsAccessKey { get; set; } = string.Empty;
 
-    public GatewaysConfig Gateways { get; set; } = new GatewaysConfig();
+    public GatewaysConfig SmsGateways { get; set; } = new GatewaysConfig();
 
-    public List<CountryGatewayConfig> CountryGateways { get; set; } = new List<CountryGatewayConfig>();
+    public List<CountryGatewayConfig> SmsCountryGateways { get; set; } = new List<CountryGatewayConfig>();
 }
 
 public class GatewaysConfig

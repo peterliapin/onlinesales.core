@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.DTOs;
+using OnlineSales.Plugin.Sms.Exceptions;
 using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Services;
@@ -49,11 +50,18 @@ public class GetshoutoutService : ISmsService
         var messageDtoJson = JsonSerializer.Serialize(messageDto, SerializeOptions);
         var content = new StringContent(messageDtoJson, new MediaTypeHeaderValue("application/json"));
 
-        var result = await client.PostAsync("/coreservice/messages", content);
+        var result = await client.PostAsync("/coreservice/messages", content);       
 
-        result.EnsureSuccessStatusCode();
+        if (result.IsSuccessStatusCode)
+        {
+            Log.Information("Sms message sent to {0} via Getshoutout gateway: {1}", recipient, message);
+        }
+        else
+        {
+            var responseContent = await result.Content.ReadAsStringAsync();
 
-        Log.Information("Sms message sent to {0} via Getshoutout gateway: {1}", recipient, message);
+            throw new GetshoutoutException(responseContent);
+        }        
     }
 }
 
