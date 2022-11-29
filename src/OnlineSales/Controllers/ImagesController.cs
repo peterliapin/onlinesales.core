@@ -64,7 +64,14 @@ namespace OnlineSales.Controllers
             await apiDbContext.Images!.AddAsync(uploadedImage);
             await apiDbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, imageCreateDto);
+            Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
+            Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
+
+            var fileData = new Dictionary<string, string>()
+            {
+                { "location", $"{this.HttpContext.Request.Path}/{imageCreateDto.ScopeUid}/{incomingFileName}" },
+            };
+            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
 
         [Route("{scopeUid}/{fileName}")]
