@@ -2,11 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using NSwag.Generation.AspNetCore;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -49,11 +48,17 @@ public class Program
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
         builder.Configuration.AddEnvironmentVariables();
 
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
+
+        ConfigureCacheProfiles(builder);
+
         ConfigureConventions(builder);
         ConfigureControllers(builder);
         ConfigurePostgres(builder);
         ConfigureElasticsearch(builder);
         ConfigureQuartz(builder);
+        ConfigureImageUpload(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -185,6 +190,18 @@ public class Program
         builder.Services.AddElasticsearch(elasticConfig);
     }
 
+    private static void ConfigureImageUpload(WebApplicationBuilder builder)
+    {
+        var imageUploadConfig = builder.Configuration.GetSection("Images");
+
+        if (imageUploadConfig == null)
+        {
+            throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");
+        }
+
+        builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+    }
+
     private static void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     {
         settings.Title = "OnlineSales API";
@@ -213,5 +230,29 @@ public class Program
         });
 
         builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+    }
+
+    private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
+    {
+        var cacheProfiles = builder.Configuration.GetSection("CacheProfiles").Get<List<CacheProfileSettings>>();
+  
+        if (cacheProfiles == null)
+        {
+            throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");
+        }
+
+        builder.Services.AddControllers(options =>
+        {
+            foreach (var item in cacheProfiles)
+            {
+                options.CacheProfiles.Add(
+                    item!.Type!,
+                    new CacheProfile()
+                    {
+                        Duration = item!.Duration,
+                        VaryByHeader = item!.VaryByHeader!,
+                    });
+            }
+        });
     }
 }

@@ -52,7 +52,7 @@ public class SmsService : ISmsService
 
     private void InitGateways()
     {
-        foreach (var countryGateway in pluginSettings.CountryGateways)
+        foreach (var countryGateway in pluginSettings.SmsCountryGateways)
         {
             ISmsService? gatewayService = null;
 
@@ -61,13 +61,13 @@ public class SmsService : ISmsService
             switch (gatewayName)
             {
                 case "Smsc":
-                    gatewayService = new SmscService(pluginSettings.Gateways.Smsc);
+                    gatewayService = new SmscService(pluginSettings.SmsGateways.Smsc);
                     break;
                 case "Getshoutout":
-                    gatewayService = new GetshoutoutService(pluginSettings.Gateways.Getshoutout);
+                    gatewayService = new GetshoutoutService(pluginSettings.SmsGateways.Getshoutout);
                     break;
                 case "AmazonSns":
-                    gatewayService = new AmazonSnsGatewayService(pluginSettings.Gateways.AmazonSns);
+                    gatewayService = new AmazonSnsGatewayService(pluginSettings.SmsGateways.AmazonSns);
                     break;
             }
 

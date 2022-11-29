@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221125045004_image_table_creation")]
+    partial class imagetablecreation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,15 +86,15 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_comment");
+                        .HasName("pk_comments");
 
                     b.HasIndex("ParentId")
-                        .HasDatabaseName("ix_comment_parent_id");
+                        .HasDatabaseName("ix_comments_parent_id");
 
                     b.HasIndex("PostId")
-                        .HasDatabaseName("ix_comment_post_id");
+                        .HasDatabaseName("ix_comments_post_id");
 
-                    b.ToTable("comment", (string)null);
+                    b.ToTable("comments", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Customer", b =>
@@ -177,9 +180,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("zip");
 
                     b.HasKey("Id")
-                        .HasName("pk_customer");
+                        .HasName("pk_customers");
 
-                    b.ToTable("customer", (string)null);
+                    b.ToTable("customers", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Image", b =>
@@ -248,291 +251,6 @@ namespace OnlineSales.Migrations
                         .HasName("pk_images");
 
                     b.ToTable("images", (string)null);
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int?>("CustomerEmailScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("customer_email_schedule_id");
-
-                    b.Property<int?>("EmailTemplateId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_template_id");
-
-                    b.Property<int>("ScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("schedule_id");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<int>("TemplateId")
-                        .HasColumnType("integer")
-                        .HasColumnName("template_id");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_customer_email_log");
-
-                    b.HasIndex("CustomerEmailScheduleId")
-                        .HasDatabaseName("ix_customer_email_log_customer_email_schedule_id");
-
-                    b.HasIndex("EmailTemplateId")
-                        .HasDatabaseName("ix_customer_email_log_email_template_id");
-
-                    b.ToTable("customer_email_log", (string)null);
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("customer_id");
-
-                    b.Property<int?>("EmailScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_schedule_id");
-
-                    b.Property<int>("ScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("schedule_id");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_customer_email_schedule");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_customer_email_schedule_customer_id");
-
-                    b.HasIndex("EmailScheduleId")
-                        .HasDatabaseName("ix_customer_email_schedule_email_schedule_id");
-
-                    b.ToTable("customer_email_schedule", (string)null);
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_email_group");
-
-                    b.ToTable("email_group", (string)null);
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int?>("EmailGroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_group_id");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("group_id");
-
-                    b.Property<string>("Schedule")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("schedule");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_email_schedule");
-
-                    b.HasIndex("EmailGroupId")
-                        .HasDatabaseName("ix_email_schedule_email_group_id");
-
-                    b.ToTable("email_schedule", (string)null);
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int?>("EmailGroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_group_id");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("group_id");
-
-                    b.Property<string>("Template")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("template");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("title");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_email_template");
-
-                    b.HasIndex("EmailGroupId")
-                        .HasDatabaseName("ix_email_template_email_group_id");
-
-                    b.ToTable("email_template", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
@@ -615,12 +333,12 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_order");
+                        .HasName("pk_orders");
 
                     b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
+                        .HasDatabaseName("ix_orders_customer_id");
 
-                    b.ToTable("order", (string)null);
+                    b.ToTable("orders", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
@@ -688,12 +406,12 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_order_item");
+                        .HasName("pk_order_items");
 
                     b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_item_order_id");
+                        .HasDatabaseName("ix_order_items_order_id");
 
-                    b.ToTable("order_item", (string)null);
+                    b.ToTable("order_items", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Post", b =>
@@ -789,9 +507,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_post");
+                        .HasName("pk_posts");
 
-                    b.ToTable("post", (string)null);
+                    b.ToTable("posts", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
@@ -852,9 +570,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_task_execution_log");
+                        .HasName("pk_task_execution_logs");
 
-                    b.ToTable("task_execution_log", (string)null);
+                    b.ToTable("task_execution_logs", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
@@ -862,74 +580,18 @@ namespace OnlineSales.Migrations
                     b.HasOne("OnlineSales.Entities.Comment", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
-                        .HasConstraintName("fk_comment_comment_parent_id");
+                        .HasConstraintName("fk_comments_comments_parent_id");
 
                     b.HasOne("OnlineSales.Entities.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_comment_post_post_id");
+                        .HasConstraintName("fk_comments_posts_post_id");
 
                     b.Navigation("Parent");
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailLog", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.CustomerEmailSchedule", "Schedule")
-                        .WithMany()
-                        .HasForeignKey("CustomerEmailScheduleId")
-                        .HasConstraintName("fk_customer_email_log_customer_email_schedule_customer_email_sch");
-
-                    b.HasOne("OnlineSales.Entities.EmailTemplate", "Template")
-                        .WithMany()
-                        .HasForeignKey("EmailTemplateId")
-                        .HasConstraintName("fk_customer_email_log_email_template_email_template_id");
-
-                    b.Navigation("Schedule");
-
-                    b.Navigation("Template");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_customer_email_schedule_customer_customer_id");
-
-                    b.HasOne("OnlineSales.Entities.EmailSchedule", "Schedule")
-                        .WithMany()
-                        .HasForeignKey("EmailScheduleId")
-                        .HasConstraintName("fk_customer_email_schedule_email_schedule_email_schedule_id");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Schedule");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("EmailGroupId")
-                        .HasConstraintName("fk_email_schedule_email_group_email_group_id");
-
-                    b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("EmailGroupId")
-                        .HasConstraintName("fk_email_template_email_group_email_group_id");
-
-                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
@@ -939,7 +601,7 @@ namespace OnlineSales.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_customer_customer_id");
+                        .HasConstraintName("fk_orders_customers_customer_id");
 
                     b.Navigation("Customer");
                 });
@@ -951,7 +613,7 @@ namespace OnlineSales.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_item_order_order_id");
+                        .HasConstraintName("fk_order_items_orders_order_id");
 
                     b.Navigation("Customer");
                 });

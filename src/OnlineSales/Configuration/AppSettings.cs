@@ -48,6 +48,24 @@ public class SmtpServerConfig : BaseServiceConfig
     public bool UseTLS { get; set; } = false;
 }
 
+public class ImagesConfig
+{
+    public string[] Extensions { get; set; } = new string[0];
+
+    public string? MaxSize { get; set; }
+
+    public string? CacheTime { get; set; }
+}
+
+public class CacheProfileSettings
+{
+    public string Type { get; set; } = string.Empty;
+
+    public string VaryByHeader { get; set; } = string.Empty;
+
+    public int? Duration { get; set; }
+}
+
 public class AppSettings
 {
     public PostgresConfig Postgres { get; set; } = new PostgresConfig();

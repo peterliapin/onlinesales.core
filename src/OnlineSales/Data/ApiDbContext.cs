@@ -5,12 +5,15 @@
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
 
 public class ApiDbContext : DbContext
 {
     protected readonly IConfiguration configuration;
+
+    private readonly IHttpContextHelper? httpContextHelper;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiDbContext"/> class.
@@ -25,10 +28,11 @@ public class ApiDbContext : DbContext
             .Build();
     }
 
-    public ApiDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration)
+    public ApiDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options)
     {
         this.configuration = configuration;
+        this.httpContextHelper = httpContextHelper;
     }
 
     public virtual DbSet<Post>? Posts { get; set; }
@@ -42,6 +46,36 @@ public class ApiDbContext : DbContext
     public virtual DbSet<OrderItem>? OrderItems { get; set; }
 
     public virtual DbSet<TaskExecutionLog>? TaskExecutionLogs { get; set; }
+
+    public virtual DbSet<Image>? Images { get; set; }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        var entries = ChangeTracker
+       .Entries()
+       .Where(e => e.Entity is BaseEntity && (
+               e.State == EntityState.Added
+               || e.State == EntityState.Modified));
+
+        foreach (var entityEntry in entries)
+        {
+            if (entityEntry.State == EntityState.Modified)
+            {
+                ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+                ((BaseEntity)entityEntry.Entity).UpdatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+            }
+
+            if (entityEntry.State == EntityState.Added)
+            {
+                ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+                ((BaseEntity)entityEntry.Entity).CreatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+            }
+        }
+
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    } 
 
     public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
 
