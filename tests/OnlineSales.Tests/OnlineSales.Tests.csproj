@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-    <ReleaseVersion>1.0.6-pre</ReleaseVersion>
+    <ReleaseVersion>1.0.7-pre</ReleaseVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -35,6 +35,11 @@
   <ItemGroup>
     <Folder Include="TestEntities\" />
     <Folder Include="Environment\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\" />
+    <None Remove="Resources\wavepoint.png" />
   </ItemGroup>
   <ItemGroup>
     <None Update="xunit.runner.json">
@@ -43,5 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="**/*" />
   </ItemGroup>
 </Project>

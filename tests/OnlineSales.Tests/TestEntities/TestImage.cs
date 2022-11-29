@@ -8,7 +8,8 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestImage : ImageCreateDto
 {
-    public TestImage()
+    public TestImage(string imageResourceName)
     {
+        ScopeUid = "test-scope-ui";
     }
 }
