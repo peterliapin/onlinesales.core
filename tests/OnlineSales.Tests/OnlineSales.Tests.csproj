@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-    <ReleaseVersion>1.0.8-pre</ReleaseVersion>
+    <ReleaseVersion>1.0.9-pre</ReleaseVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -51,5 +51,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**/*" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.AssemblyInfoInputs.cache" />
+    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.csproj.AssemblyReference.cache" />
+    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.GeneratedMSBuildEditorConfig.editorconfig" />
+    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.AssemblyInfo.cs" />
+    <EmbeddedResource Remove="bin\Debug\net7.0\CoverletSourceRootsMapping" />
   </ItemGroup>
 </Project>
