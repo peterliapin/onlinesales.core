@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace OnlineSales.Entities
 {
+    [Table("email_template")]
     public class EmailTemplate : BaseEntity
     {
         [Required]

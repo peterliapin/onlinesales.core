@@ -43,6 +43,16 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<TaskExecutionLog>? TaskExecutionLogs { get; set; }
 
+    public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
+
+    public virtual DbSet<EmailSchedule>? EmailSchedules { get; set; }
+
+    public virtual DbSet<EmailTemplate>? EmailTemplates { get; set; }
+
+    public virtual DbSet<CustomerEmailSchedule>? CustomerEmailSchedules { get; set; }
+
+    public virtual DbSet<CustomerEmailLog>? CustomerEmailLogs { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
