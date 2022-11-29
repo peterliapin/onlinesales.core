@@ -49,6 +49,16 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<Image>? Images { get; set; }
 
+    public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
+
+    public virtual DbSet<EmailSchedule>? EmailSchedules { get; set; }
+
+    public virtual DbSet<EmailTemplate>? EmailTemplates { get; set; }
+
+    public virtual DbSet<CustomerEmailSchedule>? CustomerEmailSchedules { get; set; }
+
+    public virtual DbSet<CustomerEmailLog>? CustomerEmailLogs { get; set; }
+
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker
@@ -75,17 +85,7 @@ public class ApiDbContext : DbContext
         }
 
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-    } 
-
-    public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
-
-    public virtual DbSet<EmailSchedule>? EmailSchedules { get; set; }
-
-    public virtual DbSet<EmailTemplate>? EmailTemplates { get; set; }
-
-    public virtual DbSet<CustomerEmailSchedule>? CustomerEmailSchedules { get; set; }
-
-    public virtual DbSet<CustomerEmailLog>? CustomerEmailLogs { get; set; }
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
