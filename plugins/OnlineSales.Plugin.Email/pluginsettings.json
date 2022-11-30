@@ -1,9 +1,9 @@
 ﻿{
   "Email": {
-    "SmtpServer": "$EMAIL__SMTPSERVER",
-    "Username": "$EMAIL__USERNAME",
+    "Server": "$EMAIL__SERVER",
+    "UserName": "$EMAIL__USERNAME",
     "Password": "$EMAIL__PASSWORD",
-    "UseSsl": "true",
-    "Port": "25"
+    "Port": "25",
+    "UseSsl": "true"
   }
 }

@@ -36,6 +36,8 @@ public class CountryGatewayConfig
 /// </summary>
 public class AmazonSnsConfig
 {
+    public string SenderId { get; set; } = string.Empty;
+
     public string AccessKeyId { get; set; } = string.Empty;
 
     public string SecretAccessKey { get; set; } = string.Empty;

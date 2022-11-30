@@ -28,13 +28,18 @@ public class AmazonSnsGatewayService : ISmsService
 
         var client = new AmazonSimpleNotificationServiceClient(accessKey, secretKey, region);
         var messageAttributes = new Dictionary<string, MessageAttributeValue>();
-        var smsType = new MessageAttributeValue
+
+        messageAttributes["AWS.SNS.SMS.SMSType"] = new MessageAttributeValue
         {
             DataType = "String",
             StringValue = "Transactional",
         };
 
-        messageAttributes.Add("AWS.SNS.SMS.SMSType", smsType);
+        messageAttributes["AWS.SNS.SMS.SenderID"] = new MessageAttributeValue
+        {
+            DataType = "String",
+            StringValue = amazonSns.SenderId,
+        };
 
         PublishRequest request = new PublishRequest
         {

@@ -2,6 +2,7 @@
   "SmsAccessKey": "$SMSACCESSKEY",
   "SmsGateways": {
     "AmazonSns": {
+      "SenderId": "$SMSGATEWAYS__AMAZONSNS__SENDERID",
       "AccessKeyId": "$SMSGATEWAYS__AMAZONSNS__ACCESSKEYID",
       "SecretAccessKey": "$SMSGATEWAYS__AMAZONSNS__SECRETACCESSKEY",
       "DefaultRegion": "$SMSGATEWAYS__AMAZONSNS__DEFAULTREGION"
