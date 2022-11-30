@@ -30,6 +30,11 @@ namespace OnlineSales.DataAnnotations
                 var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
                 maxFileSize = configuration.Value.MaxSize !;
             }
+            else if (type.Equals("EmailAttachment"))
+            {
+                var configuration = (IOptions<EmailAttachmentConfig>)validationContext!.GetService(typeof(IOptions<EmailAttachmentConfig>)) !;
+                maxFileSize = configuration.Value.MaxSize !;
+            }
             else
             {
                 return new ValidationResult("Invalid request type (check annotation)");
@@ -75,7 +80,7 @@ namespace OnlineSales.DataAnnotations
 
             if (file == null)
             {
-                return new ValidationResult("Invalid file");
+                return ValidationResult.Success!;
             }
 
             if (file.Length > sizeInByte)
