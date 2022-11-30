@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +65,14 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerDocument(ConfigureSwagger);
 
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.All;
+        });
+
         app = builder.Build();
+
+        app.UseForwardedHeaders();
 
         MigrateOnStartIfRequired(app, builder);
 

@@ -14,6 +14,7 @@ namespace OnlineSales.Entities
         COMPLETED = 1,
     }
 
+    [Table("customer_email_schedule")]
     public class CustomerEmailSchedule : BaseEntity
     {
         /// <summary>

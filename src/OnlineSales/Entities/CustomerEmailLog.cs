@@ -14,6 +14,7 @@ namespace OnlineSales.Entities
         SENT = 1,
     }
 
+    [Table("customer_email_log")]
     public class CustomerEmailLog : BaseEntity
     {
         /// <summary>

@@ -15,6 +15,6 @@ namespace OnlineSales.DTOs
         public IFormFile? Image { get; set; }
 
         [Required]
-        public string ScopeId { get; set; } = string.Empty;
+        public string ScopeUid { get; set; } = string.Empty;
     }
 }

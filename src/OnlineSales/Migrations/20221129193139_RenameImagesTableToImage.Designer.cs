@@ -12,8 +12,8 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20221127181338_singular_table_names")]
-    partial class singulartablenames
+    [Migration("20221129193139_RenameImagesTableToImage")]
+    partial class RenameImagesTableToImage
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -183,6 +183,359 @@ namespace OnlineSales.Migrations
                         .HasName("pk_customer");
 
                     b.ToTable("customer", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int?>("CustomerEmailScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("customer_email_schedule_id");
+
+                    b.Property<int?>("EmailTemplateId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_template_id");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("schedule_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TemplateId")
+                        .HasColumnType("integer")
+                        .HasColumnName("template_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_customer_email_log");
+
+                    b.HasIndex("CustomerEmailScheduleId")
+                        .HasDatabaseName("ix_customer_email_log_customer_email_schedule_id");
+
+                    b.HasIndex("EmailTemplateId")
+                        .HasDatabaseName("ix_customer_email_log_email_template_id");
+
+                    b.ToTable("customer_email_log", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("customer_id");
+
+                    b.Property<int?>("EmailScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_schedule_id");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("schedule_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_customer_email_schedule");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_customer_email_schedule_customer_id");
+
+                    b.HasIndex("EmailScheduleId")
+                        .HasDatabaseName("ix_customer_email_schedule_email_schedule_id");
+
+                    b.ToTable("customer_email_schedule", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_email_group");
+
+                    b.ToTable("email_group", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int?>("EmailGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_group_id");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Schedule")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("schedule");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_email_schedule");
+
+                    b.HasIndex("EmailGroupId")
+                        .HasDatabaseName("ix_email_schedule_email_group_id");
+
+                    b.ToTable("email_schedule", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int?>("EmailGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_group_id");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("group_id");
+
+                    b.Property<string>("Template")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("template");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_email_template");
+
+                    b.HasIndex("EmailGroupId")
+                        .HasDatabaseName("ix_email_template_email_group_id");
+
+                    b.ToTable("email_template", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Image", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("data");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("extension");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mime_type");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ScopeUid")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope_uid");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIP")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_image");
+
+                    b.ToTable("image", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
@@ -524,6 +877,62 @@ namespace OnlineSales.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailLog", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.CustomerEmailSchedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("CustomerEmailScheduleId")
+                        .HasConstraintName("fk_customer_email_log_customer_email_schedule_customer_email_sch");
+
+                    b.HasOne("OnlineSales.Entities.EmailTemplate", "Template")
+                        .WithMany()
+                        .HasForeignKey("EmailTemplateId")
+                        .HasConstraintName("fk_customer_email_log_email_template_email_template_id");
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Template");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_customer_email_schedule_customer_customer_id");
+
+                    b.HasOne("OnlineSales.Entities.EmailSchedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("EmailScheduleId")
+                        .HasConstraintName("fk_customer_email_schedule_email_schedule_email_schedule_id");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Schedule");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("EmailGroupId")
+                        .HasConstraintName("fk_email_schedule_email_group_email_group_id");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("EmailGroupId")
+                        .HasConstraintName("fk_email_template_email_group_email_group_id");
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>

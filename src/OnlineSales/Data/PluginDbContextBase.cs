@@ -7,7 +7,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Data;
 
-public class PluginDbContextBase : ApiDbContext
+public abstract class PluginDbContextBase : ApiDbContext
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

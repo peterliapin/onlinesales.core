@@ -57,25 +57,32 @@ namespace OnlineSales.Controllers
                 Size = incomingFileSize,
                 Data = imageInBytes,
                 MimeType = incomingFileMimeType!,
-                ScopeUId = imageCreateDto.ScopeId,
+                ScopeUid = imageCreateDto.ScopeUid,
                 Extension = incomingFileExtension,
             };
 
             await apiDbContext.Images!.AddAsync(uploadedImage);
             await apiDbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { scopeId = imageCreateDto.ScopeId, fileName = incomingFileName }, imageCreateDto);
+            Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
+            Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
+
+            var fileData = new Dictionary<string, string>()
+            {
+                { "location", $"{this.HttpContext.Request.Path}/{imageCreateDto.ScopeUid}/{incomingFileName}" },
+            };
+            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
 
-        [Route("{scopeId}/{fileName}")]
+        [Route("{scopeUid}/{fileName}")]
         [ResponseCache(CacheProfileName = "ImageResponse")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get(string scopeId, string fileName)
+        public async Task<ActionResult> Get(string scopeUid, string fileName)
         {
-            if (scopeId.IsNullOrWhiteSpace())
+            if (scopeUid.IsNullOrWhiteSpace())
             {
                 return BadRequest("Scope is invalid");
             }
@@ -85,7 +92,7 @@ namespace OnlineSales.Controllers
                 return BadRequest("File Name is invalid");
             }
 
-            var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUId == scopeId && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
