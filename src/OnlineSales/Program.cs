@@ -12,6 +12,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
@@ -267,8 +268,8 @@ public class Program
 
     private static void ConfigureEmailServices(WebApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<IEmailWithLogService, IEmailWithLogService>();
+        builder.Services.AddSingleton<IEmailWithLogService, EmailWithLogService>();
 
-        builder.Services.AddSingleton<IEmailFromTemplateService, IEmailFromTemplateService>();
+        builder.Services.AddSingleton<IEmailFromTemplateService, EmailFromTemplateService>();
     }
 }
