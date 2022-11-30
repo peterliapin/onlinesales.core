@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -50,20 +51,34 @@ namespace OnlineSales.Controllers
             using var fileStream = imageCreateDto.Image.OpenReadStream();
             byte[] imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
-
-            Image uploadedImage = new ()
+            
+            var scopeAndFileExists = from i in apiDbContext!.Images!
+                                     where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
+                                     select i;
+            if (scopeAndFileExists.Any())
             {
-                Name = incomingFileName,
-                Size = incomingFileSize,
-                Data = imageInBytes,
-                MimeType = incomingFileMimeType!,
-                ScopeUid = imageCreateDto.ScopeUid,
-                Extension = incomingFileExtension,
-            };
+                Image? uploadedImage = scopeAndFileExists!.FirstOrDefault();
+                uploadedImage!.Data = imageInBytes;
 
-            await apiDbContext.Images!.AddAsync(uploadedImage);
-            await apiDbContext.SaveChangesAsync();
+                apiDbContext.Images!.Update(uploadedImage);
+                await apiDbContext.SaveChangesAsync();
+            }
+            else
+            {
+                Image uploadedImage = new ()
+                {
+                    Name = incomingFileName,
+                    Size = incomingFileSize,
+                    Data = imageInBytes,
+                    MimeType = incomingFileMimeType!,
+                    ScopeUid = imageCreateDto.ScopeUid.Trim(),
+                    Extension = incomingFileExtension,
+                };
 
+                await apiDbContext.Images!.AddAsync(uploadedImage);
+                await apiDbContext.SaveChangesAsync();
+            }
+           
             Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
             Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
 
