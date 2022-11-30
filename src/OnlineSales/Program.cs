@@ -268,8 +268,8 @@ public class Program
 
     private static void ConfigureEmailServices(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
+        // builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
 
-        builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
+        // builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
     }
 }
