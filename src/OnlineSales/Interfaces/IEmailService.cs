@@ -6,6 +6,6 @@ namespace OnlineSales.Interfaces
 {
     public interface IEmailService
     {
-        Task SendAsync(string subject, string fromEmail, string fromName, string recipients, string body, List<IFormFile>? attachments);
+        Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments);
     }
 }

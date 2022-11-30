@@ -1,0 +1,103 @@
+﻿// <copyright file="EmailWithLogService.cs" company="WavePoint Co. Ltd.">
+// Licensed under the MIT license. See LICENSE file in the samples root for full license information.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore;
+using OnlineSales.Data;
+using OnlineSales.Entities;
+using OnlineSales.Interfaces;
+
+namespace OnlineSales.Services
+{
+    public class EmailWithLogService : IEmailWithLogService
+    {
+        private readonly IEmailService emailService;
+        private readonly ApiDbContext apiDbContext;
+
+        public EmailWithLogService(IEmailService emailService, ApiDbContext apiDbContext)
+        {
+            this.emailService = emailService;
+            this.apiDbContext = apiDbContext;
+        }
+
+        public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments)
+        {
+            bool emailStatus = false;
+
+            try
+            {
+                await emailService.SendAsync(subject, fromEmail, fromName, recipient, body, attachments);
+                emailStatus = true;
+
+                Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error occurred when sending email with subject {subject} to {recipient} from {fromEmail}");
+                throw;
+            }
+            finally
+            {
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus);
+            }
+        }
+
+        public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<IFormFile>? attachments)
+        {
+            bool emailStatus = false;
+            var recipient = string.Empty;
+
+            try
+            {
+                recipient = await GetCustomerEmailById(customerId);
+
+                await emailService.SendAsync(subject, fromEmail, fromName, recipient, body, attachments);
+                emailStatus = true;
+
+                Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Error occurred when sending email with subject {subject} to {recipient} from {fromEmail}");
+                throw;
+            }
+            finally
+            {
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, customerId);
+            }
+        }
+
+        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, int customerId = 0)
+        {
+            try
+            {
+                EmailLog log = new EmailLog();
+
+                if (customerId > 0)
+                {
+                    log.CustomerId = customerId;
+                }
+
+                log.Subject = subject;
+                log.FromEmail = fromEmail;
+                log.Body = body;
+                log.Recipient = recipient;
+                log.Status = status ? EmailStatus.SENT : EmailStatus.NOTSENT;
+
+                await apiDbContext.EmailLogs!.AddAsync(log);
+                await apiDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error occurred when adding a email log entry.");
+            }
+        }
+
+        private async Task<string> GetCustomerEmailById(int customerId)
+        {
+            var customer = await apiDbContext.Customers!.FirstOrDefaultAsync(x => x.Id == customerId);
+
+            return customer!.Email;
+        }
+    }
+}

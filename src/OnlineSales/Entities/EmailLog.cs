@@ -1,4 +1,4 @@
-﻿// <copyright file="CustomerEmailLog.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="EmailLog.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -14,13 +14,12 @@ namespace OnlineSales.Entities
         SENT = 1,
     }
 
-    [Table("customer_email_log")]
-    public class CustomerEmailLog : BaseEntity
+    [Table("email_log")]
+    public class EmailLog : BaseEntity
     {
         /// <summary>
         /// Gets or sets reference to the CustomerEmailSchedule table.
         /// </summary>
-        [Required]
         public int ScheduleId { get; set; }
 
         [JsonIgnore]
@@ -28,14 +27,40 @@ namespace OnlineSales.Entities
         public CustomerEmailSchedule? Schedule { get; set; }
 
         /// <summary>
+        /// Gets or sets reference to the customer table.
+        /// </summary>
+        public int CustomerId { get; set; }
+
+        [JsonIgnore]
+        [ForeignKey("CustomerId")]
+        public virtual Customer? Customer { get; set; }
+
+        /// <summary>
         /// Gets or sets reference to the EmailTemplate table.
         /// </summary>
-        [Required]
         public int TemplateId { get; set; }
 
         [JsonIgnore]
         [ForeignKey("EmailTemplateId")]
         public EmailTemplate? Template { get; set; }
+
+        [Required]
+        public string Subject { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the email address of the email recipient.
+        /// </summary>
+        [Required]
+        public string Recipient { get; set; } = string.Empty;
+
+        [Required]
+        public string FromEmail { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the email body.
+        /// </summary>
+        [Required]
+        public string Body { get; set; } = string.Empty;
 
         public EmailStatus Status { get; set; }
     }

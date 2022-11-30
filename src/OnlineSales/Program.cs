@@ -60,6 +60,7 @@ public class Program
         ConfigureElasticsearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
+        ConfigureEmailServices(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -262,5 +263,12 @@ public class Program
                     });
             }
         });
+    }
+
+    private static void ConfigureEmailServices(WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<IEmailWithLogService, IEmailWithLogService>();
+
+        builder.Services.AddSingleton<IEmailFromTemplateService, IEmailFromTemplateService>();
     }
 }
