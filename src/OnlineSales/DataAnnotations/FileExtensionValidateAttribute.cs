@@ -26,11 +26,6 @@ namespace OnlineSales.DataAnnotations
                 var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
                 listOfExt = configuration.Value.Extensions;
             }
-            else if (type.Equals("EmailAttachment"))
-            {
-                var configuration = (IOptions<EmailAttachmentConfig>)validationContext!.GetService(typeof(IOptions<EmailAttachmentConfig>)) !;
-                listOfExt = configuration.Value.Extensions;
-            }
             else
             {
                 return new ValidationResult("Invalid request type (check annotation)");
@@ -40,7 +35,7 @@ namespace OnlineSales.DataAnnotations
 
             if (file == null)
             {
-                return ValidationResult.Success!;
+                return new ValidationResult("Invalid file");
             }
 
             string currentExt = Path.GetExtension(file.FileName.ToLower());

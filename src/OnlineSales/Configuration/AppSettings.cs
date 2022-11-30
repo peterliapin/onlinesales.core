@@ -57,15 +57,6 @@ public class ImagesConfig
     public string? CacheTime { get; set; }
 }
 
-public class EmailAttachmentConfig
-{
-    public string[] Extensions { get; set; } = new string[0];
-
-    public string? MaxSize { get; set; }
-
-    public string? CacheTime { get; set; }
-}
-
 public class CacheProfileSettings
 {
     public string Type { get; set; } = string.Empty;
