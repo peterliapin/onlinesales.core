@@ -60,6 +60,7 @@ public class Program
         ConfigureElasticsearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
+        ConfigureEmailAttachements(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -208,6 +209,16 @@ public class Program
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+    }
+
+    private static void ConfigureEmailAttachements(WebApplicationBuilder builder)
+    {
+        var emailAttachementConfig = builder.Configuration.GetSection("EmailAttachment");
+
+        if (emailAttachementConfig != null)
+        {
+            builder.Services.Configure<EmailAttachmentConfig>(emailAttachementConfig);
+        }
     }
 
     private static void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
