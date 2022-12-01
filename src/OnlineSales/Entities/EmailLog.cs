@@ -20,29 +20,17 @@ namespace OnlineSales.Entities
         /// <summary>
         /// Gets or sets reference to the CustomerEmailSchedule table.
         /// </summary>
-        public int ScheduleId { get; set; }
-
-        [JsonIgnore]
-        [ForeignKey("CustomerEmailScheduleId")]
-        public CustomerEmailSchedule? Schedule { get; set; }
+        public int? ScheduleId { get; set; }
 
         /// <summary>
         /// Gets or sets reference to the customer table.
         /// </summary>
-        public int CustomerId { get; set; }
-
-        [JsonIgnore]
-        [ForeignKey("CustomerId")]
-        public virtual Customer? Customer { get; set; }
+        public int? CustomerId { get; set; }
 
         /// <summary>
         /// Gets or sets reference to the EmailTemplate table.
         /// </summary>
-        public int TemplateId { get; set; }
-
-        [JsonIgnore]
-        [ForeignKey("EmailTemplateId")]
-        public EmailTemplate? Template { get; set; }
+        public int? TemplateId { get; set; }
 
         [Required]
         public string Subject { get; set; } = string.Empty;
