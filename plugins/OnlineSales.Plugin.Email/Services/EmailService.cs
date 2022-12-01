@@ -9,6 +9,7 @@ using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using OnlineSales.DTOs;
 using OnlineSales.Plugin.Email.Configuration;
 using OnlineSales.Plugin.Email.Exceptions;
 using Serilog;
@@ -29,7 +30,7 @@ public class EmailService : IEmailService
         }
     }
 
-    public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments)
+    public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<AttachmentDto>? attachments)
     {
         SmtpClient client = new ();
 
@@ -68,7 +69,7 @@ public class EmailService : IEmailService
         }
     }
 
-    private static async Task<MimeMessage> GenerateEmailBody(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments)
+    private static async Task<MimeMessage> GenerateEmailBody(string subject, string fromEmail, string fromName, string recipient, string body, List<AttachmentDto>? attachments)
     {
         MimeMessage message = new MimeMessage();
 
@@ -87,7 +88,7 @@ public class EmailService : IEmailService
         {
             foreach (var attachment in attachments)
             {
-                using (var stream = attachment.OpenReadStream())
+                using (var stream = new MemoryStream(attachment.File))
                 {
                     await emailBody.Attachments.AddAsync(attachment.FileName, stream);
                 }
