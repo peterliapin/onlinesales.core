@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
+using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
@@ -20,7 +21,7 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments, int templateId = 0)
+        public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<AttachmentDto>? attachments, int templateId = 0)
         {
             bool emailStatus = false;
 
@@ -42,7 +43,7 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<IFormFile>? attachments, int scheduleId = 0, int templateId = 0)
+        public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<AttachmentDto>? attachments, int scheduleId = 0, int templateId = 0)
         {
             bool emailStatus = false;
             var recipient = string.Empty;
