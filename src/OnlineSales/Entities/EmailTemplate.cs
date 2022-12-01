@@ -12,13 +12,22 @@ namespace OnlineSales.Entities
     public class EmailTemplate : BaseEntity
     {
         [Required]
-        public string Title { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public string Subject { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the HTML template body of the email.
         /// </summary>
         [Required]
-        public string Template { get; set; } = string.Empty;
+        public string BodyTemplate { get; set; } = string.Empty;
+
+        [Required]
+        public string FromEmail { get; set; } = string.Empty;
+
+        [Required]
+        public string FromName { get; set; } = string.Empty;
 
         [Required]
         public int GroupId { get; set; }

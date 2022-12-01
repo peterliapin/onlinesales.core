@@ -8,8 +8,8 @@ namespace OnlineSales.Entities;
 
 public enum TaskExecutionStatus
 {
-    PENDING = 0,
-    COMPLETED = 1,
+    Pending = 0,
+    Completed = 1,
 }
 
 [Table("task_execution_log")]

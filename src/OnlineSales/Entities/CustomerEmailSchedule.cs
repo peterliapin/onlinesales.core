@@ -10,8 +10,8 @@ namespace OnlineSales.Entities
 {
     public enum ScheduleStatus
     {
-        PENDING = 0,
-        COMPLETED = 1,
+        Pending = 0,
+        Completed = 1,
     }
 
     [Table("customer_email_schedule")]
