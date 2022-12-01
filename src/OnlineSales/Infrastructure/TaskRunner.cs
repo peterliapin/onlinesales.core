@@ -36,7 +36,7 @@ namespace OnlineSales.Infrastructure
 
                     var isCompleted = await task.Execute(currentJob);
 
-                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.COMPLETED : TaskExecutionStatus.PENDING);
+                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
                 }
             }
             catch (Exception ex)
@@ -48,7 +48,7 @@ namespace OnlineSales.Infrastructure
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
         {
             var pendingTask = await dbContext.TaskExecutionLogs!.
-                FirstOrDefaultAsync(taskLog => taskLog.Status == TaskExecutionStatus.PENDING && taskLog.TaskName == task.Name);
+                FirstOrDefaultAsync(taskLog => taskLog.Status == TaskExecutionStatus.Pending && taskLog.TaskName == task.Name);
 
             if (pendingTask is not null)
             {
@@ -59,7 +59,7 @@ namespace OnlineSales.Infrastructure
             {
                 TaskName = task.Name,
                 ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
-                Status = TaskExecutionStatus.PENDING,
+                Status = TaskExecutionStatus.Pending,
                 RetryCount = -1,
             };
 
@@ -74,7 +74,7 @@ namespace OnlineSales.Infrastructure
             job.Status = status;
             job.ActualExecutionTime = DateTime.UtcNow;
 
-            if (status == TaskExecutionStatus.PENDING)
+            if (status == TaskExecutionStatus.Pending)
             {
                 job.RetryCount = ++job.RetryCount;
             }

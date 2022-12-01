@@ -10,9 +10,9 @@ namespace OnlineSales.Entities;
 
 public enum CommentStatus
 {
-    NOTAPPROVED = 0,
-    APPROVED = 1,
-    SPAM = 2,
+    NotApproved = 0,
+    Approved = 1,
+    Spam = 2,
 }
 
 [Table("comment")]
@@ -27,7 +27,7 @@ public class Comment : BaseEntity
     public string Content { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public CommentStatus Approved { get; set; } = CommentStatus.NOTAPPROVED;
+    public CommentStatus Approved { get; set; } = CommentStatus.NotApproved;
 
     [Required]
     public int PostId { get; set; }

@@ -10,8 +10,8 @@ namespace OnlineSales.Entities
 {
     public enum EmailStatus
     {
-        NOTSENT = 0,
-        SENT = 1,
+        NotSent = 0,
+        Sent = 1,
     }
 
     [Table("email_log")]

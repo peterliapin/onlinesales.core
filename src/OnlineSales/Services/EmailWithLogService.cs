@@ -92,7 +92,7 @@ namespace OnlineSales.Services
                 log.FromEmail = fromEmail;
                 log.Body = body;
                 log.Recipient = recipient;
-                log.Status = status ? EmailStatus.SENT : EmailStatus.NOTSENT;
+                log.Status = status ? EmailStatus.Sent : EmailStatus.NotSent;
                 log.CreatedAt = DateTime.UtcNow;
 
                 await apiDbContext.EmailLogs!.AddAsync(log);
