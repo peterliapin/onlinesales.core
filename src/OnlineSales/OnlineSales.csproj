@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -25,6 +25,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageVersion>$(ReleaseVersion)</PackageVersion>
+    <Version>$(ReleaseVersion)</Version>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
