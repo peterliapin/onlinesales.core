@@ -12,6 +12,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
@@ -60,6 +61,7 @@ public class Program
         ConfigureElasticsearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
+        ConfigureEmailServices(builder);
         ConfigureEmailAttachements(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
@@ -273,5 +275,12 @@ public class Program
                     });
             }
         });
+    }
+
+    private static void ConfigureEmailServices(WebApplicationBuilder builder)
+    {
+        // builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
+
+        // builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
     }
 }
