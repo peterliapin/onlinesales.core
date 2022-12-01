@@ -50,18 +50,33 @@ namespace OnlineSales.Controllers
             using var fileStream = imageCreateDto.Image.OpenReadStream();
             byte[] imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
-
-            Image uploadedImage = new ()
+            
+            var scopeAndFileExists = from i in apiDbContext!.Images!
+                                     where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
+                                     select i;
+            if (scopeAndFileExists.Any())
             {
-                Name = incomingFileName,
-                Size = incomingFileSize,
-                Data = imageInBytes,
-                MimeType = incomingFileMimeType!,
-                ScopeUid = imageCreateDto.ScopeUid,
-                Extension = incomingFileExtension,
-            };
+                Image? uploadedImage = scopeAndFileExists!.FirstOrDefault();
+                uploadedImage!.Data = imageInBytes;
+                uploadedImage!.Size = incomingFileSize;
 
-            await apiDbContext.Images!.AddAsync(uploadedImage);
+                apiDbContext.Images!.Update(uploadedImage);
+            }
+            else
+            {
+                Image uploadedImage = new ()
+                {
+                    Name = incomingFileName,
+                    Size = incomingFileSize,
+                    Data = imageInBytes,
+                    MimeType = incomingFileMimeType!,
+                    ScopeUid = imageCreateDto.ScopeUid.Trim(),
+                    Extension = incomingFileExtension,
+                };
+
+                await apiDbContext.Images!.AddAsync(uploadedImage);
+            }
+
             await apiDbContext.SaveChangesAsync();
 
             Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
