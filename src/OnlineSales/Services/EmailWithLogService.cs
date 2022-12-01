@@ -83,6 +83,7 @@ namespace OnlineSales.Services
                 log.Body = body;
                 log.Recipient = recipient;
                 log.Status = status ? EmailStatus.SENT : EmailStatus.NOTSENT;
+                log.CreatedAt = DateTime.UtcNow;
 
                 await apiDbContext.EmailLogs!.AddAsync(log);
                 await apiDbContext.SaveChangesAsync();
