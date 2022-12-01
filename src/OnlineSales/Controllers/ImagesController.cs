@@ -5,7 +5,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -59,9 +58,9 @@ namespace OnlineSales.Controllers
             {
                 Image? uploadedImage = scopeAndFileExists!.FirstOrDefault();
                 uploadedImage!.Data = imageInBytes;
+                uploadedImage!.Size = incomingFileSize;
 
                 apiDbContext.Images!.Update(uploadedImage);
-                await apiDbContext.SaveChangesAsync();
             }
             else
             {
@@ -76,9 +75,10 @@ namespace OnlineSales.Controllers
                 };
 
                 await apiDbContext.Images!.AddAsync(uploadedImage);
-                await apiDbContext.SaveChangesAsync();
             }
-           
+
+            await apiDbContext.SaveChangesAsync();
+
             Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
             Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
 
