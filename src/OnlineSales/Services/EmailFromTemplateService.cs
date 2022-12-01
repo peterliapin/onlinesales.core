@@ -20,22 +20,22 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string templateName, string recipient, params object[] templateArguments)
+        public async Task SendAsync(string templateName, string recipient, Dictionary<string, string> templateArguments)
         {
             var template = await GetTemplateByName(templateName);
 
             var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
 
-            await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipient, updatedBodyTemplate, null);
+            await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipient, updatedBodyTemplate, null, template.Id);
         }
 
-        public async Task SendToCustomerAsync(int customerId, string templateName, params object[] templateArguments)
+        public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, int scheduleId = 0)
         {
             var template = await GetTemplateByName(templateName);
 
             var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
 
-            await emailWithLogService.SendToCustomerAsync(customerId, template.Subject, template.FromEmail, template.FromName, updatedBodyTemplate, null);
+            await emailWithLogService.SendToCustomerAsync(customerId, template.Subject, template.FromEmail, template.FromName, updatedBodyTemplate, null, scheduleId, template.Id);
         }
 
         private async Task<EmailTemplate> GetTemplateByName(string name)
@@ -45,13 +45,11 @@ namespace OnlineSales.Services
             return template!;
         }
 
-        private string GetUpdatedBodyTemplate(string bodyTemplate, params object[] templateArguments)
+        private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string> templateArguments)
         {
             foreach (var arg in templateArguments)
             {
-                KeyValuePair<string, string> replacement = (KeyValuePair<string, string>)arg;
-
-                bodyTemplate = bodyTemplate.Replace(replacement.Key, replacement.Value);
+                bodyTemplate = bodyTemplate.Replace(arg.Key, arg.Value);
             }
 
             return bodyTemplate;

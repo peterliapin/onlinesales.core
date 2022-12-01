@@ -20,7 +20,7 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments)
+        public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<IFormFile>? attachments, int templateId = 0)
         {
             bool emailStatus = false;
 
@@ -38,11 +38,11 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus);
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, templateId: templateId);
             }
         }
 
-        public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<IFormFile>? attachments)
+        public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<IFormFile>? attachments, int scheduleId = 0, int templateId = 0)
         {
             bool emailStatus = false;
             var recipient = string.Empty;
@@ -63,11 +63,11 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, customerId);
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, customerId, scheduleId, templateId);
             }
         }
 
-        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, int customerId = 0)
+        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, int customerId = 0, int scheduleId = 0, int templateId = 0)
         {
             try
             {
@@ -76,6 +76,16 @@ namespace OnlineSales.Services
                 if (customerId > 0)
                 {
                     log.CustomerId = customerId;
+                }
+
+                if (scheduleId > 0)
+                {
+                    log.ScheduleId = scheduleId;
+                }
+
+                if (templateId > 0)
+                {
+                    log.TemplateId = templateId;
                 }
 
                 log.Subject = subject;

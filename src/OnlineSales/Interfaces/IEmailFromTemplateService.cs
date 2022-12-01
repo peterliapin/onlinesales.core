@@ -6,7 +6,7 @@ namespace OnlineSales.Interfaces;
 
 public interface IEmailFromTemplateService
 {
-    Task SendAsync(string templateName, string recipient, params object[] templateArguments);
+    Task SendAsync(string templateName, string recipient, Dictionary<string, string> templateArguments);
 
-    Task SendToCustomerAsync(int customerId, string templateName, params object[] templateArguments);
+    Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, int scheduleId = 0);
 }
