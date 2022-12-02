@@ -72,6 +72,8 @@ public class Program
             options.ForwardedHeaders = ForwardedHeaders.All;
         });
 
+        ConfigureCORS(builder);
+
         app = builder.Build();
 
         app.UseForwardedHeaders();
@@ -90,6 +92,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
         app.UseStaticFiles();
+        app.UseCors();
         app.UseAuthorization();
         app.MapControllers();
 
@@ -271,5 +274,18 @@ public class Program
         // builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
 
         // builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
+    }
+    private static void ConfigureCORS(WebApplicationBuilder builder)
+    {
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
     }
 }
