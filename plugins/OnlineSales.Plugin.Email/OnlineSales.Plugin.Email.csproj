@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ReleaseVersion>1.0.10-pre</ReleaseVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -23,7 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
+    <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <Target Name="CleanPluginAssemblies" AfterTargets="Build">

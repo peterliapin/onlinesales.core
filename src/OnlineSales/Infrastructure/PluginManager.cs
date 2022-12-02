@@ -10,6 +10,38 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
 
+internal sealed class PluginLoadContext : AssemblyLoadContext
+{
+    private readonly AssemblyDependencyResolver resolver;
+
+    public PluginLoadContext(string pluginPath)
+    {
+        resolver = new AssemblyDependencyResolver(pluginPath.Replace('\\', Path.DirectorySeparatorChar));
+    }
+
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        var assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
+        if (assemblyPath != null)
+        {
+            return LoadFromAssemblyPath(assemblyPath);
+        }
+
+        return null!;
+    }
+
+    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+    {
+        var libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+        if (libraryPath != null)
+        {
+            return LoadUnmanagedDllFromPath(libraryPath);
+        }
+
+        return IntPtr.Zero;
+    }
+}
+
 public static class PluginManager
 {
     private static readonly string PluginsFolder = Path.Combine(AppContext.BaseDirectory, "plugins");
@@ -55,7 +87,7 @@ public static class PluginManager
             {
                 try
                 {
-                    var plugin = LoadPlugin(pluginInfo.FullName, pluginDirectory);                    
+                    var plugin = LoadPlugin(pluginInfo.FullName);                    
 
                     PluginList.Add(plugin);
 
@@ -73,25 +105,27 @@ public static class PluginManager
         }
     }
 
-    private static IPlugin LoadPlugin(string fullPluginDllPath, DirectoryInfo pluginDirectory)
+    private static IPlugin LoadPlugin(string fullPluginDllPath/*, DirectoryInfo pluginDirectory*/)
     {
         var fileName = Path.GetFileName(fullPluginDllPath);
 
-        AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
+        var loadContext = new PluginLoadContext(fullPluginDllPath);
+
+        /*loadContext.Resolving += (assemblyLoadContext, assemblyName) =>
         {
             var assembleFileInfo = pluginDirectory.GetFiles(assemblyName.Name + ".dll").FirstOrDefault();
 
             if (assembleFileInfo != null)
             {
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assembleFileInfo.FullName);
+                return assemblyLoadContext.LoadFromAssemblyPath(assembleFileInfo.FullName);
             }
             else
             {
                 return null;
             }
-        };
+        };*/
 
-        var asm = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPluginDllPath);
+        var asm = loadContext.LoadFromAssemblyPath(fullPluginDllPath);
         if (asm == null)
         {
             throw new InvalidProgramException($"Failed to load plugin '{fileName}'");
