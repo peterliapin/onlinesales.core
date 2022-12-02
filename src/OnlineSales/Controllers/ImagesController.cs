@@ -84,7 +84,7 @@ namespace OnlineSales.Controllers
 
             var fileData = new Dictionary<string, string>()
             {
-                { "location", $"{this.HttpContext.Request.Path}/{imageCreateDto.ScopeUid}/{incomingFileName}" },
+                { "location", $"{this.HttpContext.Request.Path}{imageCreateDto.ScopeUid}/{incomingFileName}" },
             };
             return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
