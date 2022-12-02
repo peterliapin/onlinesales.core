@@ -275,6 +275,7 @@ public class Program
 
         // builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
     }
+
     private static void ConfigureCORS(WebApplicationBuilder builder)
     {
         builder.Services.AddCors(options =>
