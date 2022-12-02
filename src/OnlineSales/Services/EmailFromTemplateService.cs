@@ -30,6 +30,17 @@ namespace OnlineSales.Services
             await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipient, updatedBodyTemplate, attachments, template.Id);
         }
 
+        public async Task SendAsync(string templateName, string[] recipients, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
+        {
+            string receipentsMerged = string.Join(";", recipients);
+
+            var template = await GetTemplateByName(templateName);
+
+            var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
+
+            await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, receipentsMerged, updatedBodyTemplate, attachments, template.Id);
+        }
+
         public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
         {
             var template = await GetTemplateByName(templateName);
