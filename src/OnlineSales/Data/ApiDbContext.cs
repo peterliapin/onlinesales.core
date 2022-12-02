@@ -57,7 +57,7 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<CustomerEmailSchedule>? CustomerEmailSchedules { get; set; }
 
-    public virtual DbSet<CustomerEmailLog>? CustomerEmailLogs { get; set; }
+    public virtual DbSet<EmailLog>? EmailLogs { get; set; }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {

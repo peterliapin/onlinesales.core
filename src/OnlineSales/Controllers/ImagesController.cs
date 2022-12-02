@@ -44,7 +44,7 @@ namespace OnlineSales.Controllers
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                return BadRequest("MIME of the file not identified.");
+                return BadRequest(new { message = "MIME of the file not identified." });
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
@@ -99,19 +99,19 @@ namespace OnlineSales.Controllers
         {
             if (scopeUid.IsNullOrWhiteSpace())
             {
-                return BadRequest("Scope is invalid");
+                return BadRequest(new { message = "Scope is invalid" });
             }
 
             if (fileName.IsNullOrWhiteSpace())
             {
-                return BadRequest("File Name is invalid");
+                return BadRequest(new { message = "File Name is invalid" });
             }
 
             var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
-                return BadRequest("Requested file not found");
+                return NotFound(new { message = "Requested file not found" });
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName); 
