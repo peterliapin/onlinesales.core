@@ -10,38 +10,6 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
 
-internal sealed class PluginLoadContext : AssemblyLoadContext
-{
-    private readonly AssemblyDependencyResolver resolver;
-
-    public PluginLoadContext(string pluginPath)
-    {
-        resolver = new AssemblyDependencyResolver(pluginPath.Replace('\\', Path.DirectorySeparatorChar));
-    }
-
-    protected override Assembly Load(AssemblyName assemblyName)
-    {
-        var assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
-        if (assemblyPath != null)
-        {
-            return LoadFromAssemblyPath(assemblyPath);
-        }
-
-        return null!;
-    }
-
-    protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-    {
-        var libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-        if (libraryPath != null)
-        {
-            return LoadUnmanagedDllFromPath(libraryPath);
-        }
-
-        return IntPtr.Zero;
-    }
-}
-
 public static class PluginManager
 {
     private static readonly string PluginsFolder = Path.Combine(AppContext.BaseDirectory, "plugins");
@@ -75,19 +43,14 @@ public static class PluginManager
             var pluginDllName = pluginDirectory.Name + ".dll";
 
             var pluginInfo = pluginDirectory.GetFiles(pluginDllName).FirstOrDefault();
-            var pluginSettingsInfo = pluginDirectory.GetFiles("pluginsettings.json").FirstOrDefault();
-
-            if (pluginSettingsInfo != null)
-            {
-                Log.Information("Loading plugin settings from {0}", pluginSettingsInfo.FullName);
-                configurationBuilder.AddJsonFile(pluginSettingsInfo.FullName);
-            }
-
             if (pluginInfo != null)
             {
                 try
                 {
-                    var plugin = LoadPlugin(pluginInfo.FullName);                    
+                    var plugin = LoadPlugin(pluginInfo.FullName);
+
+                    // we'll add plugin configuration json file to the configurationBuilder only if plugin has been loaded.
+                    MergePluginConfig(pluginDirectory, configurationBuilder);
 
                     PluginList.Add(plugin);
 
@@ -105,25 +68,11 @@ public static class PluginManager
         }
     }
 
-    private static IPlugin LoadPlugin(string fullPluginDllPath/*, DirectoryInfo pluginDirectory*/)
+    private static IPlugin LoadPlugin(string fullPluginDllPath)
     {
         var fileName = Path.GetFileName(fullPluginDllPath);
 
         var loadContext = new PluginLoadContext(fullPluginDllPath);
-
-        /*loadContext.Resolving += (assemblyLoadContext, assemblyName) =>
-        {
-            var assembleFileInfo = pluginDirectory.GetFiles(assemblyName.Name + ".dll").FirstOrDefault();
-
-            if (assembleFileInfo != null)
-            {
-                return assemblyLoadContext.LoadFromAssemblyPath(assembleFileInfo.FullName);
-            }
-            else
-            {
-                return null;
-            }
-        };*/
 
         var asm = loadContext.LoadFromAssemblyPath(fullPluginDllPath);
         if (asm == null)
@@ -144,5 +93,16 @@ public static class PluginManager
         }
 
         return entrypoint;
+    }
+
+    private static void MergePluginConfig(DirectoryInfo pluginDirectory, IConfigurationBuilder configurationBuilder)
+    {
+        var pluginSettingsInfo = pluginDirectory.GetFiles("pluginsettings.json").FirstOrDefault();
+
+        if (pluginSettingsInfo != null)
+        {
+            Log.Information($"Loading plugin settings from {pluginSettingsInfo.FullName}");
+            configurationBuilder.AddJsonFile(pluginSettingsInfo.FullName);
+        }
     }
 }
