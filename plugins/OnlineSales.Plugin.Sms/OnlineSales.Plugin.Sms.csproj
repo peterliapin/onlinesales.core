@@ -13,6 +13,7 @@
     <OutputPath>..\..\src\OnlineSales\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
+  
   <ItemGroup>
     <Content Include="pluginsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -23,16 +24,10 @@
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
-    <ClearPluginAssemblies Include="$(SolutionDir)\build\CleanPluginAssemblies\CleanPluginAssemblies.csproj" />
-    
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.100.24" />
     <PackageReference Include="libphonenumber-csharp" Version="8.13.1" />
+    <!-- Insert additional references above this line -->
   </ItemGroup>
-
-  <Target Name="CleanPluginAssemblies" AfterTargets="Build">
-    <!-- Delete unnecessary libraries from plugin build output folder -->
-    <MSBuild Projects="@(ClearPluginAssemblies)" Properties="PluginBuildOutputFolder=$(OutputPath);HostBuildOutputFolder=$(OutputPath)../../" Targets="CleanPluginAssemblies" />
-  </Target>
 </Project>
