@@ -43,19 +43,14 @@ public static class PluginManager
             var pluginDllName = pluginDirectory.Name + ".dll";
 
             var pluginInfo = pluginDirectory.GetFiles(pluginDllName).FirstOrDefault();
-            var pluginSettingsInfo = pluginDirectory.GetFiles("pluginsettings.json").FirstOrDefault();
-
-            if (pluginSettingsInfo != null)
-            {
-                Log.Information("Loading plugin settings from {0}", pluginSettingsInfo.FullName);
-                configurationBuilder.AddJsonFile(pluginSettingsInfo.FullName);
-            }
-
             if (pluginInfo != null)
             {
                 try
                 {
-                    var plugin = LoadPlugin(pluginInfo.FullName, pluginDirectory);                    
+                    var plugin = LoadPlugin(pluginInfo.FullName);
+
+                    // we'll add plugin configuration json file to the configurationBuilder only if plugin has been loaded.
+                    MergePluginConfig(pluginDirectory, configurationBuilder);
 
                     PluginList.Add(plugin);
 
@@ -73,25 +68,13 @@ public static class PluginManager
         }
     }
 
-    private static IPlugin LoadPlugin(string fullPluginDllPath, DirectoryInfo pluginDirectory)
+    private static IPlugin LoadPlugin(string fullPluginDllPath)
     {
         var fileName = Path.GetFileName(fullPluginDllPath);
 
-        AssemblyLoadContext.Default.Resolving += (assemblyLoadContext, assemblyName) =>
-        {
-            var assembleFileInfo = pluginDirectory.GetFiles(assemblyName.Name + ".dll").FirstOrDefault();
+        var loadContext = new PluginLoadContext(fullPluginDllPath);
 
-            if (assembleFileInfo != null)
-            {
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assembleFileInfo.FullName);
-            }
-            else
-            {
-                return null;
-            }
-        };
-
-        var asm = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullPluginDllPath);
+        var asm = loadContext.LoadFromAssemblyPath(fullPluginDllPath);
         if (asm == null)
         {
             throw new InvalidProgramException($"Failed to load plugin '{fileName}'");
@@ -110,5 +93,16 @@ public static class PluginManager
         }
 
         return entrypoint;
+    }
+
+    private static void MergePluginConfig(DirectoryInfo pluginDirectory, IConfigurationBuilder configurationBuilder)
+    {
+        var pluginSettingsInfo = pluginDirectory.GetFiles("pluginsettings.json").FirstOrDefault();
+
+        if (pluginSettingsInfo != null)
+        {
+            Log.Information($"Loading plugin settings from {pluginSettingsInfo.FullName}");
+            configurationBuilder.AddJsonFile(pluginSettingsInfo.FullName);
+        }
     }
 }
