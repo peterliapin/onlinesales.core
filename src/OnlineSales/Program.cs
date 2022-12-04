@@ -93,6 +93,11 @@ public class Program
         app.UseAuthorization();
         app.MapControllers();
 
+        app.UseSpa(spa =>
+        {
+            // works out of the box, no configuration required
+        });
+
         app.Run();
     }
 
