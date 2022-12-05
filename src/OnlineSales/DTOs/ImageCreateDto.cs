@@ -10,8 +10,8 @@ namespace OnlineSales.DTOs
     public class ImageCreateDto
     {
         [Required]
-        [FileSizeValidate("Image")]
-        [FileExtensionValidate("Image")]
+        [ImageExtension]
+        [ImageFileSize]
         public IFormFile? Image { get; set; }
 
         [Required]
