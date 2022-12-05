@@ -6,6 +6,8 @@ namespace OnlineSales.Interfaces
 {
     public interface IHttpContextHelper
     {
+        public HttpRequest Request { get; }
+
         public string? IpAddress { get;  }
 
         public string? UserAgent { get; }

@@ -16,7 +16,7 @@ namespace OnlineSales.Plugin.AzureAD;
 
 public class AzureADPlugin : IPlugin, ISwaggerConfigurator
 {
-    public void Configure(IServiceCollection services, IConfiguration configuration)
+    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 

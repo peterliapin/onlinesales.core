@@ -30,7 +30,7 @@ public class EmailService : IEmailService
         }
     }
 
-    public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<AttachmentDto>? attachments)
+    public async Task SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments)
     {
         SmtpClient client = new ();
 
@@ -40,7 +40,7 @@ public class EmailService : IEmailService
 
             await client.AuthenticateAsync(new NetworkCredential(pluginSettings.Email.UserName, pluginSettings.Email.Password));
 
-            await client.SendAsync(await GenerateEmailBody(subject, fromEmail, fromName, recipient, body, attachments));
+            await client.SendAsync(await GenerateEmailBody(subject, fromEmail, fromName, recipients, body, attachments));
         }
         catch (Exception exception)
         {
@@ -69,7 +69,7 @@ public class EmailService : IEmailService
         }
     }
 
-    private static async Task<MimeMessage> GenerateEmailBody(string subject, string fromEmail, string fromName, string recipient, string body, List<AttachmentDto>? attachments)
+    private static async Task<MimeMessage> GenerateEmailBody(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments)
     {
         MimeMessage message = new MimeMessage();
 
@@ -77,7 +77,10 @@ public class EmailService : IEmailService
 
         message.From.Add(new MailboxAddress(fromName, fromEmail));
 
-        message.To.Add(MailboxAddress.Parse(recipient));
+        foreach (var receipent in recipients)
+        {
+            message.To.Add(MailboxAddress.Parse(receipent)); 
+        }
 
         BodyBuilder emailBody = new ()
         {

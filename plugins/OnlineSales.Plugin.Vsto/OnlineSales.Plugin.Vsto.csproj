@@ -13,7 +13,6 @@
     <OutputPath>..\..\src\OnlineSales\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  
   <ItemGroup>
     <Content Include="pluginsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -25,9 +24,9 @@
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="1.25.10" />
-    <!-- Insert additional references above this line -->
+    <ItemGroup>
+    <Folder Include="Configuration\" />
+    <Folder Include="Entities\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 </Project>

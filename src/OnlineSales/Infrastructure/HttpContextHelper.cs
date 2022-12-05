@@ -16,6 +16,8 @@ namespace OnlineSales.Infrastructure
             this.httpContextAccessor = httpContextAccessor;
         }
 
+        public HttpRequest Request => this.httpContextAccessor?.HttpContext?.Request!;
+        
         public string? IpAddress
         {
             get

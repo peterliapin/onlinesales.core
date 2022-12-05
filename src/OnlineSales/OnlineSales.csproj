@@ -53,6 +53,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.18.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,11 +65,6 @@
     <Folder Include="Exceptions\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Microsoft.AspNetCore.OData" />
-    <None Remove="NSwag.Core" />
-    <None Remove="NSwag.AspNetCore" />
-  </ItemGroup>
   <ItemGroup>
     <None Update="README.md">
       <Pack>True</Pack>
