@@ -3,11 +3,11 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OnlineSales.Infrastructure;
+using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Configuration;
+using OnlineSales.Plugin.Vsto.Data;
 
 namespace OnlineSales.Plugin.Vsto;
 
@@ -23,6 +23,8 @@ public class VstoPlugin : IPlugin, IPluginApplication
         {
             Configuration = pluginConfig;
         }
+
+        services.AddScoped<PluginDbContextBase, PluginDbContext>();
     }
 
     public void ConfigureApplication(IApplicationBuilder application)
