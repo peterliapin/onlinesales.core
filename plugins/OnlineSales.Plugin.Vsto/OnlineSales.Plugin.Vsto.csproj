@@ -14,12 +14,19 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="pluginsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
+    <ItemGroup>
     <Folder Include="Configuration\" />
+    <Folder Include="Entities\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 </Project>
