@@ -280,14 +280,22 @@ public class Program
 
     private static void ConfigureCORS(WebApplicationBuilder builder)
     {
+        var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsSettings>();
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .AllowAnyOrigin()
                     .AllowAnyMethod()
                     .AllowAnyHeader();
+                if (corsSettings!.AllowedOrigins == "*")
+                {
+                    policy.AllowAnyOrigin();
+                }
+                else
+                {
+                    policy.WithOrigins(corsSettings.AllowedOrigins.Split(' '));
+                }
             });
         });
     }

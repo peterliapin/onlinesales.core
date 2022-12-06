@@ -74,3 +74,8 @@ public class AppSettings
 
     public SmtpServerConfig SmtpServer { get; set; } = new SmtpServerConfig();
 }
+
+public class CorsSettings
+{
+    public string AllowedOrigins { get; set; } = string.Empty;
+}
