@@ -11,5 +11,5 @@ namespace OnlineSales.Plugin.Vsto.Data;
 public class PluginDbContext : PluginDbContextBase
 {
     // Below is the line of code showcasing how a new entity could be added on the plugin level
-    public virtual DbSet<VstoUserVersion>? TestEntities { get; set; }
+    public virtual DbSet<VstoUserVersion>? VstoUserVersions { get; set; }
 }
