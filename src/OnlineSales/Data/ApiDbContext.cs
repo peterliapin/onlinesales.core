@@ -72,14 +72,14 @@ public class ApiDbContext : DbContext
             if (entityEntry.State == EntityState.Modified)
             {
                 ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).UpdatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
             }
 
             if (entityEntry.State == EntityState.Added)
             {
                 ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).CreatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
             }
         }
