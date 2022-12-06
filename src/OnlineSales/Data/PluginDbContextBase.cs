@@ -9,13 +9,20 @@ namespace OnlineSales.Data;
 
 public abstract class PluginDbContextBase : ApiDbContext
 {
+    protected virtual bool ExcludeBaseEntitiesFromMigrations => true;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var items = modelBuilder.Model.GetEntityTypes();
+        base.OnModelCreating(modelBuilder);
 
-        foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(ApiDbContext).Assembly))
+        if (ExcludeBaseEntitiesFromMigrations)
         {
-            item.SetIsTableExcludedFromMigrations(true);
+            var items = modelBuilder.Model.GetEntityTypes();
+
+            foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(ApiDbContext).Assembly))
+            {
+                item.SetIsTableExcludedFromMigrations(true);
+            }
         }
     }
 }
