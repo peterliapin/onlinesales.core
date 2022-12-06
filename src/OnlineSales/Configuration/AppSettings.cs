@@ -77,5 +77,5 @@ public class AppSettings
 
 public class CorsSettings
 {
-    public string AllowedOrigins { get; set; } = string.Empty;
+    public string[] AllowedOrigins { get; set; } = Array.Empty<string>();
 }

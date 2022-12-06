@@ -281,6 +281,16 @@ public class Program
     private static void ConfigureCORS(WebApplicationBuilder builder)
     {
         var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsSettings>();
+        if (corsSettings == null)
+        {
+            throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
+        }
+
+        if (!corsSettings.AllowedOrigins.Any())
+        {
+            throw new MissingConfigurationException("Specify CORS allowed domains (Use '*' to allow any ).");
+        }
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -288,13 +298,13 @@ public class Program
                 policy
                     .AllowAnyMethod()
                     .AllowAnyHeader();
-                if (corsSettings!.AllowedOrigins == "*")
+                if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
                 {
                     policy.AllowAnyOrigin();
                 }
                 else
                 {
-                    policy.WithOrigins(corsSettings.AllowedOrigins.Split(' '));
+                    policy.WithOrigins(corsSettings.AllowedOrigins);
                 }
             });
         });
