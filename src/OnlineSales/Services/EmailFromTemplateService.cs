@@ -21,13 +21,13 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string templateName, string recipient, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
+        public async Task SendAsync(string templateName, string[] recipients, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
         {
             var template = await GetTemplateByName(templateName);
 
             var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
 
-            await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipient, updatedBodyTemplate, attachments, template.Id);
+            await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipients, updatedBodyTemplate, attachments, template.Id);
         }
 
         public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)

@@ -13,7 +13,7 @@ namespace OnlineSales.Plugin.Email
     {
         public static PluginSettings Settings { get; private set; } = new PluginSettings();
 
-        public void Configure(IServiceCollection services, IConfiguration configuration)
+        public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             var pluginSettings = configuration.Get<PluginSettings>();
 

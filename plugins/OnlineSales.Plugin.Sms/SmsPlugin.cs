@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Plugin.Sms.Configuration;
@@ -13,7 +14,7 @@ public class SmsPlugin : IPlugin
 {
     public static PluginConfig Configuration { get; private set; } = new PluginConfig();
 
-    public void Configure(IServiceCollection services, IConfiguration configuration)
+    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         var pluginConfig = configuration.Get<PluginConfig>();
 

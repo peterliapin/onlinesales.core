@@ -45,7 +45,7 @@ public class Program
         });
 
         ConfigureLogs(builder);
-        ConfigurePlugins(builder);
+        PluginManager.Init(builder.Configuration);
 
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
         builder.Configuration.AddEnvironmentVariables();
@@ -93,6 +93,13 @@ public class Program
         app.UseAuthorization();
         app.MapControllers();
 
+        PluginManager.Init(app);
+
+        app.UseSpa(spa =>
+        {
+            // works out of the box, no configuration required
+        });
+
         app.Run();
     }
 
@@ -125,11 +132,6 @@ public class Program
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
             IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
         };
-    }
-
-    private static void ConfigurePlugins(WebApplicationBuilder builder)
-    {
-        PluginManager.Init(builder.Configuration);
     }
 
     private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
@@ -179,7 +181,7 @@ public class Program
         foreach (var plugin in PluginManager.GetPluginList())
         {
             controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();
-            plugin.Configure(builder.Services, builder.Configuration);
+            plugin.ConfigureServices(builder.Services, builder.Configuration);
         }
     }
 

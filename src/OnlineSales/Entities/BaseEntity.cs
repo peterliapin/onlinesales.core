@@ -22,7 +22,7 @@ public class BaseEntity
     public DateTime CreatedAt { get; set; }
 
     [JsonIgnore]
-    public string? CreatedByIP { get; set; } = string.Empty;
+    public string? CreatedByIp { get; set; } = string.Empty;
 
     [JsonIgnore]
     public string? CreatedByUserAgent { get; set; } = string.Empty;
@@ -30,7 +30,7 @@ public class BaseEntity
     public DateTime? UpdatedAt { get; set; }
 
     [JsonIgnore]
-    public string? UpdatedByIP { get; set; } = string.Empty;
+    public string? UpdatedByIp { get; set; } = string.Empty;
 
     [JsonIgnore]
     public string? UpdatedByUserAgent { get; set; } = string.Empty;

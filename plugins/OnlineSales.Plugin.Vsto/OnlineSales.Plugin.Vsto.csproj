@@ -13,8 +13,6 @@
     <OutputPath>..\..\src\OnlineSales\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <ItemGroup>
     <Content Include="pluginsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -26,9 +24,9 @@
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.100.29" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.1" />
-    <!-- Insert additional references above this line -->
+    <ItemGroup>
+    <Folder Include="Configuration\" />
+    <Folder Include="Entities\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 </Project>

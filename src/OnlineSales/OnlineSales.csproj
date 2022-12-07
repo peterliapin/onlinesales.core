@@ -7,7 +7,7 @@
     <RootNamespace>OnlineSales</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>98270385-43f2-4d3c-98d5-02d0d77fc2d9</UserSecretsId>
-    <ReleaseVersion>1.0.11-pre</ReleaseVersion>
+    <ReleaseVersion>1.0.14-pre</ReleaseVersion>
     <AssemblyName>OnlineSales</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>OnlineSales</PackageId>
@@ -53,6 +53,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.11" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.18.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,11 +65,6 @@
     <Folder Include="Exceptions\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Microsoft.AspNetCore.OData" />
-    <None Remove="NSwag.Core" />
-    <None Remove="NSwag.AspNetCore" />
-  </ItemGroup>
   <ItemGroup>
     <None Update="README.md">
       <Pack>True</Pack>

@@ -21,25 +21,27 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string subject, string fromEmail, string fromName, string recipient, string body, List<AttachmentDto>? attachments, int templateId = 0)
+        public async Task SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments, int templateId = 0)
         {
             bool emailStatus = false;
+            string emails = string.Join(";", recipients);
 
             try
             {
-                await emailService.SendAsync(subject, fromEmail, fromName, recipient, body, attachments);
+                await emailService.SendAsync(subject, fromEmail, fromName, recipients, body, attachments);
                 emailStatus = true;
 
-                Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");
+                Log.Information($"Email with subject {subject} sent to {recipients} from {fromEmail}");
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error occurred when sending email with subject {subject} to {recipient} from {fromEmail}");
+                Log.Error(ex, $"Error occurred when sending email with subject {subject} to {emails} from {fromEmail}");
+
                 throw;
             }
             finally
             {
-                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, templateId: templateId);
+                await AddEmailLogEntry(subject, fromEmail, body, emails, emailStatus, templateId: templateId);
             }
         }
 
@@ -52,7 +54,9 @@ namespace OnlineSales.Services
             {
                 recipient = await GetCustomerEmailById(customerId);
 
-                await emailService.SendAsync(subject, fromEmail, fromName, recipient, body, attachments);
+                string[] receipientCollection = new string[] { recipient };
+
+                await emailService.SendAsync(subject, fromEmail, fromName, receipientCollection, body, attachments);
                 emailStatus = true;
 
                 Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");

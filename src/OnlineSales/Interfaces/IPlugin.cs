@@ -6,6 +6,11 @@ namespace OnlineSales.Interfaces
 {
     public interface IPlugin
     {
-        public void Configure(IServiceCollection services, IConfiguration configuration);
+        public void ConfigureServices(IServiceCollection services, IConfiguration configuration);
+    }
+
+    public interface IPluginApplication
+    {
+        public void ConfigureApplication(IApplicationBuilder application);
     }
 }
