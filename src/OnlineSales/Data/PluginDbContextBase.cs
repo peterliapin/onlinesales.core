@@ -3,12 +3,37 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Entities;
+using OnlineSales.Exceptions;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
 
 public abstract class PluginDbContextBase : ApiDbContext
 {
+    protected PluginDbContextBase(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+        : base(options, configuration, httpContextHelper)
+    {
+    }
+
+    public static T GetPluginDbContext<T>(IServiceScope scope)
+        where T : PluginDbContextBase
+    {
+        var contexts = scope.ServiceProvider.GetServices<PluginDbContextBase>()
+                                .Where(s => s.GetType() == typeof(T));
+        if (contexts!.Count() > 1)
+        {
+            throw new PluginDbContextTooManyException(typeof(T));
+        }
+
+        var context = contexts.Cast<T>().FirstOrDefault();
+        if (context == null)
+        {
+            throw new PluginDbContextNotFoundException();
+        }
+
+        return context;
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var items = modelBuilder.Model.GetEntityTypes();

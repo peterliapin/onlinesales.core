@@ -13,6 +13,8 @@ namespace OnlineSales.Plugin.Vsto;
 
 public class VstoPlugin : IPlugin, IPluginApplication
 {
+    private IServiceCollection? services;
+
     public static PluginConfig Configuration { get; private set; } = new PluginConfig();
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
@@ -24,19 +26,21 @@ public class VstoPlugin : IPlugin, IPluginApplication
             Configuration = pluginConfig;
         }
 
-        services.AddScoped<PluginDbContextBase, PluginDbContext>();
+        this.services = services.AddScoped<PluginDbContextBase, PluginDbContext>();
     }
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
-        /* var httpContextHelper = application.ApplicationServices.GetRequiredService<HttpContextHelper>();
+        var httpContextHelper = application.ApplicationServices.GetRequiredService<IHttpContextHelper>();
 
+        var assemblyPath = typeof(PluginDbContext).Assembly.Location;
+        var pluginDirectory = Path.GetDirectoryName(assemblyPath);
         application.UseStaticFiles(new StaticFileOptions
         {
             RequestPath = Configuration.Vsto.RequestPath,
-            FileProvider = new VstoFileProvider(httpContextHelper),
+            FileProvider = new VstoFileProvider(Path.Combine(pluginDirectory!, Configuration.Vsto.LocalPath), httpContextHelper, services!),
             ServeUnknownFileTypes = true,
-        });*/
+        });
     }
 }
 

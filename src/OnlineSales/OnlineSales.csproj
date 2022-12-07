@@ -62,7 +62,6 @@
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Configuration\" />
-    <Folder Include="Exceptions\" />
   </ItemGroup>
 
   <ItemGroup>

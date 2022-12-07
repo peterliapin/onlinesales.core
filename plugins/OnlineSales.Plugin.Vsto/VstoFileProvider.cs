@@ -2,27 +2,34 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Net;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
+using OnlineSales.Data;
+using OnlineSales.Plugin.Vsto.Data;
 
 namespace OnlineSales.Plugin.Vsto;
 
-public enum VstoFileType
-{
-    Exe,
-    Vsto,
-    None,
-}
-
-public class VstoFileProvider : IFileProvider
+public sealed class VstoFileProvider : IFileProvider
 {
     private readonly string vstoRootPath;
     private readonly IHttpContextHelper httpContextHelper;
+    private readonly IServiceCollection services;
 
-    public VstoFileProvider(IHttpContextHelper httpContextHelper)
+    public VstoFileProvider(string vstoRootPath, IHttpContextHelper httpContextHelper, IServiceCollection services)
     {
-        vstoRootPath = System.IO.Directory.GetCurrentDirectory();
+        this.vstoRootPath = vstoRootPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
         this.httpContextHelper = httpContextHelper;
+        this.services = services;
+    }
+
+    private enum VstoFileType
+    {
+        None,
+        Exe,
+        Vsto,
     }
 
     public IDirectoryContents GetDirectoryContents(string subpath)
@@ -34,36 +41,24 @@ public class VstoFileProvider : IFileProvider
     {
         var result = new VstoFileInfo(vstoRootPath, subpath);
 
-        try
+        if (ParseContext(out var fileType, out var ipAddress, out var version, subpath))
         {
-            if (ParseContext(out var fileType, out var ipAdress, out var version, subpath))
+            using (var serviceProvider = services!.BuildServiceProvider())
             {
-                if (fileType == VstoFileType.Exe)
+                using (var scope = serviceProvider.CreateScope())
                 {
-                    if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(ipAdress))
+                    var db = PluginDbContextBase.GetPluginDbContext<PluginDbContext>(scope);
+
+                    if (fileType == VstoFileType.Exe)
                     {
-                       // db.WriteVstoExeDownload(ipAdress, version);
+                        HandleExeRequest(ipAddress, version, db!);
+                    }
+                    else if (fileType == VstoFileType.Vsto)
+                    {
+                        HandleManifestRequest(ipAddress, subpath, db!, ref result);
                     }
                 }
-                else if (fileType == VstoFileType.Vsto)
-                {
-                    // var stat = db.GetUserVersion(ipAdress);
-                    //  if (stat != null && stat.TTL > DateTime.Now && !string.IsNullOrEmpty(stat.Version))
-                    //  {
-                    //      var versionPath = BuildPath(stat, subpath);
-                    //      var versionFile = new VSTOFileInfo(_path, versionPath);
-                    //      if (versionFile.Exists)
-                    //      {
-                    //          db.MarkAsInstalled(stat);
-                    //          return versionFile;
-                    //      }
-                    //  }
-                }
             }
-        }
-        catch (Exception)
-        {
-            // nothing
         }
 
         return result.Exists ? result as IFileInfo : new NotFoundFileInfo(subpath);
@@ -74,34 +69,71 @@ public class VstoFileProvider : IFileProvider
         throw new NotImplementedException();
     }
 
-    private bool ParseContext(out VstoFileType fileType, out string ipAdress, out string version, string subpath)
+    private bool ParseContext(out VstoFileType fileType, out string ipAddress, out string version, string subpath)
     {
-        // var fileName = System.IO.Path.GetFileName(subpath).ToLower();
-        var result = false;
-
         if (!Enum.TryParse(System.IO.Path.GetExtension(subpath).Replace(".", string.Empty), true, out fileType))
         {
             fileType = VstoFileType.None;
         }
 
-        ipAdress = httpContextHelper.IpAddress!;
-        /* var request = httpContextHelper.Request!;
-
-        version = request!.Query["version"];
-
-        if (string.IsNullOrEmpty(version))
-        {
-            version = request?.Query["ver"];
-        }
-
-        if (string.IsNullOrEmpty(version))
-        {
-            version = request.Query["v"];
-        } */
-
+        ipAddress = httpContextHelper.IpAddress!;
         version = string.Empty;
 
-        return result;
+        if (fileType == VstoFileType.Exe)
+        {
+            var request = httpContextHelper.Request;
+
+            string[] verQuery = { "version", "ver", "v" };
+            foreach (var verVariant in verQuery)
+            {
+                StringValues? readVer = request.Query[verVariant];
+                if (!string.IsNullOrEmpty(readVer))
+                {
+                    version = readVer!;
+                    break;
+                }
+            }
+        }
+
+        return fileType != VstoFileType.None;
+    }
+
+    private void HandleExeRequest(string ipAddress, string version, PluginDbContext db)
+    {
+        if (!string.IsNullOrEmpty(ipAddress))
+        {
+            // let's forget if we have already provided any specified version to this client
+            var toDelete = db.VstoUserVersions!.Where(r => r.IpAddress == ipAddress).ToList();
+            if (toDelete.Any())
+            {
+                toDelete.ForEach(r => db.VstoUserVersions!.Remove(r));
+                db.SaveChanges();
+            }
+
+            // let's remember the required version if it is specified
+            if (!string.IsNullOrEmpty(version))
+            {
+                db.VstoUserVersions!.Add(new Entities.VstoUserVersion
+                {
+                    IpAddress = ipAddress,
+                    Version = version,
+                    ExpireDateTime = DateTime.UtcNow.AddDays(1),
+                });
+                db.SaveChanges();
+            }
+        }
+    }
+
+    private void HandleManifestRequest(string ipAddress, string subpath, PluginDbContext db, ref VstoFileInfo result)
+    {
+        var stat = db.VstoUserVersions!.Where(r => r.IpAddress == ipAddress).FirstOrDefault();
+        if (stat != null && stat.ExpireDateTime > DateTime.Now && !string.IsNullOrEmpty(stat.Version))
+        {
+            var versionPath = Path.Combine(
+                    "Application Files",
+                    Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_') + subpath);
+            result = new VstoFileInfo(vstoRootPath, versionPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+        }
     }
 }
 
