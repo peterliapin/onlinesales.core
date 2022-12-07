@@ -25,6 +25,12 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Post, PostUpdateDto>()            
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<EmailTemplateCreateDto, EmailTemplate>().ReverseMap();
+        CreateMap<EmailTemplateUpdateDto, EmailTemplate>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<EmailTemplate, EmailTemplateUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)
