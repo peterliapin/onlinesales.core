@@ -283,7 +283,7 @@ public class Program
         var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsSettings>();
         if (corsSettings == null)
         {
-            throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
+            throw new MissingConfigurationException("CORS configuraiton is mandatory.");
         }
 
         if (!corsSettings.AllowedOrigins.Any())
