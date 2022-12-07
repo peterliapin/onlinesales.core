@@ -280,7 +280,7 @@ public class Program
 
     private static void ConfigureCORS(WebApplicationBuilder builder)
     {
-        var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsSettings>();
+        var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsConfig>();
         if (corsSettings == null)
         {
             throw new MissingConfigurationException("CORS configuraiton is mandatory.");
