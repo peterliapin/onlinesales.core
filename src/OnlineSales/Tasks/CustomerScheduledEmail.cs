@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -89,13 +89,17 @@ public class CustomerScheduledEmail : ITask
                 break;
             }
 
-            var nextExecutionTime = GetNextExecutionTime(schedule.Schedule!.Schedule, schedule.Customer!.Timezone, retryDelay, lastEmailLog);
-            // check IsRightTimeToExecute()
-            bool executeNow = IsRightTimeToExecute(nextExecutionTime);
+            var nextExecutionTime = GetNextExecutionTime(schedule.Schedule!.Schedule, schedule.Customer!.Timezone!.Value, retryDelay, lastEmailLog);
 
-            if (executeNow)
+            if (nextExecutionTime is not null)
             {
-                await emailFromTemplateService.SendToCustomerAsync(schedule.CustomerId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                // check IsRightTimeToExecute()
+                bool executeNow = IsRightTimeToExecute(nextExecutionTime.Value);
+
+                if (executeNow)
+                {
+                    await emailFromTemplateService.SendToCustomerAsync(schedule.CustomerId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                }
             }
         }
 
@@ -120,7 +124,8 @@ public class CustomerScheduledEmail : ITask
 
     private Dictionary<string, string> GetTemplateArguments()
     {
-        throw new NotImplementedException();
+        // TODO: customer based template arguments
+        return new Dictionary<string, string> { { "Key", "Value" } };
     }
 
     private bool IsRightTimeToExecute(DateTime nextExecutionTime)
@@ -133,8 +138,52 @@ public class CustomerScheduledEmail : ITask
         return false;
     }
 
-    private DateTime GetNextExecutionTime(string schedule, int? timezone, int retryDelay, EmailLog lastEmailLog)
+    private DateTime? GetNextExecutionTime(string schedule, int timezone, int retryDelay, EmailLog lastEmailLog)
     {
-        throw new NotImplementedException();
+        Schedule? customerSchedule = JsonSerializer.Deserialize<Schedule>(schedule);
+        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + timezone;
+        var lastRunTime = lastEmailLog is null ? DateTime.UtcNow : lastEmailLog.CreatedAt;
+
+        // Evaluate CRON based schedule
+        if (!string.IsNullOrEmpty(customerSchedule!.Cron))
+        {
+            Quartz.CronExpression expression = new Quartz.CronExpression(customerSchedule.Cron);
+
+            var nextRunTimeForUser = expression.GetNextValidTimeAfter(lastRunTime.AddMinutes(-userToServerTimeZoneOffset));
+            var nextRunTime = nextRunTimeForUser!.Value.AddMinutes(userToServerTimeZoneOffset);
+
+            return DateTime.SpecifyKind(nextRunTime.DateTime.AddMinutes(retryDelay), DateTimeKind.Utc);
+        }
+        else
+        {
+            // Evaluate custom scheudle based on day and time.
+
+            var days = customerSchedule.Day!.Split(',').Select(int.Parse).ToArray();
+
+            foreach (var day in days)
+            {
+                var nextRunDate = lastRunTime.AddDays(day);
+                // Add given time in the schedule + user timezone adjustment.
+                var nextRunDateTime = DateOnly.FromDateTime(nextRunDate).ToDateTime(customerSchedule!.Time!.Value).AddMinutes(userToServerTimeZoneOffset + retryDelay);
+                // Check if already passed the schedule
+                if (DateTime.UtcNow > nextRunDateTime)
+                {
+                    continue;
+                }
+
+                return DateTime.SpecifyKind(nextRunDateTime, DateTimeKind.Utc);
+            }
+
+            return null;
+        }
     }
+}
+
+public class Schedule
+{
+    public string? Cron { get; set; } = string.Empty;
+
+    public string? Day { get; set; } = string.Empty;
+
+    public TimeOnly? Time { get; set; }
 }
