@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;

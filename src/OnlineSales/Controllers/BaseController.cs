@@ -65,7 +65,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<T>> Post([FromBody] TC value)
+        public virtual async Task<ActionResult<T>> Post([FromBody] TC value)
         {
             if (!ModelState.IsValid)
             {
@@ -91,7 +91,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
+        public virtual async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
         {
             try
             {

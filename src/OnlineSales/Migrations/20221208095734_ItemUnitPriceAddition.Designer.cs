@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221208095734_ItemUnitPriceAddition")]
+    partial class ItemUnitPriceAddition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -605,10 +608,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("Data")
                         .HasColumnType("jsonb")
                         .HasColumnName("data");
-
-                    b.Property<decimal>("ExchangeRateToPayOutCurrency")
-                        .HasColumnType("numeric")
-                        .HasColumnName("exchange_rate_to_pay_out_currency");
 
                     b.Property<string>("OrderNumber")
                         .HasColumnType("text")

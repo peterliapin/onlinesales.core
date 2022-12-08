@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
 
@@ -17,16 +18,23 @@ public class OrderItemCreateDto
     [Required]
     public string LicenseCode { get; set; } = string.Empty;
 
+    [Range(1, double.MaxValue, ErrorMessage = "Minimum unit price should be 1")]
     [Required]
-    public decimal Total { get; set; } = 0;
+    public decimal UnitPrice { get; set; } = 0;
 
+    [CurrencyCode]
     [Required]
     public string Currency { get; set; } = string.Empty;
 
+    [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
     [Required]
-    public decimal CurrencyTotal { get; set; } = 0;
+    public int Quantity { get; set; } = 1;
 
-    public int Quantity { get; set; }
+    [Range(1, double.MaxValue, ErrorMessage = "Exchange rate to pay out currency must be greater than 1")]
+    [Required]
+    public decimal ExchangeRateToPayOutCurrency { get; set; } = 1;
+
+    public string Data { get; set; } = string.Empty;
 }
 
 public class OrderItemUpdateDto
@@ -34,12 +42,11 @@ public class OrderItemUpdateDto
     public string ProductName { get; set; } = string.Empty;
 
     public string LicenseCode { get; set; } = string.Empty;
-    
-    public decimal Total { get; set; } = 0;
-   
-    public string Currency { get; set; } = string.Empty;
-    
-    public decimal CurrencyTotal { get; set; } = 0;
+
+    [Range(1, double.MaxValue, ErrorMessage = "Minimum unit price should be 1")]
+    public decimal UnitPrice { get; set; } = 0;
 
     public int Quantity { get; set; }
+
+    public string Data { get; set; } = string.Empty;
 }
