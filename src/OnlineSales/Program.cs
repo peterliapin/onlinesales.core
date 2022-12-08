@@ -72,6 +72,8 @@ public class Program
             options.ForwardedHeaders = ForwardedHeaders.All;
         });
 
+        ConfigureCORS(builder);
+
         app = builder.Build();
 
         app.UseForwardedHeaders();
@@ -90,6 +92,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
         app.UseStaticFiles();
+        app.UseCors();
         app.UseAuthorization();
         app.MapControllers();
 
@@ -273,5 +276,37 @@ public class Program
         // builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
 
         // builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
+    }
+
+    private static void ConfigureCORS(WebApplicationBuilder builder)
+    {
+        var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsConfig>();
+        if (corsSettings == null)
+        {
+            throw new MissingConfigurationException("CORS configuraiton is mandatory.");
+        }
+
+        if (!corsSettings.AllowedOrigins.Any())
+        {
+            throw new MissingConfigurationException("Specify CORS allowed domains (Use '*' to allow any ).");
+        }
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
+                {
+                    policy.AllowAnyOrigin();
+                }
+                else
+                {
+                    policy.WithOrigins(corsSettings.AllowedOrigins);
+                }
+            });
+        });
     }
 }
