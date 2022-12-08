@@ -10,8 +10,8 @@ using OnlineSales.Plugin.Vsto.Data;
 
 namespace OnlineSales.Plugin.Vsto.Migrations
 {
-    [DbContext(typeof(PluginDbContext))]
-    partial class PluginDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(VstoDbContext))]
+    partial class VstoDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

@@ -26,14 +26,14 @@ public class VstoPlugin : IPlugin, IPluginApplication
             Configuration = pluginConfig;
         }
 
-        this.services = services.AddScoped<PluginDbContextBase, PluginDbContext>();
+        this.services = services.AddScoped<PluginDbContextBase, VstoDbContext>();
     }
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
         var httpContextHelper = application.ApplicationServices.GetRequiredService<IHttpContextHelper>();
 
-        var assemblyPath = typeof(PluginDbContext).Assembly.Location;
+        var assemblyPath = typeof(VstoDbContext).Assembly.Location;
         var pluginDirectory = Path.GetDirectoryName(assemblyPath);
         application.UseStaticFiles(new StaticFileOptions
         {

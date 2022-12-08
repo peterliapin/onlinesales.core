@@ -47,7 +47,7 @@ public sealed class VstoFileProvider : IFileProvider
             {
                 using (var scope = serviceProvider.CreateScope())
                 {
-                    var db = PluginDbContextBase.GetPluginDbContext<PluginDbContext>(scope);
+                    var db = PluginDbContextBase.GetPluginDbContext<VstoDbContext>(scope);
 
                     if (fileType == VstoFileType.Exe)
                     {
@@ -98,7 +98,7 @@ public sealed class VstoFileProvider : IFileProvider
         return fileType != VstoFileType.None;
     }
 
-    private void HandleExeRequest(string ipAddress, string version, PluginDbContext db)
+    private void HandleExeRequest(string ipAddress, string version, VstoDbContext db)
     {
         if (!string.IsNullOrEmpty(ipAddress))
         {
@@ -124,7 +124,7 @@ public sealed class VstoFileProvider : IFileProvider
         }
     }
 
-    private void HandleManifestRequest(string ipAddress, string subpath, PluginDbContext db, ref VstoFileInfo result)
+    private void HandleManifestRequest(string ipAddress, string subpath, VstoDbContext db, ref VstoFileInfo result)
     {
         var stat = db.VstoUserVersions!.Where(r => r.IpAddress == ipAddress).FirstOrDefault();
         if (stat != null && stat.ExpireDateTime > DateTime.Now && !string.IsNullOrEmpty(stat.Version))
