@@ -114,7 +114,7 @@ public class CustomerScheduledEmail : ITask
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error occurred when executing customer scheduled task.");
+            Log.Error(ex, $"Error occurred when executing customer scheduled task in task runner {currentJob.Id}");
             return false;
         }
     }
