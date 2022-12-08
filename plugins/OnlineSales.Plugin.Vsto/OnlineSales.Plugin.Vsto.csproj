@@ -29,4 +29,13 @@
     <Folder Include="Configuration\" />
     <Folder Include="Entities\" />
   </ItemGroup>
+  <!-- This is necessary for 'dotnet ef' but it leads to an exception in app = builder.Build();
+  Perhaps, if we exclude 'runtime' (or something else) from <IncludeAssets> below, it will resolve the issue.
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  -->
 </Project>

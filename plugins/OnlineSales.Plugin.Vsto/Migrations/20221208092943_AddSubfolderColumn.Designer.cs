@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Plugin.Vsto.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Plugin.Vsto.Data;
 namespace OnlineSales.Plugin.Vsto.Migrations
 {
     [DbContext(typeof(VstoDbContext))]
-    partial class VstoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221208092943_AddSubfolderColumn")]
+    partial class AddSubfolderColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -10,6 +10,11 @@ namespace OnlineSales.Data;
 
 public abstract class PluginDbContextBase : ApiDbContext
 {
+    protected PluginDbContextBase()
+        : base()
+    {
+    }
+
     protected PluginDbContextBase(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
