@@ -3,6 +3,8 @@
 // </copyright>
 
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -38,79 +40,90 @@ public class CustomerScheduledEmail : ITask
 
     public async Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        // Load all the customers in CustomerEmailSchedule table by pending status
-        var schedules = dbContext.CustomerEmailSchedules!.Where(s => s.Status == ScheduleStatus.Pending);
-
-        foreach (var schedule in schedules)
+        try
         {
-            EmailTemplate? nextEmailTemplateToSend;
-            int retryDelay = 0;
+            // Load all the customer schedules in CustomerEmailSchedule table by pending status
+            var schedules = dbContext.CustomerEmailSchedules!
+                .Include(c => c.Schedule)
+                .Include(c => c.Customer)
+                .Where(s => s.Status == ScheduleStatus.Pending).ToList();
 
-            var lastEmailLog = dbContext.EmailLogs!.Where(
-                    e => e.ScheduleId == schedule.ScheduleId &&
-                    e.CustomerId == schedule.CustomerId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-
-            var lastEmailTempalte = dbContext.EmailTemplates!.Where(
-                    e => e.Id == lastEmailLog!.TemplateId).FirstOrDefault();
-
-            // Retry logic if the last email is not sent
-            if (lastEmailLog!.Status is EmailStatus.NotSent)
+            foreach (var schedule in schedules)
             {
-                var emailNotSentCount = dbContext.EmailLogs!.Where(
-                        e => e.ScheduleId == schedule.ScheduleId
-                        && e.CustomerId == schedule.CustomerId
-                        && e.TemplateId == lastEmailLog.TemplateId
-                        && e.Status == EmailStatus.NotSent).Count();
+                EmailTemplate? nextEmailTemplateToSend;
+                int retryDelay = 0;
 
-                // If all retry attempts completed, get the next email template to send.
-                if (emailNotSentCount > lastEmailTempalte!.RetryCount)
+                var lastEmailLog = dbContext.EmailLogs!.Where(
+                        e => e.ScheduleId == schedule.ScheduleId &&
+                        e.CustomerId == schedule.CustomerId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+
+                var lastEmailTempalte = lastEmailLog is not null ? dbContext.EmailTemplates!.Where(
+                        e => e.Id == lastEmailLog!.TemplateId).FirstOrDefault() : null;
+
+                // Retry logic if the last email is not sent
+                if (lastEmailLog is not null && lastEmailLog!.Status is EmailStatus.NotSent)
                 {
-                    nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTempalte);
+                    var emailNotSentCount = dbContext.EmailLogs!.Where(
+                            e => e.ScheduleId == schedule.ScheduleId
+                            && e.CustomerId == schedule.CustomerId
+                            && e.TemplateId == lastEmailLog.TemplateId
+                            && e.Status == EmailStatus.NotSent).Count();
+
+                    // If all retry attempts completed, get the next email template to send.
+                    if (emailNotSentCount > lastEmailTempalte!.RetryCount)
+                    {
+                        nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTempalte, schedule.Schedule!.GroupId);
+                    }
+                    else
+                    {
+                        // Retry attempt available. sending the same email template.
+                        nextEmailTemplateToSend = dbContext.EmailTemplates!.Where(t => t.Id == lastEmailTempalte.Id).FirstOrDefault();
+                        retryDelay = lastEmailTempalte!.RetryInterval;
+                    }
                 }
                 else
                 {
-                    // Retry attempt available. sending the same email template.
-                    nextEmailTemplateToSend = dbContext.EmailTemplates!.Where(t => t.Id == lastEmailTempalte.Id).FirstOrDefault();
-                    retryDelay = lastEmailTempalte!.RetryInterval;
+                    nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTempalte!, schedule.Schedule!.GroupId);
                 }
-            }
-            else
-            {
-                nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTempalte!);
-            }
 
-            // All emails in the schedule are sent for the given customer.
-            if (nextEmailTemplateToSend is null)
-            {
-                var customerSchedule = dbContext.CustomerEmailSchedules!.Where(c => c.Id == schedule.Id).FirstOrDefault();
-                customerSchedule!.Status = ScheduleStatus.Completed;
-                await dbContext.SaveChangesAsync();
-
-                break;
-            }
-
-            var nextExecutionTime = GetNextExecutionTime(schedule.Schedule!.Schedule, schedule.Customer!.Timezone!.Value, retryDelay, lastEmailLog);
-
-            if (nextExecutionTime is not null)
-            {
-                // check IsRightTimeToExecute()
-                bool executeNow = IsRightTimeToExecute(nextExecutionTime.Value);
-
-                if (executeNow)
+                // All emails in the schedule are sent for the given customer.
+                if (nextEmailTemplateToSend is null)
                 {
-                    await emailFromTemplateService.SendToCustomerAsync(schedule.CustomerId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                    var customerSchedule = dbContext.CustomerEmailSchedules!.Where(c => c.Id == schedule.Id).FirstOrDefault();
+                    customerSchedule!.Status = ScheduleStatus.Completed;
+                    await dbContext.SaveChangesAsync();
+
+                    break;
+                }
+
+                var nextExecutionTime = GetNextExecutionTime(schedule, retryDelay, lastEmailLog);
+
+                if (nextExecutionTime is not null)
+                {
+                    // check IsRightTimeToExecute()
+                    bool executeNow = IsRightTimeToExecute(nextExecutionTime.Value);
+
+                    if (executeNow)
+                    {
+                        await emailFromTemplateService.SendToCustomerAsync(schedule.CustomerId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                    }
                 }
             }
-        }
 
-        return true;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error occurred when executing customer scheduled task.");
+            return false;
+        }
     }
 
-    private EmailTemplate? GetNextEmailTemplateToSend(EmailTemplate lastEmailTempalte)
+    private EmailTemplate? GetNextEmailTemplateToSend(EmailTemplate lastEmailTempalte, int groupId)
     {
-        var emailsOfGroup = dbContext.EmailTemplates!.Where(t => t.GroupId == lastEmailTempalte!.GroupId).ToList();
+        var emailsOfGroup = dbContext.EmailTemplates!.Where(t => t.GroupId == groupId).OrderBy(t => t.Id).ToList();
 
-        var indexOfLastEmail = emailsOfGroup.IndexOf(lastEmailTempalte);
+        var indexOfLastEmail = lastEmailTempalte is not null ? emailsOfGroup.IndexOf(lastEmailTempalte) : -1;
 
         if (emailsOfGroup.Count == indexOfLastEmail + 1)
         {
@@ -138,11 +151,17 @@ public class CustomerScheduledEmail : ITask
         return false;
     }
 
-    private DateTime? GetNextExecutionTime(string schedule, int timezone, int retryDelay, EmailLog lastEmailLog)
+    private DateTime? GetNextExecutionTime(CustomerEmailSchedule schedule, int retryDelay, EmailLog? lastEmailLog)
     {
-        Schedule? customerSchedule = JsonSerializer.Deserialize<Schedule>(schedule);
-        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + timezone;
-        var lastRunTime = lastEmailLog is null ? DateTime.UtcNow : lastEmailLog.CreatedAt;
+        Schedule? customerSchedule = JsonSerializer.Deserialize<Schedule>(schedule.Schedule!.Schedule);
+        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + schedule.Customer!.Timezone!.Value;
+        var lastRunTime = lastEmailLog is null ? schedule.Customer!.CreatedAt : lastEmailLog.CreatedAt;
+
+        // If a retry scenario, adding the retry interval. No need to evaluate schedule.
+        if (retryDelay > 0)
+        {
+            return DateTime.SpecifyKind(lastRunTime.AddMinutes(retryDelay), DateTimeKind.Utc);
+        }
 
         // Evaluate CRON based schedule
         if (!string.IsNullOrEmpty(customerSchedule!.Cron))
@@ -152,7 +171,7 @@ public class CustomerScheduledEmail : ITask
             var nextRunTimeForUser = expression.GetNextValidTimeAfter(lastRunTime.AddMinutes(-userToServerTimeZoneOffset));
             var nextRunTime = nextRunTimeForUser!.Value.AddMinutes(userToServerTimeZoneOffset);
 
-            return DateTime.SpecifyKind(nextRunTime.DateTime.AddMinutes(retryDelay), DateTimeKind.Utc);
+            return DateTime.SpecifyKind(nextRunTime.DateTime, DateTimeKind.Utc);
         }
         else
         {
@@ -160,21 +179,17 @@ public class CustomerScheduledEmail : ITask
 
             var days = customerSchedule.Day!.Split(',').Select(int.Parse).ToArray();
 
-            foreach (var day in days)
-            {
-                var nextRunDate = lastRunTime.AddDays(day);
-                // Add given time in the schedule + user timezone adjustment.
-                var nextRunDateTime = DateOnly.FromDateTime(nextRunDate).ToDateTime(customerSchedule!.Time!.Value).AddMinutes(userToServerTimeZoneOffset + retryDelay);
-                // Check if already passed the schedule
-                if (DateTime.UtcNow > nextRunDateTime)
-                {
-                    continue;
-                }
+            var emailSentCount = dbContext.EmailLogs!.Where(
+                            e => e.ScheduleId == schedule.ScheduleId
+                            && e.CustomerId == schedule.CustomerId
+                            && e.Status == EmailStatus.Sent).Count();
 
-                return DateTime.SpecifyKind(nextRunDateTime, DateTimeKind.Utc);
-            }
+            // Skip the days already the mail is sent 
+            var nextRunDate = schedule.Customer!.CreatedAt.AddDays(days[emailSentCount]);
+            // Add given time in the schedule + user timezone adjustment.
+            var nextRunDateTime = DateOnly.FromDateTime(nextRunDate).ToDateTime(customerSchedule!.Time!.Value).AddMinutes(userToServerTimeZoneOffset);
 
-            return null;
+            return DateTime.SpecifyKind(nextRunDateTime, DateTimeKind.Utc);
         }
     }
 }
