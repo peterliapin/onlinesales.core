@@ -54,7 +54,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -74,7 +74,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -119,7 +119,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -164,7 +164,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -195,7 +195,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -223,7 +223,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -256,7 +256,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -273,7 +273,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -305,7 +305,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -348,7 +348,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -375,7 +375,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -400,7 +400,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -435,7 +435,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -475,7 +475,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -505,7 +505,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -546,7 +546,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -577,7 +577,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -631,7 +631,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -661,7 +661,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -704,7 +704,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -763,7 +763,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -805,7 +805,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -840,7 +840,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -868,7 +868,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 

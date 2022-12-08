@@ -75,7 +75,7 @@ namespace OnlineSales.Controllers
             var newValue = mapper.Map<T>(value);
 
             newValue.CreatedAt = DateTime.UtcNow;
-            newValue.CreatedByIP = GetClientIP();
+            newValue.CreatedByIp = GetClientIP();
             newValue.CreatedByUserAgent = GetUserAgent();
 
             var result = await dbSet.AddAsync(newValue);
@@ -112,7 +112,7 @@ namespace OnlineSales.Controllers
                 mapper.Map(value, existingEntity);
 
                 existingEntity.UpdatedAt = DateTime.UtcNow;
-                existingEntity.UpdatedByIP = GetClientIP();
+                existingEntity.UpdatedByIp = GetClientIP();
                 existingEntity.UpdatedByUserAgent = GetUserAgent();
 
                 await dbContext.SaveChangesAsync();

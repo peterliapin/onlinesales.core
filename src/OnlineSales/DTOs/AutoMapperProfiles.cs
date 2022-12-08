@@ -25,6 +25,18 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Post, PostUpdateDto>()            
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<OrderCreateDto, Order>().ReverseMap();
+        CreateMap<OrderUpdateDto, Order>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Order, OrderUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<OrderItemCreateDto, OrderItem>().ReverseMap();
+        CreateMap<OrderItemUpdateDto, OrderItem>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<OrderItem, OrderItemUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

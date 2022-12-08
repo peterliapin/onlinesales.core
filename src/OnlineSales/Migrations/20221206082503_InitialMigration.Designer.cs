@@ -12,8 +12,8 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20221129193139_RenameImagesTableToImage")]
-    partial class RenameImagesTableToImage
+    [Migration("20221206082503_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,7 +57,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -77,7 +77,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -122,7 +122,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -167,7 +167,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -185,71 +185,6 @@ namespace OnlineSales.Migrations
                     b.ToTable("customer", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int?>("CustomerEmailScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("customer_email_schedule_id");
-
-                    b.Property<int?>("EmailTemplateId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_template_id");
-
-                    b.Property<int>("ScheduleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("schedule_id");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
-
-                    b.Property<int>("TemplateId")
-                        .HasColumnType("integer")
-                        .HasColumnName("template_id");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIP")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_customer_email_log");
-
-                    b.HasIndex("CustomerEmailScheduleId")
-                        .HasDatabaseName("ix_customer_email_log_customer_email_schedule_id");
-
-                    b.HasIndex("EmailTemplateId")
-                        .HasDatabaseName("ix_customer_email_log_email_template_id");
-
-                    b.ToTable("customer_email_log", (string)null);
-                });
-
             modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
                 {
                     b.Property<int>("Id")
@@ -263,7 +198,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -291,7 +226,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -324,7 +259,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -341,7 +276,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -353,6 +288,81 @@ namespace OnlineSales.Migrations
                         .HasName("pk_email_group");
 
                     b.ToTable("email_group", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_email");
+
+                    b.Property<string>("Recipient")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recipient");
+
+                    b.Property<int?>("ScheduleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("schedule_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subject");
+
+                    b.Property<int?>("TemplateId")
+                        .HasColumnType("integer")
+                        .HasColumnName("template_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_email_log");
+
+                    b.ToTable("email_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
@@ -368,7 +378,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -393,7 +403,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -419,11 +429,16 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BodyTemplate")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body_template");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -435,25 +450,35 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("email_group_id");
 
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_email");
+
+                    b.Property<string>("FromName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_name");
+
                     b.Property<int>("GroupId")
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
 
-                    b.Property<string>("Template")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("template");
+                        .HasColumnName("name");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("title");
+                        .HasColumnName("subject");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -483,7 +508,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -524,7 +549,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -555,7 +580,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -609,7 +634,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -639,7 +664,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -682,7 +707,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -741,7 +766,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -783,7 +808,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -818,7 +843,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -846,7 +871,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -877,23 +902,6 @@ namespace OnlineSales.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailLog", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.CustomerEmailSchedule", "Schedule")
-                        .WithMany()
-                        .HasForeignKey("CustomerEmailScheduleId")
-                        .HasConstraintName("fk_customer_email_log_customer_email_schedule_customer_email_sch");
-
-                    b.HasOne("OnlineSales.Entities.EmailTemplate", "Template")
-                        .WithMany()
-                        .HasForeignKey("EmailTemplateId")
-                        .HasConstraintName("fk_customer_email_log_email_template_email_template_id");
-
-                    b.Navigation("Schedule");
-
-                    b.Navigation("Template");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
