@@ -15,9 +15,6 @@ namespace OnlineSales.Entities
         public string Name { get; set; } = string.Empty;
 
         [Required]
-        public string Language { get; set; } = string.Empty;
-
-        [Required]
         public string Subject { get; set; } = string.Empty;
 
         /// <summary>
@@ -38,6 +35,9 @@ namespace OnlineSales.Entities
         [JsonIgnore]
         [ForeignKey("EmailGroupId")]
         public virtual EmailGroup? Group { get; set; }
+
+        [Required]
+        public string Language { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets how many times an email should resend once sending failed.
