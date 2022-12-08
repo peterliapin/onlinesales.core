@@ -35,5 +35,8 @@ namespace OnlineSales.Entities
         [JsonIgnore]
         [ForeignKey("EmailGroupId")]
         public virtual EmailGroup? Group { get; set; }
+
+        [Required]
+        public string Language { get; set; } = string.Empty;
     }
 }
