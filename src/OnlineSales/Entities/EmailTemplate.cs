@@ -15,6 +15,9 @@ namespace OnlineSales.Entities
         public string Name { get; set; } = string.Empty;
 
         [Required]
+        public string Language { get; set; } = string.Empty;
+
+        [Required]
         public string Subject { get; set; } = string.Empty;
 
         /// <summary>
