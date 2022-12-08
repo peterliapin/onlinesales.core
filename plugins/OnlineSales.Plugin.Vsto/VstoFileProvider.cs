@@ -9,6 +9,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Data;
+using OnlineSales.Plugin.Vsto.Entities;
 
 namespace OnlineSales.Plugin.Vsto;
 
@@ -39,9 +40,11 @@ public sealed class VstoFileProvider : IFileProvider
 
     public IFileInfo GetFileInfo(string subpath)
     {
-        var result = new VstoFileInfo(vstoRootPath, subpath);
+        var result = new VstoFileInfo(
+            vstoRootPath,
+            subpath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
-        if (ParseContext(out var fileType, out var ipAddress, out var version, subpath))
+        if (ParseContext(out var fileType, out var ipAddress, out var version, out var subfolder, subpath))
         {
             using (var serviceProvider = services!.BuildServiceProvider())
             {
@@ -51,7 +54,7 @@ public sealed class VstoFileProvider : IFileProvider
 
                     if (fileType == VstoFileType.Exe)
                     {
-                        HandleExeRequest(ipAddress, version, db!);
+                        HandleExeRequest(ipAddress, version, subfolder, db!);
                     }
                     else if (fileType == VstoFileType.Vsto)
                     {
@@ -69,7 +72,7 @@ public sealed class VstoFileProvider : IFileProvider
         throw new NotImplementedException();
     }
 
-    private bool ParseContext(out VstoFileType fileType, out string ipAddress, out string version, string subpath)
+    private bool ParseContext(out VstoFileType fileType, out string ipAddress, out string version, out string subfolder, string subpath)
     {
         if (!Enum.TryParse(System.IO.Path.GetExtension(subpath).Replace(".", string.Empty), true, out fileType))
         {
@@ -78,9 +81,17 @@ public sealed class VstoFileProvider : IFileProvider
 
         ipAddress = httpContextHelper.IpAddress!;
         version = string.Empty;
+        subfolder = string.Empty;
 
         if (fileType == VstoFileType.Exe)
         {
+            // 'subpath' may starts from '/'. We do not need it in subfolder.
+            subfolder = Path.GetDirectoryName(subpath) ?? string.Empty;
+            if (subfolder[0] == Path.DirectorySeparatorChar)
+            {
+                subfolder = subfolder.Substring(1);
+            }
+
             var request = httpContextHelper.Request;
 
             string[] verQuery = { "version", "ver", "v" };
@@ -98,7 +109,7 @@ public sealed class VstoFileProvider : IFileProvider
         return fileType != VstoFileType.None;
     }
 
-    private void HandleExeRequest(string ipAddress, string version, VstoDbContext db)
+    private void HandleExeRequest(string ipAddress, string version, string subdir, VstoDbContext db)
     {
         if (!string.IsNullOrEmpty(ipAddress))
         {
@@ -111,13 +122,14 @@ public sealed class VstoFileProvider : IFileProvider
             }
 
             // let's remember the required version if it is specified
-            if (!string.IsNullOrEmpty(version))
+            if (!string.IsNullOrEmpty(version) || !string.IsNullOrEmpty(subdir))
             {
                 db.VstoUserVersions!.Add(new Entities.VstoUserVersion
                 {
                     IpAddress = ipAddress,
                     Version = version,
                     ExpireDateTime = DateTime.UtcNow.AddDays(1),
+                    Subfolder = subdir,
                 });
                 db.SaveChanges();
             }
@@ -127,13 +139,20 @@ public sealed class VstoFileProvider : IFileProvider
     private void HandleManifestRequest(string ipAddress, string subpath, VstoDbContext db, ref VstoFileInfo result)
     {
         var stat = db.VstoUserVersions!.Where(r => r.IpAddress == ipAddress).FirstOrDefault();
-        if (stat != null && stat.ExpireDateTime > DateTime.Now && !string.IsNullOrEmpty(stat.Version))
+        if (stat != null)
         {
-            var versionPath = Path.Combine(
-                    "Application Files",
-                    Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_') + subpath);
-            result = new VstoFileInfo(vstoRootPath, versionPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+            var manifestPath = stat.Subfolder;
+            if (!string.IsNullOrEmpty(stat.Version) && stat.ExpireDateTime > DateTime.Now)
+            {
+                manifestPath = Path.Join(
+                    manifestPath,
+                    Path.Join(
+                        "Application Files",
+                        Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')));
+            }
+
+            manifestPath = Path.Join(manifestPath, subpath);
+            result = new VstoFileInfo(vstoRootPath, manifestPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
         }
     }
 }
-
