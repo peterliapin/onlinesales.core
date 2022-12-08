@@ -18,7 +18,7 @@ public class TestPostCreateDto : PostCreateDto
         Content = "This is a sample Content";
         CoverImageUrl = "This is a sample Cover";
         CoverImageAlt = "This is a sample Cover alt";
-        Lang = "en-US";
+        Language = "en-US";
         Categories = "This is Categories";
         Tags = "Sample Tags";
         AllowComments = true;
