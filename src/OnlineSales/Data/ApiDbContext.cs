@@ -21,11 +21,23 @@ public class ApiDbContext : DbContext
     /// </summary>
     public ApiDbContext()
     {
-        this.configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", false)
-            .AddEnvironmentVariables()
-            .AddUserSecrets(typeof(Program).Assembly)
-            .Build();
+        try
+        {
+            Console.WriteLine("Initializing ApiDbContext...");
+
+            this.configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", false)
+                .AddEnvironmentVariables()
+                .AddUserSecrets(typeof(Program).Assembly)
+                .Build();
+
+            Console.WriteLine("ApiDbContext initialized");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to create ApiDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
+            throw;
+        }
     }
 
     public ApiDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
@@ -72,14 +84,14 @@ public class ApiDbContext : DbContext
             if (entityEntry.State == EntityState.Modified)
             {
                 ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).UpdatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
             }
 
             if (entityEntry.State == EntityState.Added)
             {
                 ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).CreatedByIP = httpContextHelper!.IpAddress;
+                ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
             }
         }
@@ -89,16 +101,28 @@ public class ApiDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-        if (postgresConfig == null)
+        try
         {
-            throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
-        }
+            Console.WriteLine("Configuring ApiDbContext...");
 
-        optionsBuilder.UseNpgsql(
-            postgresConfig.ConnectionString,
-            b => b.MigrationsHistoryTable("_migrations"))
-        .UseSnakeCaseNamingConvention();
+            var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+            if (postgresConfig == null)
+            {
+                throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
+            }
+
+            optionsBuilder.UseNpgsql(
+                postgresConfig.ConnectionString,
+                b => b.MigrationsHistoryTable("_migrations"))
+            .UseSnakeCaseNamingConvention();
+
+            Console.WriteLine("ApiDbContext successfully configured");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to configure ApiDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
+            throw;
+        }
     }
 }

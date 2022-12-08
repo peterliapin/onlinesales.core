@@ -46,7 +46,7 @@ public class Program
         });
 
         ConfigureLogs(builder);
-        ConfigurePlugins(builder);
+        PluginManager.Init(builder.Configuration);
 
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
         builder.Configuration.AddEnvironmentVariables();
@@ -74,6 +74,8 @@ public class Program
             options.ForwardedHeaders = ForwardedHeaders.All;
         });
 
+        ConfigureCORS(builder);
+
         app = builder.Build();
 
         app.UseForwardedHeaders();
@@ -92,8 +94,11 @@ public class Program
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
         app.UseStaticFiles();
+        app.UseCors();
         app.UseAuthorization();
         app.MapControllers();
+
+        PluginManager.Init(app);
 
         app.UseSpa(spa =>
         {
@@ -132,11 +137,6 @@ public class Program
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
             IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
         };
-    }
-
-    private static void ConfigurePlugins(WebApplicationBuilder builder)
-    {
-        PluginManager.Init(builder.Configuration);
     }
 
     private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
@@ -186,7 +186,7 @@ public class Program
         foreach (var plugin in PluginManager.GetPluginList())
         {
             controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();
-            plugin.Configure(builder.Services, builder.Configuration);
+            plugin.ConfigureServices(builder.Services, builder.Configuration);
         }
     }
 
@@ -283,5 +283,37 @@ public class Program
     private static void ConfigureTasks(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<ITask, CustomerScheduledEmail>();
+    }
+
+    private static void ConfigureCORS(WebApplicationBuilder builder)
+    {
+        var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsConfig>();
+        if (corsSettings == null)
+        {
+            throw new MissingConfigurationException("CORS configuraiton is mandatory.");
+        }
+
+        if (!corsSettings.AllowedOrigins.Any())
+        {
+            throw new MissingConfigurationException("Specify CORS allowed domains (Use '*' to allow any ).");
+        }
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
+                {
+                    policy.AllowAnyOrigin();
+                }
+                else
+                {
+                    policy.WithOrigins(corsSettings.AllowedOrigins);
+                }
+            });
+        });
     }
 }

@@ -31,6 +31,18 @@ public static class PluginManager
         }
     }
 
+    public static void Init(IApplicationBuilder application)
+    {
+        var applicationPlugins = from plugin in PluginList
+                                 where plugin is IPluginApplication
+                                 select plugin as IPluginApplication;
+
+        foreach (var appPlugin in applicationPlugins)
+        {
+            appPlugin.ConfigureApplication(application);
+        }
+    }
+
     public static List<IPlugin> GetPluginList()
     {
         return PluginList;
