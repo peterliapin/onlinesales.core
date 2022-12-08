@@ -62,7 +62,33 @@ namespace OnlineSales.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "images",
+                name: "email_log",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    scheduleid = table.Column<int>(name: "schedule_id", type: "integer", nullable: true),
+                    customerid = table.Column<int>(name: "customer_id", type: "integer", nullable: true),
+                    templateid = table.Column<int>(name: "template_id", type: "integer", nullable: true),
+                    subject = table.Column<string>(type: "text", nullable: false),
+                    recipient = table.Column<string>(type: "text", nullable: false),
+                    fromemail = table.Column<string>(name: "from_email", type: "text", nullable: false),
+                    body = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
+                    createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
+                    createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
+                    updatedat = table.Column<DateTime>(name: "updated_at", type: "timestamp with time zone", nullable: true),
+                    updatedbyip = table.Column<string>(name: "updated_by_ip", type: "text", nullable: true),
+                    updatedbyuseragent = table.Column<string>(name: "updated_by_user_agent", type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_email_log", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "image",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -82,7 +108,7 @@ namespace OnlineSales.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_images", x => x.id);
+                    table.PrimaryKey("pk_image", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -206,8 +232,11 @@ namespace OnlineSales.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    title = table.Column<string>(type: "text", nullable: false),
-                    template = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    subject = table.Column<string>(type: "text", nullable: false),
+                    bodytemplate = table.Column<string>(name: "body_template", type: "text", nullable: false),
+                    fromemail = table.Column<string>(name: "from_email", type: "text", nullable: false),
+                    fromname = table.Column<string>(name: "from_name", type: "text", nullable: false),
                     groupid = table.Column<int>(name: "group_id", type: "integer", nullable: false),
                     emailgroupid = table.Column<int>(name: "email_group_id", type: "integer", nullable: true),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
@@ -326,39 +355,6 @@ namespace OnlineSales.Migrations
                         principalColumn: "id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "customer_email_log",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    scheduleid = table.Column<int>(name: "schedule_id", type: "integer", nullable: false),
-                    customeremailscheduleid = table.Column<int>(name: "customer_email_schedule_id", type: "integer", nullable: true),
-                    templateid = table.Column<int>(name: "template_id", type: "integer", nullable: false),
-                    emailtemplateid = table.Column<int>(name: "email_template_id", type: "integer", nullable: true),
-                    status = table.Column<int>(type: "integer", nullable: false),
-                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
-                    createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
-                    createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
-                    updatedat = table.Column<DateTime>(name: "updated_at", type: "timestamp with time zone", nullable: true),
-                    updatedbyip = table.Column<string>(name: "updated_by_ip", type: "text", nullable: true),
-                    updatedbyuseragent = table.Column<string>(name: "updated_by_user_agent", type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_customer_email_log", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_customer_email_log_customer_email_schedule_customer_email_sch",
-                        column: x => x.customeremailscheduleid,
-                        principalTable: "customer_email_schedule",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "fk_customer_email_log_email_template_email_template_id",
-                        column: x => x.emailtemplateid,
-                        principalTable: "email_template",
-                        principalColumn: "id");
-                });
-
             migrationBuilder.CreateIndex(
                 name: "ix_comment_parent_id",
                 table: "comment",
@@ -368,16 +364,6 @@ namespace OnlineSales.Migrations
                 name: "ix_comment_post_id",
                 table: "comment",
                 column: "post_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_customer_email_log_customer_email_schedule_id",
-                table: "customer_email_log",
-                column: "customer_email_schedule_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_customer_email_log_email_template_id",
-                table: "customer_email_log",
-                column: "email_template_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_customer_email_schedule_customer_id",
@@ -417,10 +403,16 @@ namespace OnlineSales.Migrations
                 name: "comment");
 
             migrationBuilder.DropTable(
-                name: "customer_email_log");
+                name: "customer_email_schedule");
 
             migrationBuilder.DropTable(
-                name: "images");
+                name: "email_log");
+
+            migrationBuilder.DropTable(
+                name: "email_template");
+
+            migrationBuilder.DropTable(
+                name: "image");
 
             migrationBuilder.DropTable(
                 name: "order_item");
@@ -432,22 +424,16 @@ namespace OnlineSales.Migrations
                 name: "post");
 
             migrationBuilder.DropTable(
-                name: "customer_email_schedule");
-
-            migrationBuilder.DropTable(
-                name: "email_template");
+                name: "email_schedule");
 
             migrationBuilder.DropTable(
                 name: "order");
 
             migrationBuilder.DropTable(
-                name: "email_schedule");
+                name: "email_group");
 
             migrationBuilder.DropTable(
                 name: "customer");
-
-            migrationBuilder.DropTable(
-                name: "email_group");
         }
     }
 }
