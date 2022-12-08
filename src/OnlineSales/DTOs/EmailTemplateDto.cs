@@ -30,15 +30,15 @@ public class EmailTemplateCreateDto
 
 public class EmailTemplateUpdateDto
 {
-    public string? Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
 
-    public string? Subject { get; set; } = string.Empty;
+    public string? Subject { get; set; }
 
-    public string? BodyTemplate { get; set; } = string.Empty;
+    public string? BodyTemplate { get; set; }
 
-    public string? FromEmail { get; set; } = string.Empty;
+    public string? FromEmail { get; set; }
 
-    public string? FromName { get; set; } = string.Empty;
+    public string? FromName { get; set; }
 
     public int? GroupId { get; set; }
 }
