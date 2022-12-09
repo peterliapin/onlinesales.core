@@ -17,3 +17,13 @@ public class TestOrderItem : OrderItemCreateDto
         UnitPrice = 1;
     }
 }
+
+public class TestOrderItemUpdate : OrderItemUpdateDto
+{
+    public TestOrderItemUpdate()
+    {
+        LicenseCode = "LicenseCode";
+        ProductName = "ProductName";
+        UnitPrice = 1;
+    }
+}
