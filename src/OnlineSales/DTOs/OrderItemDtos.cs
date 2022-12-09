@@ -39,13 +39,18 @@ public class OrderItemCreateDto
 
 public class OrderItemUpdateDto
 {
+    [Required]
     public string ProductName { get; set; } = string.Empty;
 
+    [Required]
     public string LicenseCode { get; set; } = string.Empty;
 
     [Range(1, double.MaxValue, ErrorMessage = "Minimum unit price should be 1")]
+    [Required]
     public decimal UnitPrice { get; set; } = 0;
 
+    [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
+    [Required]
     public int Quantity { get; set; }
 
     public string Data { get; set; } = string.Empty;

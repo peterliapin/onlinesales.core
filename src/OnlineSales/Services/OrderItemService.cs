@@ -50,6 +50,7 @@ namespace OnlineSales.Services
 
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
+                order.Quantity = totals.quantity;
 
                 if (!string.IsNullOrEmpty(orderItemCreateDto.Data))
                 {
@@ -87,6 +88,7 @@ namespace OnlineSales.Services
 
                 orderItemExist.CurrencyTotal = 0;
                 orderItemExist.Total = 0;
+                orderItemExist.Quantity = 0;
 
                 var totals = CalculateTotalsForOrder(orderItemExist!);
 
@@ -129,6 +131,7 @@ namespace OnlineSales.Services
 
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
+                order.Quantity = totals.quantity;
 
                 if (!string.IsNullOrEmpty(orderItemUpdateDto.Data))
                 {
@@ -154,10 +157,12 @@ namespace OnlineSales.Services
             return orderItem.CurrencyTotal * exchangeRate;
         }
 
-        private (decimal currencyTotal, decimal total) CalculateTotalsForOrder(OrderItem orderItem, int patchId = 0)
+        private (decimal currencyTotal, decimal total, int quantity) CalculateTotalsForOrder(OrderItem orderItem, int patchId = 0)
         {
             decimal currencyTotal = 0;
             decimal total = 0;
+            int quantity = 0;
+
             List<OrderItem> orderItems;
 
             if (patchId == 0)
@@ -171,11 +176,13 @@ namespace OnlineSales.Services
 
             currencyTotal = orderItems.Sum(t => t.CurrencyTotal);
             total = orderItems.Sum(t => t.Total);
+            quantity = orderItems.Sum(t => t.Quantity);
 
             currencyTotal += orderItem.CurrencyTotal;
             total += orderItem.Total;
+            quantity += orderItem.Quantity;
 
-            return (currencyTotal, total);
+            return (currencyTotal, total, quantity);
         }
     }
 }
