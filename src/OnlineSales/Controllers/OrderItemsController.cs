@@ -55,7 +55,7 @@ namespace OnlineSales.Controllers
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
