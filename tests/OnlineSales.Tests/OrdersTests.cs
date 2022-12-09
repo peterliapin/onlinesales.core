@@ -8,6 +8,7 @@ using System.Security.Policy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Namotion.Reflection;
+using NJsonSchema.Validation;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -106,6 +107,29 @@ public class OrdersTests : BaseTest
             {
                 (updatedOrder.Quantity == sumQuantity + 999).Should().BeTrue();
             }
+        }
+    }
+
+    [Fact]
+    public async Task OrderItemTotalTest()
+    {
+        var order = AddOrder();
+
+        var random = new Random();
+        var orderItem = new TestOrderItem();
+        orderItem.Quantity = random.Next(1, 1000);
+        orderItem.OrderId = order.Item1;
+        orderItem.UnitPrice = new decimal(random.NextDouble() + 1.0);
+        orderItem.ExchangeRateToPayOutCurrency = new decimal(random.NextDouble() + 1.0);
+        var orderItemUrl = await PostTest(UrlOrderItems, orderItem);
+
+        var addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
+        addedOrderItem.Should().NotBeNull();
+
+        if (addedOrderItem != null)
+        {
+            addedOrderItem.CurrencyTotal.Should().Be(orderItem.Quantity * orderItem.UnitPrice);
+            addedOrderItem.Total.Should().Be(addedOrderItem.CurrencyTotal * orderItem.ExchangeRateToPayOutCurrency);
         }
     }
 
