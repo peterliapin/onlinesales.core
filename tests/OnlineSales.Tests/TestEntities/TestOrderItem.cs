@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -15,6 +16,7 @@ public class TestOrderItem : OrderItemCreateDto
         LicenseCode = "LicenseCode";
         ProductName = "ProductName";
         UnitPrice = 1;
+        Quantity = 1;
     }
 }
 
@@ -27,4 +29,16 @@ public class TestOrderItemUpdate : OrderItemUpdateDto
         Quantity = 1;
         UnitPrice = 1;
     }
+}
+
+public class TestOrderItemUpdateWithTotal : TestOrderItemUpdate
+{
+    [Required]
+    public decimal Total { get; set; } = 0;
+}
+
+public class TestOrderItemUpdateWithCurrencyTotal : TestOrderItemUpdate
+{
+    [Required]
+    public decimal CurrencyTotal { get; set; } = 0;
 }

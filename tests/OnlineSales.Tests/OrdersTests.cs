@@ -71,7 +71,7 @@ public class OrdersTests : BaseTest
     [Fact]
     public async Task OrderQuantityTest()
     {
-        var order = AddOrder();
+        var order = await AddOrder();
 
         int numberOfOrderItems = 10;
 
@@ -115,7 +115,7 @@ public class OrdersTests : BaseTest
     [Fact]
     public async Task OrderTotalTest()
     {
-        var order = AddOrder();
+        var order = await AddOrder();
 
         int numberOfOrderItems = 10;
 
@@ -183,7 +183,7 @@ public class OrdersTests : BaseTest
     [Fact]
     public async Task OrderItemTotalTest()
     {
-        var order = AddOrder();
+        var order = await AddOrder();
 
         var random = new Random();
         var orderItem = new TestOrderItem();
@@ -232,6 +232,86 @@ public class OrdersTests : BaseTest
         await CompareItems();
     }
 
+    [Fact]
+    public async Task FailedOrderItemUpdate()
+    {
+        var order = await AddOrder();
+
+        var orderItem = new TestOrderItem();
+        orderItem.OrderId = order.Item1;
+        var orderItemUrl = await PostTest(UrlOrderItems, orderItem);
+
+        var addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
+        addedOrderItem.Should().NotBeNull();
+
+        if (addedOrderItem != null)
+        {
+            var updateOrderItemT = new TestOrderItemUpdateWithTotal();
+            updateOrderItemT.Total = addedOrderItem.Total + new decimal(1.0);
+            await Patch(orderItemUrl, updateOrderItemT);
+            var updatedOrderItem = await GetTest<OrderItem>(orderItemUrl);
+            updatedOrderItem.Should().NotBeNull();
+            if (updatedOrderItem != null)
+            {
+                updatedOrderItem.Total.Should().Be(addedOrderItem.Total);
+            }
+
+            var updateOrderItemCT = new TestOrderItemUpdateWithCurrencyTotal();
+            updateOrderItemCT.CurrencyTotal = addedOrderItem.CurrencyTotal + new decimal(1.0);
+            await Patch(orderItemUrl, updateOrderItemCT);
+            updatedOrderItem = await GetTest<OrderItem>(orderItemUrl);
+            updatedOrderItem.Should().NotBeNull();
+            if (updatedOrderItem != null)
+            {
+                updatedOrderItem.CurrencyTotal.Should().Be(addedOrderItem.CurrencyTotal);
+            }
+        }
+    }
+        
+    [Fact]
+    public async Task FailedOrderUpdate()
+    {
+        var orderData = await AddOrder();
+
+        var order = await GetTest<Order>(orderData.Item2);
+        order.Should().NotBeNull();
+
+        if (order != null)
+        {
+            var orderUrl = orderData.Item2;
+
+            var updateOrderQ = new TestOrderWithQuantity();
+            updateOrderQ.Quantity = order.Quantity + 10;
+            await Patch(orderUrl, updateOrderQ);
+            var updatedOrder = await GetTest<OrderItem>(orderUrl);
+            updatedOrder.Should().NotBeNull();
+            if (updatedOrder != null)
+            {
+                updatedOrder.Quantity.Should().Be(order.Quantity);
+            }
+
+            var updateOrderT = new TestOrderWithTotal();
+            updateOrderT.Total = order.Total + new decimal(10);
+            await Patch(orderUrl, updateOrderT);
+            updatedOrder = await GetTest<OrderItem>(orderUrl);
+            updatedOrder.Should().NotBeNull();
+            if (updatedOrder != null)
+            {
+                updatedOrder.Total.Should().Be(order.Total);
+            }
+
+            var updateOrderCT = new TestOrderWithCurrencyTotal();
+            updateOrderCT.CurrencyTotal = order.CurrencyTotal + new decimal(10);
+            await Patch(orderUrl, updateOrderCT);
+            updatedOrder = await GetTest<OrderItem>(orderUrl);
+            updatedOrder.Should().NotBeNull();
+            if (updatedOrder != null)
+            {
+                updatedOrder.CurrencyTotal.Should().Be(order.CurrencyTotal);
+            }
+        }
+    }
+
     private string AddOrderItem(int orderId, int quantity)
     {
         var orderItem = new TestOrderItem();
@@ -241,13 +321,13 @@ public class OrdersTests : BaseTest
         return orderItemUrl;
     }
 
-    private (int, string) AddOrder()
+    private async Task<(int, string)> AddOrder()
     {
         var testOrder = AddCustomerAndCreateOrder();
 
         var newOrderUrl = PostTest(UrlOrders, testOrder).Result;
 
-        var order = GetTest<Order>(newOrderUrl).Result;
+        var order = await GetTest<Order>(newOrderUrl);
 
         order.Should().NotBeNull();
 
