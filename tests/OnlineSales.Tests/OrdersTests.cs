@@ -4,6 +4,7 @@
 
 using System;
 using System.Formats.Asn1;
+using System.Security.Policy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Namotion.Reflection;
@@ -62,7 +63,8 @@ public class OrdersTests : BaseTest
     [Fact]
     public async Task UpdateOrderNotFoundTest()
     {
-        await PatchTest(UrlOrdersNotFound, new { }, HttpStatusCode.NotFound);
+        var order = new TestOrder();
+        await PatchTest(UrlOrdersNotFound, order, HttpStatusCode.NotFound);
     }
 
     [Fact]
