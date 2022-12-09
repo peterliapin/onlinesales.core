@@ -24,6 +24,7 @@ public class TestOrderItemUpdate : OrderItemUpdateDto
     {
         LicenseCode = "LicenseCode";
         ProductName = "ProductName";
+        Quantity = 1;
         UnitPrice = 1;
     }
 }

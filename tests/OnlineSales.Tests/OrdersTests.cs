@@ -99,7 +99,9 @@ public class OrdersTests : BaseTest
 
         if (addedOrderItem != null)
         {
-            await PatchOrderItem(addedOrderItem.Quantity + 999, orderItemsUrls[0]);
+            var orderItem = new TestOrderItemUpdate();
+            orderItem.Quantity = addedOrderItem.Quantity + 999;
+            await PatchTest(orderItemsUrls[0], orderItem);
             updatedOrder = await GetTest<Order>(order.Item2);
             updatedOrder.Should().NotBeNull();
 
@@ -108,6 +110,74 @@ public class OrdersTests : BaseTest
                 (updatedOrder.Quantity == sumQuantity + 999).Should().BeTrue();
             }
         }
+    }
+
+    [Fact]
+    public async Task OrderTotalTest()
+    {
+        var order = AddOrder();
+
+        int numberOfOrderItems = 10;
+
+        var random = new Random();
+        string[] orderItemsUrls = new string[numberOfOrderItems];
+        for (var i = 0; i < numberOfOrderItems; ++i)
+        {
+            var orderItem = new TestOrderItem();
+            orderItem.Quantity = random.Next(1, 1000);
+            orderItem.OrderId = order.Item1;
+            orderItem.UnitPrice = new decimal(random.NextDouble() + 1.0);
+            orderItem.ExchangeRateToPayOutCurrency = new decimal(random.NextDouble() + 1.0);
+            var orderItemUrl = await PostTest(UrlOrderItems, orderItem);
+            orderItemsUrls[i] = orderItemUrl;
+        }
+
+        async Task CompareTotals()
+        {
+            decimal total = new decimal(0);
+            foreach (var url in orderItemsUrls)
+            {
+                var orderItem = await GetTest<OrderItem>(url);
+                orderItem.Should().NotBeNull();
+                if (orderItem != null)
+                {
+                    total += orderItem.Total;
+                }                
+            }
+
+            var updatedOrder = await GetTest<Order>(order.Item2);
+            updatedOrder.Should().NotBeNull();
+            if (updatedOrder != null)
+            {
+                updatedOrder.Total.Should().Be(total);
+            }
+        }
+
+        await CompareTotals();
+
+        var addedOrderItem = await GetTest<OrderItem>(orderItemsUrls[0]);
+        addedOrderItem.Should().NotBeNull();
+        var updatedOrderItem = new TestOrderItemUpdate();
+        if (addedOrderItem != null)
+        {
+            updatedOrderItem.UnitPrice = addedOrderItem.UnitPrice;
+            updatedOrderItem.Quantity = addedOrderItem.Quantity + 999;
+        }
+
+        await PatchTest(orderItemsUrls[0], updatedOrderItem);
+        await CompareTotals();
+
+        addedOrderItem = await GetTest<OrderItem>(orderItemsUrls[0]);
+        addedOrderItem.Should().NotBeNull();
+        updatedOrderItem = new TestOrderItemUpdate();
+        if (addedOrderItem != null)
+        {
+            updatedOrderItem.UnitPrice = addedOrderItem.UnitPrice + new decimal(1.0);
+            updatedOrderItem.Quantity = addedOrderItem.Quantity;
+        }
+
+        await PatchTest(orderItemsUrls[0], updatedOrderItem);
+        await CompareTotals();
     }
 
     [Fact]
@@ -131,13 +201,6 @@ public class OrdersTests : BaseTest
             addedOrderItem.CurrencyTotal.Should().Be(orderItem.Quantity * orderItem.UnitPrice);
             addedOrderItem.Total.Should().Be(addedOrderItem.CurrencyTotal * orderItem.ExchangeRateToPayOutCurrency);
         }
-    }
-
-    private async Task PatchOrderItem(int quantity, string url)
-    {
-        var orderItem = new TestOrderItemUpdate();
-        orderItem.Quantity = quantity;
-        await PatchTest(url, orderItem);
     }
 
     private string AddOrderItem(int orderId, int quantity)
