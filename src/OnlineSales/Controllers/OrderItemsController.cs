@@ -10,6 +10,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
+using YamlDotNet.Core.Tokens;
 
 namespace OnlineSales.Controllers
 {
@@ -73,6 +74,29 @@ namespace OnlineSales.Controllers
                 Log.Information(credtedItem.ProductName);
 
                 return credtedItem;
+            }
+            catch (KeyNotFoundException knfe)
+            {
+                return NotFound(knfe.Message);
+            }
+            catch (Exception ex)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public override async Task<ActionResult> Delete(int id)
+        {
+            try
+            {
+                await orderItemService.DeleteOrderItem(id);
+                return Ok();
             }
             catch (KeyNotFoundException knfe)
             {
