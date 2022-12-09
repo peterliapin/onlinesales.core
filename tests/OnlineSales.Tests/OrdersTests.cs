@@ -77,7 +77,7 @@ public class OrdersTests : BaseTest
         string[] orderItemsUrls = new string[numberOfOrderItems];
         for (var i = 0; i < numberOfOrderItems; ++i)
         {
-            var quantity = random.Next();
+            var quantity = random.Next(1, 1000);
             sumQuantity += quantity;
             orderItemsUrls[i] = AddOrderItem(order.Item1, quantity);
         }
@@ -96,7 +96,7 @@ public class OrdersTests : BaseTest
 
         if (addedOrderItem != null)
         {
-            await PatchOrderItem(order.Item1, addedOrderItem.Quantity + 999, orderItemsUrls[0]);
+            await PatchOrderItem(addedOrderItem.Quantity + 999, orderItemsUrls[0]);
             updatedOrder = await GetTest<Order>(order.Item2);
             updatedOrder.Should().NotBeNull();
 
@@ -107,11 +107,10 @@ public class OrdersTests : BaseTest
         }
     }
 
-    private async Task PatchOrderItem(int orderId, int quantity, string url)
+    private async Task PatchOrderItem(int quantity, string url)
     {
-        var orderItem = new TestOrderItem();
+        var orderItem = new TestOrderItemUpdate();
         orderItem.Quantity = quantity;
-        orderItem.OrderId = orderId;
         await PatchTest(url, orderItem);
     }
 
