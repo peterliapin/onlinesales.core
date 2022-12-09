@@ -46,7 +46,7 @@ namespace OnlineSales.Services
             {
                 await apiDbContext.AddAsync(orderItem);
 
-                var totals = CalculateTotals_ForOrder(orderItem);
+                var totals = CalculateTotalsForOrder(orderItem);
 
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
@@ -90,7 +90,7 @@ namespace OnlineSales.Services
             {
                 apiDbContext.Update(mergedItem);
 
-                var totals = CalculateTotals_ForOrder(mergedItem!, orderItemId);
+                var totals = CalculateTotalsForOrder(mergedItem!, orderItemId);
 
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
@@ -119,7 +119,7 @@ namespace OnlineSales.Services
             return orderItem.CurrencyTotal * exchangeRate;
         }
 
-        private (decimal currencyTotal, decimal total) CalculateTotals_ForOrder(OrderItem orderItem, int patchId = 0)
+        private (decimal currencyTotal, decimal total) CalculateTotalsForOrder(OrderItem orderItem, int patchId = 0)
         {
             decimal currencyTotal = 0;
             decimal total = 0;
