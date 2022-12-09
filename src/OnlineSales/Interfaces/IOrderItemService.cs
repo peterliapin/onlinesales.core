@@ -12,5 +12,7 @@ namespace OnlineSales.Interfaces
         Task<int> AddOrderItem(OrderItemCreateDto orderItemCreateDto);
 
         Task<OrderItem> UpdateOrderItem(int orderItemId, OrderItemUpdateDto orderItemUpdateDto);
+
+        Task DeleteOrderItem(int orderItemId);
     }
 }

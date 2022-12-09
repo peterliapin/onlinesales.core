@@ -65,6 +65,41 @@ namespace OnlineSales.Services
             return orderItem.Id;
         }
 
+        public async Task DeleteOrderItem(int orderItemId)
+        {
+            var orderItemExist = await (from ordItem in apiDbContext.OrderItems where ordItem.Id == orderItemId select ordItem).FirstOrDefaultAsync();
+
+            if (orderItemExist == null)
+            {
+                throw new KeyNotFoundException("Expected order item id not found");
+            }
+
+            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItemExist!.OrderId select ord).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new KeyNotFoundException("Requested order is not found");
+            }
+
+            using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
+            {
+                apiDbContext.Remove(orderItemExist);
+
+                orderItemExist.CurrencyTotal = 0;
+                orderItemExist.Total = 0;
+
+                var totals = CalculateTotalsForOrder(orderItemExist!);
+
+                order.CurrencyTotal = totals.currencyTotal;
+                order.Total = totals.total;
+
+                apiDbContext.Update(order);
+                await apiDbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+        }
+
         public async Task<OrderItem> UpdateOrderItem(int orderItemId, OrderItemUpdateDto orderItemUpdateDto)
         {
             var orderItemExist = await (from ordItem in apiDbContext.OrderItems where ordItem.Id == orderItemId select ordItem).FirstOrDefaultAsync();
