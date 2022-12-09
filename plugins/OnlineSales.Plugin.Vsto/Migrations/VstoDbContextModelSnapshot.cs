@@ -10,8 +10,8 @@ using OnlineSales.Plugin.Vsto.Data;
 
 namespace OnlineSales.Plugin.Vsto.Migrations
 {
-    [DbContext(typeof(PluginDbContext))]
-    partial class PluginDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(VstoDbContext))]
+    partial class VstoDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -54,7 +54,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -74,7 +74,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -122,7 +122,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -167,7 +167,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -201,7 +201,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -229,7 +229,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -265,7 +265,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -282,7 +282,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -317,7 +317,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -360,7 +360,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -390,7 +390,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -415,7 +415,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -453,7 +453,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -493,7 +493,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -526,7 +526,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -567,7 +567,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -601,7 +601,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -655,7 +655,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -688,7 +688,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -731,7 +731,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -793,7 +793,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -835,7 +835,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -873,7 +873,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIP")
+                    b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
 
@@ -901,7 +901,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<string>("UpdatedByIP")
+                    b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
 
@@ -935,6 +935,11 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("ip_address");
+
+                    b.Property<string>("Subfolder")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("subfolder");
 
                     b.Property<string>("Version")
                         .IsRequired()
