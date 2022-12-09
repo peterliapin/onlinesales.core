@@ -193,14 +193,43 @@ public class OrdersTests : BaseTest
         orderItem.ExchangeRateToPayOutCurrency = new decimal(random.NextDouble() + 1.0);
         var orderItemUrl = await PostTest(UrlOrderItems, orderItem);
 
+        async Task CompareItems()
+        {
+            var addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
+            addedOrderItem.Should().NotBeNull();
+
+            if (addedOrderItem != null)
+            {
+                addedOrderItem.CurrencyTotal.Should().Be(orderItem.Quantity * orderItem.UnitPrice);
+                addedOrderItem.Total.Should().Be(addedOrderItem.CurrencyTotal * orderItem.ExchangeRateToPayOutCurrency);
+            }
+        }
+
+        await CompareItems();
+
         var addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
         addedOrderItem.Should().NotBeNull();
-
+        var updatedOrderItem = new TestOrderItemUpdate();
         if (addedOrderItem != null)
         {
-            addedOrderItem.CurrencyTotal.Should().Be(orderItem.Quantity * orderItem.UnitPrice);
-            addedOrderItem.Total.Should().Be(addedOrderItem.CurrencyTotal * orderItem.ExchangeRateToPayOutCurrency);
+            updatedOrderItem.Quantity = addedOrderItem.Quantity + 10;
+            updatedOrderItem.UnitPrice = addedOrderItem.UnitPrice;
         }
+
+        await PatchTest(orderItemUrl, orderItem);
+        await CompareItems();
+
+        addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
+        addedOrderItem.Should().NotBeNull();
+        updatedOrderItem = new TestOrderItemUpdate();
+        if (addedOrderItem != null)
+        {
+            updatedOrderItem.Quantity = addedOrderItem.Quantity;
+            updatedOrderItem.UnitPrice = addedOrderItem.UnitPrice + new decimal(1.0);
+        }
+
+        await PatchTest(orderItemUrl, orderItem);
+        await CompareItems();
     }
 
     private string AddOrderItem(int orderId, int quantity)
