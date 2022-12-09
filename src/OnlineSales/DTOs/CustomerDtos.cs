@@ -8,66 +8,57 @@ namespace OnlineSales.DTOs;
 
 public class CustomerCreateDto
 {
-    [Required]
-    public string? LastName { get; set; }
+    public string LastName { get; set; } = string.Empty;
+
+    public string FirstName { get; set; } = string.Empty;
 
     [Required]
-    public string? FirstName { get; set; }
-
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
-    public string? CompanyName { get; set; }
+    public string CompanyName { get; set; } = string.Empty;
 
-    public string? Address1 { get; set; }
+    public string Address1 { get; set; } = string.Empty;
 
-    public string? Address2 { get; set; }
+    public string Address2 { get; set; } = string.Empty;
 
-    public string? State { get; set; }
+    public string State { get; set; } = string.Empty;
 
-    public string? Zip { get; set; }
+    public string Zip { get; set; } = string.Empty;
 
-    public string? Location { get; set; }
+    public string Location { get; set; } = string.Empty;
 
-    [Required]
-    public string? Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
 
-    [Required]
-    public int? Timezone { get; set; }
+    public int Timezone { get; set; } = 0;
 
-    public string? Culture { get; set; }
+    public string Culture { get; set; } = string.Empty;
 }
 
 public class CustomerUpdateDto
 {
-    [Required]
-    public string? LastName { get; set; }
+    public string LastName { get; set; } = string.Empty;
 
-    [Required]
-    public string? FirstName { get; set; }
+    public string FirstName { get; set; } = string.Empty;
 
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
 
-    [Required]
-    public string? CompanyName { get; set; }
+    public string CompanyName { get; set; } = string.Empty;
 
-    public string? Address1 { get; set; }
+    public string Address1 { get; set; } = string.Empty;
 
-    public string? Address2 { get; set; }
+    public string Address2 { get; set; } = string.Empty;
 
-    public string? State { get; set; }
+    public string State { get; set; } = string.Empty;
 
-    public string? Zip { get; set; }
+    public string Zip { get; set; } = string.Empty;
 
-    public string? Location { get; set; }
+    public string Location { get; set; } = string.Empty;
 
-    [Required]
-    public string? Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
 
-    [Required]
-    public int? Timezone { get; set; }
+    public int Timezone { get; set; } = 0;
 
-    public string? Culture { get; set; }
+    public string Culture { get; set; } = string.Empty;
 }
