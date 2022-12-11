@@ -13,6 +13,7 @@ public class AutoMapperProfiles : Profile
     {
         CreateMap<bool?, bool>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<int?, int>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<decimal?, decimal>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()

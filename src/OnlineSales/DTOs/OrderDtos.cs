@@ -18,6 +18,12 @@ public class OrderCreateDto
 
     public string? AffiliateName { get; set; }
 
+    [Required]
+    public decimal ExchangeRate { get; set; } = 1;
+
+    [Required]
+    public string Currency { get; set; } = string.Empty;
+
     public bool TestOrder { get; set; } = false;
 
     public string? Data { get; set; }

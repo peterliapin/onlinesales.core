@@ -18,40 +18,30 @@ public class OrderItemCreateDto
     [Required]
     public string LicenseCode { get; set; } = string.Empty;
 
-    [Range(1, double.MaxValue, ErrorMessage = "Minimum unit price should be 1")]
     [Required]
     public decimal UnitPrice { get; set; } = 0;
 
     [CurrencyCode]
     [Required]
     public string Currency { get; set; } = string.Empty;
-
+    
+    [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
-    [Required]
-    public int Quantity { get; set; } = 1;
-
-    [Range(1, double.MaxValue, ErrorMessage = "Exchange rate to pay out currency must be greater than 1")]
-    [Required]
-    public decimal ExchangeRateToPayOutCurrency { get; set; } = 1;
+    public int Quantity { get; set; } = 0;
 
     public string Data { get; set; } = string.Empty;
 }
 
 public class OrderItemUpdateDto
 {
-    [Required]
-    public string ProductName { get; set; } = string.Empty;
+    public string? ProductName { get; set; }
 
-    [Required]
-    public string LicenseCode { get; set; } = string.Empty;
+    public string? LicenseCode { get; set; }
 
-    [Range(1, double.MaxValue, ErrorMessage = "Minimum unit price should be 1")]
-    [Required]
-    public decimal UnitPrice { get; set; } = 0;
+    public decimal? UnitPrice { get; set; }
 
     [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
-    [Required]
-    public int Quantity { get; set; }
+    public int? Quantity { get; set; }
 
-    public string Data { get; set; } = string.Empty;
+    public string? Data { get; set; }
 }

@@ -13,7 +13,7 @@ public class TestEmailTemplate : EmailTemplateCreateDto
         Name = "TestEmailTemplate";
         Subject = "TestEmailTemaplteSubject";
         BodyTemplate = "TestEmailTemaplteSubjectBodyTemplate";
-        FromEmail = "TestEmailTemaplteSubjectFromEmail";
+        FromEmail = "test@test.net";
         FromName = "TestEmailTemaplteFromName";
     }
 }

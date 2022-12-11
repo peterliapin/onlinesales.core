@@ -73,13 +73,7 @@ namespace OnlineSales.Controllers
             }
 
             var newValue = mapper.Map<T>(value);
-
-            newValue.CreatedAt = DateTime.UtcNow;
-            newValue.CreatedByIp = GetClientIP();
-            newValue.CreatedByUserAgent = GetUserAgent();
-
             var result = await dbSet.AddAsync(newValue);
-
             await dbContext.SaveChangesAsync();
              
             return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
@@ -110,11 +104,6 @@ namespace OnlineSales.Controllers
                 }
 
                 mapper.Map(value, existingEntity);
-
-                existingEntity.UpdatedAt = DateTime.UtcNow;
-                existingEntity.UpdatedByIp = GetClientIP();
-                existingEntity.UpdatedByUserAgent = GetUserAgent();
-
                 await dbContext.SaveChangesAsync();
 
                 return Ok();
@@ -148,16 +137,6 @@ namespace OnlineSales.Controllers
             await dbContext.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private string? GetClientIP()
-        {
-            return HttpContext?.Connection?.RemoteIpAddress?.ToString();
-        }
-
-        private string? GetUserAgent()
-        {
-            return HttpContext?.Request?.Headers[HeaderNames.UserAgent];
         }
     }
 }

@@ -82,17 +82,6 @@ public class BaseTest : IDisposable
         return DeserializePayload<T>(content);
     }
 
-    protected async Task<HttpResponseMessage> UnsuccessfulPostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.InternalServerError)
-    {
-        var content = PayloadToStringContent(payload);
-
-        var response = await Client.PostAsync(url, content);
-
-        response.StatusCode.Should().Be(expectedCode);
-
-        return response;
-    }
-
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created)
     {
         var content = PayloadToStringContent(payload);
@@ -101,9 +90,13 @@ public class BaseTest : IDisposable
 
         response.StatusCode.Should().Be(expectedCode);
 
-        var location = response.Headers?.Location?.LocalPath ?? string.Empty;
+        var location = string.Empty;
 
-        location.Should().StartWith(url);
+        if (expectedCode == HttpStatusCode.Created)
+        {
+            location = response.Headers?.Location?.LocalPath ?? string.Empty;
+            location.Should().StartWith(url);
+        }
 
         return location;
     }

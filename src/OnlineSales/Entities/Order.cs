@@ -24,7 +24,7 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets customer IP address detected by the payment processing system.
     /// </summary>
-    public string? CustomerIP { get; set; }
+    public string? CustomerIp { get; set; }
 
     /// <summary>
     /// Gets or sets a unique reference numbers across all orders.
@@ -50,7 +50,7 @@ public class Order : BaseEntity
     public string Currency { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets total amount in the payment currency without TAXes, discounts and comissions (how much will be paid out to vendor).
+    /// Gets or sets total amount in the payment currency without TAXes, discounts and comissions.
     /// </summary>
     [Required]
     public decimal CurrencyTotal { get; set; } = 0;
@@ -63,7 +63,7 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets exchange rate to the payout currency.
     /// </summary>
-    public decimal ExchangeRateToPayOutCurrency { get; set; }
+    public decimal ExchangeRate { get; set; }
 
     /// <summary>
     /// Gets or sets affiliate Name.

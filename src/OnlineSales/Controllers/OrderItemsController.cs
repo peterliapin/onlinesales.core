@@ -4,13 +4,11 @@
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Nest;
+using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
-using YamlDotNet.Core.Tokens;
 
 namespace OnlineSales.Controllers
 {
@@ -40,7 +38,9 @@ namespace OnlineSales.Controllers
                     return UnprocessableEntity(ModelState);
                 }
 
-                var credtedItem = await orderItemService.AddOrderItem(value);
+                var orderItem = mapper.Map<OrderItem>(value);
+
+                var credtedItem = await orderItemService.AddOrderItem(orderItem);
                 return CreatedAtAction(nameof(GetOne), new { id = credtedItem }, value);
             }
             catch (KeyNotFoundException knfe)
@@ -69,11 +69,20 @@ namespace OnlineSales.Controllers
                     return UnprocessableEntity(ModelState);
                 }
 
-                var credtedItem = await orderItemService.UpdateOrderItem(id, value);
+                var existingOrderItem = await (from p in this.dbSet
+                                            where p.Id == id
+                                            select p).FirstOrDefaultAsync();
 
-                Log.Information(credtedItem.ProductName);
+                if (existingOrderItem == null)
+                {
+                    return NotFound();
+                }
 
-                return credtedItem;
+                mapper.Map(value, existingOrderItem);
+
+                var updatedItem = await orderItemService.UpdateOrderItem(existingOrderItem);
+
+                return updatedItem;
             }
             catch (KeyNotFoundException knfe)
             {
@@ -96,6 +105,7 @@ namespace OnlineSales.Controllers
             try
             {
                 await orderItemService.DeleteOrderItem(id);
+
                 return Ok();
             }
             catch (KeyNotFoundException knfe)

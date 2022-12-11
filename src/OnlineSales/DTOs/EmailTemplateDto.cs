@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -19,6 +18,7 @@ public class EmailTemplateCreateDto
     public string BodyTemplate { get; set; } = string.Empty;
 
     [Required]
+    [EmailAddress]
     public string FromEmail { get; set; } = string.Empty;
 
     [Required]

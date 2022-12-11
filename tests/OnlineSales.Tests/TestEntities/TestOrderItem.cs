@@ -15,29 +15,18 @@ public class TestOrderItem : OrderItemCreateDto
         Currency = "USD";
         LicenseCode = "LicenseCode";
         ProductName = "ProductName";
-        UnitPrice = 1;
+        UnitPrice = 1.99m;
         Quantity = 1;
     }
 }
 
-public class TestOrderItemUpdate : OrderItemUpdateDto
-{
-    public TestOrderItemUpdate()
-    {
-        LicenseCode = "LicenseCode";
-        ProductName = "ProductName";
-        Quantity = 1;
-        UnitPrice = 1;
-    }
-}
-
-public class TestOrderItemUpdateWithTotal : TestOrderItemUpdate
+public class TestOrderItemUpdateWithTotal : OrderItemUpdateDto
 {
     [Required]
     public decimal Total { get; set; } = 0;
 }
 
-public class TestOrderItemUpdateWithCurrencyTotal : TestOrderItemUpdate
+public class TestOrderItemUpdateWithCurrencyTotal : OrderItemUpdateDto
 {
     [Required]
     public decimal CurrencyTotal { get; set; } = 0;

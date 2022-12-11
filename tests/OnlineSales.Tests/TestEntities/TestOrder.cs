@@ -13,6 +13,8 @@ public class TestOrder : OrderCreateDto
     public TestOrder()
     {
         RefNo = "1000";
+        Currency = "USD";
+        ExchangeRate = 2;
     }
 }
 

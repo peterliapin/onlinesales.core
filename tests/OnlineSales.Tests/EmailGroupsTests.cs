@@ -3,7 +3,6 @@
 // </copyright>
 
 using FluentAssertions;
-using Namotion.Reflection;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -13,8 +12,6 @@ public class EmailGroupsTests : BaseTest
 {
     private static readonly string UrlEmailGroups = "/api/emailgroups";
     private static readonly string UrlEmailGroupsNotFound = UrlEmailGroups + "/404";
-    private static readonly string EmailGroupName = "EmailGroupName";
-    private static readonly string EmailGroupUpdatedName = "EmailGroupUpdatedName";
 
     [Fact]
     public async Task GetEmailGroupNotFoundTest()
@@ -25,9 +22,7 @@ public class EmailGroupsTests : BaseTest
     [Fact]
     public async Task CreateAndGetEmailGroupTest()
     {
-        var testEmailGroup = new EmailGroupCreateDto();
-
-        testEmailGroup.Name = EmailGroupName;
+        var testEmailGroup = new TestEmailGroup();
 
         var newEmailGroupUrl = await PostTest(UrlEmailGroups, testEmailGroup);
 
@@ -45,15 +40,13 @@ public class EmailGroupsTests : BaseTest
     [Fact]
     public async Task CreateAndUpdateEmailGroupNameTest()
     {
-        var testEmailGroup = new EmailGroupCreateDto();
-
-        testEmailGroup.Name = EmailGroupName;
+        var testEmailGroup = new TestEmailGroup();
 
         var newEmailGroupUrl = await PostTest(UrlEmailGroups, testEmailGroup);
 
         var updatedEmailGroup = new EmailGroupUpdateDto();
 
-        testEmailGroup.Name = updatedEmailGroup.Name = EmailGroupUpdatedName;
+        testEmailGroup.Name = updatedEmailGroup.Name = "EmailGroupUpdatedName";
 
         await PatchTest(newEmailGroupUrl, updatedEmailGroup);
 
@@ -71,9 +64,7 @@ public class EmailGroupsTests : BaseTest
     [Fact]
     public async Task CreateAndDeleteEmailGroupTest()
     {
-        var testEmailGroup = new EmailGroupCreateDto();
-
-        testEmailGroup.Name = EmailGroupName;
+        var testEmailGroup = new TestEmailGroup();
 
         var newEmailGroupUrl = await PostTest(UrlEmailGroups, testEmailGroup);
 

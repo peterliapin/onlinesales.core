@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Transactions;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
@@ -15,32 +12,23 @@ namespace OnlineSales.Services
     public class OrderItemService : IOrderItemService
     {
         private readonly ApiDbContext apiDbContext;
-        private readonly IMapper mapper;
 
-        public OrderItemService(ApiDbContext apiDbContext, IMapper mapper)
+        public OrderItemService(ApiDbContext apiDbContext)
         {
             this.apiDbContext = apiDbContext;
-            this.mapper = mapper;
         }
 
-        public async Task<int> AddOrderItem(OrderItemCreateDto orderItemCreateDto)
+        public async Task<int> AddOrderItem(OrderItem orderItem)
         {
-            var orderItem = mapper.Map<OrderItem>(orderItemCreateDto);
-
             var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItem.OrderId select ord).FirstOrDefaultAsync();
 
             if (order == null)
             {
-                throw new KeyNotFoundException("Expected order  not found");
-            }
-
-            if (order!.ExchangeRateToPayOutCurrency == 0)
-            {
-                order.ExchangeRateToPayOutCurrency = orderItemCreateDto.ExchangeRateToPayOutCurrency;
+                throw new KeyNotFoundException($"Order with Id = {orderItem.OrderId} not found");
             }
 
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
-            orderItem.Total = CalculateOrderItemTotal(orderItem, order!.ExchangeRateToPayOutCurrency);
+            orderItem.Total = CalculateOrderItemTotal(orderItem, order.ExchangeRate);
 
             using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
             {
@@ -51,11 +39,6 @@ namespace OnlineSales.Services
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
                 order.Quantity = totals.quantity;
-
-                if (!string.IsNullOrEmpty(orderItemCreateDto.Data))
-                {
-                    order.Data = orderItemCreateDto.Data; 
-                }
 
                 apiDbContext.Update(order);
                 await apiDbContext.SaveChangesAsync();
@@ -72,14 +55,14 @@ namespace OnlineSales.Services
 
             if (orderItemExist == null)
             {
-                throw new KeyNotFoundException("Expected order item id not found");
+                throw new KeyNotFoundException($"Order item with Id = {orderItemId} not found");
             }
 
-            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItemExist!.OrderId select ord).FirstOrDefaultAsync();
+            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItemExist.OrderId select ord).FirstOrDefaultAsync();
 
             if (order == null)
             {
-                throw new KeyNotFoundException("Requested order is not found");
+                throw new KeyNotFoundException($"Order with Id = {orderItemExist.OrderId} not found");
             }
 
             using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
@@ -102,41 +85,27 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task<OrderItem> UpdateOrderItem(int orderItemId, OrderItemUpdateDto orderItemUpdateDto)
+        public async Task<OrderItem> UpdateOrderItem(OrderItem orderItem)
         {
-            var orderItemExist = await (from ordItem in apiDbContext.OrderItems where ordItem.Id == orderItemId select ordItem).FirstOrDefaultAsync();
-
-            if (orderItemExist == null)
-            {
-                throw new KeyNotFoundException("Expected order item id not found");
-            }
-
-            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItemExist!.OrderId select ord).FirstOrDefaultAsync();
+            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItem.OrderId select ord).FirstOrDefaultAsync();
 
             if (order == null)
             {
-                throw new KeyNotFoundException("Requested order is not found");
+                throw new KeyNotFoundException($"Order with Id = {orderItem.OrderId} not found");
             }
 
-            var mergedItem = mapper.Map(orderItemUpdateDto, orderItemExist);
-
-            mergedItem!.CurrencyTotal = CalculateOrderItemCurrencyTotal(mergedItem);
-            mergedItem!.Total = CalculateOrderItemTotal(mergedItem, order!.ExchangeRateToPayOutCurrency);
+            orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
+            orderItem.Total = CalculateOrderItemTotal(orderItem, order!.ExchangeRate);
 
             using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
             {
-                apiDbContext.Update(mergedItem);
+                apiDbContext.Update(orderItem);
 
-                var totals = CalculateTotalsForOrder(mergedItem!, orderItemId);
+                var totals = CalculateTotalsForOrder(orderItem, orderItem.Id);
 
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
                 order.Quantity = totals.quantity;
-
-                if (!string.IsNullOrEmpty(orderItemUpdateDto.Data))
-                {
-                    order.Data = orderItemUpdateDto.Data;
-                }
 
                 apiDbContext.Update(order);
                 await apiDbContext.SaveChangesAsync();
@@ -144,7 +113,7 @@ namespace OnlineSales.Services
                 await transaction.CommitAsync();
             }
 
-            return mergedItem;
+            return orderItem;
         }
 
         private decimal CalculateOrderItemCurrencyTotal(OrderItem orderItem)

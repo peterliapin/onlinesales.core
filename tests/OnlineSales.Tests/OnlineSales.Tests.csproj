@@ -49,14 +49,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <EmbeddedResource Include="**/*" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.AssemblyInfoInputs.cache" />
-    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.csproj.AssemblyReference.cache" />
-    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.GeneratedMSBuildEditorConfig.editorconfig" />
-    <EmbeddedResource Remove="obj\Debug\net7.0\OnlineSales.Tests.AssemblyInfo.cs" />
-    <EmbeddedResource Remove="bin\Debug\net7.0\CoverletSourceRootsMapping" />
+    <EmbeddedResource Include="Resources\wavepoint.png" />
   </ItemGroup>
 </Project>

@@ -3,7 +3,6 @@
 // </copyright>
 
 using FluentAssertions;
-using Namotion.Reflection;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -23,24 +22,9 @@ public class EmailTemplatesTests : BaseTest
     [Fact]
     public async Task CreateEmailTemplateWithNonExistedEmailGroupTest()
     {
-        var emailGroups = await GetTest<EmailGroup[]>("/api/emailgroups");
-        emailGroups.Should().NotBeNull();
-
-        int maxId = 0;
-        if (emailGroups != null)
-        {
-            foreach (var emailGroup in emailGroups)
-            {
-                if (emailGroup.Id > maxId)
-                {
-                    maxId = emailGroup.Id;
-                }
-            }
-        }
-
         var testEmailTemplate = new TestEmailTemplate();
-        testEmailTemplate.GroupId = maxId + 1;
-        await UnsuccessfulPostTest(urlEmailTemplates, testEmailTemplate);
+        testEmailTemplate.GroupId = 1; // non existing group id (because each test starts with empty database)
+        await PostTest(urlEmailTemplates, testEmailTemplate, HttpStatusCode.InternalServerError);
     }
         
     [Fact]
@@ -128,9 +112,7 @@ public class EmailTemplatesTests : BaseTest
 
     private (int, string) AddEmailGroup()
     {
-        var testEmailGroup = new EmailGroup();
-
-        testEmailGroup.Name = "EmailGroupName";
+        var testEmailGroup = new TestEmailGroup();
 
         var emailGroupUrl = PostTest("/api/emailgroups", testEmailGroup).Result;
 
@@ -147,8 +129,10 @@ public class EmailTemplatesTests : BaseTest
 
         var emailGroupId = addedEmailGroup.Item1;
 
-        var testEmailTemplate = new TestEmailTemplate();
-        testEmailTemplate.GroupId = emailGroupId;
+        var testEmailTemplate = new TestEmailTemplate
+        {
+            GroupId = emailGroupId,
+        };
 
         return testEmailTemplate;
     }
