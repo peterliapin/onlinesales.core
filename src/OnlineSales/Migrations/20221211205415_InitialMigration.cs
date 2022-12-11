@@ -49,6 +49,7 @@ namespace OnlineSales.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "text", nullable: false),
+                    language = table.Column<string>(type: "text", nullable: false),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
                     createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
                     createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
@@ -125,7 +126,7 @@ namespace OnlineSales.Migrations
                     slug = table.Column<string>(type: "text", nullable: false),
                     template = table.Column<string>(type: "text", nullable: false),
                     author = table.Column<string>(type: "text", nullable: false),
-                    lang = table.Column<string>(type: "text", nullable: false),
+                    language = table.Column<string>(type: "text", nullable: false),
                     categories = table.Column<string>(type: "text", nullable: false),
                     tags = table.Column<string>(type: "text", nullable: false),
                     allowcomments = table.Column<bool>(name: "allow_comments", type: "boolean", nullable: false),
@@ -179,6 +180,7 @@ namespace OnlineSales.Migrations
                     currency = table.Column<string>(type: "text", nullable: false),
                     currencytotal = table.Column<decimal>(name: "currency_total", type: "numeric", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
+                    exchangerate = table.Column<decimal>(name: "exchange_rate", type: "numeric", nullable: false),
                     affiliatename = table.Column<string>(name: "affiliate_name", type: "text", nullable: true),
                     testorder = table.Column<bool>(name: "test_order", type: "boolean", nullable: false),
                     data = table.Column<string>(type: "jsonb", nullable: true),
@@ -238,7 +240,9 @@ namespace OnlineSales.Migrations
                     fromemail = table.Column<string>(name: "from_email", type: "text", nullable: false),
                     fromname = table.Column<string>(name: "from_name", type: "text", nullable: false),
                     groupid = table.Column<int>(name: "group_id", type: "integer", nullable: false),
-                    emailgroupid = table.Column<int>(name: "email_group_id", type: "integer", nullable: true),
+                    language = table.Column<string>(type: "text", nullable: false),
+                    retrycount = table.Column<int>(name: "retry_count", type: "integer", nullable: false),
+                    retryinterval = table.Column<int>(name: "retry_interval", type: "integer", nullable: false),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
                     createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
                     createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
@@ -250,10 +254,11 @@ namespace OnlineSales.Migrations
                 {
                     table.PrimaryKey("pk_email_template", x => x.id);
                     table.ForeignKey(
-                        name: "fk_email_template_email_group_email_group_id",
-                        column: x => x.emailgroupid,
+                        name: "fk_email_template_email_group_group_id",
+                        column: x => x.groupid,
                         principalTable: "email_group",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -304,6 +309,7 @@ namespace OnlineSales.Migrations
                     currency = table.Column<string>(type: "text", nullable: false),
                     currencytotal = table.Column<decimal>(name: "currency_total", type: "numeric", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
+                    unitprice = table.Column<decimal>(name: "unit_price", type: "numeric", nullable: false),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
                     createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
                     createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
@@ -381,9 +387,9 @@ namespace OnlineSales.Migrations
                 column: "email_group_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_email_template_email_group_id",
+                name: "ix_email_template_group_id",
                 table: "email_template",
-                column: "email_group_id");
+                column: "group_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_order_customer_id",

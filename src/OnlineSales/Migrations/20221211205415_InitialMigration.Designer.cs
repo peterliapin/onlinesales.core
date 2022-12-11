@@ -12,8 +12,8 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20221208095734_ItemUnitPriceAddition")]
-    partial class ItemUnitPriceAddition
+    [Migration("20221211205415_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -267,6 +267,11 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("language");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -446,10 +451,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<int?>("EmailGroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_group_id");
-
                     b.Property<string>("FromEmail")
                         .IsRequired()
                         .HasColumnType("text")
@@ -464,10 +465,23 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("language");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("retry_count");
+
+                    b.Property<int>("RetryInterval")
+                        .HasColumnType("integer")
+                        .HasColumnName("retry_interval");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -489,8 +503,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_template");
 
-                    b.HasIndex("EmailGroupId")
-                        .HasDatabaseName("ix_email_template_email_group_id");
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_email_template_group_id");
 
                     b.ToTable("email_template", (string)null);
                 });
@@ -597,17 +611,21 @@ namespace OnlineSales.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("currency_total");
 
-                    b.Property<string>("CustomerIP")
-                        .HasColumnType("text")
-                        .HasColumnName("customer_ip");
-
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer")
                         .HasColumnName("customer_id");
 
+                    b.Property<string>("CustomerIp")
+                        .HasColumnType("text")
+                        .HasColumnName("customer_ip");
+
                     b.Property<string>("Data")
                         .HasColumnType("jsonb")
                         .HasColumnName("data");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasColumnType("numeric")
+                        .HasColumnName("exchange_rate");
 
                     b.Property<string>("OrderNumber")
                         .HasColumnType("text")
@@ -783,10 +801,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Lang")
+                    b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("lang");
+                        .HasColumnName("language");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -941,8 +959,10 @@ namespace OnlineSales.Migrations
                 {
                     b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
                         .WithMany()
-                        .HasForeignKey("EmailGroupId")
-                        .HasConstraintName("fk_email_template_email_group_email_group_id");
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_email_template_email_group_group_id");
 
                     b.Navigation("Group");
                 });
