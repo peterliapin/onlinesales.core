@@ -1,4 +1,4 @@
-﻿// <copyright file="AutoMapperProfiles.cs" company="WavePoint Co. Ltd.">
+// <copyright file="AutoMapperProfiles.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -43,6 +43,11 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<EmailTemplate, EmailTemplateUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<CustomerCreateDto, Customer>().ReverseMap();
+        CreateMap<CustomerUpdateDto, Customer>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Customer, CustomerUpdateDto>()
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();
         CreateMap<EmailGroupUpdateDto, EmailGroup>()

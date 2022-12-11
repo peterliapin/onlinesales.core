@@ -55,4 +55,9 @@ public class OrderItem : BaseEntity
     /// Gets or sets total amount of all items in the current order.
     /// </summary>
     public int Quantity { get; set; }
+
+    /// <summary>
+    /// Gets or sets unit price.
+    /// </summary>
+    public decimal UnitPrice { get; set; }
 }

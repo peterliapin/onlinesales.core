@@ -61,6 +61,11 @@ public class Order : BaseEntity
     public int Quantity { get; set; }
 
     /// <summary>
+    /// Gets or sets exchange rate to the payout currency.
+    /// </summary>
+    public decimal ExchangeRateToPayOutCurrency { get; set; }
+
+    /// <summary>
     /// Gets or sets affiliate Name.
     /// </summary>
     public string? AffiliateName { get; set; }

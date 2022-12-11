@@ -108,6 +108,15 @@ public class BaseTest : IDisposable
         return location;
     }
 
+    protected async Task<HttpResponseMessage> Patch(string url, object payload)
+    {
+        var content = PayloadToStringContent(payload);
+
+        var response = await Client.PatchAsync(url, content);
+
+        return response;
+    }
+
     protected async Task<HttpResponseMessage> PatchTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
         var content = PayloadToStringContent(payload);
