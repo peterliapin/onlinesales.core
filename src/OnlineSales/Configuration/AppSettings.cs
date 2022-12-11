@@ -57,6 +57,15 @@ public class ImagesConfig
     public string? CacheTime { get; set; }
 }
 
+public class TaskConfig
+{
+    public string CronSchedule { get; set; } = string.Empty;
+
+    public int RetryCount { get; set; }
+
+    public int RetryInterval { get; set; }
+}
+
 public class CacheProfileSettings
 {
     public string Type { get; set; } = string.Empty;

@@ -13,6 +13,7 @@ using OnlineSales.Data;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
+using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
@@ -62,6 +63,7 @@ public class Program
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureEmailServices(builder);
+        ConfigureTasks(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -273,9 +275,14 @@ public class Program
 
     private static void ConfigureEmailServices(WebApplicationBuilder builder)
     {
-        // builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
+        builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
 
-        // builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
+        builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
+    }
+
+    private static void ConfigureTasks(WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<ITask, CustomerScheduledEmail>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)
