@@ -46,8 +46,9 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<CustomerCreateDto, Customer>().ReverseMap();
         CreateMap<CustomerUpdateDto, Customer>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));                   
         CreateMap<Customer, CustomerUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));                   
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();
         CreateMap<EmailGroupUpdateDto, EmailGroup>()
