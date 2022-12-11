@@ -33,7 +33,7 @@ namespace OnlineSales.Entities
         public int GroupId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey("EmailGroupId")]
+        [ForeignKey("GroupId")]
         public virtual EmailGroup? Group { get; set; }
 
         [Required]

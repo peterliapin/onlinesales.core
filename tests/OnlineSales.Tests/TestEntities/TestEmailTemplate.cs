@@ -15,6 +15,5 @@ public class TestEmailTemplate : EmailTemplateCreateDto
         BodyTemplate = "TestEmailTemaplteSubjectBodyTemplate";
         FromEmail = "TestEmailTemaplteSubjectFromEmail";
         FromName = "TestEmailTemaplteFromName";
-        GroupId = 999;
     }
 }
