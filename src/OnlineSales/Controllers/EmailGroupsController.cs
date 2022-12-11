@@ -1,4 +1,4 @@
-// <copyright file="CustomersController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="EmailGroupsController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -11,10 +11,10 @@ using OnlineSales.Entities;
 namespace OnlineSales.Controllers;
 
 [Route("api/[controller]")]
-public class CustomersController : BaseController<Customer, CustomerCreateDto, CustomerUpdateDto>
+public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto>
 {
-    public CustomersController(ApiDbContext dbContext, IMapper mapper)
-        : base(dbContext, mapper)
+    public EmailGroupsController(ApiDbContext dbContext, IMapper mapper)
+    : base(dbContext, mapper)
     {
     }
 }

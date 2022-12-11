@@ -11,7 +11,7 @@ using OnlineSales.Plugin.Vsto.Data;
 
 namespace OnlineSales.Plugin.Vsto.Migrations
 {
-    [DbContext(typeof(PluginDbContext))]
+    [DbContext(typeof(VstoDbContext))]
     [Migration("20221205154039_AddVstoUserVersionTable")]
     partial class AddVstoUserVersionTable
     {

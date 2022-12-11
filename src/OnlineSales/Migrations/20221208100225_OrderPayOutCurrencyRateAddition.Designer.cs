@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221208100225_OrderPayOutCurrencyRateAddition")]
+    partial class OrderPayOutCurrencyRateAddition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,11 +267,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("language");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -448,6 +446,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
+                    b.Property<int?>("EmailGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_group_id");
+
                     b.Property<string>("FromEmail")
                         .IsRequired()
                         .HasColumnType("text")
@@ -462,23 +464,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("group_id");
 
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("language");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<int>("RetryCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("retry_count");
-
-                    b.Property<int>("RetryInterval")
-                        .HasColumnType("integer")
-                        .HasColumnName("retry_interval");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -500,8 +489,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_template");
 
-                    b.HasIndex("GroupId")
-                        .HasDatabaseName("ix_email_template_group_id");
+                    b.HasIndex("EmailGroupId")
+                        .HasDatabaseName("ix_email_template_email_group_id");
 
                     b.ToTable("email_template", (string)null);
                 });
@@ -798,10 +787,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<string>("Language")
+                    b.Property<string>("Lang")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("language");
+                        .HasColumnName("lang");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -956,10 +945,8 @@ namespace OnlineSales.Migrations
                 {
                     b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
                         .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_email_template_email_group_group_id");
+                        .HasForeignKey("EmailGroupId")
+                        .HasConstraintName("fk_email_template_email_group_email_group_id");
 
                     b.Navigation("Group");
                 });
