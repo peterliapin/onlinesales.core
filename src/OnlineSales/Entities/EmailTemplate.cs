@@ -33,7 +33,20 @@ namespace OnlineSales.Entities
         public int GroupId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey("EmailGroupId")]
+        [ForeignKey("GroupId")]
         public virtual EmailGroup? Group { get; set; }
+
+        [Required]
+        public string Language { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets how many times an email should resend once sending failed.
+        /// </summary>
+        public int RetryCount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the frequency in minutes where an email should resend after a failed attempt.
+        /// </summary>
+        public int RetryInterval { get; set; }
     }
 }

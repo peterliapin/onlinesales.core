@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OnlineSales.Data;
+using OnlineSales.Interfaces;
+using OnlineSales.Tests.TestServices;
 
 namespace OnlineSales.Tests.Environment;
 
@@ -34,7 +36,7 @@ public class TestApplication : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // nothing here yet
+            services.AddScoped<IEmailService, TestEmailService>();
         });
 
         return base.CreateHost(builder);

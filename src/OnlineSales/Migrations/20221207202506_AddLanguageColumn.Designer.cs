@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221207202506_AddLanguageColumn")]
+    partial class AddLanguageColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -448,6 +451,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
+                    b.Property<int?>("EmailGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_group_id");
+
                     b.Property<string>("FromEmail")
                         .IsRequired()
                         .HasColumnType("text")
@@ -472,14 +479,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<int>("RetryCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("retry_count");
-
-                    b.Property<int>("RetryInterval")
-                        .HasColumnType("integer")
-                        .HasColumnName("retry_interval");
-
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("text")
@@ -500,8 +499,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_template");
 
-                    b.HasIndex("GroupId")
-                        .HasDatabaseName("ix_email_template_group_id");
+                    b.HasIndex("EmailGroupId")
+                        .HasDatabaseName("ix_email_template_email_group_id");
 
                     b.ToTable("email_template", (string)null);
                 });
@@ -620,10 +619,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("data");
 
-                    b.Property<decimal>("ExchangeRateToPayOutCurrency")
-                        .HasColumnType("numeric")
-                        .HasColumnName("exchange_rate_to_pay_out_currency");
-
                     b.Property<string>("OrderNumber")
                         .HasColumnType("text")
                         .HasColumnName("order_number");
@@ -717,10 +712,6 @@ namespace OnlineSales.Migrations
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric")
                         .HasColumnName("total");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric")
-                        .HasColumnName("unit_price");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -956,10 +947,8 @@ namespace OnlineSales.Migrations
                 {
                     b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
                         .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_email_template_email_group_group_id");
+                        .HasForeignKey("EmailGroupId")
+                        .HasConstraintName("fk_email_template_email_group_email_group_id");
 
                     b.Navigation("Group");
                 });

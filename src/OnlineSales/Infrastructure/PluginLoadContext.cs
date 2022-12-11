@@ -16,7 +16,7 @@ internal sealed class PluginLoadContext : AssemblyLoadContext
 
     public PluginLoadContext(string pluginPath)
     {
-        resolver = new AssemblyDependencyResolver(pluginPath.Replace('\\', Path.DirectorySeparatorChar));
+        resolver = new AssemblyDependencyResolver(pluginPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
     }
 
     protected override Assembly Load(AssemblyName assemblyName)

@@ -1,0 +1,26 @@
+﻿This file describes the folders structure of VSTO data on the local file system.
+Tegs (words in angle brackets like <ROOT>) mean certain variable values, which are explained below.
+
+<ROOT>  \<SUBFOLDER1>
+        \<SUBFILDER2>
+        ...
+        \<SUBFILDERn>   \Setup.exe
+                        \<RESOURCE_NAME>.vsto
+                        \Application Files  \<RESOURCE_NAME>_<VERSION_1>
+                                            \<RESOURCE_NAME>_<VERSION_2>
+                                            ...
+                                            \<RESOURCE_NAME>_<VERSION_n>    \<RESOURCE_NAME>.vsto
+                                                                            \<FILE_1>
+                                                                            \<FILE_2>
+                                                                            \...
+                                                                            \<FILE_n>
+
+<ROOT>          - the root folder of data, providing with the plugin, in the file system. It is specified in pluginsettings.json via the 'LocalPath' parameter.
+                It may start from slash '/' (the path from local root directory), from drive name ('C:', 'X:'...) or from optional dot '.'.
+                In the last case the plugin starts looking for data from its assembly folder.
+<SUBFOLDER>     - an optional subfolder under the root one. Could be used to separate different languages (EN, RU, etc.) or different variants of resource
+                (Comunity, Professional, Ultimate...). This subfolder may be combined (contains of a few folders) or empty.
+<RESOURCE_NAME> - the name of downloaded resource.
+<VERSION_X>     - version of resource, when dotes '.' is replaced with underscore '_'.
+                E.g., if the version is 4.5.0.14999 then this tag contains value '4_5_0_14999'.
+<FILE_X>        - some files, of which the resource contains (assemplies, data files, etc.).

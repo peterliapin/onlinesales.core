@@ -31,7 +31,7 @@ public class PostCreateDto
     public string Author { get; set; } = string.Empty;
 
     [Required]
-    public string Lang { get; set; } = string.Empty;
+    public string Language { get; set; } = string.Empty;
 
     public string Categories { get; set; } = string.Empty;
 
@@ -58,7 +58,7 @@ public class PostUpdateDto
 
     public string? Author { get; set; }
 
-    public string? Lang { get; set; }
+    public string? Language { get; set; }
 
     public string? Categories { get; set; }
 

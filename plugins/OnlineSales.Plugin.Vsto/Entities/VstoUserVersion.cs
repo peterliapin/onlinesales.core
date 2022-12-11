@@ -16,5 +16,7 @@ public class VstoUserVersion
     public string Version { get; set; } = string.Empty;
 
     public DateTime ExpireDateTime { get; set; }
+
+    public string Subfolder { get; set; } = string.Empty;
 }
 
