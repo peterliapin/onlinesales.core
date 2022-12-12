@@ -5,8 +5,11 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NSwag.Generation.AspNetCore;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -168,6 +171,8 @@ public class Program
             options.LowercaseUrls = true;
             options.LowercaseQueryStrings = true;
         });
+
+        builder.Services.AddControllers(options => options.Conventions.Add(new RouteTokenTransformerConvention(new RouteToKebabCase())));
     }
 
     private static void ConfigureControllers(WebApplicationBuilder builder)
