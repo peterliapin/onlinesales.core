@@ -10,16 +10,10 @@ namespace OnlineSales.Data;
 
 public abstract class PluginDbContextBase : ApiDbContext
 {
-    // This constructor is required in the migration source files generation process only
-    // (see the 'dotnet ef migrations' command)
-#if MIGRATION
-    // NB! Do not forget to add a default construcot to your class, devived from PluginDbContextBase,
-    // under #if MIGRATION/#endif like here.
     protected PluginDbContextBase()
         : base()
     {
     }
-#endif
 
     protected PluginDbContextBase(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)

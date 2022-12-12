@@ -11,12 +11,10 @@ namespace OnlineSales.Plugin.Vsto.Data;
 
 public class VstoDbContext : PluginDbContextBase
 {
-#if MIGRATION
     public VstoDbContext()
         : base()
     {
     }
-#endif
 
     public VstoDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
