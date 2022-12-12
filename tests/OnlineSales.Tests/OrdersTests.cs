@@ -12,7 +12,7 @@ public class OrdersTests : BaseTest
 {
     private static readonly string UrlOrders = "/api/orders";
     private static readonly string UrlOrdersNotFound = UrlOrders + "/404";
-    private static readonly string UrlOrderItems = "/api/orderitems";
+    private static readonly string UrlOrderItems = "/api/order-items";
 
     [Fact]
     public async Task GetOrderNotFoundTest()

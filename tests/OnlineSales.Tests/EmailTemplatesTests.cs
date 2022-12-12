@@ -10,8 +10,8 @@ namespace OnlineSales.Tests;
 
 public class EmailTemplatesTests : BaseTest
 {
-    private readonly string urlEmailTemplates = "/api/emailtemplates";
-    private readonly string urlEmailTemplatesNotFound = "/api/emailtemplates" + "/404";
+    private readonly string urlEmailTemplates = "/api/email-templates";
+    private readonly string urlEmailTemplatesNotFound = "/api/email-templates" + "/404";
 
     [Fact]
     public async Task GetEmailTemplateNotFoundTest()
@@ -114,7 +114,7 @@ public class EmailTemplatesTests : BaseTest
     {
         var testEmailGroup = new TestEmailGroup();
 
-        var emailGroupUrl = PostTest("/api/emailgroups", testEmailGroup).Result;
+        var emailGroupUrl = PostTest("/api/email-groups", testEmailGroup).Result;
 
         var emailGroup = GetTest<EmailGroup>(emailGroupUrl).Result;
 
