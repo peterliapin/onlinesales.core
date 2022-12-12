@@ -331,7 +331,7 @@ public class OrdersTests : BaseTest
 
     private (int, string) AddCustomer()
     {
-        var testCustomer = new TestCustomer();
+        var testCustomer = new TestCustomerCreate();
 
         var customerUrl = PostTest("/api/customers", testCustomer).Result;
 
