@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Tests;
 
 public class EmailTemplatesTests : BaseTest
-{
+{    
     private readonly string urlEmailTemplates = "/api/email-templates";
     private readonly string urlEmailTemplatesNotFound = "/api/email-templates" + "/404";
 
@@ -112,7 +112,7 @@ public class EmailTemplatesTests : BaseTest
 
     private (int, string) AddEmailGroup()
     {
-        var testEmailGroup = new TestEmailGroup();
+        var testEmailGroup = new TestEmailGroupCreate();
 
         var emailGroupUrl = PostTest("/api/email-groups", testEmailGroup).Result;
 
