@@ -7,6 +7,7 @@
 
     <IsPackable>false</IsPackable>
     <ReleaseVersion>1.0.14-pre</ReleaseVersion>
+    <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
