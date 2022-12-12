@@ -10,7 +10,7 @@ namespace OnlineSales.Tests;
 
 public class EmailGroupsTests : BaseTest
 {
-    private static readonly string UrlEmailGroups = "/api/emailgroups";
+    private static readonly string UrlEmailGroups = "/api/email-groups";
     private static readonly string UrlEmailGroupsNotFound = UrlEmailGroups + "/404";
 
     [Fact]
