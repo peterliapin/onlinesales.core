@@ -43,7 +43,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetValidLanguage(language));
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(language));
 
             return template!;
         }
@@ -52,18 +52,18 @@ namespace OnlineSales.Services
         {
             var customerLanguage = apiDbContext.Customers!.Where(c => c.Id == customerId).FirstOrDefault() !.Culture;
 
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetValidLanguage(customerLanguage));
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(customerLanguage));
 
             return template!;
         }
 
-        private string GetValidLanguage(string? customerLanguage)
+        private string GetSupportedLanguage(string? language)
         {
             var supportedLanguages = apiDbContext.EmailTemplates!.Select(e => e.Language).Distinct().ToArray();
 
-            if (supportedLanguages.Contains(customerLanguage, StringComparer.OrdinalIgnoreCase))
+            if (supportedLanguages.Contains(language, StringComparer.OrdinalIgnoreCase))
             {
-                return customerLanguage!.ToLower();
+                return language!.ToLower();
             }
 
             return DefaultLanguage;
