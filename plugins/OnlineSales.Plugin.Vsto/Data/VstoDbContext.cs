@@ -11,7 +11,6 @@ namespace OnlineSales.Plugin.Vsto.Data;
 
 public class VstoDbContext : PluginDbContextBase
 {
-    // Default constructor is required for the 'dotnet ef migrations' command.
     public VstoDbContext()
         : base()
     {

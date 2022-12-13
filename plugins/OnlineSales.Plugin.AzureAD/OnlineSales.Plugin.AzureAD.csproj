@@ -1,12 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.0.14-pre</ReleaseVersion>
+    <ReleaseVersion>1.0.15-pre</ReleaseVersion>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,7 +20,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'!='Migration'">
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
@@ -29,5 +30,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="1.25.10" />
     <!-- Insert additional references above this line -->
+  </ItemGroup>
+
+  <!--This ItemGroup is required to support migration generating with the "dotnet ef migrations add" command-->
+  <ItemGroup Condition="'$(Configuration)'=='Migration'">
+    <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
