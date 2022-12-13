@@ -21,9 +21,9 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string templateName, string[] recipients, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
+        public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
         {
-            var template = await GetTemplateByName(templateName);
+            var template = await GetEmailTemplate(templateName, language);
 
             var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
 
@@ -32,16 +32,25 @@ namespace OnlineSales.Services
 
         public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
         {
-            var template = await GetTemplateByName(templateName);
+            var template = await GetEmailTemplate(templateName, customerId);
 
             var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
 
             await emailWithLogService.SendToCustomerAsync(customerId, template.Subject, template.FromEmail, template.FromName, updatedBodyTemplate, attachments, scheduleId, template.Id);
         }
 
-        private async Task<EmailTemplate> GetTemplateByName(string name)
+        private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name);
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
+
+            return template!;
+        }
+
+        private async Task<EmailTemplate> GetEmailTemplate(string name, int customerId)
+        {
+            var customerLanguage = apiDbContext.Customers!.Where(c => c.Id == customerId).FirstOrDefault() !.Culture;
+
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == customerLanguage);
 
             return template!;
         }
