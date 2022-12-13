@@ -34,7 +34,7 @@ namespace OnlineSales.Entities
         public int ScheduleId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey("EmailScheduleId")]
+        [ForeignKey("ScheduleId")]
         public EmailSchedule? Schedule { get; set; }
 
         /// <summary>
