@@ -8,7 +8,7 @@ using OnlineSales.Entities;
  
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate, TestOrderItemUpdate>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto>
 {
     public OrdersItemsTests()
         : base("/api/order-items")
@@ -18,7 +18,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
     [Fact]
     public override async Task CreateItemWithNonExistedFKItemTest()
     {
-        var testItem = new TestOrderItemCreate();
+        var testItem = new TestOrderItem();
         await PostTest(itemsUrl, testItem, HttpStatusCode.NotFound);
     }
 
@@ -37,7 +37,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
             var quantity = i + 1;
             sumQuantity += quantity;
 
-            var testOrderItem = new TestOrderItemCreate
+            var testOrderItem = new TestOrderItem
             {
                 OrderId = orderDetails.Item1,
                 Quantity = quantity,
@@ -90,7 +90,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
 
         for (var i = 0; i < numberOfOrderItems; ++i)
         {
-            var orderItem = new TestOrderItemCreate
+            var orderItem = new TestOrderItem
             {
                 OrderId = orderDetails.Item1,
                 Quantity = i + 1,
@@ -156,7 +156,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
     {
         var orderDetails = await CreateFKItem();
 
-        var orderItem = new TestOrderItemCreate();
+        var orderItem = new TestOrderItem();
         orderItem.OrderId = orderDetails.Item1;
 
         var orderItemUrl = await PostTest(itemsUrl, orderItem);
@@ -244,9 +244,9 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
         }
     }
 
-    protected override async Task<(TestOrderItemCreate, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrderItem, string)> CreateItem(int fkId)
     {
-        var testOrderItem = new TestOrderItemCreate
+        var testOrderItem = new TestOrderItem
         {
             OrderId = fkId,
         };
@@ -256,19 +256,16 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
         return (testOrderItem, newUrl);
     }
 
-    protected override TestOrderItemUpdate UpdateItem(TestOrderItemCreate to)
+    protected override OrderItemUpdateDto UpdateItem(TestOrderItem to)
     {
-        var from = new TestOrderItemUpdate();
-        to.ProductName = from.ProductName ?? to.ProductName;
-        to.LicenseCode = from.LicenseCode ?? to.LicenseCode;
-        to.UnitPrice = from.UnitPrice ?? to.UnitPrice;
-        to.Quantity = from.Quantity ?? to.Quantity;
+        var from = new OrderItemUpdateDto();
+        to.ProductName = from.ProductName = to.ProductName + "Updated";
         return from;
     }
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var customerCreate = new TestCustomerCreate();
+        var customerCreate = new TestCustomer();
 
         var customerUrl = await PostTest("/api/customers", customerCreate);
 
@@ -276,7 +273,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItemCreate,
 
         customer.Should().NotBeNull();
 
-        var orderCreate = new TestOrderCreate();
+        var orderCreate = new TestOrder();
 
         orderCreate.CustomerId = customer!.Id;
 

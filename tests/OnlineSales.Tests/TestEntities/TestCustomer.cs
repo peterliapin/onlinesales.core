@@ -6,18 +6,10 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestCustomerCreate : CustomerCreateDto
+public class TestCustomer : CustomerCreateDto
 {
-    public TestCustomerCreate()
+    public TestCustomer()
     {
         Email = "customer@test.net";
-    }
-}
-
-public class TestCustomerUpdate : CustomerUpdateDto
-{
-    public TestCustomerUpdate()
-    {
-        Email = "customerUpdate@test.net";
     }
 }

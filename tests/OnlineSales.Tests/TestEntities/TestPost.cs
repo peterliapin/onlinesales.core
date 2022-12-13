@@ -7,9 +7,9 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestPostCreateDto : PostCreateDto
+public class TestPost : PostCreateDto
 {
-    public TestPostCreateDto()
+    public TestPost()
     {
         Slug = "Test Slug " + new Random().Next(0, 50000).ToString() + " - " + DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString();
         Template = "Test Template";
@@ -23,24 +23,5 @@ public class TestPostCreateDto : PostCreateDto
         Categories = "This is Categories";
         Tags = "Sample Tags";
         AllowComments = true;
-    }
-}
-
-public class TestPostUpdateDto : PostUpdateDto
-{
-    public TestPostUpdateDto()
-    {
-        Slug = "Test Slug " + new Random().Next(0, 50000).ToString() + " - " + DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString();
-        Template = "Test Template Update";
-        Author = "Peter Liapin Update";
-        Title = "Test Title (via test suit) Update";
-        Description = "This is a sample test description Update";
-        Content = "This is a sample Content Update";
-        CoverImageUrl = "This is a sample Cover Update";
-        CoverImageAlt = "This is a sample Cover alt Update";
-        Language = "ru-RU";
-        Categories = "This is Categories Update";
-        Tags = "Sample Tags Update";
-        AllowComments = false;
     }
 }

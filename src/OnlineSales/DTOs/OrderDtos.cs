@@ -34,7 +34,7 @@ public class OrderUpdateDto
     [Required]
     public string RefNo { get; set; } = string.Empty;
 
-    public string? AffiliateName { get; set; } = string.Empty;
+    public string? AffiliateName { get; set; }
 
     public string? Data { get; set; } 
 }

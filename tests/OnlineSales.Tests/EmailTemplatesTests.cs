@@ -8,16 +8,16 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplateCreate, TestEmailTemplateUpdate>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")
     {
     }
 
-    protected override async Task<(TestEmailTemplateCreate, string)> CreateItem(int fkId)
+    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId)
     {
-        var testEmailTemplate = new TestEmailTemplateCreate
+        var testEmailTemplate = new TestEmailTemplate
         {
             GroupId = fkId,
         };
@@ -29,7 +29,7 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var fkItemCreate = new TestEmailGroupCreate();
+        var fkItemCreate = new TestEmailGroup();
 
         var fkUrl = await PostTest("/api/email-groups", fkItemCreate);
 
@@ -40,14 +40,10 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
         return (fkItem!.Id, fkUrl);
     }
 
-    protected override TestEmailTemplateUpdate UpdateItem(TestEmailTemplateCreate to)
+    protected override EmailTemplateUpdateDto UpdateItem(TestEmailTemplate to)
     {
-        var from = new TestEmailTemplateUpdate();
-        to.Name = from.Name ?? to.Name;
-        to.Subject = from.Subject ?? to.Subject;
-        to.BodyTemplate = from.BodyTemplate ?? to.BodyTemplate;
-        to.FromEmail = from.FromEmail ?? to.FromEmail;
-        to.FromName = from.FromName ?? to.FromName;
+        var from = new EmailTemplateUpdateDto();
+        to.Name = from.Name = to.Name + "Updated";
         return from;
     }
 }

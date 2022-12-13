@@ -7,17 +7,17 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
-public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroupCreate, TestEmailGroupUpdate>
+public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto>
 {
     public EmailGroupsTests()
         : base("/api/email-groups")
     {
     }
 
-    protected override TestEmailGroupUpdate UpdateItem(TestEmailGroupCreate to)
+    protected override EmailGroupUpdateDto UpdateItem(TestEmailGroup to)
     {
-        var from = new TestEmailGroupUpdate();
-        to.Name = from.Name ?? to.Name;
+        var from = new EmailGroupUpdateDto();
+        to.Name = from.Name = to.Name + "Updated";
         return from;
     }
 }

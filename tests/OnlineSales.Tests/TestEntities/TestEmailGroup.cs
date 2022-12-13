@@ -8,18 +8,10 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestEmailGroupCreate : EmailGroupCreateDto
+public class TestEmailGroup : EmailGroupCreateDto
 {
-    public TestEmailGroupCreate()
+    public TestEmailGroup()
     {
         Name = "TestEmailGroup";
-    }
-}
-
-public class TestEmailGroupUpdate : EmailGroupUpdateDto
-{
-    public TestEmailGroupUpdate()
-    {
-        Name = "TestEmailGroupUpdate";
     }
 }

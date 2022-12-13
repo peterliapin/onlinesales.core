@@ -8,11 +8,19 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrderCreate, TestOrderUpdate>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 {
     public OrdersTests()
         : base("/api/orders")
     {
+    }
+
+    [Fact]
+    public override async Task UpdateItemNotFoundTest()
+    {
+        var updateOrder = new OrderUpdateDto();
+        updateOrder.RefNo = "1111";
+        await PatchTest(itemsUrlNotFound, updateOrder, HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -59,9 +67,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrderCreate, TestOrderUpd
         }
     }
 
-    protected override async Task<(TestOrderCreate, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrder, string)> CreateItem(int fkId)
     {
-        var testOrder = new TestOrderCreate
+        var testOrder = new TestOrder
         {
             CustomerId = fkId,
         };
@@ -71,18 +79,16 @@ public class OrdersTests : TableWithFKTests<Order, TestOrderCreate, TestOrderUpd
         return (testOrder, newUrl);
     }
 
-    protected override TestOrderUpdate UpdateItem(TestOrderCreate to)
+    protected override OrderUpdateDto UpdateItem(TestOrder to)
     {
-        var from = new TestOrderUpdate();
-        to.RefNo = from.RefNo;
-        to.AffiliateName = from.AffiliateName ?? to.AffiliateName;
-        to.Data = from.Data ?? to.Data;
+        var from = new OrderUpdateDto();
+        to.RefNo = from.RefNo = to.RefNo + "1";
         return from;
     }
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var fkItemCreate = new TestCustomerCreate();
+        var fkItemCreate = new TestCustomer();
 
         var fkUrl = await PostTest("/api/customers", fkItemCreate);
 
