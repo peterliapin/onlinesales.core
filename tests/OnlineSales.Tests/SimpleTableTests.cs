@@ -14,8 +14,8 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     where TC : new()
     where TU : new()
 {
-    private readonly string itemsUrl;
-    private readonly string itemsUrlNotFound;
+    protected readonly string itemsUrl;
+    protected readonly string itemsUrlNotFound;
 
     protected SimpleTableTests(string url)
     {
