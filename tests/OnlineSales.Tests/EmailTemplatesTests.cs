@@ -8,10 +8,10 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplateCreate, TestEmailTemplateUpdate, EmailGroup, TestEmailGroupCreate>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplateCreate, TestEmailTemplateUpdate>
 {
     public EmailTemplatesTests()
-        : base("/api/email-templates", "/api/email-groups")
+        : base("/api/email-templates")
     {
     }
 
@@ -27,9 +27,17 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
         return (testEmailTemplate, newEmailTemplateUrl);
     }
 
-    protected override void ChangeFKId(TestEmailTemplateUpdate item, int fkId)
+    protected override async Task<(int, string)> CreateFKItem()
     {
-        item.GroupId = fkId;
+        var fkItemCreate = new TestEmailGroupCreate();
+
+        var fkUrl = await PostTest("/api/email-groups", fkItemCreate);
+
+        var fkItem = await GetTest<EmailGroup>(fkUrl);
+
+        fkItem.Should().NotBeNull();
+
+        return (fkItem!.Id, fkUrl);
     }
 
     protected override TestEmailTemplateUpdate UpdateItem(TestEmailTemplateCreate to)

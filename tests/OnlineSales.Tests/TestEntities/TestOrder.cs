@@ -8,9 +8,9 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestOrder : OrderCreateDto
+public class TestOrderCreate : OrderCreateDto
 {
-    public TestOrder()
+    public TestOrderCreate()
     {
         RefNo = "1000";
         Currency = "USD";
@@ -18,19 +18,27 @@ public class TestOrder : OrderCreateDto
     }
 }
 
-public class TestOrderWithQuantity : TestOrder
+public class TestOrderUpdate : OrderUpdateDto
+{
+    public TestOrderUpdate()
+    {
+        RefNo = "1001";
+    }
+}
+
+public class TestOrderWithQuantity : TestOrderCreate
 {
     [Required]
     public int Quantity { get; set; } = 10;
 }
 
-public class TestOrderWithTotal : TestOrder
+public class TestOrderWithTotal : TestOrderCreate
 {
     [Required]
     public decimal Total { get; set; } = 10;
 }
 
-public class TestOrderWithCurrencyTotal : TestOrder
+public class TestOrderWithCurrencyTotal : TestOrderCreate
 {
     [Required]
     public decimal CurrencyTotal { get; set; } = 10;

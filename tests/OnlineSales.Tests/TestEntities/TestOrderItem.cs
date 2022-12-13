@@ -8,15 +8,26 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestOrderItem : OrderItemCreateDto
+public class TestOrderItemCreate : OrderItemCreateDto
 {
-    public TestOrderItem()
+    public TestOrderItemCreate()
     {
         Currency = "USD";
         LicenseCode = "LicenseCode";
         ProductName = "ProductName";
         UnitPrice = 1.99m;
         Quantity = 1;
+    }
+}
+
+public class TestOrderItemUpdate : OrderItemUpdateDto
+{
+    public TestOrderItemUpdate()
+    {
+        LicenseCode = "LicenseCodeUpdated";
+        ProductName = "ProductNameUpdated";
+        UnitPrice = 2.99m;
+        Quantity = 2;
     }
 }
 

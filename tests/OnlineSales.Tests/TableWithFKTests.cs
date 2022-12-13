@@ -10,39 +10,21 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public abstract class TableWithFKTests<T, TC, TU, TFK, TFKC> : SimpleTableTests<T, TC, TU>
+public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
     where T : BaseEntity
     where TC : new()
     where TU : new()
-    where TFK : BaseEntity
-    where TFKC : new()
 {
-    private readonly string fkItemsUrl;
-
-    protected TableWithFKTests(string url, string fkItemsUrl)
+    protected TableWithFKTests(string url)
         : base(url)
     {
-        this.fkItemsUrl = fkItemsUrl;
     }
 
     [Fact]
-    public async Task CreateItemWithNonExistedFKItemTest()
+    public virtual async Task CreateItemWithNonExistedFKItemTest()
     {
         var testItem = new TC();
         await PostTest(itemsUrl, testItem, HttpStatusCode.InternalServerError);
-    }
-
-    [Fact]
-
-    public async Task UpdateItemWithNonExistedFKItemTest()
-    {
-        var testCreateItem = await CreateItem();
-
-        var testUpdateItem = UpdateItem(testCreateItem.Item1);
-
-        ChangeFKId(testUpdateItem, 999);
-
-        await PatchTest(testCreateItem.Item2, testUpdateItem!, HttpStatusCode.InternalServerError);
     }
 
     [Fact]
@@ -72,18 +54,7 @@ public abstract class TableWithFKTests<T, TC, TU, TFK, TFKC> : SimpleTableTests<
         }             
     }
 
-    protected async Task<(int, string)> CreateFKItem()
-    {
-        var fkItemCreate = new TFKC();
-
-        var fkUrl = await PostTest(fkItemsUrl, fkItemCreate);
-
-        var fkItem = await GetTest<TFK>(fkUrl);
-
-        fkItem.Should().NotBeNull();
-
-        return (fkItem!.Id, fkUrl);
-    }
+    protected abstract Task<(int, string)> CreateFKItem();
 
     protected override async Task<(TC, string)> CreateItem()
     {
@@ -95,6 +66,4 @@ public abstract class TableWithFKTests<T, TC, TU, TFK, TFKC> : SimpleTableTests<
     }
 
     protected abstract Task<(TC, string)> CreateItem(int fkId);
-
-    protected abstract void ChangeFKId(TU item, int fkId);
 }

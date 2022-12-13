@@ -42,7 +42,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task UpdateItemNotFoundTest()
     {
-        await PatchTest(itemsUrlNotFound, new { }, HttpStatusCode.NotFound);
+        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.NotFound);
     }
 
     [Fact]

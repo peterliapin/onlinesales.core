@@ -28,8 +28,6 @@ public class OrderItemCreateDto
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
     public int Quantity { get; set; } = 0;
-
-    public string Data { get; set; } = string.Empty;
 }
 
 public class OrderItemUpdateDto
