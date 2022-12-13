@@ -21,11 +21,3 @@ public class TestCustomerUpdate : CustomerUpdateDto
         Email = "customerUpdate@test.net";
     }
 }
-
-public class TestCustomerConverter : ITestTypeConverter<TestCustomerUpdate, TestCustomerCreate>
-{
-    public void Convert(TestCustomerUpdate from, TestCustomerCreate to)
-    {
-        to.Email = from.Email ?? to.Email;
-    }
-}

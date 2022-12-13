@@ -44,22 +44,3 @@ public class TestPostUpdateDto : PostUpdateDto
         AllowComments = false;
     }
 }
-
-public class TestPostConverter : ITestTypeConverter<TestPostUpdateDto, TestPostCreateDto>
-{
-    public void Convert(TestPostUpdateDto from, TestPostCreateDto to)
-    {
-        to.Slug = from.Slug ?? to.Slug;
-        to.Template = from.Template ?? to.Template;
-        to.Author = from.Author ?? to.Author;
-        to.Title = from.Title ?? to.Title;
-        to.Description = from.Description ?? to.Description;
-        to.Content = from.Content ?? to.Content;
-        to.CoverImageAlt = from.CoverImageAlt ?? to.CoverImageAlt;
-        to.CoverImageUrl = from.CoverImageUrl ?? to.CoverImageUrl;
-        to.Language = from.Language ?? to.Language;
-        to.Categories = from.Categories ?? to.Categories;
-        to.Tags = from.Tags ?? to.Tags;
-        to.AllowComments = from.AllowComments ?? to.AllowComments;
-    }
-}

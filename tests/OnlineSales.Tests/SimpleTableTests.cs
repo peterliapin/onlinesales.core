@@ -9,11 +9,10 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU, TUTCConverter> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     where T : BaseEntity
     where TC : new()
     where TU : new()
-    where TUTCConverter : ITestTypeConverter<TU, TC>, new()
 {
     private readonly string itemsUrl;
     private readonly string itemsUrlNotFound;
@@ -51,14 +50,9 @@ public abstract class SimpleTableTests<T, TC, TU, TUTCConverter> : BaseTest
     {      
         var testCreateItem = await CreateItem();
 
-        var testUpdateItem = new TU();
+        var testUpdateItem = UpdateItem(testCreateItem.Item1);
 
-        testCreateItem.Item1 = new TC();
-
-        var conv = new TUTCConverter();
-        conv.Convert(testUpdateItem, testCreateItem.Item1);
-
-        await PatchTest(testCreateItem.Item2, testUpdateItem);
+        await PatchTest(testCreateItem.Item2, testUpdateItem!);
 
         var item = await GetTest<T>(testCreateItem.Item2);
 
@@ -81,7 +75,7 @@ public abstract class SimpleTableTests<T, TC, TU, TUTCConverter> : BaseTest
         await GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
     }
 
-    private async Task<(TC, string)> CreateItem()
+    protected virtual async Task<(TC, string)> CreateItem()
     {
         var testCreateItem = new TC();
 
@@ -90,18 +84,5 @@ public abstract class SimpleTableTests<T, TC, TU, TUTCConverter> : BaseTest
         return (testCreateItem, newItemUrl);
     }
 
-    private async Task CreateAndUpdateItemTestInternal(Func<int, TC> creator)
-    {
-        var testCreateItem = await CreateItem();
-
-        var testUpdateItem = new TU();
-
-        testCreateItem.Item1 = creator(1);
-
-        await PatchTest(testCreateItem.Item2, testUpdateItem);
-
-        var item = await GetTest<T>(testCreateItem.Item2);
-
-        item.Should().BeEquivalentTo(testCreateItem.Item1);
-    }
+    protected abstract TU UpdateItem(TC createdItem);
 }

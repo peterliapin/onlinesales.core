@@ -8,10 +8,17 @@ using OnlineSales.Entities;
 using OnlineSales.Tests.TestEntities;
 
 namespace OnlineSales.Tests;
-public class CustomersTests : SimpleTableTests<Customer, TestCustomerCreate, TestCustomerUpdate, TestCustomerConverter>
+public class CustomersTests : SimpleTableTests<Customer, TestCustomerCreate, TestCustomerUpdate>
 {
     public CustomersTests()
         : base("/api/customers")
     {
+    }
+
+    protected override TestCustomerUpdate UpdateItem(TestCustomerCreate to)
+    {
+        var from = new TestCustomerUpdate();
+        to.Email = from.Email ?? to.Email;
+        return from;
     }
 }

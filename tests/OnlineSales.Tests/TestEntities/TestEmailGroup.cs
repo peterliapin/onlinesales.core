@@ -23,11 +23,3 @@ public class TestEmailGroupUpdate : EmailGroupUpdateDto
         Name = "TestEmailGroupUpdate";
     }
 }
-
-public class TestEmailGroupConverter : ITestTypeConverter<TestEmailGroupUpdate, TestEmailGroupCreate>
-{
-    public void Convert(TestEmailGroupUpdate from, TestEmailGroupCreate to)
-    {
-        to.Name = from.Name ?? to.Name;
-    }
-}

@@ -9,11 +9,6 @@ using FluentAssertions;
 
 namespace OnlineSales.Tests;
 
-public interface ITestTypeConverter<TU, TC>
-{
-    public void Convert(TU from, TC to);
-}
-
 public class BaseTest : IDisposable
 {
     protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
