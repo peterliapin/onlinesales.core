@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Mvc.Formatters;
 using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestPostCreateDto : PostCreateDto
+public class TestPost : PostCreateDto
 {
-    public TestPostCreateDto()
+    public TestPost()
     {
         Slug = "Test Slug " + new Random().Next(0, 50000).ToString() + " - " + DateTime.Now.Year.ToString() + "-" + DateTime.Now.Month.ToString() + "-" + DateTime.Now.Day.ToString();
         Template = "Test Template";

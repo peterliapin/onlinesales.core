@@ -96,7 +96,7 @@ namespace OnlineSales.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -106,7 +106,7 @@ namespace OnlineSales.Controllers
             {
                 await orderItemService.DeleteOrderItem(id);
 
-                return Ok();
+                return NoContent();
             }
             catch (KeyNotFoundException knfe)
             {
