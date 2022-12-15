@@ -69,7 +69,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return UnprocessableEntity(ModelState);
+                return BadRequest(ModelState);
             }
 
             var newValue = mapper.Map<T>(value);
@@ -91,7 +91,7 @@ namespace OnlineSales.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return UnprocessableEntity(ModelState);
+                    return BadRequest(ModelState);
                 }
 
                 var existingEntity = await (from p in this.dbSet

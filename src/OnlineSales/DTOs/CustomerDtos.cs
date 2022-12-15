@@ -41,6 +41,7 @@ public class CustomerUpdateDto
 
     public string? FirstName { get; set; }
 
+    [EmailAddress]
     public string? Email { get; set; }
 
     public string? CompanyName { get; set; }
