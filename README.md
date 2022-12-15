@@ -11,6 +11,9 @@
     - [Running automated test suite](#run-test-project)
     - [Working with Database Migrations](#working-with-migrations)
 - [Plugin integration](#plugin-integration)
+    - [Default plugins](#default-plugin)
+    - [Adding a new plugin](#new-plugin)
+    - [Plugin level migrations](#plugin-migrations)
 
 <a id="overview"></a>
 ## Overview
@@ -171,3 +174,20 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
 
 <a id="plugin-integration"></a>
 ## Plugin integration
+
+<!--- TO DO -->
+
+<a id="default-plugin"></a>
+### Default plugins
+
+<!--- TO DO -->
+
+<a id="new-plugin"></a>
+### Adding a new plugin
+
+<!--- TO DO -->
+
+<a id="plugin-migrations"></a>
+### Plugin level migrations
+
+<!--- TO DO -->
