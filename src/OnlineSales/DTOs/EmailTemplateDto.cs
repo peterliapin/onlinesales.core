@@ -25,6 +25,9 @@ public class EmailTemplateCreateDto
     public string FromName { get; set; } = string.Empty;
 
     [Required]
+    public string Language { get; set; } = string.Empty;
+
+    [Required]
     public int GroupId { get; set; }
 }
 

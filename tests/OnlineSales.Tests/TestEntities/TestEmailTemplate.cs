@@ -16,6 +16,7 @@ public class TestEmailTemplate : EmailTemplateCreateDto
         BodyTemplate = "TestEmailTemaplteSubjectBodyTemplate";
         FromEmail = "test@test.net";
         FromName = "TestEmailTemaplteFromName";
+        Language = "en";
         GroupId = 1;
     }
 }
