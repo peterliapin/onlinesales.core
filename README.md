@@ -2,14 +2,15 @@
 
 - [Overview](#overview)
 - [Sites powered by OnlineSales](#sites-powered-by-onlinesales)
-- [Getting Started](#getting-started)
+- [Getting started](#getting-started)
     - [Overview of the Solution Structure](#overview-solution-structure)
     - [Pre-requisites for development environment setup](#prerequisites)
     - [Setting up docker containers](#setup-docker-containers)
     - [Secrets management](#secrets-management)
-    - [Run or Debug the project in local environment](#run-project)
+    - [Debugging the project in local environment](#run-project)
     - [Running automated test suite](#run-test-project)
     - [Working with Database Migrations](#working-with-migrations)
+- [Plugin integration](#plugin-integration)
 
 <a id="overview"></a>
 ## Overview
@@ -24,7 +25,7 @@ OnlineSale is a light-weight, extendable headless CMS written in .NET 7. It is u
 - [TagPoint](https://tagpoint.co.uk) - easy-to-use app to take care of your facilities | assets | services
 
 <a id="getting-started"></a>
-## Getting Started
+## Getting started
 
 <a id="overview-solution-structure"></a>
 ### Overview of the Solution Structure
@@ -45,8 +46,8 @@ OnlineSale is a light-weight, extendable headless CMS written in .NET 7. It is u
     * Download [docker desktop](https://docs.docker.com/desktop/install/windows-install/)
 
     * Prerequisites for docker installation:
-        * CPU virtualization should be enabled in BIOS settings.
-        * Hyper-V and Containers windows features should be enabled.
+        * `CPU virtualization` should be enabled in BIOS settings.
+        * `Hyper-V` and `Containers` windows features should be enabled.
 
 2. Install [.NET 7 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 
@@ -59,8 +60,8 @@ OnlineSale is a light-weight, extendable headless CMS written in .NET 7. It is u
 ### Setting up docker containers
 
 OnlineSales platform integrates with two databases initially.
-- PostgreSQL
-- Elasticsearch
+1. PostgreSQL
+2. Elasticsearch
 
 * Docker containers should be created to run database services for development and testing environments.
 
@@ -126,9 +127,9 @@ It will maintain a `secrets.json` file internally to store any configuration.
 
 2. Update the `secrets.json` file with required secrets in the format same as the `appsettings.json` file.
 
-Secrets of the appsettings.tests.json file can also be managed using Secret Manager in the test project.
+Secrets of the `appsettings.tests.json` file can also be managed using Secret Manager in the test project.
 
-At runtime, secrets of `appsettings.json` file (or appsettings.tests.json) will be replaced by the values of secrets.json.
+At runtime, secrets of `appsettings.json` file (or appsettings.tests.json) will be replaced by the values of `secrets.json`.
 
 #### Updating appsettings secrets in pipeline
 
@@ -136,10 +137,10 @@ Secrets are stored as `Variables` in the pipeline and can be marked as secrets.
 
 Pipeline variables should be assigned to Environment variables in the pipeline script.
 
-At pipeline runtime, secrets of appsettings.json file (or appsettings.unittest.json) will be replaced by the corresponding environment variables.
+At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest.json) will be replaced by the corresponding environment variables.
 
 <a id="run-project"></a>
-### Run or Debug the project in local environment
+### Debugging the project in local environment
 
 1. Make sure above pre-requisites and configuration settings are completed.
 
@@ -167,3 +168,6 @@ At pipeline runtime, secrets of appsettings.json file (or appsettings.unittest.j
 * However, migrations can be applied manually if need using [entity framework core commands](https://learn.microsoft.com/en-us/ef/core/cli/dotnet#using-the-tools) in a command line interface or package manager console.
 
 * When a model is updated, a new migration script should be generated to update the database using [entity framework core commands](https://learn.microsoft.com/en-us/ef/core/cli/dotnet#using-the-tools) following the existing naming conventions.
+
+<a id="plugin-integration"></a>
+## Plugin integration
