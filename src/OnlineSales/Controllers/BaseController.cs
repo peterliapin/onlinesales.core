@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 
@@ -54,7 +55,7 @@ namespace OnlineSales.Controllers
 
             if (result == null)
             {
-                return NotFound();
+                return CreateNotFoundObject(id);
             }
 
             return Ok(result);
@@ -100,7 +101,7 @@ namespace OnlineSales.Controllers
 
                 if (existingEntity == null)
                 {
-                    return NotFound();
+                    return CreateNotFoundObject(id);
                 }
 
                 mapper.Map(value, existingEntity);
@@ -129,7 +130,7 @@ namespace OnlineSales.Controllers
 
             if (existingEntity == null)
             {
-                return NotFound();
+                return CreateNotFoundObject(id);
             }
 
             dbContext.Remove(existingEntity);
@@ -137,6 +138,11 @@ namespace OnlineSales.Controllers
             await dbContext.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private NotFoundObjectResult CreateNotFoundObject(int id)
+        {
+            return NotFound(JsonConvert.SerializeObject(new { Id = new string[] { string.Format("The Id field with value = {0} is not found", id) } }, Formatting.Indented));
         }
     }
 }
