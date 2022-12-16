@@ -13,7 +13,7 @@
 - [Plugin integration](#plugin-integration)
     - [Default plugins](#default-plugin)
     - [Adding a new plugin](#new-plugin)
-    - [Plugin level migrations](#plugin-migrations)
+    - [Plugin-level migrations](#plugin-migrations)
 
 <a id="overview"></a>
 ## Overview
@@ -175,19 +175,79 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
 <a id="plugin-integration"></a>
 ## Plugin integration
 
-<!--- TO DO -->
+* `OnlineSales` core project provides more generic and reusable functionalities, while a plugin project can be implemented to cater more specific requirements that may be provided by different clients.
+
+* Core project can be published and run as a CMS without integrating any plugin, but a plugin requires the core project to be up and running.
+
+* A plugin is connected to core project via a common interface called `IPlugin`.
+    * Plugin should be inherited from `IPlugin` interface so that the core project can load all supported plugins at the application startup.
+
+    * Any plugin-level configurations should be added to a file named `pluginsettings.json` within the plugin project, which is getting merged with `appsettings.json`.
+
+    * `PluginManager` class of the core project is responsible for loading all supported plugins and merging configurations into `appsettings.json`
+
+    * `Program` class of the core project initiates the `PluginManager` at the application startup.
+
+* Core project should be added as a dependency for a plugin project either as a project reference or nuget package reference so that the plugin can access interfaces and public classes for integrations.
+
+* A plugin can also add new models and migrations with data seeding on top of core database structure.
+
+* Example use cases for plugin integration:
+    * `Email service` is a generic functionality of the core project and a plugin can implement a `Contact Us` form where it uses core email service to send email notifications.
+    * `Scheduled task runner` is a generic functionality of the core project and a plugin can provide user-specific data, such as schedules, email templates, etc.. as input data to run scheduled tasks.
+
 
 <a id="default-plugin"></a>
 ### Default plugins
 
-<!--- TO DO -->
+`OnlineSales` solution consists of a set of plugins that are already implemented.
+* `OnlineSales.Plugin.AzureAD` :
+
+* `OnlineSales.Plugin.Email` : Implementation of a generic email service that can be configured to use any email service provider which supports SMTP protocol.
+
+* `OnlineSales.Plugin.Sms` : Implementation of a generic sms service configured to use sms gateways such as Amazon SNS, ShoutOut, NotifyLK.
+
+* `OnlineSales.Plugin.Vsto` :
+
 
 <a id="new-plugin"></a>
 ### Adding a new plugin
 
-<!--- TO DO -->
+1. Create a new class library project.
+    * Project can be added to the `OnlineSales` solution or to a new solution depending on the requirement.
+
+2. Add `OnlineSales` core project as a dependency.
+    * If the new project is added to the `OnlineSales` solution, the dependency can be added as a project reference.
+
+    * If the project is added to a new solution, `OnlineSales` project dependency can be added as a nuget package reference.
+
+3. Add a new class inherited from `IPlugin` interface, which comes under `OnlineSales.Interfaces` namespace.
+
+4. Implement a new service based on the requirement and register it in the application's service collection.
+
+5. Use the `ConfigureServices` method of the `IPlugin` interface to register a dependency service into the [DI container](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-7.0) of the core application.
+    * `IServiceCollection` parameter represents the list of services that the application depends on. Any plugin-level dependency service should be added to this collection.
+
+    * `IConfiguration` can be used to access all the configurations available in `appsettings.json`.
 
 <a id="plugin-migrations"></a>
-### Plugin level migrations
+### Plugin-level migrations
 
-<!--- TO DO -->
+To extend the core project's database context, use the `PluginDbContextBase` abstract database context class that comes under `OnlineSales.Data` namespace, which inherited from the `ApiDbContext` class which is the main database context of the core project.
+* Create new models which are specific to the plugin requirement.
+
+* Create a new class inherited from `PluginDbContextBase` class and add `DbSet` type properties which map to database tables, for the newly created entities.
+
+* Override `OnModelCreating` method to seed plugin-level default data into the database.
+
+* Use [entity framework core commands](https://learn.microsoft.com/en-us/ef/core/cli/dotnet#using-the-tools) to add a new migration script if a new model is added or perform a data seeding.
+    * Note: `--Configuration` option with the value `Migration` should be used for plugin-level migrations
+        * Example:
+            ```
+            dotnet ef migrations add "[SampleMigrationName]" --Configuration Migration
+            ```
+* Register the extended database context class in the `ConfigureServices` method.
+    * Example:
+        ```c#
+        services.AddScoped<PluginDbContextBase, ExtendedDbContext>();
+        ```
