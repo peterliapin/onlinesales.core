@@ -228,7 +228,7 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
 5. Use the `ConfigureServices` method of the `IPlugin` interface to register a dependency service into the [DI container](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-7.0) of the core application.
     * `IServiceCollection` parameter represents the list of services that the application depends on. Any plugin-level dependency service should be added to this collection.
         * Example:
-            ```
+            ```c#
             services.AddSingleton<IEmailService, EmailService>();
             ```
     * `IConfiguration` can be used to access all the configurations available in `appsettings.json`.
