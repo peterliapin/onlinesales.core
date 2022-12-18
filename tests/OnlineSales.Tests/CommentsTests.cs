@@ -3,13 +3,56 @@
 // </copyright>
 
 using System.Net;
+using FluentAssertions;
+using OnlineSales.DTOs;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : BaseTest
-{    
-    public async Task GetCommentsTest()
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto>
+{
+    public CommentsTests()
+        : base("/api/comments")
     {
-        await GetTest("/api/comments", HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public override async Task UpdateItemNotFoundTest()
+    {
+        var comment = new CommentUpdateDto();
+        comment.Content = "Content";
+        await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.UnprocessableEntity);
+    }
+
+    protected override async Task<(TestComment, string)> CreateItem(int fkId)
+    {
+        var testComment = new TestComment()
+        {
+            PostId = fkId,
+        };
+
+        var newCommentUrl = await PostTest(itemsUrl, testComment);
+
+        return (testComment, newCommentUrl);
+    }
+
+    protected override async Task<(int, string)> CreateFKItem()
+    {
+        var fkItemCreate = new TestPost();
+
+        var fkUrl = await PostTest("/api/posts", fkItemCreate);
+
+        var fkItem = await GetTest<Post>(fkUrl);
+
+        fkItem.Should().NotBeNull();
+
+        return (fkItem!.Id, fkUrl);
+    }
+
+    protected override CommentUpdateDto UpdateItem(TestComment to)
+    {
+        var from = new CommentUpdateDto();
+        to.Content = from.Content = to.Content + "Updated";
+        return from;
     }
 }

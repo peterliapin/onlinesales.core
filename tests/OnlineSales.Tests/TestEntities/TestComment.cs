@@ -7,9 +7,9 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestCommentCreateDto : CommentCreateDto
+public class TestComment : CommentCreateDto
 {
-    public TestCommentCreateDto()
+    public TestComment()
     {
         AuthorName = "Test Author";
         AuthorEmail = "author@test.email";
