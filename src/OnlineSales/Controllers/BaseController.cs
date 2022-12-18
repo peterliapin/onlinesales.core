@@ -30,7 +30,7 @@ namespace OnlineSales.Controllers
 
         // GET api/{entity}s/
         [HttpGet]
-        [EnableQuery(PageSize = 10)]
+        // [EnableQuery(PageSize = 10)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual ActionResult<IQueryable<T>> GetAll()
@@ -42,7 +42,7 @@ namespace OnlineSales.Controllers
 
         // GET api/{entity}s/5
         [HttpGet("{id}")]
-        [EnableQuery]
+        // [EnableQuery]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

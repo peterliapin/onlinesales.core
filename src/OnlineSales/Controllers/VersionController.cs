@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
     public class VersionController : ControllerBase
     {
         [HttpGet]

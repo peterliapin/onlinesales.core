@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,8 @@ using Quartz.Util;
 
 namespace OnlineSales.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
-    [ApiController]
     public class ImagesController : ControllerBase
     {
         private readonly ApiDbContext apiDbContext;
