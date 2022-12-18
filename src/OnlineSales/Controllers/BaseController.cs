@@ -13,7 +13,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T, TC, TU> : ControllerBase
+    public class BaseController<T, TC, TU> : ControllerBaseEH
         where T : BaseEntity, new()
         where TC : class
         where TU : class
@@ -21,14 +21,12 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly DbContext dbContext;
         protected readonly IMapper mapper;
-        protected readonly ErrorHandler errorHandler;
 
         public BaseController(ApiDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
             this.mapper = mapper;
-            this.errorHandler = new ErrorHandler(this);
         }
 
         // GET api/{entity}s/
