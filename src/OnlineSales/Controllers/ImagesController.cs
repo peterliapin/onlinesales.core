@@ -13,7 +13,6 @@ using Quartz.Util;
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
     public class ImagesController : ControllerBase
     {
         private readonly ApiDbContext apiDbContext;

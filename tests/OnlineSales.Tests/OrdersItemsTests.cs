@@ -16,13 +16,6 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     }
 
     [Fact]
-    public override async Task CreateItemWithNonExistedFKItemTest()
-    {
-        var testItem = new TestOrderItem();
-        await PostTest(itemsUrl, testItem, HttpStatusCode.NotFound);
-    }
-
-    [Fact]
     public async Task OrderQuantityTest()
     {
         var orderDetails = await CreateFKItem();

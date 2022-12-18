@@ -32,8 +32,10 @@ public class OrderItemCreateDto
 
 public class OrderItemUpdateDto
 {
+    [NonEmptyString]
     public string? ProductName { get; set; }
 
+    [NonEmptyString]
     public string? LicenseCode { get; set; }
 
     public decimal? UnitPrice { get; set; }

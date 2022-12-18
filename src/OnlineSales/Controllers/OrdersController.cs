@@ -13,12 +13,21 @@ using OnlineSales.Entities;
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class OrdersController : BaseController<Order, OrderCreateDto, OrderUpdateDto>
+    public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer>
     {
         public OrdersController(ApiDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
         {
+        }
+
+        protected override int GetFKId(OrderCreateDto item)
+        {
+            return item.CustomerId;
+        }
+
+        protected override int? GetFKId(OrderUpdateDto item)
+        {
+            return null;
         }
     }
 }

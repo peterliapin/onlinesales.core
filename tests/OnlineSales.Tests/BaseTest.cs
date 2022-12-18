@@ -88,6 +88,9 @@ public class BaseTest : IDisposable
 
         var response = await Client.PostAsync(url, content);
 
+        var m = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(m);
+
         response.StatusCode.Should().Be(expectedCode);
 
         var location = string.Empty;
@@ -116,6 +119,9 @@ public class BaseTest : IDisposable
 
         var response = await Client.PatchAsync(url, content);
 
+        var m = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(m);
+
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
@@ -126,6 +132,9 @@ public class BaseTest : IDisposable
         var response = await Client.DeleteAsync(url);
 
         response.StatusCode.Should().Be(expectedCode);
+
+        var m = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(m);
 
         return response;
     }
