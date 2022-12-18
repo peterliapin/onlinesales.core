@@ -119,7 +119,7 @@ namespace OnlineSales.Controllers
 
                 if (uploadedImageData == null)
                 {
-                    return errorHandler.CreateNotFoundResponce("Requested file not found");
+                    return errorHandler.CreateNotFoundResponce(string.Format("Requested file with filename = {0} not found", fileName));
                 }
 
                 return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);

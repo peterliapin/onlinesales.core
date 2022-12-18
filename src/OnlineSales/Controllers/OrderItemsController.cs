@@ -43,7 +43,7 @@ namespace OnlineSales.Controllers
 
                 if (existFKItem == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(GetFKId(value)));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(GetFKId(value)));
                 }
 
                 var orderItem = mapper.Map<OrderItem>(value);
@@ -77,7 +77,7 @@ namespace OnlineSales.Controllers
 
                 if (existingEntity == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(id));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
                 }
 
                 var existFKItem = await (from fk in this.dbFKSet
@@ -86,7 +86,7 @@ namespace OnlineSales.Controllers
 
                 if (existFKItem == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(existingEntity.OrderId));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
                 }
 
                 mapper.Map(value, existingEntity);
@@ -115,7 +115,7 @@ namespace OnlineSales.Controllers
 
                 if (existingEntity == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(id));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
                 }
 
                 var existFKItem = await (from fk in this.dbFKSet
@@ -124,7 +124,7 @@ namespace OnlineSales.Controllers
 
                 if (existFKItem == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(existingEntity.OrderId));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
                 }
 
                 await orderItemService.DeleteOrderItem(existFKItem, existingEntity);

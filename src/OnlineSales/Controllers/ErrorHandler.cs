@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Resources;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -20,17 +21,30 @@ namespace OnlineSales.Controllers
 
         public ActionResult CreateBadRequestResponce(string message = "")
         {
-            return controller.BadRequest(controller.ModelState);
+            var allErrors = new List<string>();
+            foreach (var keyModelStatePair in controller.ModelState)
+            {
+                var errors = keyModelStatePair.Value.Errors;
+                if (errors != null && errors.Count > 0)
+                {
+                    foreach (var error in errors)
+                    {
+                        allErrors.Add(error.ErrorMessage);
+                    }
+                }
+            }
+
+            return controller.BadRequest(allErrors);
         }
 
         public ActionResult CreateNotFoundResponce(string message = "")
         {
-            return controller.NotFound(message);
+            return controller.NotFound(new string[] { message });
         }
 
         public ActionResult CreateUnprocessableEntityResponce(string message = "")
         {
-            return controller.UnprocessableEntity(message);
+            return controller.UnprocessableEntity(new string[] { message });
         }
 
         public ActionResult CreateInternalServerErrorResponce(string message = "")

@@ -41,7 +41,7 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
 
             if (existFKItem == null)
             {
-                return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(GetFKId(value)));
+                return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Comment>(GetFKId(value)));
             }
 
             if (value.ParentId != null)
@@ -52,7 +52,7 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
 
                 if (parent == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(value.ParentId.Value));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Post>(value.ParentId.Value));
                 }
             }
 

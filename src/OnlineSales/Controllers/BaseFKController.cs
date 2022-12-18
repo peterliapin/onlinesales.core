@@ -49,7 +49,7 @@ namespace OnlineSales.Controllers
 
                 if (existFKItem == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(GetFKId(value)));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<TFK>(GetFKId(value)));
                 }
 
                 var newValue = mapper.Map<T>(value);
@@ -84,7 +84,7 @@ namespace OnlineSales.Controllers
 
                 if (existingEntity == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(id));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<T>(id));
                 }
 
                 var fkid = GetFKId(value);
@@ -96,7 +96,7 @@ namespace OnlineSales.Controllers
 
                     if (existFKItem == null)
                     {
-                        return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(fkid.Value));
+                        return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<TFK>(fkid.Value));
                     }
                 }
 

@@ -64,7 +64,7 @@ namespace OnlineSales.Controllers
 
                 if (result == null)
                 {
-                    return errorHandler.CreateNotFoundResponce(CreateNotFoundMessage(id));
+                    return errorHandler.CreateNotFoundResponce(CreateNotFoundMessage<T>(id));
                 }
 
                 return Ok(result);
@@ -122,7 +122,7 @@ namespace OnlineSales.Controllers
 
                 if (existingEntity == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(id));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<T>(id));
                 }
 
                 mapper.Map(value, existingEntity);
@@ -151,7 +151,7 @@ namespace OnlineSales.Controllers
 
                 if (existingEntity == null)
                 {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage(id));
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<T>(id));
                 }
 
                 dbContext.Remove(existingEntity);
@@ -166,9 +166,10 @@ namespace OnlineSales.Controllers
             }
         }
 
-        protected string CreateNotFoundMessage(int id)
+        protected string CreateNotFoundMessage<TEntity>(int id)
         {
-            return JsonConvert.SerializeObject(new { Id = new string[] { string.Format("The Id field with value = {0} is not found", id) } }, Formatting.Indented);
+            // return JsonConvert.SerializeObject(new { Id = new string[] { string.Format("The Id field with value = {0} is not found", id) } }, Formatting.Indented);
+            return string.Format("The {0} with Id = {1} is not found", typeof(TEntity).FullName, id);
         }
     }
 }
