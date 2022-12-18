@@ -33,7 +33,7 @@ namespace OnlineSales.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    return errorHandler.CreateBadRequestResponce();
                 }
 
                 var provider = new FileExtensionContentTypeProvider();
