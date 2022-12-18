@@ -34,7 +34,7 @@ namespace OnlineSales.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return UnprocessableEntity(ModelState);
+                    return errorHandler.CreateBadRequestResponce();
                 }
 
                 var existFKItem = await (from fk in this.dbFKSet
@@ -68,7 +68,7 @@ namespace OnlineSales.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return UnprocessableEntity(ModelState);
+                    return errorHandler.CreateBadRequestResponce();
                 }
 
                 var existingEntity = await (from p in this.dbSet

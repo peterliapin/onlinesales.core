@@ -45,7 +45,7 @@ namespace OnlineSales.Controllers
 
                 if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
                 {
-                    return UnprocessableEntity("MIME of the file not identified.");
+                    return errorHandler.CreateUnprocessableEntityResponce("MIME of the file not identified.");
                 }
 
                 using var fileStream = imageCreateDto.Image.OpenReadStream();
