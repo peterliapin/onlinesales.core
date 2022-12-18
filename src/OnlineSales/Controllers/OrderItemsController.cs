@@ -3,6 +3,7 @@
 // </copyright>
 
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
@@ -12,6 +13,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class OrderItemsController : BaseFKController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, Order>
     {

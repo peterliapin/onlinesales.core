@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
@@ -14,14 +15,14 @@ using Serilog;
 
 namespace OnlineSales.Plugin.AzureAD;
 
-public class AzureADPlugin : IPlugin, ISwaggerConfigurator
+public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(configuration);
+                    .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
 
         services.AddAuthorization(options =>
         {
@@ -34,15 +35,22 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator
         });
     }
 
+    public void ConfigureApplication(IApplicationBuilder application)
+    {
+        application.UseAuthentication();
+        application.UseAuthorization();
+    }
+
     public void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
     {
         settings.OperationProcessors.Add(new OperationSecurityScopeProcessor("Azure AD JWT Token"));
-        settings.AddSecurity("Azure JWT Token", new OpenApiSecurityScheme
+
+        settings.AddSecurity("Azure AD JWT Token", new OpenApiSecurityScheme
         {
             Type = OpenApiSecuritySchemeType.ApiKey,
             Name = "Authorization",
             Description = "Copy 'Bearer ' + valid JWT token into field",
             In = OpenApiSecurityApiKeyLocation.Header,
-        });
+        });       
     }
 }

@@ -3,15 +3,15 @@
 // </copyright>
 
 using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer>
     {

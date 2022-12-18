@@ -3,6 +3,7 @@
 // </copyright>
 
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -10,6 +11,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 public class CustomersController : BaseController<Customer, CustomerCreateDto, CustomerUpdateDto>
 {

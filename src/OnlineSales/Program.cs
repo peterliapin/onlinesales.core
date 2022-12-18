@@ -85,10 +85,10 @@ public class Program
         MigrateOnStartIfRequired(app, builder);
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseODataRouteDebug();
-        }
+        // if (app.Environment.IsDevelopment())
+        // {
+            // app.UseODataRouteDebug();
+        // }
 
         app.UseOpenApi();
         app.UseSwaggerUi3();
@@ -96,11 +96,11 @@ public class Program
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
         app.UseStaticFiles();
-        app.UseCors();
-        app.UseAuthorization();
-        app.MapControllers();
+        app.UseCors();        
 
         PluginManager.Init(app);
+
+        app.MapControllers();
 
         app.UseSpa(spa =>
         {
@@ -182,10 +182,10 @@ public class Program
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             })
-            .AddOData(options => options
+            /*.AddOData(options => options
                 .Select().Filter().OrderBy()
                 .SetMaxTop(10).Expand().Count()
-                .SkipToken());
+                .SkipToken())*/;
 
         foreach (var plugin in PluginManager.GetPluginList())
         {

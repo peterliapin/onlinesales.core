@@ -3,6 +3,7 @@
 // </copyright>
 
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
 using OnlineSales.Data;
@@ -12,6 +13,7 @@ using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup>
 {

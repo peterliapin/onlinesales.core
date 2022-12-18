@@ -40,16 +40,16 @@
     <PackageReference Include="Elasticsearch.Net" Version="7.17.5" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="EFCore.NamingConventions" Version="7.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.12" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.18.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.0" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.18.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -74,4 +74,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup Label="FilesToCopy">
+    <Content Include="OnlineSales.targets" PackagePath="build/OnlineSales.targets" />
+  </ItemGroup>
+  
 </Project>

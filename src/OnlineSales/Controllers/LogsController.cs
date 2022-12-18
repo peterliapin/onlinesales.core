@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 public class LogsController : ControllerEH
 {

@@ -3,6 +3,7 @@
 // </copyright>
 
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nest;
@@ -12,6 +13,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 public class CommentsController : BaseFKController<Comment, CommentCreateDto, CommentUpdateDto, Post>
 {
