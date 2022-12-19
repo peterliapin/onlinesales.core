@@ -8,16 +8,8 @@ using System.Text.Json.Serialization;
 
 namespace OnlineSales.Entities;
 
-public class BaseEntity
+public class BaseEntity : BaseEntityWithId
 {
-    public BaseEntity()
-    {
-    }
-
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [Required]
     public DateTime CreatedAt { get; set; }
 
@@ -34,4 +26,11 @@ public class BaseEntity
 
     [JsonIgnore]
     public string? UpdatedByUserAgent { get; set; } = string.Empty;
+}
+
+public class BaseEntityWithId
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 }

@@ -15,6 +15,8 @@ public class VstoPlugin : IPlugin, IPluginApplication
 {
     private IServiceCollection? services;
 
+    public static string VstoLocalPath { get; private set; } = string.Empty;
+
     public static PluginConfig Configuration { get; private set; } = new PluginConfig();
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
@@ -26,19 +28,25 @@ public class VstoPlugin : IPlugin, IPluginApplication
             Configuration = pluginConfig;
         }
 
-        this.services = services.AddScoped<PluginDbContextBase, VstoDbContext>();
+        var assemblyPath = typeof(VstoDbContext).Assembly.Location;
+        var pluginDirectory = Path.GetDirectoryName(assemblyPath);
+
+        VstoLocalPath = Path.Combine(pluginDirectory!, Configuration.Vsto.LocalPath);
+
+        services.AddScoped<PluginDbContextBase, VstoDbContext>();
+        services.AddSingleton<IVariablesProvider, VstoVariablesProvider>();
+
+        this.services = services;
     }
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
         var httpContextHelper = application.ApplicationServices.GetRequiredService<IHttpContextHelper>();
 
-        var assemblyPath = typeof(VstoDbContext).Assembly.Location;
-        var pluginDirectory = Path.GetDirectoryName(assemblyPath);
         application.UseStaticFiles(new StaticFileOptions
         {
             RequestPath = Configuration.Vsto.RequestPath,
-            FileProvider = new VstoFileProvider(Path.Combine(pluginDirectory!, Configuration.Vsto.LocalPath), httpContextHelper, services!),
+            FileProvider = new VstoFileProvider(VstoLocalPath, httpContextHelper, services!),
             ServeUnknownFileTypes = true,
         });
     }

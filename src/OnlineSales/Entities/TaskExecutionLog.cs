@@ -13,7 +13,7 @@ public enum TaskExecutionStatus
 }
 
 [Table("task_execution_log")]
-public class TaskExecutionLog : BaseEntity
+public class TaskExecutionLog : BaseEntityWithId
 {
     public string? TaskName { get; set; }
 
