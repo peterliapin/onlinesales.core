@@ -39,27 +39,6 @@ namespace OnlineSales.Controllers
             this.mapper = mapper;
         }
 
-        /*
-        // GET api/{entity}s/
-        [HttpGet]
-        // [EnableQuery(PageSize = 10)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public virtual ActionResult<IQueryable<T>> GetAll()
-        {
-            try
-            {
-                var result = this.dbSet!.AsQueryable<T>();
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
-        }
-        */
-
         // GET api/{entity}s/5
         [HttpGet("{id}")]
         // [EnableQuery]
