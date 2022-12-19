@@ -58,6 +58,7 @@
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Configuration\" />
+    <Folder Include="Geography\" />
   </ItemGroup>
 
   <ItemGroup>
