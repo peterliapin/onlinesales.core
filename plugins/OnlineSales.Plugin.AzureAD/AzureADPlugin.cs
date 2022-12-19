@@ -62,7 +62,8 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
             },
         });
     }
-        public void ConfigureApplication(IApplicationBuilder application)
+
+    public void ConfigureApplication(IApplicationBuilder application)
     {
         application.UseAuthentication();
         application.UseAuthorization();
