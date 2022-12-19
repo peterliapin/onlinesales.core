@@ -182,7 +182,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult> Filter([FromQuery] IDictionary<string, string> keys)
+        public virtual async Task<ActionResult> Get([FromQuery] IDictionary<string, string>? parameters)
         {
             var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
             var query = this.dbSet!.AsQueryable<T>();
