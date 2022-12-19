@@ -25,8 +25,7 @@ public class VariableService : IVariableService
         {
             if (variableProvider.Key == contextKey && variableProvider.Language == (language is null ? DefaultLanguage : language))
             {
-                variableProvider.GenerateVariables();
-                contextVariables.AddRangeIfNotExists(variableProvider.Variables);
+                contextVariables.AddRangeIfNotExists(variableProvider.GetVariables());
             }
         }
 

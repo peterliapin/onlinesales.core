@@ -6,11 +6,9 @@ namespace OnlineSales.Interfaces;
 
 public interface IVariableProvider
 {
-    public Dictionary<string, string> Variables { get; set; }
-
     public string Key { get; set; }
 
     public string Language { get; set; }
 
-    public void GenerateVariables();
+    public Dictionary<string, string> GetVariables();
 }
