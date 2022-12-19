@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Web;
 using AutoMapper;
 using AutoMapper.Internal;
 using Microsoft.AspNetCore.Components.Forms;
@@ -14,10 +15,6 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.ModelBuilder;
-using Newtonsoft.Json.Serialization;
-using NSwag.Annotations;
-using NSwag.Generation.Processors;
-using NSwag.Generation.Processors.Contexts;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
@@ -158,15 +155,14 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [OpenApiOperationProcessor(typeof(ParamsOperationFilter))]
-        public virtual async Task<ActionResult> Filter(IEnumerable<string> queryParameter)
+        public virtual async Task<ActionResult> Filter([FromQuery] IDictionary<string, string> keys)
         {
-            // var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').ToArray(); // Removing '?' character, split by '&'
+            var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
             var query = this.dbSet!.AsQueryable<T>();
             var processedCommands = new List<QueryCommand>();
             var typeProperties = typeof(T).GetProperties();
             // Processing received commands
-            foreach (var cmd in queryParameter)
+            foreach (var cmd in queryCommands)
             {
                 var match = Regex.Match(cmd, "filter(\\[(?'property'.*?)\\])+?=(?'value'.*)");
                 if (!match.Success)

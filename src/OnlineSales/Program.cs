@@ -3,12 +3,13 @@
 // </copyright>
 
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using NSwag.Generation.AspNetCore;
+using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Infrastructure;
@@ -18,6 +19,7 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using Swashbuckle.AspNetCore;
 
 namespace OnlineSales;
 
@@ -69,7 +71,7 @@ public class Program
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerDocument(ConfigureSwagger);
+        ConfigureSwagger(builder);
 
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -90,8 +92,8 @@ public class Program
             app.UseODataRouteDebug();
         }
 
-        app.UseOpenApi();
-        app.UseSwaggerUi3();
+        app.UseSwagger();
+        app.UseSwaggerUI();
 
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
@@ -223,19 +225,33 @@ public class Program
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
     }
 
-    private static void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
+    private static void ConfigureSwagger(WebApplicationBuilder builder)
     {
-        settings.Title = "OnlineSales API";
-        settings.Version = typeof(Program).Assembly.GetName().Version!.ToString() ?? "1.0.0";
-
+        var openApiInfo = new OpenApiInfo()
+        {
+            Version = typeof(Program).Assembly.GetName().Version!.ToString() ?? "1.0.0",
+            Title = "OnlineSales API",
+            License = new OpenApiLicense
+            {
+                Name = "License",
+#pragma warning disable
+                Url = new Uri("https://github.com/peterliapin/onlinesales.core/blob/main/LICENSE"),
+#pragma warning restore
+            },
+        };
         var swaggerConfigurators = from p in PluginManager.GetPluginList()
                                    where p is ISwaggerConfigurator
                                    select p as ISwaggerConfigurator;
 
-        foreach (var swaggerConfigurator in swaggerConfigurators)
+        builder.Services.AddSwaggerGen(config =>
         {
-            swaggerConfigurator.ConfigureSwagger(settings);
-        }
+            foreach (var swaggerConfigurator in swaggerConfigurators)
+            {
+                swaggerConfigurator.ConfigureSwagger(config, openApiInfo);
+            }
+
+            config.SwaggerDoc("v1", openApiInfo);
+        });
     }
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)

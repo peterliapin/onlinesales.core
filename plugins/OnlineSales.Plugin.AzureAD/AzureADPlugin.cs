@@ -6,11 +6,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
-using NSwag;
-using NSwag.Generation.AspNetCore;
-using NSwag.Generation.Processors.Security;
+using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Plugin.AzureAD;
 
@@ -34,15 +33,32 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator
         });
     }
 
-    public void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
+    public void ConfigureSwagger(SwaggerGenOptions options, OpenApiInfo settings)
     {
-        settings.OperationProcessors.Add(new OperationSecurityScopeProcessor("Azure AD JWT Token"));
-        settings.AddSecurity("Azure JWT Token", new OpenApiSecurityScheme
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
         {
-            Type = OpenApiSecuritySchemeType.ApiKey,
-            Name = "Authorization",
             Description = "Copy 'Bearer ' + valid JWT token into field",
-            In = OpenApiSecurityApiKeyLocation.Header,
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer",
+        });
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+        {
+            {
+                new OpenApiSecurityScheme()
+                {
+                    Reference = new OpenApiReference()
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                    Scheme = "oauth2",
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                },
+                new List<string>()
+            },
         });
     }
 }
