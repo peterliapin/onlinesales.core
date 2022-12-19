@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using NSwag.Generation.AspNetCore;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Interfaces;
 
 public interface ISwaggerConfigurator
 {
-    void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings);
+    void ConfigureSwagger(SwaggerGenOptions options, OpenApiInfo settings);
 }

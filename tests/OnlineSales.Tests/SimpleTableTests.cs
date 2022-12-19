@@ -3,7 +3,6 @@
 // </copyright>
 
 using FluentAssertions;
-using Namotion.Reflection;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 

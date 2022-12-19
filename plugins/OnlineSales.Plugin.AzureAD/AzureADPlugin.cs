@@ -7,11 +7,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
-using NSwag;
-using NSwag.Generation.AspNetCore;
-using NSwag.Generation.Processors.Security;
+using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Plugin.AzureAD;
 
@@ -34,23 +33,39 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
             });
         });
     }
+    
+    public void ConfigureSwagger(SwaggerGenOptions options, OpenApiInfo settings)
+    {
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+        {
+            Description = "Copy 'Bearer ' + valid JWT token into field",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer",
+        });
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+        {
+            {
+                new OpenApiSecurityScheme()
+                {
+                    Reference = new OpenApiReference()
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                    Scheme = "oauth2",
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                },
+                new List<string>()
+            },
+        });
+    }
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
         application.UseAuthentication();
         application.UseAuthorization();
-    }
-
-    public void ConfigureSwagger(AspNetCoreOpenApiDocumentGeneratorSettings settings)
-    {
-        settings.OperationProcessors.Add(new OperationSecurityScopeProcessor("Azure AD JWT Token"));
-
-        settings.AddSecurity("Azure AD JWT Token", new OpenApiSecurityScheme
-        {
-            Type = OpenApiSecuritySchemeType.ApiKey,
-            Name = "Authorization",
-            Description = "Copy 'Bearer ' + valid JWT token into field",
-            In = OpenApiSecurityApiKeyLocation.Header,
-        });
     }
 }
