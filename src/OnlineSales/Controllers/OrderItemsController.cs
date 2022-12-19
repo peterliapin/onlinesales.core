@@ -15,7 +15,7 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrderItemsController : BaseController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto>
+    public class OrderItemsController : BaseFKController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, Order>
     {
         private readonly IOrderItemService orderItemService;
 
@@ -27,8 +27,8 @@ namespace OnlineSales.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Post([FromBody] OrderItemCreateDto value)
         {
@@ -36,30 +36,33 @@ namespace OnlineSales.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return UnprocessableEntity(ModelState);
+                    return errorHandler.CreateBadRequestResponce();
+                }
+
+                var existFKItem = await (from fk in this.dbFKSet
+                                         where fk.Id == GetFKId(value)
+                                         select fk).FirstOrDefaultAsync();
+
+                if (existFKItem == null)
+                {
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(GetFKId(value)));
                 }
 
                 var orderItem = mapper.Map<OrderItem>(value);
 
-                var credtedItem = await orderItemService.AddOrderItem(orderItem);
+                var credtedItem = await orderItemService.AddOrderItem(existFKItem, orderItem);
                 return CreatedAtAction(nameof(GetOne), new { id = credtedItem }, value);
             }
-            catch (KeyNotFoundException knfe)
+            catch (Exception e)
             {
-                return NotFound(knfe.Message);
-            }
-            catch (Exception ex)
-            {
-                return Problem(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    title: ex.Message);
+                return errorHandler.CreateInternalServerErrorResponce(e.Message);
             }
         }
 
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Patch(int id, [FromBody] OrderItemUpdateDto value)
         {
@@ -67,33 +70,36 @@ namespace OnlineSales.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return UnprocessableEntity(ModelState);
+                    return errorHandler.CreateBadRequestResponce();
                 }
 
-                var existingOrderItem = await (from p in this.dbSet
+                var existingEntity = await (from p in this.dbSet
                                             where p.Id == id
                                             select p).FirstOrDefaultAsync();
 
-                if (existingOrderItem == null)
+                if (existingEntity == null)
                 {
-                    return NotFound();
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
                 }
 
-                mapper.Map(value, existingOrderItem);
+                var existFKItem = await (from fk in this.dbFKSet
+                                            where fk.Id == existingEntity.OrderId
+                                            select fk).FirstOrDefaultAsync();
 
-                var updatedItem = await orderItemService.UpdateOrderItem(existingOrderItem);
+                if (existFKItem == null)
+                {
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
+                }
+
+                mapper.Map(value, existingEntity);
+
+                var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
 
                 return updatedItem;
             }
-            catch (KeyNotFoundException knfe)
+            catch (Exception e)
             {
-                return NotFound(knfe.Message);
-            }
-            catch (Exception ex)
-            {
-                return Problem(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    title: ex.Message);
+                return errorHandler.CreateInternalServerErrorResponce(e.Message);
             }
         }
 
@@ -105,20 +111,42 @@ namespace OnlineSales.Controllers
         {
             try
             {
-                await orderItemService.DeleteOrderItem(id);
+                var existingEntity = await (from p in this.dbSet
+                                            where p.Id == id
+                                            select p).FirstOrDefaultAsync();
+
+                if (existingEntity == null)
+                {
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
+                }
+
+                var existFKItem = await (from fk in this.dbFKSet
+                                         where fk.Id == existingEntity.OrderId
+                                         select fk).FirstOrDefaultAsync();
+
+                if (existFKItem == null)
+                {
+                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
+                }
+
+                await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
 
                 return NoContent();
             }
-            catch (KeyNotFoundException knfe)
+            catch (Exception e)
             {
-                return NotFound(knfe.Message);
+                return errorHandler.CreateInternalServerErrorResponce(e.Message);
             }
-            catch (Exception ex)
-            {
-                return Problem(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    title: ex.Message);
-            }
+        }
+
+        protected override int GetFKId(OrderItemCreateDto item)
+        {
+            return item.OrderId;
+        }
+
+        protected override int? GetFKId(OrderItemUpdateDto item)
+        {
+            return null;
         }
     }
 }

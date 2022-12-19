@@ -11,7 +11,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class LogsController : Controller
+public class LogsController : ControllerEH
 {
     protected readonly ElasticClient elasticClient;
 
@@ -37,9 +37,7 @@ public class LogsController : Controller
         }
         catch (Exception ex)
         {
-            return Problem(
-                statusCode: StatusCodes.Status500InternalServerError,
-                title: ex.Message);
+            return errorHandler.CreateInternalServerErrorResponce(ex.Message);
         }
     }
 }

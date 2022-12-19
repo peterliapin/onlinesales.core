@@ -42,7 +42,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public virtual async Task UpdateItemNotFoundTest()
     {
-        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.NotFound);
+        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.UnprocessableEntity);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task DeleteItemNotFoundTest()
     {
-        await DeleteTest(itemsUrlNotFound, HttpStatusCode.NotFound);
+        await DeleteTest(itemsUrlNotFound, HttpStatusCode.UnprocessableEntity);
     }
 
     [Fact]

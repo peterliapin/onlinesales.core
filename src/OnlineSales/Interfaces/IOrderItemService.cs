@@ -8,10 +8,10 @@ namespace OnlineSales.Interfaces
 {
     public interface IOrderItemService
     {
-        Task<int> AddOrderItem(OrderItem orderItem);
+        Task<int> AddOrderItem(Order order, OrderItem orderItem);
 
-        Task<OrderItem> UpdateOrderItem(OrderItem orderItem);
+        Task<OrderItem> UpdateOrderItem(Order order, OrderItem orderItem);
 
-        Task DeleteOrderItem(int orderItemId);
+        Task DeleteOrderItem(Order order, OrderItem orderItem);
     }
 }

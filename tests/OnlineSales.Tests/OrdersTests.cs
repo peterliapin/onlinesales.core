@@ -20,7 +20,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         var updateOrder = new OrderUpdateDto();
         updateOrder.RefNo = "1111";
-        await PatchTest(itemsUrlNotFound, updateOrder, HttpStatusCode.NotFound);
+        await PatchTest(itemsUrlNotFound, updateOrder, HttpStatusCode.UnprocessableEntity);
     }
 
     [Fact]
