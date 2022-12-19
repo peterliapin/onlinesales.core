@@ -88,7 +88,7 @@ public class Program
         // Configure the HTTP request pipeline.
         // if (app.Environment.IsDevelopment())
         // {
-            // app.UseODataRouteDebug();
+        // app.UseODataRouteDebug();
         // }
 
         app.UseOpenApi();
@@ -97,7 +97,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseDefaultFiles();
         app.UseStaticFiles();
-        app.UseCors();        
+        app.UseCors();
 
         PluginManager.Init(app);
 
@@ -183,10 +183,10 @@ public class Program
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             })
-            /*.AddOData(options => options
-                .Select().Filter().OrderBy()
-                .SetMaxTop(10).Expand().Count()
-                .SkipToken())*/;
+                /*.AddOData(options => options
+                    .Select().Filter().OrderBy()
+                    .SetMaxTop(10).Expand().Count()
+                    .SkipToken())*/;
 
         foreach (var plugin in PluginManager.GetPluginList())
         {
@@ -257,7 +257,7 @@ public class Program
     private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
     {
         var cacheProfiles = builder.Configuration.GetSection("CacheProfiles").Get<List<CacheProfileSettings>>();
-  
+
         if (cacheProfiles == null)
         {
             throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");

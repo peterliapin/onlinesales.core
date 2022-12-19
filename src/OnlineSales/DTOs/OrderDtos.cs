@@ -36,5 +36,5 @@ public class OrderUpdateDto
 
     public string? AffiliateName { get; set; }
 
-    public string? Data { get; set; } 
+    public string? Data { get; set; }
 }

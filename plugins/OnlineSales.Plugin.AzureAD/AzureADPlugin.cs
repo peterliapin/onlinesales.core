@@ -51,6 +51,6 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
             Name = "Authorization",
             Description = "Copy 'Bearer ' + valid JWT token into field",
             In = OpenApiSecurityApiKeyLocation.Header,
-        });       
+        });
     }
 }

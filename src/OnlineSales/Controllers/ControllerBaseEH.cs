@@ -18,7 +18,7 @@ public class ControllerBaseEH : ControllerBase
     protected readonly ErrorHandler errorHandler;
 
     public ControllerBaseEH()
-        : base() 
+        : base()
     {
         errorHandler = new ErrorHandler(this);
     }

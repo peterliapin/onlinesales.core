@@ -26,7 +26,7 @@ namespace OnlineSales.Controllers
             : base(dbContext, mapper)
         {
             this.dbFKSet = dbContext.Set<TFK>();
-        }              
+        }
 
         // POST api/{entity}s
         [HttpPost]
@@ -44,8 +44,8 @@ namespace OnlineSales.Controllers
                 }
 
                 var existFKItem = await (from fk in this.dbFKSet
-                                            where fk.Id == GetFKId(value)
-                                            select fk).FirstOrDefaultAsync();
+                                         where fk.Id == GetFKId(value)
+                                         select fk).FirstOrDefaultAsync();
 
                 if (existFKItem == null)
                 {

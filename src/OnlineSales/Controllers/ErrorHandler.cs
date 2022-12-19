@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
-{    
+{
     public class ErrorHandler
     {
         private readonly ControllerBase controller;

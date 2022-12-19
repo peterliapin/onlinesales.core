@@ -49,8 +49,8 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
             if (value.ParentId != null)
             {
                 var parent = await (from p in this.dbSet
-                                            where p.Id == value.ParentId
-                                            select p).FirstOrDefaultAsync();
+                                    where p.Id == value.ParentId
+                                    select p).FirstOrDefaultAsync();
 
                 if (parent == null)
                 {
@@ -80,4 +80,3 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
         return null;
     }
 }
-

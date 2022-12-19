@@ -83,8 +83,8 @@ namespace OnlineSales.Controllers
                 }
 
                 var existFKItem = await (from fk in this.dbFKSet
-                                            where fk.Id == existingEntity.OrderId
-                                            select fk).FirstOrDefaultAsync();
+                                         where fk.Id == existingEntity.OrderId
+                                         select fk).FirstOrDefaultAsync();
 
                 if (existFKItem == null)
                 {
@@ -150,5 +150,3 @@ namespace OnlineSales.Controllers
         }
     }
 }
-
-

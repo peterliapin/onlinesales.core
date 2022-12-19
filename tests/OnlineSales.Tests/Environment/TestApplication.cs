@@ -47,4 +47,3 @@ public class TestApplication : WebApplicationFactory<Program>
         return base.CreateHost(builder);
     }
 }
-

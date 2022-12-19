@@ -28,7 +28,7 @@ public class GetshoutoutService : ISmsService
     }
 
     public async Task SendAsync(string recipient, string message)
-    {       
+    {
         var client = new HttpClient();
         client.BaseAddress = new Uri(getshoutoutConfig.ApiUrl);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -50,7 +50,7 @@ public class GetshoutoutService : ISmsService
         var messageDtoJson = JsonSerializer.Serialize(messageDto, SerializeOptions);
         var content = new StringContent(messageDtoJson, new MediaTypeHeaderValue("application/json"));
 
-        var result = await client.PostAsync("/coreservice/messages", content);       
+        var result = await client.PostAsync("/coreservice/messages", content);
 
         if (result.IsSuccessStatusCode)
         {
@@ -61,7 +61,6 @@ public class GetshoutoutService : ISmsService
             var responseContent = await result.Content.ReadAsStringAsync();
 
             throw new GetshoutoutException(responseContent);
-        }        
+        }
     }
 }
-

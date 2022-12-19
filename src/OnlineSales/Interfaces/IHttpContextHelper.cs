@@ -8,7 +8,7 @@ namespace OnlineSales.Interfaces
     {
         public HttpRequest Request { get; }
 
-        public string? IpAddress { get;  }
+        public string? IpAddress { get; }
 
         public string? UserAgent { get; }
     }

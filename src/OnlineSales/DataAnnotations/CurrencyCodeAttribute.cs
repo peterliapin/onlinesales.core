@@ -32,7 +32,7 @@ public class CurrencyCodeAttribute : ValidationAttribute
 
         if (symbol != null)
         {
-            return ValidationResult.Success !;
+            return ValidationResult.Success!;
         }
         else
         {

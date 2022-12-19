@@ -18,4 +18,3 @@ public class ImagesTests : BaseTest
     //    image.Should().BeEquivalentTo(testImage);
     // }
 }
-

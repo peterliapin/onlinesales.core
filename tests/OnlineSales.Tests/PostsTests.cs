@@ -22,4 +22,3 @@ public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
         return from;
     }
 }
-

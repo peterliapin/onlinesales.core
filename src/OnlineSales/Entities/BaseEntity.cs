@@ -26,7 +26,7 @@ public class BaseEntity
 
     [JsonIgnore]
     public string? CreatedByUserAgent { get; set; } = string.Empty;
-   
+
     public DateTime? UpdatedAt { get; set; }
 
     [JsonIgnore]

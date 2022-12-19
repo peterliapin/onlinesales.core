@@ -58,4 +58,3 @@ public class AmazonSnsGatewayService : ISmsService
         Log.Information("Sms message sent to {0} via AmazonSns gateway: {1} HttpStatus Code {2} Message Id {3}", recipient, message, response.HttpStatusCode.ToString(), response.MessageId.ToString());
     }
 }
-

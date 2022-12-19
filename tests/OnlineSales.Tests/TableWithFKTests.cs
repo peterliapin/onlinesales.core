@@ -51,7 +51,7 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
         for (var i = 0; i < numberOfItems; ++i)
         {
             await GetTest<T>(itemsUrls[i], HttpStatusCode.NotFound);
-        }             
+        }
     }
 
     protected abstract Task<(int, string)> CreateFKItem();

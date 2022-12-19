@@ -29,4 +29,3 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
         return Task.FromResult(result);
     }
 }
-

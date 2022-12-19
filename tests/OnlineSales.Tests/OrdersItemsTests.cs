@@ -5,7 +5,7 @@
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
- 
+
 namespace OnlineSales.Tests;
 
 public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto>
@@ -156,7 +156,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         var order = await GetTest<Order>(orderDetails.Item2);
 
-        order.Should().NotBeNull(); 
+        order.Should().NotBeNull();
 
         async Task CompareItems()
         {
@@ -171,7 +171,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         }
 
         await CompareItems();
-                
+
         var addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
         addedOrderItem.Should().NotBeNull();
 
