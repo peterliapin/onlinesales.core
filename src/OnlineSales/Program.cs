@@ -232,13 +232,6 @@ public class Program
         {
             Version = typeof(Program).Assembly.GetName().Version!.ToString() ?? "1.0.0",
             Title = "OnlineSales API",
-            License = new OpenApiLicense
-            {
-                Name = "License",
-#pragma warning disable
-                Url = new Uri("https://github.com/peterliapin/onlinesales.core/blob/main/LICENSE"),
-#pragma warning restore
-            },
         };
         var swaggerConfigurators = from p in PluginManager.GetPluginList()
                                    where p is ISwaggerConfigurator

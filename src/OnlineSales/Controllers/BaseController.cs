@@ -379,5 +379,4 @@ namespace OnlineSales.Controllers
             return string.Format("The {0} with Id = {1} is not found", typeof(TEntity).FullName, id);
         }
     }
-#pragma warning restore
 }
