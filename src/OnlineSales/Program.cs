@@ -55,6 +55,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
+        builder.Services.AddScoped<IVariableService, VariableService>();
 
         ConfigureCacheProfiles(builder);
 

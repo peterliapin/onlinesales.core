@@ -138,6 +138,8 @@ public class CustomerScheduledEmail : ITask
     private Dictionary<string, string> GetTemplateArguments()
     {
         // TODO: customer based template arguments
+        // Get related variable dictionary from variableservice.
+        // Add any required scope based variables into the dictionary.
         return new Dictionary<string, string> { { "Key", "Value" } };
     }
 
