@@ -53,7 +53,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.18.2" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.1" />
   </ItemGroup>
 

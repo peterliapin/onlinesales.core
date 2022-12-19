@@ -178,12 +178,6 @@ namespace OnlineSales.Controllers
             }
         }
 
-        protected string CreateNotFoundMessage<TEntity>(int id)
-        {
-            // return JsonConvert.SerializeObject(new { Id = new string[] { string.Format("The Id field with value = {0} is not found", id) } }, Formatting.Indented);
-            return string.Format("The {0} with Id = {1} is not found", typeof(TEntity).FullName, id);
-        }
-
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -398,6 +392,12 @@ namespace OnlineSales.Controllers
 
             var result = await query!.ToArrayAsync();
             return Ok(result);
+        }
+
+        protected string CreateNotFoundMessage<TEntity>(int id)
+        {
+            // return JsonConvert.SerializeObject(new { Id = new string[] { string.Format("The Id field with value = {0} is not found", id) } }, Formatting.Indented);
+            return string.Format("The {0} with Id = {1} is not found", typeof(TEntity).FullName, id);
         }
     }
 #pragma warning restore
