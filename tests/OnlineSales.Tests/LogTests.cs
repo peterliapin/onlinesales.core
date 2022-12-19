@@ -20,4 +20,3 @@ public class LogTests : BaseTest
         await GetTest("/api/logs");
     }
 }
-

@@ -6,12 +6,15 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services
 {
     public class EmailFromTemplateService : IEmailFromTemplateService
     {
+        private const string DefaultLanguage = "en";
+
         private readonly IEmailWithLogService emailWithLogService;
         private readonly ApiDbContext apiDbContext;
 
@@ -21,7 +24,7 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
+        public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments)
         {
             var template = await GetEmailTemplate(templateName, language);
 
@@ -30,7 +33,7 @@ namespace OnlineSales.Services
             await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipients, updatedBodyTemplate, attachments, template.Id);
         }
 
-        public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
+        public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
         {
             var template = await GetEmailTemplate(templateName, customerId);
 
@@ -41,7 +44,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(language));
 
             return template!;
         }
@@ -50,19 +53,31 @@ namespace OnlineSales.Services
         {
             var customerLanguage = apiDbContext.Customers!.Where(c => c.Id == customerId).FirstOrDefault() !.Culture;
 
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == customerLanguage);
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(customerLanguage));
 
             return template!;
         }
 
-        private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string> templateArguments)
+        private string GetSupportedLanguage(string? language)
         {
-            foreach (var arg in templateArguments)
+            var supportedLanguages = apiDbContext.EmailTemplates!.Select(e => e.Language).Distinct().ToArray();
+
+            if (supportedLanguages.Contains(language, StringComparer.OrdinalIgnoreCase))
             {
-                bodyTemplate = bodyTemplate.Replace(arg.Key, arg.Value);
+                return language!.ToLower();
             }
 
-            return bodyTemplate;
+            return DefaultLanguage;
+        }
+
+        private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string>? templateArguments)
+        {
+            if (templateArguments is null)
+            {
+                return bodyTemplate;
+            }
+
+            return TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("<%", "%>"), bodyTemplate);
         }
     }
 }

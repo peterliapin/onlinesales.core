@@ -18,15 +18,8 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task<int> AddOrderItem(OrderItem orderItem)
+        public async Task<int> AddOrderItem(Order order, OrderItem orderItem)
         {
-            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItem.OrderId select ord).FirstOrDefaultAsync();
-
-            if (order == null)
-            {
-                throw new KeyNotFoundException($"Order with Id = {orderItem.OrderId} not found");
-            }
-
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, order.ExchangeRate);
 
@@ -49,31 +42,17 @@ namespace OnlineSales.Services
             return orderItem.Id;
         }
 
-        public async Task DeleteOrderItem(int orderItemId)
+        public async Task DeleteOrderItem(Order order, OrderItem orderItem)
         {
-            var orderItemExist = await (from ordItem in apiDbContext.OrderItems where ordItem.Id == orderItemId select ordItem).FirstOrDefaultAsync();
-
-            if (orderItemExist == null)
-            {
-                throw new KeyNotFoundException($"Order item with Id = {orderItemId} not found");
-            }
-
-            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItemExist.OrderId select ord).FirstOrDefaultAsync();
-
-            if (order == null)
-            {
-                throw new KeyNotFoundException($"Order with Id = {orderItemExist.OrderId} not found");
-            }
-
             using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
             {
-                apiDbContext.Remove(orderItemExist);
+                apiDbContext.Remove(orderItem);
 
-                orderItemExist.CurrencyTotal = 0;
-                orderItemExist.Total = 0;
-                orderItemExist.Quantity = 0;
+                orderItem.CurrencyTotal = 0;
+                orderItem.Total = 0;
+                orderItem.Quantity = 0;
 
-                var totals = CalculateTotalsForOrder(orderItemExist!);
+                var totals = CalculateTotalsForOrder(orderItem);
 
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
@@ -85,15 +64,8 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task<OrderItem> UpdateOrderItem(OrderItem orderItem)
+        public async Task<OrderItem> UpdateOrderItem(Order order, OrderItem orderItem)
         {
-            var order = await (from ord in apiDbContext.Orders! where ord.Id == orderItem.OrderId select ord).FirstOrDefaultAsync();
-
-            if (order == null)
-            {
-                throw new KeyNotFoundException($"Order with Id = {orderItem.OrderId} not found");
-            }
-
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, order!.ExchangeRate);
 

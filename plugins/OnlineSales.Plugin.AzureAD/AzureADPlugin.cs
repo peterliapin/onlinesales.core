@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
@@ -13,14 +14,14 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Plugin.AzureAD;
 
-public class AzureADPlugin : IPlugin, ISwaggerConfigurator
+public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(configuration);
+                    .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
 
         services.AddAuthorization(options =>
         {
@@ -32,7 +33,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator
             });
         });
     }
-
+    
     public void ConfigureSwagger(SwaggerGenOptions options, OpenApiInfo settings)
     {
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -60,5 +61,10 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator
                 new List<string>()
             },
         });
+    }
+        public void ConfigureApplication(IApplicationBuilder application)
+    {
+        application.UseAuthentication();
+        application.UseAuthorization();
     }
 }

@@ -71,13 +71,13 @@ public class SmsService : ISmsService
                     break;
                 case "AmazonSns":
                     gatewayService = new AmazonSnsGatewayService(pluginSettings.SmsGateways.AmazonSns);
-                    break;  
+                    break;
             }
 
             if (gatewayService != null)
             {
                 countrySmsServices[countryGateway.Code] = gatewayService;
-            }            
-        }   
+            }
+        }
     }
 }

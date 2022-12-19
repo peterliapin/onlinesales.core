@@ -9,8 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class VersionController : ControllerBase
+    public class VersionController : ControllerBaseEH
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -25,9 +24,7 @@ namespace OnlineSales.Controllers
             }
             catch (Exception ex)
             {
-                return Problem(
-                    statusCode: StatusCodes.Status500InternalServerError,
-                    title: ex.Message);
+                return errorHandler.CreateInternalServerErrorResponce(ex.Message);
             }
         }
     }

@@ -57,6 +57,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
+        builder.Services.AddScoped<IVariablesService, VariablesService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -87,10 +88,10 @@ public class Program
         MigrateOnStartIfRequired(app, builder);
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseODataRouteDebug();
-        }
+        // if (app.Environment.IsDevelopment())
+        // {
+        // app.UseODataRouteDebug();
+        // }
 
         app.UseSwagger();
         app.UseSwaggerUI();
@@ -99,10 +100,10 @@ public class Program
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
-        app.UseAuthorization();
-        app.MapControllers();
 
         PluginManager.Init(app);
+
+        app.MapControllers();
 
         app.UseSpa(spa =>
         {
@@ -184,10 +185,10 @@ public class Program
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             })
-            .AddOData(options => options
-                .Select().Filter().OrderBy()
-                .SetMaxTop(10).Expand().Count()
-                .SkipToken());
+                                /*.AddOData(options => options
+                                    .Select().Filter().OrderBy()
+                                    .SetMaxTop(10).Expand().Count()
+                                    .SkipToken())*/;
 
         foreach (var plugin in PluginManager.GetPluginList())
         {
@@ -272,7 +273,7 @@ public class Program
     private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
     {
         var cacheProfiles = builder.Configuration.GetSection("CacheProfiles").Get<List<CacheProfileSettings>>();
-  
+
         if (cacheProfiles == null)
         {
             throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");

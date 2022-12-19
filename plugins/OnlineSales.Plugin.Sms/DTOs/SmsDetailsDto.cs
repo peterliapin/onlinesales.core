@@ -15,4 +15,3 @@ public class SmsDetailsDto
     [MinLength(1)]
     public string Message { get; set; } = string.Empty;
 }
-

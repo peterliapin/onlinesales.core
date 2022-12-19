@@ -17,7 +17,7 @@ namespace OnlineSales.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "7.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -566,6 +566,39 @@ namespace OnlineSales.Migrations
                     b.ToTable("image", (string)null);
                 });
 
+            modelBuilder.Entity("OnlineSales.Entities.IpDetails", b =>
+                {
+                    b.Property<string>("Ip")
+                        .HasColumnType("text")
+                        .HasColumnName("ip");
+
+                    b.Property<string>("CityName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("city_name");
+
+                    b.Property<int>("ContinentCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("continent_code");
+
+                    b.Property<int>("CountryCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("country_code");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.HasKey("Ip")
+                        .HasName("pk_ip_details");
+
+                    b.ToTable("ip_details", (string)null);
+                });
+
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -850,18 +883,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("comment");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
                     b.Property<int>("RetryCount")
                         .HasColumnType("integer")
                         .HasColumnName("retry_count");
@@ -877,18 +898,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("TaskName")
                         .HasColumnType("text")
                         .HasColumnName("task_name");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
                         .HasName("pk_task_execution_log");

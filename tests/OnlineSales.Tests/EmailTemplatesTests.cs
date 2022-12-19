@@ -8,132 +8,42 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : BaseTest
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto>
 {
-    private readonly string urlEmailTemplates = "/api/email-templates";
-    private readonly string urlEmailTemplatesNotFound = "/api/email-templates" + "/404";
-
-    [Fact]
-    public async Task GetEmailTemplateNotFoundTest()
+    public EmailTemplatesTests()
+        : base("/api/email-templates")
     {
-        await GetTest(urlEmailTemplatesNotFound, HttpStatusCode.NotFound);
     }
 
-    [Fact]
-    public async Task CreateEmailTemplateWithNonExistedEmailGroupTest()
+    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId)
     {
-        var testEmailTemplate = new TestEmailTemplate();
-        testEmailTemplate.GroupId = 1; // non existing group id (because each test starts with empty database)
-        await PostTest(urlEmailTemplates, testEmailTemplate, HttpStatusCode.InternalServerError);
-    }
-        
-    [Fact]
-    public async Task CreateAndGetEmailTemplateTest()
-    {
-        var testEmailTemplate = AddEmailGroupAndCreateEmailTemplate();
-
-        var newEmailTemplateUrl = await PostTest(urlEmailTemplates, testEmailTemplate);
-
-        var emailTemplate = await GetTest<EmailTemplate>(newEmailTemplateUrl);
-
-        emailTemplate.Should().BeEquivalentTo(testEmailTemplate);
-    }
-    
-    [Fact]
-    public async Task UpdateEmailTemplateNotFoundTest()
-    {
-        await PatchTest(urlEmailTemplatesNotFound, new { }, HttpStatusCode.NotFound);
-    }
-    
-    [Fact]
-    public async Task CreateAndUpdateEmailTemplateNameTest()
-    {
-        var testEmailTemplate = AddEmailGroupAndCreateEmailTemplate();
-
-        var newEmailTemplateUrl = await PostTest(urlEmailTemplates, testEmailTemplate);
-
-        var updatedEmailTemplate = new EmailTemplateUpdateDto();
-
-        testEmailTemplate.Name = updatedEmailTemplate.Name = "Update EmailTemplate Name";
-
-        await PatchTest(newEmailTemplateUrl, updatedEmailTemplate);
-
-        var emailTemplate = await GetTest<EmailTemplate>(newEmailTemplateUrl);
-
-        emailTemplate.Should().BeEquivalentTo(testEmailTemplate);
-    }
-
-    [Fact]
-    public async Task DeleteEmailTemplateNotFoundTest()
-    {
-        await DeleteTest(urlEmailTemplatesNotFound, HttpStatusCode.NotFound);
-    }
-
-    [Fact]
-    public async Task CreateAndDeleteEmailTemplateTest()
-    {
-        var testEmailTemplate = AddEmailGroupAndCreateEmailTemplate();
-
-        var newEmailTemplateUrl = await PostTest(urlEmailTemplates, testEmailTemplate);
-
-        await DeleteTest(newEmailTemplateUrl);
-
-        await GetTest(newEmailTemplateUrl, HttpStatusCode.NotFound);
-    }
-
-    [Fact]
-    public async Task DeleteEmailGroupAndAllEmailTemplatesTest()
-    {
-        var emailGroup = AddEmailGroup();
-
-        var emailGroupId = emailGroup.Item1;
-
-        int numberOfEmailTemplates = 10;
-
-        string[] emailTemplatesUrls = new string[numberOfEmailTemplates];
-
-        for (var i = 0; i < numberOfEmailTemplates; ++i)
-        {
-            var testEmailTemplate = new TestEmailTemplate();
-            testEmailTemplate.GroupId = emailGroupId;
-
-            var newEmailTemplateUrl = await PostTest(urlEmailTemplates, testEmailTemplate);
-
-            emailTemplatesUrls[i] = newEmailTemplateUrl;
-        }
-
-        await DeleteTest(emailGroup.Item2);
-
-        for (var i = 0; i < numberOfEmailTemplates; ++i)
-        {
-            await GetTest<EmailGroup>(emailTemplatesUrls[i], HttpStatusCode.NotFound);
-        }
-    }
-
-    private (int, string) AddEmailGroup()
-    {
-        var testEmailGroup = new TestEmailGroup();
-
-        var emailGroupUrl = PostTest("/api/email-groups", testEmailGroup).Result;
-
-        var emailGroup = GetTest<EmailGroup>(emailGroupUrl).Result;
-
-        emailGroup.Should().NotBeNull();
-
-        return (emailGroup == null ? 0 : emailGroup.Id, emailGroupUrl);
-    }
-
-    private TestEmailTemplate AddEmailGroupAndCreateEmailTemplate()
-    {
-        var addedEmailGroup = AddEmailGroup();
-
-        var emailGroupId = addedEmailGroup.Item1;
-
         var testEmailTemplate = new TestEmailTemplate
         {
-            GroupId = emailGroupId,
+            GroupId = fkId,
         };
 
-        return testEmailTemplate;
+        var newEmailTemplateUrl = await PostTest(itemsUrl, testEmailTemplate);
+
+        return (testEmailTemplate, newEmailTemplateUrl);
+    }
+
+    protected override async Task<(int, string)> CreateFKItem()
+    {
+        var fkItemCreate = new TestEmailGroup();
+
+        var fkUrl = await PostTest("/api/email-groups", fkItemCreate);
+
+        var fkItem = await GetTest<EmailGroup>(fkUrl);
+
+        fkItem.Should().NotBeNull();
+
+        return (fkItem!.Id, fkUrl);
+    }
+
+    protected override EmailTemplateUpdateDto UpdateItem(TestEmailTemplate to)
+    {
+        var from = new EmailTemplateUpdateDto();
+        to.Name = from.Name = to.Name + "Updated";
+        return from;
     }
 }

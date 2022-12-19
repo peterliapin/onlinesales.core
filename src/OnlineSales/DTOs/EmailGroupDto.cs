@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
@@ -15,5 +16,6 @@ public class EmailGroupCreateDto
 
 public class EmailGroupUpdateDto
 {
+    [NonEmptyString]
     public string? Name { get; set; }
 }

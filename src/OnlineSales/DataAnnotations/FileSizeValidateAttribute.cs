@@ -28,7 +28,7 @@ namespace OnlineSales.DataAnnotations
             if (type.Equals("Image"))
             {
                 var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
-                maxFileSize = configuration.Value.MaxSize !;
+                maxFileSize = configuration.Value.MaxSize!;
             }
             else
             {
@@ -80,7 +80,7 @@ namespace OnlineSales.DataAnnotations
 
             if (file.Length > sizeInByte)
             {
-               return new ValidationResult("Max file size exceeded");
+                return new ValidationResult("Max file size exceeded");
             }
 
             return ValidationResult.Success!;

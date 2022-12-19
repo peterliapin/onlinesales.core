@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Security.Policy;
 using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
@@ -15,5 +16,7 @@ public class TestEmailTemplate : EmailTemplateCreateDto
         BodyTemplate = "TestEmailTemaplteSubjectBodyTemplate";
         FromEmail = "test@test.net";
         FromName = "TestEmailTemaplteFromName";
+        Language = "en";
+        GroupId = 1;
     }
 }

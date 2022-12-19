@@ -78,4 +78,3 @@ public class Order : BaseEntity
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
 }
-

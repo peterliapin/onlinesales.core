@@ -3,18 +3,32 @@
 // </copyright>
 
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
-public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto>
+public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup>
 {
     public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper)
     : base(dbContext, mapper)
     {
+    }
+
+    protected override int GetFKId(EmailTemplateCreateDto item)
+    {
+        return item.GroupId;
+    }
+
+    protected override int? GetFKId(EmailTemplateUpdateDto item)
+    {
+        return item.GroupId;
     }
 }

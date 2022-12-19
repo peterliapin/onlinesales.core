@@ -17,12 +17,12 @@ public enum CommentStatus
 
 [Table("comment")]
 public class Comment : BaseEntity
-{   
+{
     public string AuthorName { get; set; } = string.Empty;
 
     [EmailAddress]
     public string AuthorEmail { get; set; } = string.Empty;
-    
+
     [Required]
     public string Content { get; set; } = string.Empty;
 
@@ -31,9 +31,9 @@ public class Comment : BaseEntity
 
     [Required]
     public int PostId { get; set; }
-    
+
     [JsonIgnore]
-    [ForeignKey("PostId")]    
+    [ForeignKey("PostId")]
     public virtual Post? Post { get; set; }
 
     public int? ParentId { get; set; }

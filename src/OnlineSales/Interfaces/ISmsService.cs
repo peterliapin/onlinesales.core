@@ -9,4 +9,3 @@ namespace OnlineSales.Interfaces
         Task SendAsync(string recipient, string message);
     }
 }
-

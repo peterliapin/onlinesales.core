@@ -79,7 +79,14 @@ public class BaseTest : IDisposable
 
         var content = await response.Content.ReadAsStringAsync();
 
-        return DeserializePayload<T>(content);
+        if (expectedCode == HttpStatusCode.OK)
+        {
+            return DeserializePayload<T>(content);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created)

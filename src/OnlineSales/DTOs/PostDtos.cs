@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
 
@@ -42,22 +43,28 @@ public class PostCreateDto
 
 public class PostUpdateDto
 {
+    [NonEmptyString]
     public string? Title { get; set; }
 
+    [NonEmptyString]
     public string? Description { get; set; }
 
+    [NonEmptyString]
     public string? Content { get; set; }
 
     public string? CoverImageUrl { get; set; }
 
     public string? CoverImageAlt { get; set; }
 
+    [NonEmptyString]
     public string? Slug { get; set; }
 
+    [NonEmptyString]
     public string? Template { get; set; }
 
     public string? Author { get; set; }
 
+    [NonEmptyString]
     public string? Language { get; set; }
 
     public string? Categories { get; set; }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,9 +38,12 @@ public class TestApplication : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             services.AddScoped<IEmailService, TestEmailService>();
+
+            services.AddAuthentication(defaultScheme: "TestScheme")
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
+                    "TestScheme", options => { });
         });
 
         return base.CreateHost(builder);
     }
 }
-
