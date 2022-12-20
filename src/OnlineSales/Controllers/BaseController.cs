@@ -24,7 +24,6 @@ using Quartz;
 
 namespace OnlineSales.Controllers
 {
-    [AllowAnonymous]
     public class BaseController<T, TC, TU> : ControllerBaseEH
         where T : BaseEntity, new()
         where TC : class
