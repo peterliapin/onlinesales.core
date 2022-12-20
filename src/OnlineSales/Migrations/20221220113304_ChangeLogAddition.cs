@@ -17,7 +17,7 @@ namespace OnlineSales.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    objecttype = table.Column<int>(name: "object_type", type: "integer", nullable: false),
+                    objecttype = table.Column<string>(name: "object_type", type: "text", nullable: false),
                     objectid = table.Column<int>(name: "object_id", type: "integer", nullable: false),
                     operation = table.Column<int>(type: "integer", nullable: false),
                     data = table.Column<string>(type: "jsonb", nullable: false)

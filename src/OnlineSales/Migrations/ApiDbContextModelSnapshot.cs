@@ -40,8 +40,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("object_id");
 
-                    b.Property<int>("ObjectType")
-                        .HasColumnType("integer")
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("object_type");
 
                     b.Property<int>("Operation")

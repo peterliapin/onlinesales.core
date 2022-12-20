@@ -12,7 +12,7 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20221220110844_ChangeLogAddition")]
+    [Migration("20221220113304_ChangeLogAddition")]
     partial class ChangeLogAddition
     {
         /// <inheritdoc />
@@ -43,8 +43,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("object_id");
 
-                    b.Property<int>("ObjectType")
-                        .HasColumnType("integer")
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("object_type");
 
                     b.Property<int>("Operation")

@@ -8,20 +8,19 @@ namespace OnlineSales.Entities
 {
     public enum Operation
     {
-        NA = 0,
-        Inserted = 1,
-        Updated = 2,
-        Deleted = 3,
+        Inserted = 0,
+        Updated = 1,
+        Deleted = 2,
     }
 
     [Table("change_log")]
     public class ChangeLog : BaseEntityWithId
     {
-        public int ObjectType { get; set; }
+        public string ObjectType { get; set; } = string.Empty;
 
         public int ObjectId { get; set; }
 
-        public Operation Operation { get; set; } = Operation.NA;
+        public Operation Operation { get; set; }
 
         [Column(TypeName = "jsonb")]
         public string Data { get; set; } = string.Empty;
