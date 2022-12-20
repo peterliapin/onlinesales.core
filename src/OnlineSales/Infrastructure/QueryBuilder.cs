@@ -137,92 +137,46 @@ namespace OnlineSales.Infrastructure
         private static IQueryable<T> AppendWhereExpression(IQueryable<T> query, QueryCommand[] commands)
         {
             BinaryExpression? whereExpression = null;
-            var typeProperties = typeof(T).GetProperties();
+            BinaryExpression? orExpression = null;
             var expressionParameter = Expression.Parameter(typeof(T));
 
             // Executing received commands
             foreach (var cmd in commands.Where(c => c.Type == FilterType.Where).ToArray())
             {
-                var propertyName = cmd.Props.ElementAtOrDefault(0);
-                var operand = QueryCommand.OperandMappings.FirstOrDefault(m => m.Key == cmd.Props.ElementAtOrDefault(1)).Value;
+                if (TryProcessWhereOperand(expressionParameter, cmd, out var outExpr, out var oExpr))
+                {
+                    if (oExpr)
+                    {
+                        if (orExpression == null)
+                        {
+                            orExpression = outExpr!;
+                            continue;
+                        }
 
-                if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
-                {
-                    continue; // Broken command
-                }
+                        orExpression = Expression.Or(orExpression, outExpr!);
+                        continue;
+                    }
 
-                var propertyType = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
+                    if (whereExpression == null)
+                    {
+                        whereExpression = outExpr;
+                        continue;
+                    }
 
-                // Property check
-                if (propertyType == null)
-                {
-                    continue; // Broken command
+                    whereExpression = Expression.And(whereExpression, outExpr!);
                 }
+            }
 
-                dynamic parsedValue;
-                // Value cast
-                if (DateTime.TryParseExact(cmd.Value, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && propertyType.PropertyType == typeof(DateTime))
+            if (orExpression != null)
+            {
+                if (whereExpression == null)
                 {
-                    parsedValue = date;
-                }
-                else if (decimal.TryParse(cmd.Value, out var decimalValue) && propertyType.PropertyType == typeof(decimal))
-                {
-                    parsedValue = decimalValue;
-                }
-                else if (double.TryParse(cmd.Value, out var doubleValue) && propertyType.PropertyType == typeof(double))
-                {
-                    parsedValue = doubleValue;
-                }
-                else if (int.TryParse(cmd.Value, out int intValue) && propertyType.PropertyType == typeof(int))
-                {
-                    parsedValue = intValue;
+                    whereExpression = orExpression;
                 }
                 else
                 {
-                    parsedValue = cmd.Value;
+                    whereExpression = Expression.Or(whereExpression, orExpression);
                 }
-
-                // Construct expression
-                BinaryExpression? outputExpression = null;
-                var valueParameterExpression = Expression.Constant(parsedValue);
-                var parameterPropertyExpression = Expression.Property(expressionParameter, propertyName);
-                switch (operand)
-                {
-                    case WOperand.Equal:
-                        outputExpression = Expression.Equal(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.GreaterThan:
-                        outputExpression = Expression.GreaterThan(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.GreaterThanOrEquals:
-                        outputExpression = Expression.GreaterThanOrEqual(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.LessThan:
-                        outputExpression = Expression.LessThan(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.LessThanOrEquals:
-                        outputExpression = Expression.LessThanOrEqual(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.NotEqual:
-                        outputExpression = Expression.NotEqual(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    default:
-                        continue; // Broken command
-                }
-
-                if (outputExpression == null)
-                {
-                    continue;
-                }
-
-                if (whereExpression == null)
-                {
-                    whereExpression = outputExpression;
-                    continue;
-                }
-
-                // Concatenate
-                whereExpression = Expression.And(whereExpression, outputExpression);
             }
 
             if (whereExpression != null)
@@ -231,6 +185,110 @@ namespace OnlineSales.Infrastructure
             }
 
             return query;
+        }
+
+        private static bool TryProcessWhereOperand(ParameterExpression expressionParameter, QueryCommand cmd, out BinaryExpression? expression, out bool orExpression)
+        {
+            BinaryExpression? outputExpression = null;
+            orExpression = false;
+            var typeProperties = typeof(T).GetProperties();
+            var orOperandShift = 0;
+            string? propertyName = string.Empty;
+
+            var fProp = cmd.Props.ElementAtOrDefault(0);
+
+            if (fProp == null || string.IsNullOrWhiteSpace(fProp))
+            {
+                expression = null;
+                return false; // Broken command
+            }
+
+            if (fProp == "or")
+            {
+                orOperandShift = 1;
+                orExpression = true;
+                propertyName = cmd.Props.ElementAtOrDefault(1);
+            }
+            else
+            {
+                propertyName = fProp;
+            }
+
+            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
+            {
+                expression = null;
+                return false; // Broken command
+            }
+
+            var propertyType = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
+
+            // Property check
+            if (propertyType == null)
+            {
+                expression = null;
+                return false; // Broken command
+            }
+
+            dynamic parsedValue;
+            // Value cast
+            if (DateTime.TryParseExact(cmd.Value, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && propertyType.PropertyType == typeof(DateTime))
+            {
+                parsedValue = date;
+            }
+            else if (decimal.TryParse(cmd.Value, out var decimalValue) && propertyType.PropertyType == typeof(decimal))
+            {
+                parsedValue = decimalValue;
+            }
+            else if (double.TryParse(cmd.Value, out var doubleValue) && propertyType.PropertyType == typeof(double))
+            {
+                parsedValue = doubleValue;
+            }
+            else if (int.TryParse(cmd.Value, out int intValue) && propertyType.PropertyType == typeof(int))
+            {
+                parsedValue = intValue;
+            }
+            else
+            {
+                parsedValue = cmd.Value;
+            }
+
+            var valueParameterExpression = Expression.Constant(parsedValue);
+            var parameterPropertyExpression = Expression.Property(expressionParameter, propertyName);
+
+            var operand = QueryCommand.OperandMappings.FirstOrDefault(m => m.Key == cmd.Props.ElementAtOrDefault(1 + orOperandShift)).Value;
+            switch (operand)
+            {
+                case WOperand.Equal:
+                    outputExpression = Expression.Equal(parameterPropertyExpression, valueParameterExpression);
+                    break;
+                case WOperand.GreaterThan:
+                    outputExpression = Expression.GreaterThan(parameterPropertyExpression, valueParameterExpression);
+                    break;
+                case WOperand.GreaterThanOrEquals:
+                    outputExpression = Expression.GreaterThanOrEqual(parameterPropertyExpression, valueParameterExpression);
+                    break;
+                case WOperand.LessThan:
+                    outputExpression = Expression.LessThan(parameterPropertyExpression, valueParameterExpression);
+                    break;
+                case WOperand.LessThanOrEquals:
+                    outputExpression = Expression.LessThanOrEqual(parameterPropertyExpression, valueParameterExpression);
+                    break;
+                case WOperand.NotEqual:
+                    outputExpression = Expression.NotEqual(parameterPropertyExpression, valueParameterExpression);
+                    break;
+                default:
+                    expression = null;
+                    return false; // Broken command
+            }
+
+            if (outputExpression == null)
+            {
+                expression = null;
+                return false; // Broken command
+            }
+
+            expression = outputExpression;
+            return true;
         }
 
         private static IOrderedQueryable<T> AppendOrderExpression(IQueryable<T> query, QueryCommand[] commands)

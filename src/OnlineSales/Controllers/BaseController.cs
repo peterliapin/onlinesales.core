@@ -173,7 +173,7 @@ namespace OnlineSales.Controllers
                 query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
                 if (selectExists)
                 {
-                    var selectResult = QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
+                    var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
                     return Ok(selectResult);
                 }
 
