@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Reflection;
+using System.Text.Json;
 using System.Web;
-using Newtonsoft.Json;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Exceptions;
-using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Services;
 
@@ -38,7 +36,7 @@ public class SmscService : ISmsService
             responseString = await response.Content.ReadAsStringAsync();
         }
 
-        dynamic? jsonResponseObject = JsonConvert.DeserializeObject(responseString);
+        dynamic? jsonResponseObject = JsonSerializer.Deserialize<dynamic>(responseString);
         if (jsonResponseObject != null && jsonResponseObject!["error"] != null)
         {
             throw new SmscException($"Failed to send message to {recipient} ( {jsonResponseObject!["error"]} )");

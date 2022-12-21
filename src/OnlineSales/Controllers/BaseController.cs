@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData.ModelBuilder;
-using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;

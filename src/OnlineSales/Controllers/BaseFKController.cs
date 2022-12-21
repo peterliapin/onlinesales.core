@@ -4,11 +4,7 @@
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
-using Nest;
-using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 

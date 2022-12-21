@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Newtonsoft.Json;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -118,7 +118,7 @@ public class ApiDbContext : DbContext
                 ObjectId = ((BaseEntity)entityEntry.Entity).Id,
                 ObjectType = entityEntry.Entity.GetType().Name,
                 Operation = operation!,
-                Data = JsonConvert.SerializeObject(entityEntry.Entity),
+                Data = JsonSerializer.Serialize(entityEntry.Entity),
             };
 
             changes.Add(change);
