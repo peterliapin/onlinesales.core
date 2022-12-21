@@ -76,6 +76,8 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<ChangeLog>? ChangeLog { get; set; }
 
+    public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLog { get; set; }
+
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker
