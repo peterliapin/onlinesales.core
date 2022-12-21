@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Net;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -10,7 +12,9 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using NSwag.Generation.AspNetCore;
 using OnlineSales.Configuration;
+using OnlineSales.Controllers;
 using OnlineSales.Data;
+using OnlineSales.ErrorHandling;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -55,6 +59,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
+        builder.Services.AddSingleton<IErrorMessageGenerator, ErrorMessageGenerator>();
 
         ConfigureCacheProfiles(builder);
 
@@ -80,6 +85,8 @@ public class Program
 
         app = builder.Build();
 
+        app.UseMiddleware<ErrorMessageMiddleware>();
+
         app.UseForwardedHeaders();
 
         MigrateOnStartIfRequired(app, builder);
@@ -87,7 +94,7 @@ public class Program
         // Configure the HTTP request pipeline.
         // if (app.Environment.IsDevelopment())
         // {
-            // app.UseODataRouteDebug();
+        // app.UseODataRouteDebug();
         // }
 
         app.UseOpenApi();

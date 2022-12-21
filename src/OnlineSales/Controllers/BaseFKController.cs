@@ -11,6 +11,8 @@ using Nest;
 using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
+using YamlDotNet.Core.Tokens;
 
 namespace OnlineSales.Controllers
 {
@@ -22,8 +24,8 @@ namespace OnlineSales.Controllers
     {
         protected readonly DbSet<TFK> dbFKSet;
 
-        protected BaseFKController(ApiDbContext dbContext, IMapper mapper)
-            : base(dbContext, mapper)
+        protected BaseFKController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
+            : base(dbContext, mapper, errorMessageGenerator)
         {
             this.dbFKSet = dbContext.Set<TFK>();
         }              
@@ -36,32 +38,25 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<T>> Post([FromBody] TC value)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var existFKItem = await (from fk in this.dbFKSet
-                                            where fk.Id == GetFKId(value)
-                                            select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<TFK>(GetFKId(value)));
-                }
-
-                var newValue = mapper.Map<T>(value);
-                var result = await dbSet.AddAsync(newValue);
-                await dbContext.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
+                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
             }
-            catch (Exception e)
+
+            var existFKItem = await (from fk in this.dbFKSet
+                                        where fk.Id == GetFKId(value)
+                                        select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateUnprocessableEntityResult(GetFKId(value));
             }
+
+            var newValue = mapper.Map<T>(value);
+            var result = await dbSet.AddAsync(newValue);
+            await dbContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
         }
 
         [HttpPatch("{id}")]
@@ -71,44 +66,47 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
-
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<T>(id));
-                }
-
-                var fkid = GetFKId(value);
-                if (fkid != null)
-                {
-                    var existFKItem = await (from fk in this.dbFKSet
-                                             where fk.Id == fkid
-                                             select fk).FirstOrDefaultAsync();
-
-                    if (existFKItem == null)
-                    {
-                        return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<TFK>(fkid.Value));
-                    }
-                }
-
-                mapper.Map(value, existingEntity);
-                await dbContext.SaveChangesAsync();
-
-                return Ok();
+                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
             }
-            catch (Exception e)
+
+            var existingEntity = await (from p in this.dbSet
+                                        where p.Id == id
+                                        select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateNotFoundMessageResult(id);
             }
+
+            var fkid = GetFKId(value);
+            if (fkid != null)
+            {
+                var existFKItem = await (from fk in this.dbFKSet
+                                            where fk.Id == fkid
+                                            select fk).FirstOrDefaultAsync();
+
+                if (existFKItem == null)
+                {
+                    return CreateUnprocessableEntityResult(fkid.Value);
+                }
+            }
+
+            mapper.Map(value, existingEntity);
+            await dbContext.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        protected ActionResult CreateUnprocessableEntityResult(int fkId, string fkTypeName)
+        {
+            return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.FKIdNotFound, fkTypeName, fkId.ToString());
+        }
+
+        protected ActionResult CreateUnprocessableEntityResult(int fkId)
+        {
+            return CreateUnprocessableEntityResult(fkId, typeof(TFK).Name);
         }
 
         protected abstract int GetFKId(TC item);

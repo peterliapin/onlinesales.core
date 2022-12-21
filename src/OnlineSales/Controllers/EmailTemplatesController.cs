@@ -9,6 +9,7 @@ using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
 using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
@@ -17,8 +18,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup>
 {
-    public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper)
-    : base(dbContext, mapper)
+    public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
+    : base(dbContext, mapper, errorMessageGenerator)
     {
     }
 

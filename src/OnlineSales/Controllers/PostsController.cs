@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
@@ -15,8 +17,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class PostsController : BaseController<Post, PostCreateDto, PostUpdateDto>
 {
-    public PostsController(ApiDbContext dbContext, IMapper mapper)
-        : base(dbContext, mapper)
+    public PostsController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
+        : base(dbContext, mapper, errorMessageGenerator)
     {
     }
 }

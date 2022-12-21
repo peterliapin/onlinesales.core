@@ -10,6 +10,7 @@ using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers;
 
@@ -17,8 +18,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseFKController<Comment, CommentCreateDto, CommentUpdateDto, Post>
 {
-    public CommentsController(ApiDbContext dbContext, IMapper mapper)
-        : base(dbContext, mapper)
+    public CommentsController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
+        : base(dbContext, mapper, errorMessageGenerator)
     {
     }
 
@@ -30,44 +31,37 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<Comment>> Post([FromBody] CommentCreateDto value)
     {
-        try
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return errorHandler.CreateBadRequestResponce();
-            }
-
-            var existFKItem = await (from fk in this.dbFKSet
-                                     where fk.Id == GetFKId(value)
-                                     select fk).FirstOrDefaultAsync();
-
-            if (existFKItem == null)
-            {
-                return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Comment>(GetFKId(value)));
-            }
-
-            if (value.ParentId != null)
-            {
-                var parent = await (from p in this.dbSet
-                                            where p.Id == value.ParentId
-                                            select p).FirstOrDefaultAsync();
-
-                if (parent == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Post>(value.ParentId.Value));
-                }
-            }
-
-            var newValue = mapper.Map<Comment>(value);
-            var result = await dbSet.AddAsync(newValue);
-            await dbContext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
+            return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
         }
-        catch (Exception e)
+
+        var existFKItem = await (from fk in this.dbFKSet
+                                    where fk.Id == GetFKId(value)
+                                    select fk).FirstOrDefaultAsync();
+
+        if (existFKItem == null)
         {
-            return errorHandler.CreateInternalServerErrorResponce(e.Message);
+            return CreateUnprocessableEntityResult(GetFKId(value));
         }
+
+        if (value.ParentId != null)
+        {
+            var parent = await (from p in this.dbSet
+                                        where p.Id == value.ParentId
+                                        select p).FirstOrDefaultAsync();
+
+            if (parent == null)
+            {
+                return CreateUnprocessableEntityResult(value.ParentId.Value, typeof(Comment).Name);
+            }
+        }
+
+        var newValue = mapper.Map<Comment>(value);
+        var result = await dbSet.AddAsync(newValue);
+        await dbContext.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
     }
 
     protected override int GetFKId(CommentCreateDto item)

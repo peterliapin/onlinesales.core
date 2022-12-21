@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
@@ -19,8 +20,8 @@ namespace OnlineSales.Controllers
     {
         private readonly IOrderItemService orderItemService;
 
-        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService)
-            : base(dbContext, mapper)
+        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, IErrorMessageGenerator errorMessageGenerator)
+            : base(dbContext, mapper, errorMessageGenerator)
         {
             this.orderItemService = orderItemService;
         }
@@ -32,31 +33,24 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Post([FromBody] OrderItemCreateDto value)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var existFKItem = await (from fk in this.dbFKSet
-                                         where fk.Id == GetFKId(value)
-                                         select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(GetFKId(value)));
-                }
-
-                var orderItem = mapper.Map<OrderItem>(value);
-
-                var credtedItem = await orderItemService.AddOrderItem(existFKItem, orderItem);
-                return CreatedAtAction(nameof(GetOne), new { id = credtedItem }, value);
+                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
             }
-            catch (Exception e)
+
+            var existFKItem = await (from fk in this.dbFKSet
+                                        where fk.Id == GetFKId(value)
+                                        select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateUnprocessableEntityResult(GetFKId(value));
             }
+
+            var orderItem = mapper.Map<OrderItem>(value);
+
+            var credtedItem = await orderItemService.AddOrderItem(existFKItem, orderItem);
+            return CreatedAtAction(nameof(GetOne), new { id = credtedItem }, value);
         }
 
         [HttpPatch("{id}")]
@@ -66,41 +60,34 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Patch(int id, [FromBody] OrderItemUpdateDto value)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
-
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
-                }
-
-                var existFKItem = await (from fk in this.dbFKSet
-                                            where fk.Id == existingEntity.OrderId
-                                            select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
-                }
-
-                mapper.Map(value, existingEntity);
-
-                var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
-
-                return updatedItem;
+                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
             }
-            catch (Exception e)
+
+            var existingEntity = await (from p in this.dbSet
+                                        where p.Id == id
+                                        select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateNotFoundMessageResult(id);
             }
+
+            var existFKItem = await (from fk in this.dbFKSet
+                                        where fk.Id == existingEntity.OrderId
+                                        select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
+            {
+                return CreateUnprocessableEntityResult(existingEntity.OrderId);
+            }
+
+            mapper.Map(value, existingEntity);
+
+            var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
+
+            return updatedItem;
         }
 
         [HttpDelete("{id}")]
@@ -109,34 +96,27 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult> Delete(int id)
         {
-            try
+            var existingEntity = await (from p in this.dbSet
+                                        where p.Id == id
+                                        select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
             {
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
-
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
-                }
-
-                var existFKItem = await (from fk in this.dbFKSet
-                                         where fk.Id == existingEntity.OrderId
-                                         select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
-                }
-
-                await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
-
-                return NoContent();
+                return CreateNotFoundMessageResult(id);
             }
-            catch (Exception e)
+
+            var existFKItem = await (from fk in this.dbFKSet
+                                        where fk.Id == existingEntity.OrderId
+                                        select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateUnprocessableEntityResult(existingEntity.OrderId);
             }
+
+            await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
+
+            return NoContent();
         }
 
         protected override int GetFKId(OrderItemCreateDto item)

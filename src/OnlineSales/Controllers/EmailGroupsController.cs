@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers;
 
@@ -15,8 +16,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto>
 {
-    public EmailGroupsController(ApiDbContext dbContext, IMapper mapper)
-    : base(dbContext, mapper)
+    public EmailGroupsController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
+    : base(dbContext, mapper, errorMessageGenerator)
     {
     }
 }

@@ -5,27 +5,28 @@
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    public class VersionController : ControllerBaseEH
+    public class VersionController : ControllerBase
     {
+        protected readonly IErrorMessageGenerator errorMessageGenerator;
+
+        public VersionController(IErrorMessageGenerator errorMessageGenerator)
+        {
+            this.errorMessageGenerator = errorMessageGenerator;
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult Get()
         {
-            try
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                return Ok(new { Version = fileVersionInfo.ProductVersion! });
-            }
-            catch (Exception ex)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(ex.Message);
-            }
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            return Ok(new { Version = fileVersionInfo.ProductVersion! });
         }
     }
 }

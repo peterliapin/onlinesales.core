@@ -7,13 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
+using Nest;
 using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T, TC, TU> : ControllerBaseEH
+    public class BaseController<T, TC, TU> : ControllerBase
         where T : BaseEntity, new()
         where TC : class
         where TU : class
@@ -21,12 +23,14 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly DbContext dbContext;
         protected readonly IMapper mapper;
+        protected readonly IErrorMessageGenerator errorMessageGenerator;
 
-        public BaseController(ApiDbContext dbContext, IMapper mapper)
+        public BaseController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
             this.mapper = mapper;
+            this.errorMessageGenerator = errorMessageGenerator;
         }
 
         // GET api/{entity}s/
@@ -36,16 +40,9 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual ActionResult<IQueryable<T>> GetAll()
         {
-            try
-            {
-                var result = this.dbSet!.AsQueryable<T>();
+            var result = this.dbSet!.AsQueryable<T>();
 
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
+            return Ok(result);
         }
 
         // GET api/{entity}s/5
@@ -56,49 +53,36 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<T>> GetOne(int id)
         {
-            try
-            {
-                var result = await (from p in this.dbSet
-                                    where p.Id == id
-                                    select p).FirstOrDefaultAsync();
+            var result = await (from p in this.dbSet
+                                where p.Id == id
+                                select p).FirstOrDefaultAsync();
 
-                if (result == null)
-                {
-                    return errorHandler.CreateNotFoundResponce(CreateNotFoundMessage<T>(id));
-                }
-
-                return Ok(result);
-            }
-            catch (Exception e)
+            if (result == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateNotFoundMessageResult(id);
             }
+
+            return Ok(result);
         }
 
         // POST api/{entity}s
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<T>> Post([FromBody] TC value)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var newValue = mapper.Map<T>(value);
-                var result = await dbSet.AddAsync(newValue);
-                await dbContext.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
+                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
             }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
+
+            var newValue = mapper.Map<T>(value);
+            var result = await dbSet.AddAsync(newValue);
+            await dbContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
         }
 
         // PUT api/posts/5
@@ -109,31 +93,24 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
-
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<T>(id));
-                }
-
-                mapper.Map(value, existingEntity);
-                await dbContext.SaveChangesAsync();
-
-                return Ok();
+                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
             }
-            catch (Exception e)
+
+            var existingEntity = await (from p in this.dbSet
+                                        where p.Id == id
+                                        select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
             {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
+                return CreateNotFoundMessageResult(id);
             }
+
+            mapper.Map(value, existingEntity);
+            await dbContext.SaveChangesAsync();
+
+            return Ok();
         }
 
         // DELETE api/posts/5
@@ -143,33 +120,25 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult> Delete(int id)
         {
-            try
+            var existingEntity = await (from p in this.dbSet
+                                        where p.Id == id
+                                        select p).FirstOrDefaultAsync();
+
+            if (existingEntity == null)
             {
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
-
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<T>(id));
-                }
-
-                dbContext.Remove(existingEntity);
-
-                await dbContext.SaveChangesAsync();
-
-                return NoContent();
+                return CreateNotFoundMessageResult(id);
             }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
+
+            dbContext.Remove(existingEntity);
+
+            await dbContext.SaveChangesAsync();
+
+            return NoContent();
         }
 
-        protected string CreateNotFoundMessage<TEntity>(int id)
+        protected ActionResult CreateNotFoundMessageResult(int id)
         {
-            // return JsonConvert.SerializeObject(new { Id = new string[] { string.Format("The Id field with value = {0} is not found", id) } }, Formatting.Indented);
-            return string.Format("The {0} with Id = {1} is not found", typeof(TEntity).FullName, id);
+            return errorMessageGenerator.CreateNotFoundResponce(InnerErrorCodes.Status404.IdNotFound, typeof(T).Name, id.ToString());
         }
     }
 }
