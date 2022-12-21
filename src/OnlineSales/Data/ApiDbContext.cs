@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Newtonsoft.Json;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -76,8 +77,11 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<ChangeLog>? ChangeLog { get; set; }
 
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
+        List<ChangeLog> changes = new ();
+        Operation operation;
+
         var entries = ChangeTracker
        .Entries()
        .Where(e => e.Entity is BaseEntity && (
@@ -88,20 +92,41 @@ public class ApiDbContext : DbContext
         {
             if (entityEntry.State == EntityState.Modified)
             {
+                operation = Operation.Updated;
+
                 ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
                 ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;              
             }
-
-            if (entityEntry.State == EntityState.Added)
+            else if (entityEntry.State == EntityState.Added)
             {
+                operation = Operation.Inserted;
+
                 ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
                 ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+
+                await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken); // need this inorder to generate Id
             }
+            else
+            {
+                operation = Operation.Deleted;
+            }
+
+            ChangeLog change = new ChangeLog()
+            {
+                ObjectId = ((BaseEntity)entityEntry.Entity).Id,
+                ObjectType = entityEntry.Entity.GetType().Name,
+                Operation = operation!,
+                Data = JsonConvert.SerializeObject(entityEntry.Entity),
+            };
+
+            changes.Add(change);
         }
 
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        ChangeLog!.AddRange(changes);
+        
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
