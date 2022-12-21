@@ -77,6 +77,8 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<ChangeLog>? ChangeLog { get; set; }
 
+    public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLog { get; set; }
+
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         List<ChangeLog> changes = new ();
