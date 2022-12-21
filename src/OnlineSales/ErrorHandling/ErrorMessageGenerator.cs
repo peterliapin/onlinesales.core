@@ -20,14 +20,7 @@ namespace OnlineSales.ErrorHandling
         {
         };
 
-        private readonly ControllerBase controller;
-
-        public ErrorMessageGenerator(ControllerBase controller)
-        {
-            this.controller = controller;
-        }
-
-        public ActionResult CreateBadRequestResponce((string, string) innerErrorMessage, params string[] arguments)
+        public ActionResult CreateBadRequestResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments)
         {
             var allErrors = new List<string>();
             foreach (var keyModelStatePair in controller.ModelState)
@@ -54,7 +47,7 @@ namespace OnlineSales.ErrorHandling
             return controller.BadRequest(JsonSerializer.Serialize(em, SerializeOptions));
         }
 
-        public ActionResult CreateNotFoundResponce((string, string) innerErrorMessage, params string[] arguments)
+        public ActionResult CreateNotFoundResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments)
         {
             var em = new ErrorMessage()
             {
@@ -67,7 +60,7 @@ namespace OnlineSales.ErrorHandling
             return controller.NotFound(JsonSerializer.Serialize(em, SerializeOptions));
         }
 
-        public ActionResult CreateUnprocessableEntityResponce((string, string) innerErrorMessage, params string[] arguments)
+        public ActionResult CreateUnprocessableEntityResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments)
         {
             var em = new ErrorMessage()
             {

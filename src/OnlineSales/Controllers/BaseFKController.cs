@@ -40,7 +40,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return CreateValidationErrorMessageResult();
             }
 
             var existFKItem = await (from fk in this.dbFKSet
@@ -68,7 +68,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return CreateValidationErrorMessageResult();
             }
 
             var existingEntity = await (from p in this.dbSet
@@ -101,7 +101,7 @@ namespace OnlineSales.Controllers
 
         protected ActionResult CreateUnprocessableEntityResult(int fkId, string fkTypeName)
         {
-            return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.FKIdNotFound, fkTypeName, fkId.ToString());
+            return errorMessageGenerator.CreateUnprocessableEntityResponce(this, InnerErrorCodes.Status422.FKIdNotFound, fkTypeName, fkId.ToString());
         }
 
         protected ActionResult CreateUnprocessableEntityResult(int fkId)

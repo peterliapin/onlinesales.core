@@ -75,7 +75,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return CreateValidationErrorMessageResult();
             }
 
             var newValue = mapper.Map<T>(value);
@@ -95,7 +95,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return CreateValidationErrorMessageResult();
             }
 
             var existingEntity = await (from p in this.dbSet
@@ -138,7 +138,12 @@ namespace OnlineSales.Controllers
 
         protected ActionResult CreateNotFoundMessageResult(int id)
         {
-            return errorMessageGenerator.CreateNotFoundResponce(InnerErrorCodes.Status404.IdNotFound, typeof(T).Name, id.ToString());
+            return errorMessageGenerator.CreateNotFoundResponce(this, InnerErrorCodes.Status404.IdNotFound, typeof(T).Name, id.ToString());
+        }
+
+        protected ActionResult CreateValidationErrorMessageResult()
+        {
+            return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.ValidationErrors);
         }
     }
 }

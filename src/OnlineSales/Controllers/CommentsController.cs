@@ -33,7 +33,7 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     {
         if (!ModelState.IsValid)
         {
-            return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+            return CreateValidationErrorMessageResult();
         }
 
         var existFKItem = await (from fk in this.dbFKSet

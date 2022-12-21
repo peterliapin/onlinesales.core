@@ -16,10 +16,10 @@ namespace OnlineSales.ErrorHandling
 {    
     public interface IErrorMessageGenerator
     {
-        public ActionResult CreateBadRequestResponce((string, string) innerErrorMessage, params string[] arguments);
+        public ActionResult CreateBadRequestResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments);
 
-        public ActionResult CreateNotFoundResponce((string, string) innerErrorMessage, params string[] arguments);
+        public ActionResult CreateNotFoundResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments);
 
-        public ActionResult CreateUnprocessableEntityResponce((string, string) innerErrorMessage, params string[] arguments);
+        public ActionResult CreateUnprocessableEntityResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments);
     }
 }

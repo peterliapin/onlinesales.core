@@ -56,10 +56,10 @@ public class Program
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
         builder.Configuration.AddEnvironmentVariables();
 
+        builder.Services.AddSingleton<IErrorMessageGenerator, ErrorMessageGenerator>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
-        builder.Services.AddSingleton<IErrorMessageGenerator, ErrorMessageGenerator>();
 
         ConfigureCacheProfiles(builder);
 
@@ -75,6 +75,11 @@ public class Program
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerDocument(ConfigureSwagger);
+        builder.Services.AddControllers()
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {

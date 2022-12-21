@@ -35,7 +35,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return CreateValidationErrorMessageResult();
             }
 
             var existFKItem = await (from fk in this.dbFKSet
@@ -62,7 +62,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return CreateValidationErrorMessageResult();
             }
 
             var existingEntity = await (from p in this.dbSet

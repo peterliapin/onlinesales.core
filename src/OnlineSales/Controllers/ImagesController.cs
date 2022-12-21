@@ -36,7 +36,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.ValidationErrors);
+                return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.ValidationErrors);
             }
 
             var provider = new FileExtensionContentTypeProvider();
@@ -48,7 +48,7 @@ namespace OnlineSales.Controllers
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.MIMINotIdentified, incomingFileName);
+                return errorMessageGenerator.CreateUnprocessableEntityResponce(this, InnerErrorCodes.Status422.MIMINotIdentified, incomingFileName);
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
@@ -103,19 +103,19 @@ namespace OnlineSales.Controllers
         {
             if (scopeUid.IsNullOrWhiteSpace())
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.InvalidScope);
+                return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.InvalidScope);
             }
 
             if (fileName.IsNullOrWhiteSpace())
             {
-                return errorMessageGenerator.CreateBadRequestResponce(InnerErrorCodes.Status400.InvalidFileName);
+                return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.InvalidFileName);
             }
 
             var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
-                return errorMessageGenerator.CreateNotFoundResponce(InnerErrorCodes.Status404.FileNotFound, fileName);
+                return errorMessageGenerator.CreateNotFoundResponce(this, InnerErrorCodes.Status404.FileNotFound, fileName);
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
