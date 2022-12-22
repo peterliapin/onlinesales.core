@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.ErrorHandling;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
 {
@@ -14,8 +15,11 @@ namespace OnlineSales.Controllers
     {
         protected readonly IErrorMessageGenerator errorMessageGenerator;
 
-        public VersionController(IErrorMessageGenerator errorMessageGenerator)
+        private readonly IHttpContextHelper? httpContextHelper;
+
+        public VersionController(IHttpContextHelper? httpContextHelper, IErrorMessageGenerator errorMessageGenerator)
         {
+            this.httpContextHelper = httpContextHelper;
             this.errorMessageGenerator = errorMessageGenerator;
         }
 
@@ -26,7 +30,14 @@ namespace OnlineSales.Controllers
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            return Ok(new { Version = fileVersionInfo.ProductVersion! });
+            return Ok(
+                new
+                {
+                    Version = fileVersionInfo.ProductVersion!,
+                    IP = httpContextHelper!.IpAddress,
+                    IPv4 = httpContextHelper!.IpAddressV4,
+                    IPv6 = httpContextHelper!.IpAddressV6,
+                });
         }
     }
 }

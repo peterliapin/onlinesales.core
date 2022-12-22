@@ -4,15 +4,10 @@
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
-using Nest;
-using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.ErrorHandling;
-using YamlDotNet.Core.Tokens;
 
 namespace OnlineSales.Controllers
 {
@@ -28,7 +23,7 @@ namespace OnlineSales.Controllers
             : base(dbContext, mapper, errorMessageGenerator)
         {
             this.dbFKSet = dbContext.Set<TFK>();
-        }              
+        }
 
         // POST api/{entity}s
         [HttpPost]
@@ -45,8 +40,8 @@ namespace OnlineSales.Controllers
             }
 
             var existFKItem = await (from fk in this.dbFKSet
-                                        where fk.Id == GetFKId(value)
-                                        select fk).FirstOrDefaultAsync();
+                                     where fk.Id == GetFKId(value)
+                                     select fk).FirstOrDefaultAsync();
 
             if (existFKItem == null)
             {

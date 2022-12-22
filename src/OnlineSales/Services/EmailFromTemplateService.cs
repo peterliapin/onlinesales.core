@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services
@@ -23,7 +24,7 @@ namespace OnlineSales.Services
             this.apiDbContext = apiDbContext;
         }
 
-        public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments)
+        public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments)
         {
             var template = await GetEmailTemplate(templateName, language);
 
@@ -32,7 +33,7 @@ namespace OnlineSales.Services
             await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipients, updatedBodyTemplate, attachments, template.Id);
         }
 
-        public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string> templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
+        public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
         {
             var template = await GetEmailTemplate(templateName, customerId);
 
@@ -69,14 +70,14 @@ namespace OnlineSales.Services
             return DefaultLanguage;
         }
 
-        private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string> templateArguments)
+        private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string>? templateArguments)
         {
-            foreach (var arg in templateArguments)
+            if (templateArguments is null)
             {
-                bodyTemplate = bodyTemplate.Replace(arg.Key, arg.Value);
+                return bodyTemplate;
             }
 
-            return bodyTemplate;
+            return TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("<%", "%>"), bodyTemplate);
         }
     }
 }

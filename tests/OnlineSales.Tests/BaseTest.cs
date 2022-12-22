@@ -86,7 +86,7 @@ public class BaseTest : IDisposable
         else
         {
             return null;
-        }        
+        }
     }
 
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created)

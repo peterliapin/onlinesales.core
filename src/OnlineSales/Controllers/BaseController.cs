@@ -2,17 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.IO.Pipelines;
+using System.Web;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
-using Nest;
-using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.ErrorHandling;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers
 {
@@ -21,7 +18,7 @@ namespace OnlineSales.Controllers
         where TC : class
         where TU : class
     {
-        protected readonly DbSet<T> dbSet;
+        protected readonly DbSet<T> dbSet;  
         protected readonly DbContext dbContext;
         protected readonly IMapper mapper;
         protected readonly IErrorMessageGenerator errorMessageGenerator;
@@ -34,16 +31,23 @@ namespace OnlineSales.Controllers
             this.errorMessageGenerator = errorMessageGenerator;
         }
 
-        // GET api/{entity}s/
         [HttpGet]
-        // [EnableQuery(PageSize = 10)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public virtual ActionResult<IQueryable<T>> GetAll()
+        public virtual async Task<ActionResult> Get([FromQuery] IDictionary<string, string>? parameters)
         {
-            var result = this.dbSet!.AsQueryable<T>();
+            var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
+            var query = this.dbSet!.AsQueryable<T>();
 
+            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
+            if (selectExists)
+            {
+                var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
+                return Ok(selectResult);
+            }
+
+            var result = await query!.ToArrayAsync();
             return Ok(result);
         }
 

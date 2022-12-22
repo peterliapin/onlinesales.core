@@ -17,7 +17,7 @@ namespace OnlineSales.Infrastructure
         }
 
         public HttpRequest Request => this.httpContextAccessor?.HttpContext?.Request!;
-        
+
         public string? IpAddress
         {
             get
@@ -31,6 +31,22 @@ namespace OnlineSales.Infrastructure
             get
             {
                 return httpContextAccessor?.HttpContext?.Request?.Headers[HeaderNames.UserAgent];
+            }
+        }
+
+        public string? IpAddressV4
+        {
+            get
+            {
+                return httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.MapToIPv4().ToString();
+            }
+        }
+
+        public string? IpAddressV6
+        {
+            get
+            {
+                return httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.MapToIPv6().ToString();
             }
         }
     }

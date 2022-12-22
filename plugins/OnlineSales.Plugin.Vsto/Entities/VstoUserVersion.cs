@@ -19,4 +19,3 @@ public class VstoUserVersion
 
     public string Subfolder { get; set; } = string.Empty;
 }
-

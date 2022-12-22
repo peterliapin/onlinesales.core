@@ -38,11 +38,10 @@ public class SmscService : ISmsService
             responseString = await response.Content.ReadAsStringAsync();
         }
 
-        dynamic jsonResponseObject = JsonConvert.DeserializeObject(responseString);
-        if (jsonResponseObject["error"] != null)
+        dynamic? jsonResponseObject = JsonConvert.DeserializeObject(responseString);
+        if (jsonResponseObject != null && jsonResponseObject!["error"] != null)
         {
-            throw new SmscException($"Failed to send message to {recipient} ( {jsonResponseObject["error"]} )");
+            throw new SmscException($"Failed to send message to {recipient} ( {jsonResponseObject!["error"]} )");
         }
     }
 }
-

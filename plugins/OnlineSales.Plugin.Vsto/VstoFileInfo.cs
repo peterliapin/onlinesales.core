@@ -14,7 +14,7 @@ public class VstoFileInfo : IFileInfo
     public VstoFileInfo(string basePath, string filePath)
     {
         this.basePath = basePath;
-        this.filePath = filePath;        
+        this.filePath = filePath;
     }
 
     public string FullPath => Path.Join(basePath, filePath);
@@ -48,4 +48,3 @@ public class VstoFileInfo : IFileInfo
         return File.OpenRead(FullPath);
     }
 }
-

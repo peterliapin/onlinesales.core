@@ -79,7 +79,7 @@ public class EmailService : IEmailService
 
         foreach (var receipent in recipients)
         {
-            message.To.Add(MailboxAddress.Parse(receipent)); 
+            message.To.Add(MailboxAddress.Parse(receipent));
         }
 
         BodyBuilder emailBody = new ()

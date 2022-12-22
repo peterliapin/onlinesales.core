@@ -3,7 +3,6 @@
 // </copyright>
 
 using FluentAssertions;
-using Namotion.Reflection;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -47,7 +46,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
     [Fact]
     public async Task CreateAndUpdateItemTest()
-    {      
+    {
         var testCreateItem = await CreateItem();
 
         var testUpdateItem = UpdateItem(testCreateItem.Item1);

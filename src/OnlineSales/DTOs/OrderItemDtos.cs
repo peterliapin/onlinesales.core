@@ -24,7 +24,7 @@ public class OrderItemCreateDto
     [CurrencyCode]
     [Required]
     public string Currency { get; set; } = string.Empty;
-    
+
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
     public int Quantity { get; set; } = 0;

@@ -19,7 +19,7 @@ public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerU
 
     protected override CustomerUpdateDto UpdateItem(TestCustomer to)
     {
-        var from = new CustomerUpdateDto();        
+        var from = new CustomerUpdateDto();
         to.Email = from.Email = "Updated" + to.Email;
         return from;
     }
