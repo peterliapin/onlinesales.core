@@ -9,7 +9,6 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.ErrorHandling;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 

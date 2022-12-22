@@ -5,12 +5,10 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.ErrorHandling;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
