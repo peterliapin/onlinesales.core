@@ -21,7 +21,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     {
         var comment = new CommentUpdateDto();
         comment.Content = "Content";
-        await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.UnprocessableEntity);
+        await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
     protected override async Task<(TestComment, string)> CreateItem(int fkId)
