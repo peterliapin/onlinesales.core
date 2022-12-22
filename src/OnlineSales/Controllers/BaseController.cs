@@ -78,8 +78,7 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // return CreateValidationErrorMessageResult();
-                throw new PluginDbContextException();
+                return CreateValidationErrorMessageResult();
             }
 
             var newValue = mapper.Map<T>(value);
