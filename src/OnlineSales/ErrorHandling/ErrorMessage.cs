@@ -2,18 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace OnlineSales.ErrorHandling
 {
-    public class ErrorMessage
+    public class ErrorMessage : ProblemDetails
     {
-        public int Status { get; set; } = StatusCodes.Status200OK;
+        [JsonPropertyName("code")]
+        public string Code { get; set; } = InnerErrorCodes.UnspecifiedError.Code;
 
-        public string Code { get; set; } = InnerErrorCodes.UnspecifiedError;
+        [JsonPropertyName("details_arguments")]
+        public List<string>? Arguments { get; set; } = null;
 
-        public string Message { get; set; } = string.Empty;
-
-        public string[] Arguments { get; set; } = new string[0];
-
-        public List<string> Details { get; set; } = new List<string>();
+        [JsonPropertyName("error_description")]
+        public object? ErrorDescription { get; set; } = null;
     }
 }

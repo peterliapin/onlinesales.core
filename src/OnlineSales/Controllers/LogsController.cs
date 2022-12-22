@@ -26,6 +26,7 @@ public class LogsController : Controller
     // GET api/logs/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<List<LogRecord>>> GetAll()
     {

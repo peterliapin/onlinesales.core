@@ -30,6 +30,7 @@ namespace OnlineSales.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Post([FromForm] ImageCreateDto imageCreateDto)
@@ -48,7 +49,7 @@ namespace OnlineSales.Controllers
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                return errorMessageGenerator.CreateUnprocessableEntityResponce(this, InnerErrorCodes.Status422.MIMINotIdentified, incomingFileName);
+                return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.MIMINotIdentified, incomingFileName);
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
@@ -98,6 +99,7 @@ namespace OnlineSales.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get(string scopeUid, string fileName)
         {
@@ -115,7 +117,7 @@ namespace OnlineSales.Controllers
 
             if (uploadedImageData == null)
             {
-                return errorMessageGenerator.CreateNotFoundResponce(this, InnerErrorCodes.Status404.FileNotFound, fileName);
+                return errorMessageGenerator.CreateNotFoundResponce(InnerErrorCodes.Status404.FileNotFound, fileName);
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);

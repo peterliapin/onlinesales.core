@@ -34,6 +34,7 @@ namespace OnlineSales.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<T>> Post([FromBody] TC value)
@@ -62,6 +63,7 @@ namespace OnlineSales.Controllers
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
@@ -101,7 +103,7 @@ namespace OnlineSales.Controllers
 
         protected ActionResult CreateUnprocessableEntityResult(int fkId, string fkTypeName)
         {
-            return errorMessageGenerator.CreateUnprocessableEntityResponce(this, InnerErrorCodes.Status422.FKIdNotFound, fkTypeName, fkId.ToString());
+            return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.FKIdNotFound, fkTypeName, fkId.ToString());
         }
 
         protected ActionResult CreateUnprocessableEntityResult(int fkId)

@@ -16,11 +16,7 @@ namespace OnlineSales.ErrorHandling
 {    
     public class ErrorMessageGenerator : IErrorMessageGenerator
     {
-        private static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
-        {
-        };
-
-        public ActionResult CreateBadRequestResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments)
+        public ActionResult CreateBadRequestResponce(ControllerBase controller, ErrorDescription innerErrorMessage, params string[] arguments)
         {
             var allErrors = new List<string>();
             foreach (var keyModelStatePair in controller.ModelState)
@@ -35,45 +31,46 @@ namespace OnlineSales.ErrorHandling
                 }
             }
 
-            var em = new ErrorMessage()
-            {
-                Status = StatusCodes.Status400BadRequest,
-                Code = "Status400." + innerErrorMessage.Item1,
-                Message = CreateMessage(innerErrorMessage.Item2, arguments),
-                Arguments = arguments,
-                Details = allErrors,
-            };
+            var em = CreateErrorMessage<InnerErrorCodes.Status400>(StatusCodes.Status400BadRequest, innerErrorMessage, arguments);
+            em.ErrorDescription = allErrors;
 
-            return controller.BadRequest(JsonSerializer.Serialize(em, SerializeOptions));
+            return new ObjectResult(em);
         }
 
-        public ActionResult CreateNotFoundResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments)
+        public ActionResult CreateNotFoundResponce(ErrorDescription innerErrorMessage, params string[] arguments)
         {
-            var em = new ErrorMessage()
-            {
-                Status = StatusCodes.Status404NotFound,
-                Code = "Status404." + innerErrorMessage.Item1,
-                Message = CreateMessage(innerErrorMessage.Item2, arguments),
-                Arguments = arguments,
-            };
+            var em = CreateErrorMessage<InnerErrorCodes.Status404>(StatusCodes.Status404NotFound, innerErrorMessage, arguments);
 
-            return controller.NotFound(JsonSerializer.Serialize(em, SerializeOptions));
+            return new ObjectResult(em);
         }
 
-        public ActionResult CreateUnprocessableEntityResponce(ControllerBase controller, (string, string) innerErrorMessage, params string[] arguments)
+        public ActionResult CreateUnprocessableEntityResponce(ErrorDescription innerErrorMessage, params string[] arguments)
         {
-            var em = new ErrorMessage()
-            {
-                Status = StatusCodes.Status422UnprocessableEntity,
-                Code = "Status422." + innerErrorMessage.Item1,
-                Message = CreateMessage(innerErrorMessage.Item2, arguments),
-                Arguments = arguments,
-            };
+            var em = CreateErrorMessage<InnerErrorCodes.Status422>(StatusCodes.Status422UnprocessableEntity, innerErrorMessage, arguments);
 
-            return controller.UnprocessableEntity(JsonSerializer.Serialize(em, SerializeOptions));
+            return new ObjectResult(em);
         }
 
-        private static string CreateMessage(string formattedMessage, params string[] arguments)
+        public ErrorMessage CreateErrorMessage<T>(int status, ErrorDescription innerErrorMessage, params string[] arguments)
+        {
+            var em = new ErrorMessage();
+            em.Status = status;
+            em.Code = typeof(T).Name + "." + innerErrorMessage.Code;
+            em.Status = status;
+            em.Title = innerErrorMessage.Title;
+            if (innerErrorMessage.Details != null)
+            {
+                em.Detail = CreateDetail(innerErrorMessage.Details, arguments);
+                if (arguments.Length > 0)
+                {
+                    em.Arguments = arguments.ToList();
+                }
+            }
+
+            return em;
+        }
+
+        private static string CreateDetail(string formattedMessage, params string[] arguments)
         {
             try
             {

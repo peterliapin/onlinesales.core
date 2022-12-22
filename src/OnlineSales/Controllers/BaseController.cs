@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.IO.Pipelines;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -37,6 +38,7 @@ namespace OnlineSales.Controllers
         [HttpGet]
         // [EnableQuery(PageSize = 10)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual ActionResult<IQueryable<T>> GetAll()
         {
@@ -49,6 +51,7 @@ namespace OnlineSales.Controllers
         [HttpGet("{id}")]
         // [EnableQuery]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<T>> GetOne(int id)
@@ -75,7 +78,8 @@ namespace OnlineSales.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return CreateValidationErrorMessageResult();
+                // return CreateValidationErrorMessageResult();
+                throw new PluginDbContextException();
             }
 
             var newValue = mapper.Map<T>(value);
@@ -116,6 +120,7 @@ namespace OnlineSales.Controllers
         // DELETE api/posts/5
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult> Delete(int id)
@@ -138,7 +143,7 @@ namespace OnlineSales.Controllers
 
         protected ActionResult CreateNotFoundMessageResult(int id)
         {
-            return errorMessageGenerator.CreateNotFoundResponce(this, InnerErrorCodes.Status404.IdNotFound, typeof(T).Name, id.ToString());
+            return errorMessageGenerator.CreateNotFoundResponce(InnerErrorCodes.Status404.IdNotFound, typeof(T).Name, id.ToString());
         }
 
         protected ActionResult CreateValidationErrorMessageResult()
