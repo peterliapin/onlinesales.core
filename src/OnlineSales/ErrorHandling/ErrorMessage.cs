@@ -9,13 +9,10 @@ namespace OnlineSales.ErrorHandling
 {
     public class ErrorMessage : ProblemDetails
     {
-        [JsonPropertyName("code")]
         public string Code { get; set; } = InnerErrorCodes.UnspecifiedError.Code;
 
-        [JsonPropertyName("details_arguments")]
         public List<string>? Arguments { get; set; } = null;
 
-        [JsonPropertyName("error_description")]
         public object? ErrorDescription { get; set; } = null;
     }
 }

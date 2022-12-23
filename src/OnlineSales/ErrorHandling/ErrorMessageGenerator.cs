@@ -2,14 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.ComponentModel;
-using System.Reflection;
-using System.Resources;
-using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.ErrorHandling
 {    
@@ -33,21 +26,21 @@ namespace OnlineSales.ErrorHandling
             var em = CreateErrorMessage<InnerErrorCodes.Status400>(StatusCodes.Status400BadRequest, innerErrorMessage, arguments);
             em.ErrorDescription = allErrors;
 
-            return new ObjectResult(em);
+            return CreateResult(em);
         }
 
         public ActionResult CreateNotFoundResponce(ErrorDescription innerErrorMessage, params string[] arguments)
         {
             var em = CreateErrorMessage<InnerErrorCodes.Status404>(StatusCodes.Status404NotFound, innerErrorMessage, arguments);
 
-            return new ObjectResult(em);
+            return CreateResult(em);
         }
 
         public ActionResult CreateUnprocessableEntityResponce(ErrorDescription innerErrorMessage, params string[] arguments)
         {
             var em = CreateErrorMessage<InnerErrorCodes.Status422>(StatusCodes.Status422UnprocessableEntity, innerErrorMessage, arguments);
 
-            return new ObjectResult(em);
+            return CreateResult(em);
         }
 
         public ErrorMessage CreateErrorMessage<T>(int status, ErrorDescription innerErrorMessage, params string[] arguments)
@@ -79,6 +72,11 @@ namespace OnlineSales.ErrorHandling
             {
                 return string.Format(formattedMessage);
             }
+        }
+
+        private JsonResult CreateResult(ErrorMessage em)
+        {
+            return new JsonResult(em, IErrorMessageGenerator.ErrorHandlingSerializerOptions);
         }
     }
 }

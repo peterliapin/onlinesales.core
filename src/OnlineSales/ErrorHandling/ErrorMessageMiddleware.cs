@@ -58,7 +58,7 @@ namespace OnlineSales.Controllers
             {
                 var em = errorMessageGenerator.CreateErrorMessage<InnerErrorCodes.Status400>(StatusCodes.Status500InternalServerError, InnerErrorCodes.Status500.ExceptionCaught, ex.GetType().Name);
                 em.ErrorDescription = ex.Message;
-                await WriteToStream(JsonSerializer.Serialize(em, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true, }), originBody);
+                await WriteToStream(JsonSerializer.Serialize(em, IErrorMessageGenerator.ErrorHandlingSerializerOptions), originBody);
                 context.Response.Body = originBody;
                 return;
             }
@@ -81,7 +81,7 @@ namespace OnlineSales.Controllers
                         standartErrorMessage.Instance = null;
                         standartErrorMessage.Extensions.Clear();
                         standartErrorMessage.Type = null;
-                        responseBody = JsonSerializer.Serialize(standartErrorMessage, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true, });
+                        responseBody = JsonSerializer.Serialize(standartErrorMessage, IErrorMessageGenerator.ErrorHandlingSerializerOptions);
                     }
                 }
                 catch (Exception)
@@ -110,7 +110,7 @@ namespace OnlineSales.Controllers
         {
             try
             {
-                var em = JsonSerializer.Deserialize<ErrorMessage>(data);
+                var em = JsonSerializer.Deserialize<ErrorMessage>(data, IErrorMessageGenerator.ErrorHandlingSerializerOptions);
                 return em;
             }
             catch (Exception)
