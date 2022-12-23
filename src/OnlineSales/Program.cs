@@ -67,6 +67,7 @@ public class Program
         ConfigureElasticsearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
+        ConfigureIPDetailResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
 
@@ -212,6 +213,18 @@ public class Program
         }
 
         builder.Services.AddElasticsearch(elasticConfig);
+    }
+
+    private static void ConfigureIPDetailResolver(WebApplicationBuilder builder)
+    {
+        var ipDetailsConfig = builder.Configuration.GetSection("IPInfoApi");
+
+        if (ipDetailsConfig == null)
+        {
+            throw new MissingConfigurationException("Ip Details configuraiton is mandatory.");
+        }
+
+        builder.Services.Configure<IpConfig>(ipDetailsConfig);
     }
 
     private static void ConfigureImageUpload(WebApplicationBuilder builder)
