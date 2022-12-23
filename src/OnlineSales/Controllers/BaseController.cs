@@ -129,7 +129,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult> Get([FromQuery] IDictionary<string, string>? parameters)
+        public virtual async Task<ActionResult<List<T>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
             var query = this.dbSet!.AsQueryable<T>();
             if (!this.Request.QueryString.HasValue)
@@ -146,7 +146,7 @@ namespace OnlineSales.Controllers
                 return Ok(selectResult);
             }
 
-            var result = await query!.ToArrayAsync();
+            var result = await query!.ToListAsync();
             return Ok(result);
         }
 

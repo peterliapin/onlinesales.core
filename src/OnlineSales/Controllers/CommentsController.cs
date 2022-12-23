@@ -23,6 +23,29 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     {
     }
 
+    [HttpGet]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public override Task<ActionResult<List<Comment>>> Get([FromQuery] IDictionary<string, string>? parameters)
+    {
+        return base.Get(parameters);
+    }
+
+    // GET api/{entity}s/5
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public override Task<ActionResult<Comment>> GetOne(int id)
+    {
+        return base.GetOne(id);
+    }
+
     // POST api/{entity}s
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
