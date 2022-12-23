@@ -57,13 +57,6 @@ public class ImagesConfig
     public string? CacheTime { get; set; }
 }
 
-public class IpConfig
-{
-    public string Url { get; set; } = string.Empty;
-
-    public string AuthKey { get; set; } = string.Empty;
-}
-
 public class TaskConfig
 {
     public string CronSchedule { get; set; } = string.Empty;

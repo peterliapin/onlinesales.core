@@ -82,7 +82,6 @@ public class ApiDbContext : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         List<ChangeLog> changes = new ();
-        Operation operation;
 
         var entries = ChangeTracker
        .Entries()
@@ -93,33 +92,25 @@ public class ApiDbContext : DbContext
         foreach (var entityEntry in entries)
         {
             if (entityEntry.State == EntityState.Modified)
-            {
-                operation = Operation.Updated;
-
+            { 
                 ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
                 ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;              
+                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
             }
             else if (entityEntry.State == EntityState.Added)
             {
-                operation = Operation.Inserted;
-
                 ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
                 ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
 
-                await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken); // need this inorder to generate Id
-            }
-            else
-            {
-                operation = Operation.Deleted;
-            }
+                await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            }          
 
             ChangeLog change = new ChangeLog()
             {
                 ObjectId = ((BaseEntity)entityEntry.Entity).Id,
                 ObjectType = entityEntry.Entity.GetType().Name,
-                Operation = operation!,
+                EntityState = entityEntry.State,
                 Data = JsonSerializer.Serialize(entityEntry.Entity),
             };
 
@@ -127,7 +118,7 @@ public class ApiDbContext : DbContext
         }
 
         ChangeLog!.AddRange(changes);
-        
+
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 

@@ -3,11 +3,9 @@
 // </copyright>
 
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
@@ -19,7 +17,6 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
-using Swashbuckle.AspNetCore;
 
 namespace OnlineSales;
 
@@ -67,7 +64,6 @@ public class Program
         ConfigureElasticsearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
-        ConfigureIPDetailResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
 
@@ -225,18 +221,6 @@ public class Program
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
-    }
-
-    private static void ConfigureIPDetailResolver(WebApplicationBuilder builder)
-    {
-        var ipDetailsConfig = builder.Configuration.GetSection("IPInfoApi");
-
-        if (ipDetailsConfig == null)
-        {
-            throw new MissingConfigurationException("Ip Details configuraiton is mandatory.");
-        }
-
-        builder.Services.Configure<IpConfig>(ipDetailsConfig);
     }
 
     private static void ConfigureSwagger(WebApplicationBuilder builder)
