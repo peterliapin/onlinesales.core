@@ -26,7 +26,6 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public override Task<ActionResult<List<Comment>>> Get([FromQuery] IDictionary<string, string>? parameters)
@@ -50,7 +49,6 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<Comment>> Post([FromBody] CommentCreateDto value)

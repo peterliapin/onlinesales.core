@@ -24,7 +24,6 @@ public class PostsController : BaseController<Post, PostCreateDto, PostUpdateDto
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]    
     public override Task<ActionResult<List<Post>>> Get([FromQuery] IDictionary<string, string>? parameters)
@@ -36,7 +35,6 @@ public class PostsController : BaseController<Post, PostCreateDto, PostUpdateDto
     [HttpGet("{id}")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public override Task<ActionResult<Post>> GetOne(int id)

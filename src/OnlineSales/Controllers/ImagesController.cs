@@ -94,12 +94,12 @@ namespace OnlineSales.Controllers
             return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
 
-        [Route("{scopeUid}/{fileName}")]
-        [ResponseCache(CacheProfileName = "ImageResponse")]
         [HttpGet]
+        [AllowAnonymous]
+        [Route("{scopeUid}/{fileName}")]
+        [ResponseCache(CacheProfileName = "ImageResponse")]        
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get(string scopeUid, string fileName)
         {
