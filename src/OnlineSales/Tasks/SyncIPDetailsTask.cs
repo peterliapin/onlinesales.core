@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -70,7 +71,7 @@ public class SyncIPDetailsTask : ChangeLogTask
 
         IpObject ipObject = JsonConvert.DeserializeObject<IpObject>(changeLogData!, settings) !;
 
-        if (ipObject.Operation == Operation.Inserted)
+        if (ipObject.EntityState == EntityState.Added)
         {
             existingIpDetails = dbContext.IpDetails!.Where(i => i.Ip == ipObject.CreatedByIp).FirstOrDefault();
             if (existingIpDetails is null)
@@ -78,7 +79,7 @@ public class SyncIPDetailsTask : ChangeLogTask
                 newIp = ipObject.CreatedByIp!;
             }
         }
-        else if (ipObject.Operation == Operation.Updated)
+        else if (ipObject.EntityState == EntityState.Modified)
         {
             existingIpDetails = dbContext.IpDetails!.Where(i => i.Ip == ipObject.UpdatedByIp).FirstOrDefault();
             if (existingIpDetails is null)
@@ -97,7 +98,7 @@ public class IpObject
 
     public string? UpdatedByIp { get; set; }
 
-    public Operation Operation { get; set; }
+    public EntityState EntityState { get; set; }
 
     public Dictionary<string, object>? AdditionalProperties { get; set; }
 }
