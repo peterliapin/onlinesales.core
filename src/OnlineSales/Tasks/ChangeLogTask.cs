@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
@@ -9,7 +10,16 @@ namespace OnlineSales.Tasks;
 
 public abstract class ChangeLogTask : ITask
 {
+    protected readonly ApiDbContext dbContext;
+
+    protected ChangeLogTask(ApiDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+
     public virtual int LogTaskRetryCount { get; set; } = 0;
+
+    public virtual int ChangeLogBatchSize { get; set; } = 50;
 
     public abstract string Name { get; }
 
@@ -21,11 +31,16 @@ public abstract class ChangeLogTask : ITask
 
     public Task<bool> Execute(TaskExecutionLog currentJob)
     {
+        if (IsPreviousTaskInProgress(Name))
+        {
+            return Task.FromResult(true);
+        }
+
         var changeLogBatch = GetNextOrFailedChangeLogBatch(Name);
 
         if (changeLogBatch is not null)
         {
-            var taskLog = AddChangeLogTaskLogRecord(Name);
+            var taskLog = AddChangeLogTaskLogRecord(Name, changeLogBatch.First().Id, changeLogBatch.Last().Id);
 
             try
             {
@@ -47,22 +62,66 @@ public abstract class ChangeLogTask : ITask
 
     internal abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
 
-    private void UpdateChangeLogTaskLogRecord(ChangeLogTaskLog taskLog, int changesProcessed, TaskExecutionState state)
+    private bool IsPreviousTaskInProgress(string name)
     {
-        // TODO: Update ChangeLogTaskLog record with the state and change count.
-        throw new NotImplementedException();
+        var inProgressCount = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == name && c.State == TaskExecutionState.InProgress).Count();
+
+        return inProgressCount > 0;
     }
 
-    private ChangeLogTaskLog AddChangeLogTaskLogRecord(string taskName)
+    private void UpdateChangeLogTaskLogRecord(ChangeLogTaskLog taskLog, int changesProcessed, TaskExecutionState state)
     {
-        // TODO: Add a new ChangeLogTaskLog record and return.
-        throw new NotImplementedException();
+        taskLog.ChangesProcessed = changesProcessed;
+        taskLog.State = state;
+        taskLog.End = DateTime.UtcNow;
+
+        dbContext.SaveChanges();
+    }
+
+    private ChangeLogTaskLog AddChangeLogTaskLogRecord(string taskName, int minLogId, int maxLogId)
+    {
+        var changeLogTaskLogEntry = new ChangeLogTaskLog()
+        {
+            TaskName = taskName,
+            Start = DateTime.UtcNow,
+            State = TaskExecutionState.InProgress,
+            ChangeLogIdMin = minLogId,
+            ChangeLogIdMax = maxLogId,
+        };
+
+        dbContext.ChangeLogTaskLog!.Add(changeLogTaskLogEntry);
+        dbContext.SaveChanges();
+
+        return changeLogTaskLogEntry;
     }
 
     private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName)
     {
-        // TODO: Get any "state = Failed" batch or get next batch to execute.
-        // Handle LogTaskRetryCount logic also here. If retrycount exceeded then get the next batch without retrying.
-        throw new NotImplementedException();
+        int minLogId = 1;
+
+        var lastProcessedTask = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
+
+        if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Failed)
+        {
+            var failedTaskCount = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin).Count();
+            if (failedTaskCount > 0 && failedTaskCount <= LogTaskRetryCount)
+            {
+                // If this is a retry, get the same minId of last processed task to re-execute the same batch.
+                minLogId = lastProcessedTask.ChangeLogIdMin;
+            }
+            else
+            {
+                // If all retries are completed get the next batch.
+                minLogId = lastProcessedTask.ChangeLogIdMax + 1;
+            }
+        }
+        else if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Completed)
+        {
+            minLogId = lastProcessedTask.ChangeLogIdMax + 1;
+        }
+
+        var changeLogList = dbContext.ChangeLog!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize).OrderBy(b => b.Id).ToList();
+
+        return changeLogList;
     }
 }

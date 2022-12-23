@@ -31,26 +31,6 @@ namespace OnlineSales.Controllers
             this.errorMessageGenerator = errorMessageGenerator;
         }
 
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult> Get([FromQuery] IDictionary<string, string>? parameters)
-        {
-            var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
-            var query = this.dbSet!.AsQueryable<T>();
-
-            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
-            if (selectExists)
-            {
-                var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
-                return Ok(selectResult);
-            }
-
-            var result = await query!.ToArrayAsync();
-            return Ok(result);
-        }
-
         // GET api/{entity}s/5
         [HttpGet("{id}")]
         // [EnableQuery]
@@ -142,6 +122,32 @@ namespace OnlineSales.Controllers
             await dbContext.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public virtual async Task<ActionResult> Get([FromQuery] IDictionary<string, string>? parameters)
+        {
+            var query = this.dbSet!.AsQueryable<T>();
+            if (!this.Request.QueryString.HasValue)
+            {
+                return Ok(await query.ToListAsync());
+            }
+
+            var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
+
+            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
+            if (selectExists)
+            {
+                var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
+                return Ok(selectResult);
+            }
+
+            var result = await query!.ToArrayAsync();
+            return Ok(result);
         }
 
         protected ActionResult CreateNotFoundMessageResult(int id)
