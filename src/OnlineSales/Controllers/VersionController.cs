@@ -5,18 +5,22 @@
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using OnlineSales.ErrorHandling;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    public class VersionController : ControllerBaseEH
+    public class VersionController : ControllerBase
     {
+        protected readonly IErrorMessageGenerator errorMessageGenerator;
+
         private readonly IHttpContextHelper? httpContextHelper;
 
-        public VersionController(IHttpContextHelper? httpContextHelper)
+        public VersionController(IHttpContextHelper? httpContextHelper, IErrorMessageGenerator errorMessageGenerator)
         {
             this.httpContextHelper = httpContextHelper;
+            this.errorMessageGenerator = errorMessageGenerator;
         }
 
         [HttpGet]
@@ -24,23 +28,16 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult Get()
         {
-            try
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                return Ok(
-                    new
-                    {
-                        Version = fileVersionInfo.ProductVersion!,
-                        IP = httpContextHelper!.IpAddress,
-                        IPv4 = httpContextHelper!.IpAddressV4,
-                        IPv6 = httpContextHelper!.IpAddressV6,
-                    });
-            }
-            catch (Exception ex)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(ex.Message);
-            }
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            return Ok(
+                new
+                {
+                    Version = fileVersionInfo.ProductVersion!,
+                    IP = httpContextHelper!.IpAddress,
+                    IPv4 = httpContextHelper!.IpAddressV4,
+                    IPv6 = httpContextHelper!.IpAddressV6,
+                });
         }
     }
 }
