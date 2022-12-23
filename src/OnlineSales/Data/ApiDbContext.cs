@@ -89,6 +89,8 @@ public class ApiDbContext : DbContext
                e.State == EntityState.Added
                || e.State == EntityState.Modified));
 
+        List<AuditEntry> auditEntries = new ();
+
         foreach (var entityEntry in entries)
         {
             if (entityEntry.State == EntityState.Modified)
@@ -102,19 +104,31 @@ public class ApiDbContext : DbContext
                 ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
                 ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+            }
 
-                await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-            }          
-
-            ChangeLog change = new ChangeLog()
+            auditEntries.Add(new AuditEntry()
             {
-                ObjectId = ((BaseEntity)entityEntry.Entity).Id,
-                ObjectType = entityEntry.Entity.GetType().Name,
+                EntityEntry = entityEntry,
                 EntityState = entityEntry.State,
-                Data = JsonSerializer.Serialize(entityEntry.Entity),
-            };
+            }); 
+        }
 
-            changes.Add(change);
+        await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+        foreach (var entry in auditEntries)
+        {
+            if (entry.EntityState == EntityState.Added || entry.EntityState == EntityState.Modified)
+            {
+                ChangeLog change = new ChangeLog()
+                {
+                    ObjectId = ((BaseEntity)entry!.EntityEntry!.Entity).Id,
+                    ObjectType = entry.EntityEntry.Entity.GetType().Name,
+                    EntityState = entry.EntityState,
+                    Data = JsonSerializer.Serialize(entry.EntityEntry.Entity),
+                };
+
+                changes.Add(change);
+            }
         }
 
         ChangeLog!.AddRange(changes);
