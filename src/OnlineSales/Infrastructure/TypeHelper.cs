@@ -9,8 +9,6 @@ namespace OnlineSales.Infrastructure
 {
     public static class TypeHelper
     {
-        private static Dictionary<Type[], Type> typeCache = new Dictionary<Type[], Type>();
-
         public static Type CompileTypeForSelectStatement(PropertyInfo[] types)
         {
             TypeBuilder tb = GetTypeBuilder();

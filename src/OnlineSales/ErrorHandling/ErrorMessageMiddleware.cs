@@ -32,7 +32,7 @@ namespace OnlineSales.Controllers
             }
             catch (Exception ex)
             {
-                var em = errorMessageGenerator.CreateErrorMessage<InnerErrorCodes.Status400>(StatusCodes.Status500InternalServerError, InnerErrorCodes.Status500.ExceptionCaught, ex.GetType().Name);
+                var em = errorMessageGenerator.CreateErrorMessage<InnerErrorCodes.Status500>(StatusCodes.Status500InternalServerError, InnerErrorCodes.Status500.ExceptionCaught, ex.GetType().Name);
                 em.ErrorDescription = ex.Message;
                 await WriteToStream(JsonSerializer.Serialize(em, IErrorMessageGenerator.ErrorHandlingSerializerOptions), originBody);
                 context.Response.Body = originBody;
