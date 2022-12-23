@@ -76,7 +76,9 @@ namespace OnlineSales.ErrorHandling
 
         private JsonResult CreateResult(ErrorMessage em)
         {
-            return new JsonResult(em, IErrorMessageGenerator.ErrorHandlingSerializerOptions);
+            var res = new JsonResult(em, IErrorMessageGenerator.ErrorHandlingSerializerOptions);
+            res.StatusCode = em.Status;
+            return res;
         }
     }
 }
