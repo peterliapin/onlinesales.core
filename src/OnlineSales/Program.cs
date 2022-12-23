@@ -197,10 +197,10 @@ public class Program
                 opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             })
-                                /*.AddOData(options => options
-                                    .Select().Filter().OrderBy()
-                                    .SetMaxTop(10).Expand().Count()
-                                    .SkipToken())*/;
+            /*.AddOData(options => options
+                .Select().Filter().OrderBy()
+                .SetMaxTop(10).Expand().Count()
+                .SkipToken())*/;
 
         foreach (var plugin in PluginManager.GetPluginList())
         {

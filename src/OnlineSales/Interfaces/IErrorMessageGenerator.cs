@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineSales.ErrorHandling
-{    
+{
     public interface IErrorMessageGenerator
     {
         public static readonly JsonSerializerOptions ErrorHandlingSerializerOptions = new JsonSerializerOptions()
