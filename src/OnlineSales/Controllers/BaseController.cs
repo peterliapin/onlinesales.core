@@ -166,8 +166,13 @@ namespace OnlineSales.Controllers
         {
             try
             {
-                var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
                 var query = this.dbSet!.AsQueryable<T>();
+                if (!this.Request.QueryString.HasValue)
+                {
+                    return Ok(await query.ToListAsync());
+                }
+
+                var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
 
                 query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
                 if (selectExists)
