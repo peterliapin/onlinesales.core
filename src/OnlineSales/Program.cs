@@ -2,20 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
-using OnlineSales.Controllers;
 using OnlineSales.Data;
-using OnlineSales.ErrorHandling;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -23,7 +17,6 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
-using Swashbuckle.AspNetCore;
 
 namespace OnlineSales;
 
@@ -58,7 +51,6 @@ public class Program
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
         builder.Configuration.AddEnvironmentVariables();
 
-        builder.Services.AddSingleton<IErrorMessageGenerator, ErrorMessageGenerator>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
@@ -77,11 +69,13 @@ public class Program
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
+
         builder.Services.AddControllers()
             .ConfigureApiBehaviorOptions(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
+
         ConfigureSwagger(builder);
 
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -93,8 +87,8 @@ public class Program
 
         app = builder.Build();
 
-        app.UseMiddleware<ErrorMessageMiddleware>();
-
+        app.UseHttpsRedirection();
+        app.UseExceptionHandler("/error");
         app.UseForwardedHeaders();
 
         MigrateOnStartIfRequired(app, builder);
@@ -106,9 +100,7 @@ public class Program
         // }
 
         app.UseSwagger();
-        app.UseSwaggerUI();
-
-        app.UseHttpsRedirection();
+        app.UseSwaggerUI();        
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
@@ -190,17 +182,20 @@ public class Program
 
     private static void ConfigureControllers(WebApplicationBuilder builder)
     {
-        var controllersBuilder = builder.Services.AddControllers()
-            .AddJsonOptions(opts =>
-            {
-                var enumConverter = new JsonStringEnumConverter();
-                opts.JsonSerializerOptions.Converters.Add(enumConverter);
-                opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            })
-            /*.AddOData(options => options
-                .Select().Filter().OrderBy()
-                .SetMaxTop(10).Expand().Count()
-                .SkipToken())*/;
+        var controllersBuilder = builder.Services.AddControllers(options =>
+        {
+            options.Filters.Add<ValidateModelStateAttribute>();
+        })
+        .AddJsonOptions(opts =>
+        {
+            var enumConverter = new JsonStringEnumConverter();
+            opts.JsonSerializerOptions.Converters.Add(enumConverter);
+            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        })
+        /*.AddOData(options => options
+            .Select().Filter().OrderBy()
+            .SetMaxTop(10).Expand().Count()
+            .SkipToken())*/;
 
         foreach (var plugin in PluginManager.GetPluginList())
         {

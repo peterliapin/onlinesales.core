@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers
 {
@@ -19,8 +18,8 @@ namespace OnlineSales.Controllers
     {
         protected readonly DbSet<TFK> dbFKSet;
 
-        protected BaseFKController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
-            : base(dbContext, mapper, errorMessageGenerator)
+        protected BaseFKController(ApiDbContext dbContext, IMapper mapper)
+            : base(dbContext, mapper)
         {
             this.dbFKSet = dbContext.Set<TFK>();
         }
@@ -28,24 +27,20 @@ namespace OnlineSales.Controllers
         // POST api/{entity}s
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<T>> Post([FromBody] TC value)
         {
-            if (!ModelState.IsValid)
-            {
-                return CreateValidationErrorMessageResult();
-            }
-
             var existFKItem = await (from fk in this.dbFKSet
-                                     where fk.Id == GetFKId(value)
+                                     where fk.Id == GetFKId(value).Item1
                                      select fk).FirstOrDefaultAsync();
 
             if (existFKItem == null)
             {
-                return CreateUnprocessableEntityResult(GetFKId(value));
+                ModelState.AddModelError(GetFKId(value).Item2, "The referenced object was not found");
+
+                throw new InvalidModelStateException(ModelState);
             }
 
             var newValue = mapper.Map<T>(value);
@@ -57,36 +52,26 @@ namespace OnlineSales.Controllers
 
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
         {
-            if (!ModelState.IsValid)
-            {
-                return CreateValidationErrorMessageResult();
-            }
-
-            var existingEntity = await (from p in this.dbSet
-                                        where p.Id == id
-                                        select p).FirstOrDefaultAsync();
-
-            if (existingEntity == null)
-            {
-                return CreateNotFoundMessageResult(id);
-            }
+            var existingEntity = await FindOrThrowNotFound(id);
 
             var fkid = GetFKId(value);
-            if (fkid != null)
+
+            if (fkid.Item1 != null)
             {
                 var existFKItem = await (from fk in this.dbFKSet
-                                            where fk.Id == fkid
+                                            where fk.Id == fkid.Item1
                                             select fk).FirstOrDefaultAsync();
 
                 if (existFKItem == null)
                 {
-                    return CreateUnprocessableEntityResult(fkid.Value);
+                    ModelState.AddModelError(fkid.Item2, "The referenced object was not found");
+
+                    throw new InvalidModelStateException(ModelState);
                 }
             }
 
@@ -96,18 +81,8 @@ namespace OnlineSales.Controllers
             return Ok();
         }
 
-        protected ActionResult CreateUnprocessableEntityResult(int fkId, string fkTypeName)
-        {
-            return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.FKIdNotFound, fkTypeName, fkId.ToString());
-        }
+        protected abstract (int, string) GetFKId(TC item);
 
-        protected ActionResult CreateUnprocessableEntityResult(int fkId)
-        {
-            return CreateUnprocessableEntityResult(fkId, typeof(TFK).Name);
-        }
-
-        protected abstract int GetFKId(TC item);
-
-        protected abstract int? GetFKId(TU item);
+        protected abstract (int?, string) GetFKId(TU item);
     }
 }

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers;
 
@@ -16,16 +15,16 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class PostsController : BaseController<Post, PostCreateDto, PostUpdateDto>
 {
-    public PostsController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
-        : base(dbContext, mapper, errorMessageGenerator)
+    public PostsController(ApiDbContext dbContext, IMapper mapper)
+        : base(dbContext, mapper)
     {
     }
 
     [HttpGet]
-    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]    
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override Task<ActionResult<List<Post>>> Get([FromQuery] IDictionary<string, string>? parameters)
     {
         return base.Get(parameters);
@@ -33,10 +32,10 @@ public class PostsController : BaseController<Post, PostCreateDto, PostUpdateDto
 
     // GET api/{entity}s/5
     [HttpGet("{id}")]
-    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override Task<ActionResult<Post>> GetOne(int id)
     {
         return base.GetOne(id);

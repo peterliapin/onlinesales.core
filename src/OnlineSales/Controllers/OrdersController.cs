@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers
 {
@@ -16,19 +15,19 @@ namespace OnlineSales.Controllers
     [Route("api/[controller]")]
     public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer>
     {
-        public OrdersController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
-            : base(dbContext, mapper, errorMessageGenerator)
+        public OrdersController(ApiDbContext dbContext, IMapper mapper)
+            : base(dbContext, mapper)
         {
         }
 
-        protected override int GetFKId(OrderCreateDto item)
+        protected override (int, string) GetFKId(OrderCreateDto item)
         {
-            return item.CustomerId;
+            return (item.CustomerId, "CustomerId");
         }
 
-        protected override int? GetFKId(OrderUpdateDto item)
+        protected override (int?, string) GetFKId(OrderUpdateDto item)
         {
-            return null;
+            return (null, string.Empty);
         }
     }
 }

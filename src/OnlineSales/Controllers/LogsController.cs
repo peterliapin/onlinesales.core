@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers;
 
@@ -15,19 +14,17 @@ namespace OnlineSales.Controllers;
 public class LogsController : Controller
 {
     protected readonly ElasticClient elasticClient;
-    protected readonly IErrorMessageGenerator errorMessageGenerator;
 
-    public LogsController(ElasticClient client, IErrorMessageGenerator errorMessageGenerator)
+    public LogsController(ElasticClient client)
     {
         elasticClient = client;
-        this.errorMessageGenerator = errorMessageGenerator;
     }
 
     // GET api/logs/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<List<LogRecord>>> GetAll()
     {
         var logRecords = (

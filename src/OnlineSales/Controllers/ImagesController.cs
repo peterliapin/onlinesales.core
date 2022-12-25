@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -9,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
-using Quartz.Util;
 
 namespace OnlineSales.Controllers
 {
@@ -19,27 +18,19 @@ namespace OnlineSales.Controllers
     public class ImagesController : ControllerBase
     {
         private readonly ApiDbContext apiDbContext;
-        private readonly IErrorMessageGenerator errorMessageGenerator;
 
-        public ImagesController(ApiDbContext apiDbContext, IErrorMessageGenerator errorMessageGenerator)
+        public ImagesController(ApiDbContext apiDbContext)
         {
             this.apiDbContext = apiDbContext;
-            this.errorMessageGenerator = errorMessageGenerator;
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Post([FromForm] ImageCreateDto imageCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.ValidationErrors);
-            }
-
             var provider = new FileExtensionContentTypeProvider();
 
             string incomingFileName = imageCreateDto.Image!.FileName;
@@ -49,7 +40,9 @@ namespace OnlineSales.Controllers
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                return errorMessageGenerator.CreateUnprocessableEntityResponce(InnerErrorCodes.Status422.MIMINotIdentified, incomingFileName);
+                ModelState.AddModelError("FileName", "Unsupported MIME type");
+
+                throw new InvalidModelStateException(ModelState);
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
@@ -99,25 +92,15 @@ namespace OnlineSales.Controllers
         [Route("{scopeUid}/{fileName}")]
         [ResponseCache(CacheProfileName = "ImageResponse")]        
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get(string scopeUid, string fileName)
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            if (scopeUid.IsNullOrWhiteSpace())
-            {
-                return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.InvalidScope);
-            }
-
-            if (fileName.IsNullOrWhiteSpace())
-            {
-                return errorMessageGenerator.CreateBadRequestResponce(this, InnerErrorCodes.Status400.InvalidFileName);
-            }
-
             var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
-                return errorMessageGenerator.CreateNotFoundResponce(InnerErrorCodes.Status404.FileNotFound, fileName);
+                throw new EntityNotFoundException(typeof(Image).Name, $"{scopeUid}/{fileName}");
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);

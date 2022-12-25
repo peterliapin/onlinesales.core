@@ -12,9 +12,9 @@ public class ImagesTests : BaseTest
     // [Fact]
     // public async Task CreateAndGetImageTest()
     // {
-    //    var testImage = new TestImage("wavepoint.png");
-    //    var newPostUrl = await PostTest("/api/images", testImage);
-    //    var image = await GetTest<Image>(newPostUrl);
-    //    image.Should().BeEquivalentTo(testImage);
+    //     var testImage = new TestImage("wavepoint.png");
+    //     var newPostUrl = await PostTest("/api/images", testImage);
+    //     var image = await GetTest<Image>(newPostUrl);
+    //     image.Should().BeEquivalentTo(testImage);
     // }
 }

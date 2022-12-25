@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
 
 namespace OnlineSales.Controllers;
 
@@ -16,18 +15,18 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup>
 {
-    public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper, IErrorMessageGenerator errorMessageGenerator)
-    : base(dbContext, mapper, errorMessageGenerator)
+    public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper)
+    : base(dbContext, mapper)
     {
     }
 
-    protected override int GetFKId(EmailTemplateCreateDto item)
+    protected override (int, string) GetFKId(EmailTemplateCreateDto item)
     {
-        return item.GroupId;
+        return (item.GroupId, "GroupId");
     }
 
-    protected override int? GetFKId(EmailTemplateUpdateDto item)
+    protected override (int?, string) GetFKId(EmailTemplateUpdateDto item)
     {
-        return item.GroupId;
+        return (item.GroupId, "GroupId");
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
+using OnlineSales.Exceptions;
 using OnlineSales.Plugin.Sms.DTOs;
 using PhoneNumbers;
 using Serilog;
@@ -28,8 +29,8 @@ public class MessagesController : Controller
     [HttpPost]
     [Route("sms")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> SendSms(
         [FromBody] SmsDetailsDto smsDetails,
         [FromHeader(Name = "Authentication")] string accessToken)
@@ -56,7 +57,7 @@ public class MessagesController : Controller
 
             if (!ModelState.IsValid)
             {
-                return UnprocessableEntity(ModelState);
+                throw new InvalidModelStateException(ModelState);
             }
 
             await smsService.SendAsync(recipient, smsDetails.Message);

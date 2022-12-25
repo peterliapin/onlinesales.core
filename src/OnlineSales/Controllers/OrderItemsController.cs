@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.ErrorHandling;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
@@ -20,32 +19,28 @@ namespace OnlineSales.Controllers
     {
         private readonly IOrderItemService orderItemService;
 
-        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, IErrorMessageGenerator errorMessageGenerator)
-            : base(dbContext, mapper, errorMessageGenerator)
+        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService)
+            : base(dbContext, mapper)
         {
             this.orderItemService = orderItemService;
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Post([FromBody] OrderItemCreateDto value)
         {
-            if (!ModelState.IsValid)
-            {
-                return CreateValidationErrorMessageResult();
-            }
-
             var existFKItem = await (from fk in this.dbFKSet
-                                        where fk.Id == GetFKId(value)
+                                        where fk.Id == GetFKId(value).Item1
                                         select fk).FirstOrDefaultAsync();
 
             if (existFKItem == null)
             {
-                return CreateUnprocessableEntityResult(GetFKId(value));
+                ModelState.AddModelError(GetFKId(value).Item2, "The referenced object was not found");
+
+                throw new InvalidModelStateException(ModelState);
             }
 
             var orderItem = mapper.Map<OrderItem>(value);
@@ -56,25 +51,12 @@ namespace OnlineSales.Controllers
 
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Patch(int id, [FromBody] OrderItemUpdateDto value)
         {
-            if (!ModelState.IsValid)
-            {
-                return CreateValidationErrorMessageResult();
-            }
-
-            var existingEntity = await (from p in this.dbSet
-                                        where p.Id == id
-                                        select p).FirstOrDefaultAsync();
-
-            if (existingEntity == null)
-            {
-                return CreateNotFoundMessageResult(id);
-            }
+            var existingEntity = await FindOrThrowNotFound(id);
 
             var existFKItem = await (from fk in this.dbFKSet
                                      where fk.Id == existingEntity.OrderId
@@ -82,7 +64,9 @@ namespace OnlineSales.Controllers
 
             if (existFKItem == null)
             {
-                return CreateUnprocessableEntityResult(existingEntity.OrderId);
+                ModelState.AddModelError("OrderId", "The referenced object was not found");
+
+                throw new InvalidModelStateException(ModelState);
             }
 
             mapper.Map(value, existingEntity);
@@ -94,19 +78,12 @@ namespace OnlineSales.Controllers
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult> Delete(int id)
         {
-            var existingEntity = await (from p in this.dbSet
-                                        where p.Id == id
-                                        select p).FirstOrDefaultAsync();
-
-            if (existingEntity == null)
-            {
-                return CreateNotFoundMessageResult(id);
-            }
+            var existingEntity = await FindOrThrowNotFound(id);
 
             var existFKItem = await (from fk in this.dbFKSet
                                         where fk.Id == existingEntity.OrderId
@@ -114,7 +91,9 @@ namespace OnlineSales.Controllers
 
             if (existFKItem == null)
             {
-                return CreateUnprocessableEntityResult(existingEntity.OrderId);
+                ModelState.AddModelError("OrderId", "The referenced object was not found");
+
+                throw new InvalidModelStateException(ModelState);
             }
 
             await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
@@ -122,14 +101,14 @@ namespace OnlineSales.Controllers
             return NoContent();
         }
 
-        protected override int GetFKId(OrderItemCreateDto item)
+        protected override (int, string) GetFKId(OrderItemCreateDto item)
         {
-            return item.OrderId;
+            return (item.OrderId, "OrderId");
         }
 
-        protected override int? GetFKId(OrderItemUpdateDto item)
+        protected override (int?, string) GetFKId(OrderItemUpdateDto item)
         {
-            return null;
+            return (null, string.Empty);
         }
     }
 }
