@@ -24,12 +24,17 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
-    protected override async Task<(TestComment, string)> CreateItem(int fkId)
+    protected override async Task<(TestComment, string)> CreateItem(int fkId, Action<TestComment>? itemTransformation = null)
     {
         var testComment = new TestComment()
         {
             PostId = fkId,
         };
+
+        if (itemTransformation != null)
+        {
+            itemTransformation(testComment);
+        }
 
         var newCommentUrl = await PostTest(itemsUrl, testComment);
 

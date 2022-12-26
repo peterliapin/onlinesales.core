@@ -3,7 +3,6 @@
 // </copyright>
 
 using FluentAssertions;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
@@ -74,9 +73,22 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
     }
 
-    protected virtual async Task<(TC, string)> CreateItem()
+    protected async Task CreateItems(int numberOfItems, Action<TC>? itemTransformation = null)
+    {
+        for (int i = 0; i < numberOfItems; ++i)
+        {
+            await CreateItem(itemTransformation);
+        }
+    }
+
+    protected virtual async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
     {
         var testCreateItem = new TC();
+
+        if (itemTransformation != null)
+        {
+            itemTransformation(testCreateItem);
+        }
 
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 

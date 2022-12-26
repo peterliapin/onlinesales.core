@@ -84,6 +84,23 @@ public class BaseTest : IDisposable
         return Client.SendAsync(request);
     }
 
+    protected async Task<List<T>?> GetListTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
+        where T : class
+    {
+        var response = await GetTest(url, expectedCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (expectedCode == HttpStatusCode.OK)
+        {
+            return DeserializePayload<List<T>>(content);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
     {
         var response = await GetRequest(url, authToken);

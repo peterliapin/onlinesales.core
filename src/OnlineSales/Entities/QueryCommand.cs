@@ -39,7 +39,6 @@ namespace OnlineSales.Entities
 
         public static Dictionary<string, WOperand> OperandMappings { get; } = new Dictionary<string, WOperand>()
         {
-            { "and", WOperand.And },
             { "or", WOperand.Or },
             { "gt", WOperand.GreaterThan },
             { "gte", WOperand.GreaterThanOrEquals },
