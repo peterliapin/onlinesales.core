@@ -22,7 +22,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         int limit = 5;
         await CreateItems(limit);
 
-        var result = await GetListTest<Order>(itemsUrl + string.Format("?filter[limit]={0}", limit));
+        var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[limit]={0}", limit));
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(limit);
@@ -35,7 +35,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         await CreateItems(numberOfItems);
 
-        var result = await GetListTest<Order>(itemsUrl + "?filter[order]=Id%20ASC");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20ASC");
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
@@ -45,7 +45,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
             result[i].Id.Should().Be(i + 1);
         }
 
-        result = await GetListTest<Order>(itemsUrl + "?filter[order]=Id%20DESC");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20DESC");
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
@@ -67,7 +67,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
             await CreateItem((order) => { order.AffiliateName = (i / 2).ToString(); });
         }
 
-        var result = await GetListTest<Order>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC");
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
@@ -91,7 +91,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         async void GetAndCheck(int skipItemsNumber)
         {
-            var result = await GetListTest<Order>(itemsUrl + string.Format("?filter[skip]={0}", skipItemsNumber));
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[skip]={0}", skipItemsNumber));
             result.Should().NotBeNull();
             result!.Count.Should().Be(numberOfItems >= skipItemsNumber ? numberOfItems - skipItemsNumber : 0);
         }
@@ -117,25 +117,25 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
             await CreateItem((order) => { order.AffiliateName = ((i + 1) % 2 == 0) ? "even" : "odd"; });
         }              
 
-        var result = await GetListTest<Order>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
+        var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(1);
         result[0].Id.Should().Be(numberOfItems / 2);
 
-        result = await GetListTest<Order>(itemsUrl + string.Format("?filter[where][Id][neq]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][neq]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems - 1);
                 
-        result = await GetListTest<Order>(itemsUrl + string.Format("?filter[where][Id][gte]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][gte]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(1 + (numberOfItems / 2));
 
-        result = await GetListTest<Order>(itemsUrl + string.Format("?filter[where][Id][lte]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems / 2);
 
         // TODO: after updating add [0] and [1]
-        result = await GetListTest<Order>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
         result.Should().NotBeNull();
         result!.Count.Should().Be(4);        
     }
@@ -147,7 +147,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         await CreateItems(10);
 
-        var result = await GetListTest<Order>(itemsUrl + "?SomeIncorrectQuery");
+        var result = await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery");
         result.Should().NotBeNull();
         result!.Count.Should().Be(0);
     }
@@ -162,7 +162,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         async void GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
         {
-            var result = await GetListTest<Order>(itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
             result.Should().NotBeNull();
             result!.Count.Should().Be(expectedItemsNumber);
             for (int i = 0; i < expectedItemsNumber; ++i)
