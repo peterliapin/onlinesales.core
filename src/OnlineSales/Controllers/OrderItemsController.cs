@@ -45,8 +45,8 @@ namespace OnlineSales.Controllers
 
             var orderItem = mapper.Map<OrderItem>(value);
 
-            var credtedItem = await orderItemService.AddOrderItem(existFKItem, orderItem);
-            return CreatedAtAction(nameof(GetOne), new { id = credtedItem }, value);
+            var createdItemId = await orderItemService.AddOrderItem(existFKItem, orderItem);
+            return CreatedAtAction(nameof(GetOne), new { id = createdItemId }, value);
         }
 
         [HttpPatch("{id}")]

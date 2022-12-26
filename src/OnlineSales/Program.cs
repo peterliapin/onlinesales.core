@@ -61,7 +61,7 @@ public class Program
         ConfigureConventions(builder);
         ConfigureControllers(builder);
         ConfigurePostgres(builder);
-        ConfigureElasticsearch(builder);
+        ConfigureElasticSearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureEmailServices(builder);
@@ -123,7 +123,7 @@ public class Program
 
         if (elasticConfig == null)
         {
-            throw new MissingConfigurationException("Elasticsearch configuraiton is mandatory.");
+            throw new MissingConfigurationException("ElasticSearch configuration is mandatory.");
         }
 
         Log.Logger = new LoggerConfiguration()
@@ -209,13 +209,13 @@ public class Program
         builder.Services.AddDbContext<ApiDbContext>();
     }
 
-    private static void ConfigureElasticsearch(WebApplicationBuilder builder)
+    private static void ConfigureElasticSearch(WebApplicationBuilder builder)
     {
         var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticsearchConfig>();
 
         if (elasticConfig == null)
         {
-            throw new MissingConfigurationException("Elasticsearch configuraiton is mandatory.");
+            throw new MissingConfigurationException("ElasticSearch configuration is mandatory.");
         }
 
         builder.Services.AddElasticsearch(elasticConfig);
@@ -227,7 +227,7 @@ public class Program
 
         if (imageUploadConfig == null)
         {
-            throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");
+            throw new MissingConfigurationException("Image Upload configuration is mandatory.");
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
@@ -276,7 +276,7 @@ public class Program
 
         if (cacheProfiles == null)
         {
-            throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");
+            throw new MissingConfigurationException("Image Upload configuration is mandatory.");
         }
 
         builder.Services.AddControllers(options =>
@@ -311,7 +311,7 @@ public class Program
         var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsConfig>();
         if (corsSettings == null)
         {
-            throw new MissingConfigurationException("CORS configuraiton is mandatory.");
+            throw new MissingConfigurationException("CORS configuration is mandatory.");
         }
 
         if (!corsSettings.AllowedOrigins.Any())

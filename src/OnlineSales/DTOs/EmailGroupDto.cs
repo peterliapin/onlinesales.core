@@ -4,7 +4,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using OnlineSales.DataAnnotations;
-using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 

@@ -21,6 +21,6 @@ namespace OnlineSales.Entities
 
         public string MimeType { get; set; } = string.Empty;
 
-        public byte[] Data { get; set; } = new byte[0];
+        public byte[] Data { get; set; } = Array.Empty<byte>();
     }
 }

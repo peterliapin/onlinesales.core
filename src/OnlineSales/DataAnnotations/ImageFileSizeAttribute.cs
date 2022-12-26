@@ -14,7 +14,7 @@ namespace OnlineSales.DataAnnotations
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
             var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
-            string maxFileSize = configuration.Value.MaxSize!;
+            var maxFileSize = configuration.Value.MaxSize!;
 
             this.MaxFileSize = maxFileSize;
             return base.IsValid(value, validationContext);

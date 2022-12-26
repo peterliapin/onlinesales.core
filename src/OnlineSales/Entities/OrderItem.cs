@@ -34,7 +34,7 @@ public class OrderItem : BaseEntity
     public string LicenseCode { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and comissions (how much will be paid out to vendor).
+    /// Gets or sets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and commissions (how much will be paid out to vendor).
     /// </summary>
     [Required]
     public decimal Total { get; set; } = 0;
@@ -46,7 +46,7 @@ public class OrderItem : BaseEntity
     public string Currency { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets total amount in the payment currency without TAXes, discounts and comissions.
+    /// Gets or sets total amount in the payment currency without TAXes, discounts and commissions.
     /// </summary>
     [Required]
     public decimal CurrencyTotal { get; set; } = 0;
@@ -57,7 +57,7 @@ public class OrderItem : BaseEntity
     public int Quantity { get; set; }
 
     /// <summary>
-    /// Gets or sets unit price in the payment currency without TAXes, discounts and comissions.
+    /// Gets or sets unit price in the payment currency without TAXes, discounts and commissions.
     /// </summary>
     public decimal UnitPrice { get; set; }
 }

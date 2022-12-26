@@ -4,8 +4,6 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Nest;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 

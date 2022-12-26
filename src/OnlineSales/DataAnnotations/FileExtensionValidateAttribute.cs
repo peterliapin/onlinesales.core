@@ -38,7 +38,7 @@ namespace OnlineSales.DataAnnotations
                 return new ValidationResult("Invalid file");
             }
 
-            string currentExt = Path.GetExtension(file.FileName.ToLower());
+            var currentExt = Path.GetExtension(file.FileName.ToLower());
 
             var hasMatchingExt = from ext in listOfExt! where ext == currentExt select ext;
 
