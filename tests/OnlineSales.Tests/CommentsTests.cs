@@ -17,6 +17,18 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     }
 
     [Fact]
+    public async Task GetAllTestAnonymous()
+    {
+        await GetAllTestImpl(true);
+    }
+
+    [Fact]
+    public async Task CreateAndGetItemTestAnonymous()
+    {
+        await CreateAndGetItemTestImpl(true);
+    }
+
+    [Fact]
     public override async Task UpdateItemNotFoundTest()
     {
         var comment = new CommentUpdateDto();

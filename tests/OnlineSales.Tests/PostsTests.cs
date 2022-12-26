@@ -15,6 +15,18 @@ public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
     {
     }
 
+    [Fact]
+    public async Task GetAllTestAnonymous()
+    {
+        await GetAllTestImpl(true);
+    }
+
+    [Fact]
+    public async Task CreateAndGetItemTestAnonymous()
+    {
+        await CreateAndGetItemTestImpl(true);
+    }
+
     protected override PostUpdateDto UpdateItem(TestPost to)
     {
         var from = new PostUpdateDto();

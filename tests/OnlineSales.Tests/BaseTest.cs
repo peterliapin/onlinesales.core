@@ -20,7 +20,10 @@ public class BaseTest : IDisposable
     };
 
     protected static readonly TestApplication App = new TestApplication();
+
     protected readonly HttpClient Client;
+
+    protected string? authenticationHeaderValueScheme = "Bearer";
 
     static BaseTest()
     {
@@ -79,7 +82,10 @@ public class BaseTest : IDisposable
             request.Content = PayloadToStringContent(payload);
         }
 
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+        if (authenticationHeaderValueScheme != null)
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue(authenticationHeaderValueScheme, authToken);
+        }
 
         return Client.SendAsync(request);
     }
