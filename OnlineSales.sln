@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33103.184
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D24DF77-6D65-4C52-9D3D-0360F878B445}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{1D24DF77-6D65-4C52-9D3D-0360F878B445}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales", "src\OnlineSales\OnlineSales.csproj", "{D340D06E-35D2-4C38-809A-E7EBDA9BE1B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales", "src\OnlineSales\OnlineSales.csproj", "{D340D06E-35D2-4C38-809A-E7EBDA9BE1B7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Tests", "tests\OnlineSales.Tests\OnlineSales.Tests.csproj", "{D8B4F2A5-5C3E-464C-B1B7-FF4C716D09FC}"
 EndProject
@@ -40,13 +40,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plugins", "plugins", "{0F2716C8-A043-4743-A8AD-54B86635D567}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.Sms", "plugins\OnlineSales.Plugin.Sms\OnlineSales.Plugin.Sms.csproj", "{98630F81-A093-47B1-9A12-9B73A52BA2B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.Sms", "plugins\OnlineSales.Plugin.Sms\OnlineSales.Plugin.Sms.csproj", "{98630F81-A093-47B1-9A12-9B73A52BA2B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.AzureAD", "plugins\OnlineSales.Plugin.AzureAD\OnlineSales.Plugin.AzureAD.csproj", "{72C2D973-92A7-4520-95E9-E53B48A064DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.AzureAD", "plugins\OnlineSales.Plugin.AzureAD\OnlineSales.Plugin.AzureAD.csproj", "{72C2D973-92A7-4520-95E9-E53B48A064DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.Email", "plugins\OnlineSales.Plugin.Email\OnlineSales.Plugin.Email.csproj", "{6A24D6C8-268E-43EE-8990-D0CDD431D6DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.Email", "plugins\OnlineSales.Plugin.Email\OnlineSales.Plugin.Email.csproj", "{6A24D6C8-268E-43EE-8990-D0CDD431D6DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.Vsto", "plugins\OnlineSales.Plugin.Vsto\OnlineSales.Plugin.Vsto.csproj", "{1DA75BFA-CEFD-4B3D-87D6-76E17FD20282}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.Vsto", "plugins\OnlineSales.Plugin.Vsto\OnlineSales.Plugin.Vsto.csproj", "{1DA75BFA-CEFD-4B3D-87D6-76E17FD20282}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

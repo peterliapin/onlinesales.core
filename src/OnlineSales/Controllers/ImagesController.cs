@@ -33,10 +33,10 @@ namespace OnlineSales.Controllers
         {
             var provider = new FileExtensionContentTypeProvider();
 
-            string incomingFileName = imageCreateDto.Image!.FileName;
-            string incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
-            long incomingFileSize = imageCreateDto.Image!.Length; // bytes
-            string? incomingFileMimeType = string.Empty;
+            var incomingFileName = imageCreateDto.Image!.FileName;
+            var incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
+            var incomingFileSize = imageCreateDto.Image!.Length; // bytes
+            var incomingFileMimeType = string.Empty;
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
@@ -46,7 +46,7 @@ namespace OnlineSales.Controllers
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
-            byte[] imageInBytes = new byte[incomingFileSize];
+            var imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
 
             var scopeAndFileExists = from i in apiDbContext!.Images!
@@ -54,7 +54,7 @@ namespace OnlineSales.Controllers
                                         select i;
             if (scopeAndFileExists.Any())
             {
-                Image? uploadedImage = scopeAndFileExists!.FirstOrDefault();
+                var uploadedImage = scopeAndFileExists!.FirstOrDefault();
                 uploadedImage!.Data = imageInBytes;
                 uploadedImage!.Size = incomingFileSize;
 
@@ -100,7 +100,7 @@ namespace OnlineSales.Controllers
 
             if (uploadedImageData == null)
             {
-                throw new EntityNotFoundException(typeof(Image).Name, $"{scopeUid}/{fileName}");
+                throw new EntityNotFoundException(nameof(Image), $"{scopeUid}/{fileName}");
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);

@@ -41,7 +41,7 @@ namespace OnlineSales.Infrastructure
             var validFieldCommands = commands.Where(c => c.Type == FilterType.Fields && bool.TryParse(c.Value, out var _)).ToList();
             if (validFieldCommands.Any())
             {
-                var atLeastOneTrue = validFieldCommands.Select(c => c.Value).Any(v => bool.Parse(v));
+                var atLeastOneTrue = validFieldCommands.Select(c => c.Value).Any(bool.Parse);
                 var selectedProperties = new List<PropertyInfo>(atLeastOneTrue ? Array.Empty<PropertyInfo>() : typeProperties);
                 foreach (var cmd in validFieldCommands)
                 {
@@ -71,7 +71,6 @@ namespace OnlineSales.Infrastructure
 
                             selectedProperties.Remove(rProperty);
                             break;
-                        default:
                     }
                 }
 
@@ -169,14 +168,9 @@ namespace OnlineSales.Infrastructure
 
             if (orExpression != null)
             {
-                if (whereExpression == null)
-                {
-                    whereExpression = orExpression;
-                }
-                else
-                {
-                    whereExpression = Expression.Or(whereExpression, orExpression);
-                }
+                whereExpression = whereExpression == null
+                    ? orExpression
+                    : Expression.Or(whereExpression, orExpression);
             }
 
             if (whereExpression != null)

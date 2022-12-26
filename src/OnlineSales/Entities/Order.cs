@@ -38,7 +38,7 @@ public class Order : BaseEntity
     public string? OrderNumber { get; set; }
 
     /// <summary>
-    /// Gets or sets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and comissions (how much will be paid out to vendor).
+    /// Gets or sets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and commissions (how much will be paid out to vendor).
     /// </summary>
     [Required]
     public decimal Total { get; set; } = 0;

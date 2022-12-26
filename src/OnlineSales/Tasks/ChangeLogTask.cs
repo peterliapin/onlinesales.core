@@ -64,7 +64,7 @@ public abstract class ChangeLogTask : ITask
 
     private bool IsPreviousTaskInProgress(string name)
     {
-        var inProgressCount = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == name && c.State == TaskExecutionState.InProgress).Count();
+        var inProgressCount = dbContext.ChangeLogTaskLog!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
 
         return inProgressCount > 0;
     }
@@ -97,13 +97,13 @@ public abstract class ChangeLogTask : ITask
 
     private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName)
     {
-        int minLogId = 1;
+        var minLogId = 1;
 
         var lastProcessedTask = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
 
         if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Failed)
         {
-            var failedTaskCount = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin).Count();
+            var failedTaskCount = dbContext.ChangeLogTaskLog!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
             if (failedTaskCount > 0 && failedTaskCount <= LogTaskRetryCount)
             {
                 // If this is a retry, get the same minId of last processed task to re-execute the same batch.

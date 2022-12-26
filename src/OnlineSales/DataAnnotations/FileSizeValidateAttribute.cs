@@ -40,13 +40,13 @@ namespace OnlineSales.DataAnnotations
                 return new ValidationResult("Config error, File Size is not available");
             }
 
-            measurement = maxFileSize![^2..];
-            fileSize = maxFileSize![0..^2];
+            measurement = maxFileSize[^2..];
+            fileSize = maxFileSize[..^2];
 
             if (!measurement.All(char.IsLetter))
             {
-                measurement = maxFileSize![^1..];
-                fileSize = maxFileSize![0..^1];
+                measurement = maxFileSize[^1..];
+                fileSize = maxFileSize[..^1];
             }
 
             if (!int.TryParse(fileSize, out size))
