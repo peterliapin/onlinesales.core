@@ -3,9 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Nest;
 
 namespace OnlineSales.Controllers;
 
@@ -22,16 +20,15 @@ public class ErrorsController : Controller
 
         switch (error)
         {
-            case InvalidModelStateException:
+            case InvalidModelStateException exception:
                 problemDetails = ProblemDetailsFactory.CreateValidationProblemDetails(
                     HttpContext,
-                    ((InvalidModelStateException)error).ModelState!,
+                    exception.ModelState!,
                     StatusCodes.Status422UnprocessableEntity);
 
                 break;
 
-            case EntityNotFoundException:
-                var entityNotFoundError = (EntityNotFoundException)error;
+            case EntityNotFoundException entityNotFoundError:
 
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(
                     HttpContext,

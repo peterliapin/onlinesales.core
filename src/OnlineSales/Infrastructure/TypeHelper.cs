@@ -20,7 +20,7 @@ namespace OnlineSales.Infrastructure
                 CreateProperty(tb, field.Name, field.PropertyType);
             }
 
-            Type objectType = tb.CreateType();
+            var objectType = tb.CreateType();
             return objectType;
         }
 
@@ -28,8 +28,8 @@ namespace OnlineSales.Infrastructure
         {
             var typeSignature = "MyDynamicType";
             var an = new AssemblyName(typeSignature);
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
+            var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
             var typeAttributes =
                 TypeAttributes.Public |
                 TypeAttributes.Class |
@@ -38,20 +38,17 @@ namespace OnlineSales.Infrastructure
                 TypeAttributes.BeforeFieldInit |
                 TypeAttributes.AutoLayout;
 
-            TypeBuilder tb = moduleBuilder.DefineType(
-                typeSignature,
-                typeAttributes,
-                null);
+            var tb = moduleBuilder.DefineType(typeSignature, typeAttributes, null);
             return tb;
         }
 
         private static void CreateProperty(TypeBuilder tb, string propertyName, Type propertyType)
         {
-            FieldBuilder fieldBuilder = tb.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
+            var fieldBuilder = tb.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
 
-            PropertyBuilder propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
-            MethodBuilder getPropMthdBldr = tb.DefineMethod(propertyName, MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
-            ILGenerator getIl = getPropMthdBldr.GetILGenerator();
+            var propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+            var getPropMthdBldr = tb.DefineMethod(propertyName, MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
+            var getIl = getPropMthdBldr.GetILGenerator();
 
             getIl.Emit(OpCodes.Ldarg_0);
             getIl.Emit(OpCodes.Ldfld, fieldBuilder);
@@ -62,11 +59,11 @@ namespace OnlineSales.Infrastructure
                   MethodAttributes.SpecialName |
                   MethodAttributes.HideBySig;
 
-            MethodBuilder setPropMthdBldr = tb.DefineMethod(methodName, methodAttributes, null, new[] { propertyType });
+            var setPropMthdBldr = tb.DefineMethod(methodName, methodAttributes, null, new[] { propertyType });
 
-            ILGenerator setIl = setPropMthdBldr.GetILGenerator();
-            Label modifyProperty = setIl.DefineLabel();
-            Label exitSet = setIl.DefineLabel();
+            var setIl = setPropMthdBldr.GetILGenerator();
+            var modifyProperty = setIl.DefineLabel();
+            var exitSet = setIl.DefineLabel();
 
             setIl.MarkLabel(modifyProperty);
             setIl.Emit(OpCodes.Ldarg_0);

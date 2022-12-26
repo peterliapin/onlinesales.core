@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.Interfaces;
-
 namespace OnlineSales.Infrastructure;
 
 public static class DictionaryExtensions
@@ -21,13 +19,6 @@ public static class DictionaryExtensions
 
     public static Dictionary<string, string> ConvertKeys(this Dictionary<string, string> targetDictionary, string prefix, string postfix)
     {
-        Dictionary<string, string> convertedCollection = new Dictionary<string, string>();
-
-        foreach (var item in targetDictionary)
-        {
-            convertedCollection.Add($"{prefix}{item.Key}{postfix}", item.Value);
-        }
-
-        return convertedCollection;
+        return targetDictionary.ToDictionary(item => $"{prefix}{item.Key}{postfix}", item => item.Value);
     }
 }

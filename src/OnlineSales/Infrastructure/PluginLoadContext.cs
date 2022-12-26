@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
-using Microsoft.Extensions.Configuration;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
 
@@ -22,22 +19,16 @@ internal sealed class PluginLoadContext : AssemblyLoadContext
     protected override Assembly Load(AssemblyName assemblyName)
     {
         var assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
-        if (assemblyPath != null)
-        {
-            return LoadFromAssemblyPath(assemblyPath);
-        }
-
-        return null!;
+        return assemblyPath != null
+            ? LoadFromAssemblyPath(assemblyPath)
+            : null!;
     }
 
     protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
     {
         var libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-        if (libraryPath != null)
-        {
-            return LoadUnmanagedDllFromPath(libraryPath);
-        }
-
-        return IntPtr.Zero;
+        return libraryPath != null
+            ? LoadUnmanagedDllFromPath(libraryPath)
+            : nint.Zero;
     }
 }
