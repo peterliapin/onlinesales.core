@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-    <ReleaseVersion>1.0.24-pre</ReleaseVersion>
+    <ReleaseVersion>1.0.25-pre</ReleaseVersion>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
