@@ -20,9 +20,9 @@ public class IpDetailsService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
     };
 
-    private readonly IOptions<IpConfig> options;
+    private readonly IOptions<GeolocationApiConfig> options;
 
-    public IpDetailsService(IOptions<IpConfig> options)
+    public IpDetailsService(IOptions<GeolocationApiConfig> options)
     {
         this.options = options;
         SerializeOptions.Converters.Add(new JsonStringEnumConverter());

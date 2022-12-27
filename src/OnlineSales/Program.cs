@@ -64,7 +64,7 @@ public class Program
         ConfigureElasticSearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
-        ConfigureIPDetailResolver(builder);
+        ConfigureIPDetailsResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
 
@@ -222,16 +222,16 @@ public class Program
         builder.Services.AddElasticsearch(elasticConfig);
     }
 
-    private static void ConfigureIPDetailResolver(WebApplicationBuilder builder)
+    private static void ConfigureIPDetailsResolver(WebApplicationBuilder builder)
     {
-        var ipDetailsConfig = builder.Configuration.GetSection("IPInfoApi");
+        var geolocationApiConfig = builder.Configuration.GetSection("GeolocationApi");
 
-        if (ipDetailsConfig == null)
+        if (geolocationApiConfig == null)
         {
-            throw new MissingConfigurationException("Ip Details configuraiton is mandatory.");
+            throw new MissingConfigurationException("Geo Location Api configuraiton is mandatory.");
         }
 
-        builder.Services.Configure<IpConfig>(ipDetailsConfig);
+        builder.Services.Configure<GeolocationApiConfig>(geolocationApiConfig);
     }
 
     private static void ConfigureImageUpload(WebApplicationBuilder builder)
