@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
@@ -77,13 +78,17 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLog { get; set; }
 
-    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
+        List<ChangeLog> changes = new ();
+        List<AuditEntry> auditEntries = new ();
+
         var entries = ChangeTracker
        .Entries()
        .Where(e => e.Entity is BaseEntity && (
                e.State == EntityState.Added
-               || e.State == EntityState.Modified));
+               || e.State == EntityState.Modified
+               || e.State == EntityState.Deleted));
 
         foreach (var entityEntry in entries)
         {
@@ -100,9 +105,32 @@ public class ApiDbContext : DbContext
                 ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
                 ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
             }
+
+            auditEntries.Add(new AuditEntry()
+            {
+                EntityEntry = entityEntry,
+                EntityState = entityEntry.State,
+            });
         }
 
-        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+        foreach (var entry in auditEntries)
+        {
+            ChangeLog change = new ChangeLog()
+            {
+                ObjectId = ((BaseEntity)entry!.EntityEntry!.Entity).Id,
+                ObjectType = entry.EntityEntry.Entity.GetType().Name,
+                EntityState = entry.EntityState,
+                Data = JsonSerializer.Serialize(entry.EntityEntry.Entity),
+            };
+
+            changes.Add(change);
+        }
+
+        ChangeLog!.AddRange(changes);
+
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

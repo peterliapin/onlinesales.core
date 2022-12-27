@@ -3,16 +3,10 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Entities
 {
-    public enum Operation
-    {
-        Inserted = 0,
-        Updated = 1,
-        Deleted = 2,
-    }
-
     [Table("change_log")]
     public class ChangeLog : BaseEntityWithId
     {
@@ -20,7 +14,7 @@ namespace OnlineSales.Entities
 
         public int ObjectId { get; set; }
 
-        public Operation Operation { get; set; }
+        public EntityState EntityState { get; set; }
 
         [Column(TypeName = "jsonb")]
         public string Data { get; set; } = string.Empty;
