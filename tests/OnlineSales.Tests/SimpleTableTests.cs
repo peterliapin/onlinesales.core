@@ -3,8 +3,8 @@
 // </copyright>
 
 using FluentAssertions;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
@@ -74,6 +74,32 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
     }
 
+    [Theory]
+    [InlineData(true, "", 1, 1)]
+    [InlineData(true, "filter[where][id][eq]=1", 1, 1)]
+    [InlineData(true, "filter[where][id][eq]=100", 0, 0)]
+    [InlineData(true, "filter[limit]=10&filter[skip]=0", 1, 1)]
+    [InlineData(true, "filter[limit]=10&filter[skip]=100", 1, 0)]
+    [InlineData(false, "", 0, 0)]
+    [InlineData(false, "filter[where][id][eq]=1", 0, 0)]
+    public async Task GetTotalCountTest(bool createTestItem, string filter, int totalCount, int payloadItemsCount)
+    {
+        if (createTestItem)
+        {
+            await CreateItem();
+        }
+
+        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        response.Should().NotBeNull();
+
+        var totalCountHeader = response.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault();
+        totalCountHeader.Should().BeEquivalentTo($"{totalCount}");
+        var content = await response.Content.ReadAsStringAsync();
+        var payload = DeserializePayload<List<T>>(content);
+        payload.Should().NotBeNull();
+        payload.Should().HaveCount(payloadItemsCount);
+    }
+    
     protected virtual async Task<(TC, string)> CreateItem()
     {
         var testCreateItem = new TC();
