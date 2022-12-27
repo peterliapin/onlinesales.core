@@ -14,7 +14,7 @@ namespace OnlineSales.DataAnnotations
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
             var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
-            string[] listOfExt = configuration.Value.Extensions;
+            var listOfExt = configuration.Value.Extensions;
 
             this.ListOfExt = listOfExt;
             return base.IsValid(value, validationContext);

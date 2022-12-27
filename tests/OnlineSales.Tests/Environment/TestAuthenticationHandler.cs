@@ -19,12 +19,21 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
-        var identity = new ClaimsIdentity(claims, "Test");
-        var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, "TestScheme");
+        AuthenticateResult result;
 
-        var result = AuthenticateResult.Success(ticket);
+        if (Context.Request.Headers["Authorization"] == "Bearer Success")
+        {
+            var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
+            var identity = new ClaimsIdentity(claims, "Test");
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, "TestScheme");
+
+            result = AuthenticateResult.Success(ticket);            
+        }
+        else
+        {
+            result = AuthenticateResult.Fail("Invalid Bearer Token");
+        }
 
         return Task.FromResult(result);
     }

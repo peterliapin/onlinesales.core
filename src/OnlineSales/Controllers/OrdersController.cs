@@ -20,14 +20,14 @@ namespace OnlineSales.Controllers
         {
         }
 
-        protected override int GetFKId(OrderCreateDto item)
+        protected override (int, string) GetFKId(OrderCreateDto item)
         {
-            return item.CustomerId;
+            return (item.CustomerId, "CustomerId");
         }
 
-        protected override int? GetFKId(OrderUpdateDto item)
+        protected override (int?, string) GetFKId(OrderUpdateDto item)
         {
-            return null;
+            return (null, string.Empty);
         }
     }
 }

@@ -3,11 +3,9 @@
 // </copyright>
 
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
@@ -19,7 +17,6 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
-using Swashbuckle.AspNetCore;
 
 namespace OnlineSales;
 
@@ -64,7 +61,7 @@ public class Program
         ConfigureConventions(builder);
         ConfigureControllers(builder);
         ConfigurePostgres(builder);
-        ConfigureElasticsearch(builder);
+        ConfigureElasticSearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureIPDetailResolver(builder);
@@ -73,6 +70,13 @@ public class Program
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
+
+        builder.Services.AddControllers()
+            .ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
         ConfigureSwagger(builder);
 
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -84,6 +88,8 @@ public class Program
 
         app = builder.Build();
 
+        app.UseHttpsRedirection();
+        app.UseExceptionHandler("/error");
         app.UseForwardedHeaders();
 
         MigrateOnStartIfRequired(app, builder);
@@ -95,9 +101,7 @@ public class Program
         // }
 
         app.UseSwagger();
-        app.UseSwaggerUI();
-
-        app.UseHttpsRedirection();
+        app.UseSwaggerUI();        
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
@@ -120,7 +124,7 @@ public class Program
 
         if (elasticConfig == null)
         {
-            throw new MissingConfigurationException("Elasticsearch configuraiton is mandatory.");
+            throw new MissingConfigurationException("ElasticSearch configuration is mandatory.");
         }
 
         Log.Logger = new LoggerConfiguration()
@@ -179,17 +183,20 @@ public class Program
 
     private static void ConfigureControllers(WebApplicationBuilder builder)
     {
-        var controllersBuilder = builder.Services.AddControllers()
-            .AddJsonOptions(opts =>
-            {
-                var enumConverter = new JsonStringEnumConverter();
-                opts.JsonSerializerOptions.Converters.Add(enumConverter);
-                opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            })
-                                /*.AddOData(options => options
-                                    .Select().Filter().OrderBy()
-                                    .SetMaxTop(10).Expand().Count()
-                                    .SkipToken())*/;
+        var controllersBuilder = builder.Services.AddControllers(options =>
+        {
+            options.Filters.Add<ValidateModelStateAttribute>();
+        })
+        .AddJsonOptions(opts =>
+        {
+            var enumConverter = new JsonStringEnumConverter();
+            opts.JsonSerializerOptions.Converters.Add(enumConverter);
+            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        })
+        /*.AddOData(options => options
+            .Select().Filter().OrderBy()
+            .SetMaxTop(10).Expand().Count()
+            .SkipToken())*/;
 
         foreach (var plugin in PluginManager.GetPluginList())
         {
@@ -203,13 +210,13 @@ public class Program
         builder.Services.AddDbContext<ApiDbContext>();
     }
 
-    private static void ConfigureElasticsearch(WebApplicationBuilder builder)
+    private static void ConfigureElasticSearch(WebApplicationBuilder builder)
     {
         var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticsearchConfig>();
 
         if (elasticConfig == null)
         {
-            throw new MissingConfigurationException("Elasticsearch configuraiton is mandatory.");
+            throw new MissingConfigurationException("ElasticSearch configuration is mandatory.");
         }
 
         builder.Services.AddElasticsearch(elasticConfig);
@@ -233,7 +240,7 @@ public class Program
 
         if (imageUploadConfig == null)
         {
-            throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");
+            throw new MissingConfigurationException("Image Upload configuration is mandatory.");
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
@@ -282,7 +289,7 @@ public class Program
 
         if (cacheProfiles == null)
         {
-            throw new MissingConfigurationException("Image Upload configuraiton is mandatory.");
+            throw new MissingConfigurationException("Image Upload configuration is mandatory.");
         }
 
         builder.Services.AddControllers(options =>
@@ -317,7 +324,7 @@ public class Program
         var corsSettings = builder.Configuration.GetSection("Cors").Get<CorsConfig>();
         if (corsSettings == null)
         {
-            throw new MissingConfigurationException("CORS configuraiton is mandatory.");
+            throw new MissingConfigurationException("CORS configuration is mandatory.");
         }
 
         if (!corsSettings.AllowedOrigins.Any())

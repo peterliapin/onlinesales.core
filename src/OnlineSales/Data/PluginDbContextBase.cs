@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Exceptions;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
