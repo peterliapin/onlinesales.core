@@ -23,8 +23,6 @@ public class BaseTest : IDisposable
 
     protected readonly HttpClient Client;
 
-    protected string? authenticationHeaderValueScheme = "Bearer";
-
     static BaseTest()
     {
         SerializeOptions.Converters.Add(new JsonStringEnumConverter());
@@ -82,10 +80,7 @@ public class BaseTest : IDisposable
             request.Content = PayloadToStringContent(payload);
         }
 
-        if (authenticationHeaderValueScheme != null)
-        {
-            request.Headers.Authorization = new AuthenticationHeaderValue(authenticationHeaderValueScheme, authToken);
-        }
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
         return Client.SendAsync(request);
     }
@@ -99,10 +94,10 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
         where T : class
     {
-        var response = await GetTest(url, expectedCode);
+        var response = await GetTest(url, expectedCode, authToken);
 
         var content = await response.Content.ReadAsStringAsync();
 

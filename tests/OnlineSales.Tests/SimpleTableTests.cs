@@ -25,7 +25,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task GetAllTest()
     {
-        await GetAllTestImpl(false);
+        await GetAllTestImpl();
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        await CreateAndGetItemTestImpl(false);
+        await CreateAndGetItemTestImpl();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         return (testCreateItem, newItemUrl);
     }
 
-    protected async Task GetAllTestImpl(bool anonymous)
+    protected async Task GetAllTestImpl(string getAuthToken = "Success")
     {
         const int itemsNumber = 10;
 
@@ -94,27 +94,17 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
             await CreateItem();
         }
 
-        if (anonymous)
-        {
-            this.authenticationHeaderValueScheme = null;                
-        }
-
-        var items = await GetTest<List<T>>(itemsUrl);
+        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 
         items.Should().NotBeNull();
         items!.Count.Should().Be(itemsNumber);
     }
 
-    protected async Task CreateAndGetItemTestImpl(bool anonymous)
+    protected async Task CreateAndGetItemTestImpl(string getAuthToken = "Success")
     {
         var testCreateItem = await CreateItem();
 
-        if (anonymous)
-        {
-            this.authenticationHeaderValueScheme = null;
-        }
-
-        var item = await GetTest<T>(testCreateItem.Item2);
+        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, getAuthToken);
 
         item.Should().BeEquivalentTo(testCreateItem.Item1);
     }

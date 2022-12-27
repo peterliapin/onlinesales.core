@@ -19,13 +19,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllTestImpl(true);
+        await GetAllTestImpl("NonSuccess");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemTestImpl(true);
+        await CreateAndGetItemTestImpl("NonSuccess");
     }
 
     [Fact]

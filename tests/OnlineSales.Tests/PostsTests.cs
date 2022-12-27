@@ -18,13 +18,13 @@ public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllTestImpl(true);
+        await GetAllTestImpl("NonSuccess");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemTestImpl(true);
+        await CreateAndGetItemTestImpl("NonSuccess");
     }
 
     protected override PostUpdateDto UpdateItem(TestPost to)
