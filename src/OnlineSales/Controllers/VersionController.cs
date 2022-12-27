@@ -34,6 +34,7 @@ namespace OnlineSales.Controllers
                     IP = httpContextHelper!.IpAddress,
                     IPv4 = httpContextHelper!.IpAddressV4,
                     IPv6 = httpContextHelper!.IpAddressV6,
+                    Headers = HttpContext.Request.Headers,
                 });
         }
     }
