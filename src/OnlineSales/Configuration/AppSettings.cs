@@ -19,13 +19,7 @@ public class PostgresConfig : BaseServiceConfig
 {
     public string Database { get; set; } = string.Empty;
 
-    public string ConnectionString
-    {
-        get
-        {
-            return $"User ID={UserName};Password={Password};Server={Server};Port={Port};Database={Database};Pooling=true;";
-        }
-    }
+    public string ConnectionString => $"User ID={UserName};Password={Password};Server={Server};Port={Port};Database={Database};Pooling=true;";
 }
 
 public class ElasticsearchConfig : BaseServiceConfig
@@ -34,13 +28,7 @@ public class ElasticsearchConfig : BaseServiceConfig
 
     public string IndexPrefix { get; set; } = string.Empty;
 
-    public string Url
-    {
-        get
-        {
-            return $"http{(UseHttps ? "s" : string.Empty)}://{Server}:{Port}";
-        }
-    }
+    public string Url => $"http{(UseHttps ? "s" : string.Empty)}://{Server}:{Port}";
 }
 
 public class SmtpServerConfig : BaseServiceConfig
@@ -50,11 +38,18 @@ public class SmtpServerConfig : BaseServiceConfig
 
 public class ImagesConfig
 {
-    public string[] Extensions { get; set; } = new string[0];
+    public string[] Extensions { get; set; } = Array.Empty<string>();
 
     public string? MaxSize { get; set; }
 
     public string? CacheTime { get; set; }
+}
+
+public class GeolocationApiConfig
+{
+    public string Url { get; set; } = string.Empty;
+
+    public string AuthKey { get; set; } = string.Empty;
 }
 
 public class TaskConfig

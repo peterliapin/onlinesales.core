@@ -11,7 +11,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class LogsController : ControllerEH
+public class LogsController : Controller
 {
     protected readonly ElasticClient elasticClient;
 
@@ -23,21 +23,15 @@ public class LogsController : ControllerEH
     // GET api/logs/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<List<LogRecord>>> GetAll()
     {
-        try
-        {
-            var logRecords = (
-                    await elasticClient.SearchAsync<LogRecord>(
-                        s => s.Size(20).Skip(10)))
-                .Documents.ToList();
+        var logRecords = (
+                await elasticClient.SearchAsync<LogRecord>(
+                    s => s.Size(20).Skip(10)))
+            .Documents.ToList();
 
-            return Ok(logRecords);
-        }
-        catch (Exception ex)
-        {
-            return errorHandler.CreateInternalServerErrorResponce(ex.Message);
-        }
+        return Ok(logRecords);
     }
 }

@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -116,7 +115,7 @@ public class ApiDbContext : DbContext
 
             if (postgresConfig == null)
             {
-                throw new MissingConfigurationException("Postgres configuraiton is mandatory.");
+                throw new MissingConfigurationException("Postgres configuration is mandatory.");
             }
 
             optionsBuilder.UseNpgsql(

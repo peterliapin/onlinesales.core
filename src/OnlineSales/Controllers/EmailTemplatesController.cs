@@ -5,11 +5,9 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Nest;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -22,13 +20,13 @@ public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTem
     {
     }
 
-    protected override int GetFKId(EmailTemplateCreateDto item)
+    protected override (int, string) GetFKId(EmailTemplateCreateDto item)
     {
-        return item.GroupId;
+        return (item.GroupId, "GroupId");
     }
 
-    protected override int? GetFKId(EmailTemplateUpdateDto item)
+    protected override (int?, string) GetFKId(EmailTemplateUpdateDto item)
     {
-        return item.GroupId;
+        return (item.GroupId, "GroupId");
     }
 }

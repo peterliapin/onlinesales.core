@@ -2,10 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.IO;
-using System.Reflection;
-using System.Runtime.Loader;
-using Microsoft.Extensions.Configuration;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
@@ -98,13 +94,13 @@ public static class PluginManager
             throw new InvalidProgramException($"Could not locate entry point of plugin '{fileName}'");
         }
 
-        var entrypoint = Activator.CreateInstance(entryPointType) as IPlugin;
-        if (entrypoint == null)
+        var entryPoint = Activator.CreateInstance(entryPointType) as IPlugin;
+        if (entryPoint == null)
         {
             throw new InvalidProgramException($"Failed to init plugin '{fileName}'");
         }
 
-        return entrypoint;
+        return entryPoint;
     }
 
     private static void MergePluginConfig(DirectoryInfo pluginDirectory, IConfigurationBuilder configurationBuilder)
