@@ -23,6 +23,12 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Fact]
+    public async Task GetAllTest()
+    {
+        await GetAllTestImpl();
+    }
+
+    [Fact]
     public async Task GetItemNotFoundTest()
     {
         await GetTest(itemsUrlNotFound, HttpStatusCode.NotFound);
@@ -31,11 +37,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        var testCreateItem = await CreateItem();
-
-        var item = await GetTest<T>(testCreateItem.Item2);
-
-        item.Should().BeEquivalentTo(testCreateItem.Item1);
+        await CreateAndGetItemTestImpl();
     }
 
     [Fact]
@@ -107,6 +109,30 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 
         return (testCreateItem, newItemUrl);
+    }
+
+    protected async Task GetAllTestImpl(string getAuthToken = "Success")
+    {
+        const int itemsNumber = 10;
+
+        for (int i = 0; i < itemsNumber; ++i)
+        {
+            await CreateItem();
+        }
+
+        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+
+        items.Should().NotBeNull();
+        items!.Count.Should().Be(itemsNumber);
+    }
+
+    protected async Task CreateAndGetItemTestImpl(string getAuthToken = "Success")
+    {
+        var testCreateItem = await CreateItem();
+
+        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, getAuthToken);
+
+        item.Should().BeEquivalentTo(testCreateItem.Item1);
     }
 
     protected abstract TU UpdateItem(TC createdItem);
