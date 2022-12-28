@@ -56,7 +56,6 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         }
     }
 
-    // TODO: check after fix queries
     [Fact]
     public async Task GetWithOrderByTwoPropertiesTest()
     {
@@ -134,13 +133,11 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems / 2);
 
-        // TODO: after updating add [0] and [1]
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
         result.Should().NotBeNull();
         result!.Count.Should().Be(4);        
     }
 
-    // TODO: check after fix queries
     [Fact]
 
     public async Task GetWithIncorrectQueryTest()
