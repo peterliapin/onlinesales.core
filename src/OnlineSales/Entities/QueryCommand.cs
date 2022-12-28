@@ -52,5 +52,7 @@ namespace OnlineSales.Entities
         public string[] Props { get; set; } = Array.Empty<string>();
 
         public string Value { get; set; } = string.Empty;
+
+        public string Source { get; set; } = string.Empty;
     }
 }

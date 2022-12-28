@@ -100,12 +100,22 @@ namespace OnlineSales.Controllers
             var query = this.dbSet!.AsQueryable<T>();
             if (!this.Request.QueryString.HasValue)
             {
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, query.Count().ToString());
                 return Ok(await query.ToListAsync());
             }
 
             var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
+            var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
 
-            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
+            var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
+            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
+
+            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+            if (!anyValidCmds && this.Request.QueryString.HasValue)
+            {
+                return NotFound();
+            }
+
             if (selectExists)
             {
                 var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
