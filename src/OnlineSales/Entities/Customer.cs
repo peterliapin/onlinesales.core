@@ -33,5 +33,5 @@ public class Customer : BaseEntity
 
     public int? Timezone { get; set; }
 
-    public string? Culture { get; set; }
+    public string? Language { get; set; }
 }

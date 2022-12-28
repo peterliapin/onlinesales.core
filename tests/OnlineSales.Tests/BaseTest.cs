@@ -20,6 +20,7 @@ public class BaseTest : IDisposable
     };
 
     protected static readonly TestApplication App = new TestApplication();
+
     protected readonly HttpClient Client;
 
     static BaseTest()
@@ -93,10 +94,10 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
         where T : class
     {
-        var response = await GetTest(url, expectedCode);
+        var response = await GetTest(url, expectedCode, authToken);
 
         var content = await response.Content.ReadAsStringAsync();
 
