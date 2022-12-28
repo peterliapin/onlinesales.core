@@ -105,7 +105,12 @@ namespace OnlineSales.Controllers
 
             var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
 
-            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
+            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+            if (!anyValidCmds)
+            {
+                return NotFound();
+            }
+
             if (selectExists)
             {
                 var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
