@@ -51,7 +51,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, int customerId)
         {
-            var customerLanguage = apiDbContext.Customers!.FirstOrDefault(c => c.Id == customerId) !.Culture;
+            var customerLanguage = apiDbContext.Customers!.FirstOrDefault(c => c.Id == customerId) !.Language;
 
             var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(customerLanguage));
 

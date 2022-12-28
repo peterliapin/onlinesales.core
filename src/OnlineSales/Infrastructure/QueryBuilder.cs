@@ -28,6 +28,17 @@ namespace OnlineSales.Infrastructure
             return query;
         }
 
+        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString)
+        {
+            var cmds = Parse(queryString);
+            query = AppendWhereExpression(query, cmds);
+            query = AppendSkipExpression(query, cmds);
+            query = AppendLimitExpression(query, cmds);
+            query = AppendOrderExpression(query, cmds);
+
+            return query;
+        }
+
         public static bool IsSelectCommandExists(QueryCommand[] commands)
         {
             var validFieldCommands = commands.Where(c => c.Type == FilterType.Fields && bool.TryParse(c.Value, out var _)).ToList();
