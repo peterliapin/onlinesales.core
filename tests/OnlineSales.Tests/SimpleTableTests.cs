@@ -101,8 +101,16 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         payload.Should().NotBeNull();
         payload.Should().HaveCount(payloadItemsCount);
     }
-    
-    protected virtual async Task<(TC, string)> CreateItem()
+
+    protected async Task CreateItems(int numberOfItems, Action<TC>? itemTransformation = null)
+    {
+        for (int i = 0; i < numberOfItems; ++i)
+        {
+            await CreateItem(itemTransformation);
+        }
+    }
+
+    protected virtual async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
     {
         var testCreateItem = new TC();
 
