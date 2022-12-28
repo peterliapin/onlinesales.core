@@ -110,7 +110,12 @@ namespace OnlineSales.Controllers
             var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
 
-            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists);
+            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+            if (!anyValidCmds && this.Request.QueryString.HasValue)
+            {
+                return NotFound();
+            }
+
             if (selectExists)
             {
                 var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
