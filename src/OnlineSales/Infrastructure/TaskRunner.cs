@@ -12,6 +12,7 @@ namespace OnlineSales.Infrastructure
 {
     public class TaskRunner : IJob
     {
+        private readonly string lockKey = "TaskRunnerPrimaryNodeLock";
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
 
@@ -25,6 +26,13 @@ namespace OnlineSales.Infrastructure
         {
             try
             {
+                var taskLock = TaskLocker.GetInstance(lockKey);
+
+                if (taskLock is null)
+                {
+                    return;
+                }
+
                 foreach (var task in tasks)
                 {
                     var currentJob = await AddOrGetPendingTaskExecutionLog(task);
