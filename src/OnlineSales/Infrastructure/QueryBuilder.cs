@@ -5,6 +5,7 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Entities;
@@ -14,7 +15,20 @@ namespace OnlineSales.Infrastructure
     public static class QueryBuilder<T>
         where T : BaseEntity
     {
-        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable)
+        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds)
+        {
+            var cmds = Parse(queryString);
+            validCmds = cmds.Any();
+            query = AppendWhereExpression(query, cmds);
+            query = AppendSkipExpression(query, cmds);
+            query = AppendLimitExpression(query, cmds);
+            query = AppendOrderExpression(query, cmds);
+
+            selectStatementAvailable = IsSelectCommandExists(cmds);
+            return query;
+        }
+
+        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString)
         {
             var cmds = Parse(queryString);
             query = AppendWhereExpression(query, cmds);
@@ -22,7 +36,6 @@ namespace OnlineSales.Infrastructure
             query = AppendLimitExpression(query, cmds);
             query = AppendOrderExpression(query, cmds);
 
-            selectStatementAvailable = IsSelectCommandExists(cmds);
             return query;
         }
 
@@ -41,7 +54,7 @@ namespace OnlineSales.Infrastructure
             var validFieldCommands = commands.Where(c => c.Type == FilterType.Fields && bool.TryParse(c.Value, out var _)).ToList();
             if (validFieldCommands.Any())
             {
-                var atLeastOneTrue = validFieldCommands.Select(c => c.Value).Any(v => bool.Parse(v));
+                var atLeastOneTrue = validFieldCommands.Select(c => c.Value).Any(bool.Parse);
                 var selectedProperties = new List<PropertyInfo>(atLeastOneTrue ? Array.Empty<PropertyInfo>() : typeProperties);
                 foreach (var cmd in validFieldCommands)
                 {
@@ -71,7 +84,6 @@ namespace OnlineSales.Infrastructure
 
                             selectedProperties.Remove(rProperty);
                             break;
-                        default:
                     }
                 }
 
@@ -127,6 +139,7 @@ namespace OnlineSales.Infrastructure
                     Type = QueryCommand.FilterMappings.First(m => m.Key == type).Value,
                     Props = match.Groups["property"].Captures.Skip(1).Select(capture => capture.Value).ToArray(),
                     Value = match.Groups["value"].Captures[0].Value,
+                    Source = cmd,
                 };
                 processedCommands.Add(qcmd);
             }
@@ -169,14 +182,9 @@ namespace OnlineSales.Infrastructure
 
             if (orExpression != null)
             {
-                if (whereExpression == null)
-                {
-                    whereExpression = orExpression;
-                }
-                else
-                {
-                    whereExpression = Expression.Or(whereExpression, orExpression);
-                }
+                whereExpression = whereExpression == null
+                    ? orExpression
+                    : Expression.Or(whereExpression, orExpression);
             }
 
             if (whereExpression != null)
@@ -293,54 +301,72 @@ namespace OnlineSales.Infrastructure
 
         private static IOrderedQueryable<T> AppendOrderExpression(IQueryable<T> query, QueryCommand[] commands)
         {
-            var orderCommand = commands.FirstOrDefault(c => c.Type == FilterType.Order);
-            if (orderCommand == null)
+            var orderCommands = commands.Where(c => c.Type == FilterType.Order).ToArray();
+            if (!orderCommands.Any())
             {
                 return query.OrderBy(t => t.Id);
             }
 
-            var typeProperties = typeof(T).GetProperties();
-            var expressionParameter = Expression.Parameter(typeof(T));
-
-            var valueProps = orderCommand.Value.Split(' ');
-            var propertyName = string.Empty;
-            var methodName = "OrderBy";
-
-            switch (valueProps.Length)
+            if (orderCommands.Length > 1)
             {
-                case 0:
-                    return query.OrderBy(t => t.Id);
-                case 1:
-                    propertyName = valueProps.First().ToLowerInvariant();
-                    break;
-                case 2:
-                    propertyName = valueProps.First().ToLowerInvariant();
-                    methodName = valueProps.ElementAt(1) switch
+                Array.ForEach(orderCommands, c =>
+                {
+                    if (c.Props.ElementAtOrDefault(0) == null || string.IsNullOrEmpty(c.Props[0]))
                     {
-                        "asc" => "OrderBy",
-                        "desc" => "OrderByDescending",
-                        _ => "OrderBy",
-                    };
-                    break;
-                default:
-                    return query.OrderBy(t => t.Id);
+                        throw new QueryException($"Failed to parse order command. Check syntax ( {c.Source} )");
+                    }
+                });
+                orderCommands = orderCommands.OrderBy(c => c.Props[0]).ToArray();
             }
 
-            if (typeProperties.Any(p => p.Name.ToLowerInvariant() == propertyName))
+            foreach (var orderCmd in orderCommands)
             {
-                var orderPropertyType = typeProperties.First(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant()).PropertyType;
-                var orderPropertyExpression = Expression.Property(expressionParameter, propertyName);
-                var orderDelegateType = typeof(Func<,>).MakeGenericType(typeof(T), orderPropertyType);
-                dynamic orderLambda = Expression.Lambda(orderDelegateType, orderPropertyExpression, expressionParameter);
-                var orderMethod = typeof(Queryable).GetMethods().First(
-                                                                    m => m.Name == methodName &&
-                                                                    m.GetGenericArguments().Length == 2 &&
-                                                                    m.GetParameters().Length == 2).MakeGenericMethod(typeof(T), orderPropertyType);
-                query = (IOrderedQueryable<T>)orderMethod.Invoke(query, new object?[] { query, orderLambda }) !;
-                return (IOrderedQueryable<T>)query;
+                var typeProperties = typeof(T).GetProperties();
+                var expressionParameter = Expression.Parameter(typeof(T));
+
+                var valueProps = orderCmd.Value.Split(' ');
+                var propertyName = string.Empty;
+                var methodName = query is IOrderedQueryable<T> ? "ThenBy" : "OrderBy"; // if query was ordered in previous cycle it will implement IOrderedQueryable interface
+
+                switch (valueProps.Length)
+                {
+                    case 0:
+                        return query.OrderBy(t => t.Id);
+                    case 1:
+                        propertyName = valueProps.First().ToLowerInvariant();
+                        break;
+                    case 2:
+                        propertyName = valueProps.First().ToLowerInvariant();
+                        methodName = valueProps.ElementAt(1) switch
+                        {
+                            "asc" => query is IOrderedQueryable<T> ? "ThenBy" : "OrderBy",
+                            "desc" => query is IOrderedQueryable<T> ? "ThenByDescending" : "OrderByDescending",
+                            _ => query is IOrderedQueryable<T> ? "ThenBy" : "OrderBy",
+                        };
+                        break;
+                    default:
+                        throw new QueryException($"Failed to parse order command. Check syntax ( {orderCmd.Source} )");
+                }
+
+                if (typeProperties.Any(p => p.Name.ToLowerInvariant() == propertyName))
+                {
+                    var orderPropertyType = typeProperties.First(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant()).PropertyType;
+                    var orderPropertyExpression = Expression.Property(expressionParameter, propertyName);
+                    var orderDelegateType = typeof(Func<,>).MakeGenericType(typeof(T), orderPropertyType);
+                    dynamic orderLambda = Expression.Lambda(orderDelegateType, orderPropertyExpression, expressionParameter);
+                    var orderMethod = typeof(Queryable).GetMethods().First(
+                                                                        m => m.Name == methodName &&
+                                                                        m.GetGenericArguments().Length == 2 &&
+                                                                        m.GetParameters().Length == 2).MakeGenericMethod(typeof(T), orderPropertyType);
+                    query = (IOrderedQueryable<T>)orderMethod.Invoke(query, new object?[] { query, orderLambda }) !;
+                }
+                else
+                {
+                    throw new QueryException($"Failed to parse order command. No such property '{propertyName}' Check syntax ( {orderCmd.Source} )");
+                }
             }
 
-            return query.OrderBy(t => t.Id);
+            return (IOrderedQueryable<T>)query;
         }
 
         private static IQueryable<T> AppendSkipExpression(IQueryable<T> query, QueryCommand[] commands)

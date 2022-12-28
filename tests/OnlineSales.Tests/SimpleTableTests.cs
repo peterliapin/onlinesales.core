@@ -3,8 +3,8 @@
 // </copyright>
 
 using FluentAssertions;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
@@ -23,6 +23,12 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Fact]
+    public async Task GetAllTest()
+    {
+        await GetAllTestImpl();
+    }
+
+    [Fact]
     public async Task GetItemNotFoundTest()
     {
         await GetTest(itemsUrlNotFound, HttpStatusCode.NotFound);
@@ -31,17 +37,13 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        var testCreateItem = await CreateItem();
-
-        var item = await GetTest<T>(testCreateItem.Item2);
-
-        item.Should().BeEquivalentTo(testCreateItem.Item1);
+        await CreateAndGetItemTestImpl();
     }
 
     [Fact]
     public virtual async Task UpdateItemNotFoundTest()
     {
-        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.UnprocessableEntity);
+        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -61,7 +63,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task DeleteItemNotFoundTest()
     {
-        await DeleteTest(itemsUrlNotFound, HttpStatusCode.UnprocessableEntity);
+        await DeleteTest(itemsUrlNotFound, HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -74,6 +76,32 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
     }
 
+    [Theory]
+    [InlineData(true, "", 1, 1)]
+    [InlineData(true, "filter[where][id][eq]=1", 1, 1)]
+    [InlineData(true, "filter[where][id][eq]=100", 0, 0)]
+    [InlineData(true, "filter[limit]=10&filter[skip]=0", 1, 1)]
+    [InlineData(true, "filter[limit]=10&filter[skip]=100", 1, 0)]
+    [InlineData(false, "", 0, 0)]
+    [InlineData(false, "filter[where][id][eq]=1", 0, 0)]
+    public async Task GetTotalCountTest(bool createTestItem, string filter, int totalCount, int payloadItemsCount)
+    {
+        if (createTestItem)
+        {
+            await CreateItem();
+        }
+
+        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        response.Should().NotBeNull();
+
+        var totalCountHeader = response.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault();
+        totalCountHeader.Should().BeEquivalentTo($"{totalCount}");
+        var content = await response.Content.ReadAsStringAsync();
+        var payload = DeserializePayload<List<T>>(content);
+        payload.Should().NotBeNull();
+        payload.Should().HaveCount(payloadItemsCount);
+    }
+    
     protected virtual async Task<(TC, string)> CreateItem()
     {
         var testCreateItem = new TC();
@@ -81,6 +109,30 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 
         return (testCreateItem, newItemUrl);
+    }
+
+    protected async Task GetAllTestImpl(string getAuthToken = "Success")
+    {
+        const int itemsNumber = 10;
+
+        for (int i = 0; i < itemsNumber; ++i)
+        {
+            await CreateItem();
+        }
+
+        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+
+        items.Should().NotBeNull();
+        items!.Count.Should().Be(itemsNumber);
+    }
+
+    protected async Task CreateAndGetItemTestImpl(string getAuthToken = "Success")
+    {
+        var testCreateItem = await CreateItem();
+
+        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, getAuthToken);
+
+        item.Should().BeEquivalentTo(testCreateItem.Item1);
     }
 
     protected abstract TU UpdateItem(TC createdItem);

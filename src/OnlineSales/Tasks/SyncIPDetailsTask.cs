@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -40,13 +41,13 @@ public class SyncIPDetailsTask : ChangeLogTask
                 continue;
             }
 
-            string newIp = GetIpIfNotExist(changeLogData);
+            var newIp = GetIpIfNotExist(changeLogData);
 
             if (!string.IsNullOrEmpty(newIp))
             {
                 // TODO: Call external service and get IP related additional information.
 
-                IpDetails ipDetails = new IpDetails()
+                var ipDetails = new IpDetails()
                 {
                     Ip = newIp,
                     // TODO: fill additional information here.
@@ -60,27 +61,27 @@ public class SyncIPDetailsTask : ChangeLogTask
 
     private string GetIpIfNotExist(string changeLogData)
     {
-        string newIp = string.Empty;
+        var newIp = string.Empty;
         IpDetails? existingIpDetails;
 
-        JsonSerializerSettings settings = new JsonSerializerSettings
+        var settings = new JsonSerializerSettings
         {
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
         };
 
-        IpObject ipObject = JsonConvert.DeserializeObject<IpObject>(changeLogData!, settings) !;
+        var ipObject = JsonConvert.DeserializeObject<IpObject>(changeLogData!, settings) !;
 
-        if (ipObject.Operation == Operation.Inserted)
+        if (ipObject.EntityState == EntityState.Added)
         {
-            existingIpDetails = dbContext.IpDetails!.Where(i => i.Ip == ipObject.CreatedByIp).FirstOrDefault();
+            existingIpDetails = dbContext.IpDetails!.FirstOrDefault(i => i.Ip == ipObject.CreatedByIp);
             if (existingIpDetails is null)
             {
                 newIp = ipObject.CreatedByIp!;
             }
         }
-        else if (ipObject.Operation == Operation.Updated)
+        else if (ipObject.EntityState == EntityState.Modified)
         {
-            existingIpDetails = dbContext.IpDetails!.Where(i => i.Ip == ipObject.UpdatedByIp).FirstOrDefault();
+            existingIpDetails = dbContext.IpDetails!.FirstOrDefault(i => i.Ip == ipObject.UpdatedByIp);
             if (existingIpDetails is null)
             {
                 newIp = ipObject.UpdatedByIp!;
@@ -97,7 +98,7 @@ public class IpObject
 
     public string? UpdatedByIp { get; set; }
 
-    public Operation Operation { get; set; }
+    public EntityState EntityState { get; set; }
 
     public Dictionary<string, object>? AdditionalProperties { get; set; }
 }

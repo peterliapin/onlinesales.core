@@ -108,7 +108,7 @@ namespace OnlineSales.Infrastructure
 
         private DateTime GetExecutionTimeByCronSchedule(string cronSchedule, DateTime baseExecutionTime)
         {
-            CronExpression expression = new CronExpression(cronSchedule);
+            var expression = new CronExpression(cronSchedule);
 
             var nextRunTime = expression.GetNextValidTimeAfter(baseExecutionTime);
 

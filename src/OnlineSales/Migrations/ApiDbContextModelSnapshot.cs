@@ -36,6 +36,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("data");
 
+                    b.Property<int>("EntityState")
+                        .HasColumnType("integer")
+                        .HasColumnName("entity_state");
+
                     b.Property<int>("ObjectId")
                         .HasColumnType("integer")
                         .HasColumnName("object_id");
@@ -44,10 +48,6 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("object_type");
-
-                    b.Property<int>("Operation")
-                        .HasColumnType("integer")
-                        .HasColumnName("operation");
 
                     b.HasKey("Id")
                         .HasName("pk_change_log");
@@ -204,10 +204,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<string>("Culture")
-                        .HasColumnType("text")
-                        .HasColumnName("culture");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text")
@@ -216,6 +212,10 @@ namespace OnlineSales.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("text")
                         .HasColumnName("first_name");
+
+                    b.Property<string>("Language")
+                        .HasColumnType("text")
+                        .HasColumnName("language");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text")

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -9,13 +10,12 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using Quartz.Util;
 
 namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class ImagesController : ControllerBaseEH
+    public class ImagesController : ControllerBase
     {
         private readonly ApiDbContext apiDbContext;
 
@@ -26,110 +26,84 @@ namespace OnlineSales.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Post([FromForm] ImageCreateDto imageCreateDto)
         {
-            try
+            var provider = new FileExtensionContentTypeProvider();
+
+            var incomingFileName = imageCreateDto.Image!.FileName;
+            var incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
+            var incomingFileSize = imageCreateDto.Image!.Length; // bytes
+            var incomingFileMimeType = string.Empty;
+
+            if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                if (!ModelState.IsValid)
+                ModelState.AddModelError("FileName", "Unsupported MIME type");
+
+                throw new InvalidModelStateException(ModelState);
+            }
+
+            using var fileStream = imageCreateDto.Image.OpenReadStream();
+            var imageInBytes = new byte[incomingFileSize];
+            fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
+
+            var scopeAndFileExists = from i in apiDbContext!.Images!
+                                        where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
+                                        select i;
+            if (scopeAndFileExists.Any())
+            {
+                var uploadedImage = scopeAndFileExists!.FirstOrDefault();
+                uploadedImage!.Data = imageInBytes;
+                uploadedImage!.Size = incomingFileSize;
+
+                apiDbContext.Images!.Update(uploadedImage);
+            }
+            else
+            {
+                Image uploadedImage = new ()
                 {
-                    return errorHandler.CreateBadRequestResponce();
-                }
-
-                var provider = new FileExtensionContentTypeProvider();
-
-                string incomingFileName = imageCreateDto.Image!.FileName;
-                string incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
-                long incomingFileSize = imageCreateDto.Image!.Length; // bytes
-                string? incomingFileMimeType = string.Empty;
-
-                if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce("MIME of the file not identified.");
-                }
-
-                using var fileStream = imageCreateDto.Image.OpenReadStream();
-                byte[] imageInBytes = new byte[incomingFileSize];
-                fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
-
-                var scopeAndFileExists = from i in apiDbContext!.Images!
-                                         where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
-                                         select i;
-                if (scopeAndFileExists.Any())
-                {
-                    Image? uploadedImage = scopeAndFileExists!.FirstOrDefault();
-                    uploadedImage!.Data = imageInBytes;
-                    uploadedImage!.Size = incomingFileSize;
-
-                    apiDbContext.Images!.Update(uploadedImage);
-                }
-                else
-                {
-                    Image uploadedImage = new ()
-                    {
-                        Name = incomingFileName,
-                        Size = incomingFileSize,
-                        Data = imageInBytes,
-                        MimeType = incomingFileMimeType!,
-                        ScopeUid = imageCreateDto.ScopeUid.Trim(),
-                        Extension = incomingFileExtension,
-                    };
-
-                    await apiDbContext.Images!.AddAsync(uploadedImage);
-                }
-
-                await apiDbContext.SaveChangesAsync();
-
-                Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
-                Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
-
-                var fileData = new Dictionary<string, string>()
-                {
-                    { "location", $"{Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/")}" },
+                    Name = incomingFileName,
+                    Size = incomingFileSize,
+                    Data = imageInBytes,
+                    MimeType = incomingFileMimeType!,
+                    ScopeUid = imageCreateDto.ScopeUid.Trim(),
+                    Extension = incomingFileExtension,
                 };
-                return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
+
+                await apiDbContext.Images!.AddAsync(uploadedImage);
             }
-            catch (Exception ex)
+
+            await apiDbContext.SaveChangesAsync();
+
+            Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
+            Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
+
+            var fileData = new Dictionary<string, string>()
             {
-                return errorHandler.CreateInternalServerErrorResponce(ex.Message);
-            }
+                { "location", $"{Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/")}" },
+            };
+            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
 
-        [Route("{scopeUid}/{fileName}")]
-        [ResponseCache(CacheProfileName = "ImageResponse")]
         [HttpGet]
+        [AllowAnonymous]
+        [Route("{scopeUid}/{fileName}")]
+        [ResponseCache(CacheProfileName = "ImageResponse")]        
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get(string scopeUid, string fileName)
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            try
+            var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+
+            if (uploadedImageData == null)
             {
-                if (scopeUid.IsNullOrWhiteSpace())
-                {
-                    return errorHandler.CreateBadRequestResponce("Scope is invalid");
-                }
-
-                if (fileName.IsNullOrWhiteSpace())
-                {
-                    return errorHandler.CreateBadRequestResponce("File Name is invalid");
-                }
-
-                var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
-
-                if (uploadedImageData == null)
-                {
-                    return errorHandler.CreateNotFoundResponce(string.Format("Requested file with filename = {0} not found", fileName));
-                }
-
-                return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
+                throw new EntityNotFoundException(nameof(Image), $"{scopeUid}/{fileName}");
             }
-            catch (Exception ex)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(ex.Message);
-            }
+
+            return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
         }
     }
 }

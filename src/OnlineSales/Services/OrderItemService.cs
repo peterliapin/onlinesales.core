@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -103,17 +102,10 @@ namespace OnlineSales.Services
             decimal currencyTotal = 0;
             decimal total = 0;
             int quantity = 0;
-
-            List<OrderItem> orderItems;
-
-            if (patchId == 0)
-            {
-                orderItems = (from ordItem in apiDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId select ordItem).ToList();
-            }
-            else
-            {
-                orderItems = (from ordItem in apiDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId && ordItem.Id != patchId select ordItem).ToList();
-            }
+            
+            var orderItems = patchId == 0
+                ? (from ordItem in apiDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId select ordItem).ToList()
+                : (from ordItem in apiDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId && ordItem.Id != patchId select ordItem).ToList();
 
             currencyTotal = orderItems.Sum(t => t.CurrencyTotal);
             total = orderItems.Sum(t => t.Total);

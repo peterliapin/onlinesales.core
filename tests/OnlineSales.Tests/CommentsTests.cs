@@ -17,11 +17,23 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     }
 
     [Fact]
+    public async Task GetAllTestAnonymous()
+    {
+        await GetAllTestImpl("NonSuccess");
+    }
+
+    [Fact]
+    public async Task CreateAndGetItemTestAnonymous()
+    {
+        await CreateAndGetItemTestImpl("NonSuccess");
+    }
+
+    [Fact]
     public override async Task UpdateItemNotFoundTest()
     {
         var comment = new CommentUpdateDto();
         comment.Content = "Content";
-        await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.UnprocessableEntity);
+        await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
     protected override async Task<(TestComment, string)> CreateItem(int fkId)

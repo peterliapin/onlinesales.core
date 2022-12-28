@@ -19,7 +19,7 @@ namespace OnlineSales.DataAnnotations.Base
                 return ValidationResult.Success!; // Required should handel this senario.
             }
 
-            string currentExt = Path.GetExtension(file.FileName.ToLower());
+            var currentExt = Path.GetExtension(file.FileName.ToLower());
 
             var hasMatchingExt = from ext in ListOfExt! where ext == currentExt select ext;
 

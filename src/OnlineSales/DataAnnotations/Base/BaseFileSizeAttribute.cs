@@ -22,8 +22,8 @@ namespace OnlineSales.DataAnnotations.Base
                 return ValidationResult.Success!;
             }
 
-            string measurement = MaxFileSize![^2..];
-            string fileSize = MaxFileSize![0..^2];
+            var measurement = MaxFileSize![^2..];
+            var fileSize = MaxFileSize![0..^2];
 
             if (!measurement.All(char.IsLetter))
             {

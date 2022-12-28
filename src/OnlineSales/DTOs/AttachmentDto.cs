@@ -9,10 +9,10 @@ namespace OnlineSales.DTOs;
 public class AttachmentDto
 {
     /// <summary>
-    /// Gets or sets the email attachement converted to a byte array.
+    /// Gets or sets the email attachment converted to a byte array.
     /// </summary>
     [Required]
-    public byte[] File { get; set; } = new byte[0];
+    public byte[] File { get; set; } = Array.Empty<byte>();
 
     /// <summary>
     /// Gets or sets the attachment file name with the extension.

@@ -27,126 +27,88 @@ namespace OnlineSales.Controllers
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Post([FromBody] OrderItemCreateDto value)
         {
-            try
+            var existFKItem = await (from fk in this.dbFKSet
+                                        where fk.Id == GetFKId(value).Item1
+                                        select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
+                ModelState.AddModelError(GetFKId(value).Item2, "The referenced object was not found");
 
-                var existFKItem = await (from fk in this.dbFKSet
-                                         where fk.Id == GetFKId(value)
-                                         select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(GetFKId(value)));
-                }
-
-                var orderItem = mapper.Map<OrderItem>(value);
-
-                var credtedItem = await orderItemService.AddOrderItem(existFKItem, orderItem);
-                return CreatedAtAction(nameof(GetOne), new { id = credtedItem }, value);
+                throw new InvalidModelStateException(ModelState);
             }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
+
+            var orderItem = mapper.Map<OrderItem>(value);
+
+            var createdItemId = await orderItemService.AddOrderItem(existFKItem, orderItem);
+            return CreatedAtAction(nameof(GetOne), new { id = createdItemId }, value);
         }
 
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItem>> Patch(int id, [FromBody] OrderItemUpdateDto value)
         {
-            try
+            var existingEntity = await FindOrThrowNotFound(id);
+
+            var existFKItem = await (from fk in this.dbFKSet
+                                     where fk.Id == existingEntity.OrderId
+                                     select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
             {
-                if (!ModelState.IsValid)
-                {
-                    return errorHandler.CreateBadRequestResponce();
-                }
+                ModelState.AddModelError("OrderId", "The referenced object was not found");
 
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
-
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
-                }
-
-                var existFKItem = await (from fk in this.dbFKSet
-                                         where fk.Id == existingEntity.OrderId
-                                         select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
-                }
-
-                mapper.Map(value, existingEntity);
-
-                var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
-
-                return updatedItem;
+                throw new InvalidModelStateException(ModelState);
             }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
+
+            mapper.Map(value, existingEntity);
+
+            var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
+
+            return updatedItem;
         }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult> Delete(int id)
         {
-            try
+            var existingEntity = await FindOrThrowNotFound(id);
+
+            var existFKItem = await (from fk in this.dbFKSet
+                                        where fk.Id == existingEntity.OrderId
+                                        select fk).FirstOrDefaultAsync();
+
+            if (existFKItem == null)
             {
-                var existingEntity = await (from p in this.dbSet
-                                            where p.Id == id
-                                            select p).FirstOrDefaultAsync();
+                ModelState.AddModelError("OrderId", "The referenced object was not found");
 
-                if (existingEntity == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<OrderItem>(id));
-                }
-
-                var existFKItem = await (from fk in this.dbFKSet
-                                         where fk.Id == existingEntity.OrderId
-                                         select fk).FirstOrDefaultAsync();
-
-                if (existFKItem == null)
-                {
-                    return errorHandler.CreateUnprocessableEntityResponce(CreateNotFoundMessage<Order>(existingEntity.OrderId));
-                }
-
-                await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
-
-                return NoContent();
+                throw new InvalidModelStateException(ModelState);
             }
-            catch (Exception e)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(e.Message);
-            }
+
+            await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
+
+            return NoContent();
         }
 
-        protected override int GetFKId(OrderItemCreateDto item)
+        protected override (int, string) GetFKId(OrderItemCreateDto item)
         {
-            return item.OrderId;
+            return (item.OrderId, "OrderId");
         }
 
-        protected override int? GetFKId(OrderItemUpdateDto item)
+        protected override (int?, string) GetFKId(OrderItemUpdateDto item)
         {
-            return null;
+            return (null, string.Empty);
         }
     }
 }

@@ -23,8 +23,8 @@ namespace OnlineSales.Services
 
         public async Task SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments, int templateId = 0)
         {
-            bool emailStatus = false;
-            string emails = string.Join(";", recipients);
+            var emailStatus = false;
+            var emails = string.Join(";", recipients);
 
             try
             {
@@ -47,16 +47,16 @@ namespace OnlineSales.Services
 
         public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<AttachmentDto>? attachments, int scheduleId = 0, int templateId = 0)
         {
-            bool emailStatus = false;
+            var emailStatus = false;
             var recipient = string.Empty;
 
             try
             {
                 recipient = await GetCustomerEmailById(customerId);
 
-                string[] receipientCollection = new string[] { recipient };
+                var recipientCollection = new[] { recipient };
 
-                await emailService.SendAsync(subject, fromEmail, fromName, receipientCollection, body, attachments);
+                await emailService.SendAsync(subject, fromEmail, fromName, recipientCollection, body, attachments);
                 emailStatus = true;
 
                 Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");
@@ -76,7 +76,7 @@ namespace OnlineSales.Services
         {
             try
             {
-                EmailLog log = new EmailLog();
+                var log = new EmailLog();
 
                 if (customerId > 0)
                 {

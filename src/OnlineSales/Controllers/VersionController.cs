@@ -10,7 +10,7 @@ using OnlineSales.Interfaces;
 namespace OnlineSales.Controllers
 {
     [Route("api/[controller]")]
-    public class VersionController : ControllerBaseEH
+    public class VersionController : ControllerBase
     {
         private readonly IHttpContextHelper? httpContextHelper;
 
@@ -24,23 +24,18 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult Get()
         {
-            try
-            {
-                Assembly assembly = Assembly.GetExecutingAssembly();
-                FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                return Ok(
-                    new
-                    {
-                        Version = fileVersionInfo.ProductVersion!,
-                        IP = httpContextHelper!.IpAddress,
-                        IPv4 = httpContextHelper!.IpAddressV4,
-                        IPv6 = httpContextHelper!.IpAddressV6,
-                    });
-            }
-            catch (Exception ex)
-            {
-                return errorHandler.CreateInternalServerErrorResponce(ex.Message);
-            }
+            var assembly = Assembly.GetExecutingAssembly();
+            var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+            return Ok(
+                new
+                {
+                    Version = fileVersionInfo.ProductVersion!,
+                    IP = httpContextHelper!.IpAddress,
+                    IPv4 = httpContextHelper!.IpAddressV4,
+                    IPv6 = httpContextHelper!.IpAddressV6,
+                    Headers = HttpContext.Request.Headers,
+                });
         }
     }
 }
