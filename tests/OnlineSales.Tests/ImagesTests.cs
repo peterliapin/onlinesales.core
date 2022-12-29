@@ -13,11 +13,12 @@ namespace OnlineSales.Tests;
 public class ImagesTests : BaseTest
 {
     private readonly string fileName = "wavepoint.png";
+    private readonly string fileNameModified = "wavepointModified.png";
 
     [Fact]
     public async Task CreateAndGetImageTest()
     {
-        var stream = CreateImageStream();
+        var stream = CreateImageStream(fileName);
         var testImage = new TestImage(stream!, fileName);
         var newPostUrl = await PostTest("/api/images", testImage);
         var imageStream = await GetImageTest(newPostUrl);
@@ -26,9 +27,25 @@ public class ImagesTests : BaseTest
     }
 
     [Fact]
+    public async Task UpdateImageTest()
+    {
+        await CreateAndGetImageTest();
+
+        var nonModifiedStream = CreateImageStream(fileName);
+
+        var stream = CreateImageStream(fileNameModified);
+        var testImage = new TestImage(stream!, fileName);
+        var newPostUrl = await PostTest("/api/images", testImage);
+        var imageStream = await GetImageTest(newPostUrl);
+        imageStream.Should().NotBeNull();
+        CompareStreams(nonModifiedStream!, imageStream!).Should().BeFalse();
+        CompareStreams(stream!, imageStream!).Should().BeTrue();
+    }
+
+    [Fact]
     public async Task CreateImageAnonymousTest()
     {
-        var stream = CreateImageStream();
+        var stream = CreateImageStream(fileName);
         var testImage = new TestImage(stream!, fileName);
         await PostTest("/api/images", testImage, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
     }
@@ -36,7 +53,7 @@ public class ImagesTests : BaseTest
     [Fact]
     public async Task GetImageAnonymousTest()
     {
-        var stream = CreateImageStream();
+        var stream = CreateImageStream(fileName);
         var testImage = new TestImage(stream!, fileName);
         var newPostUrl = await PostTest("/api/images", testImage);
         var imageStream = await GetImageTest(newPostUrl, HttpStatusCode.OK, "NonSuccessAuthentification");
@@ -44,11 +61,11 @@ public class ImagesTests : BaseTest
         CompareStreams(stream!, imageStream!).Should().BeTrue();
     }
 
-    private Stream CreateImageStream()
+    private Stream CreateImageStream(string filename)
     {
         var assembly = Assembly.GetExecutingAssembly();
         assembly.Should().NotBeNull();
-        var resourcePath = assembly.GetManifestResourceNames().Single(str => str.EndsWith(fileName));
+        var resourcePath = assembly.GetManifestResourceNames().Single(str => str.EndsWith(filename));
         resourcePath.Should().NotBeNull();
         var stream = assembly!.GetManifestResourceStream(resourcePath);
         stream.Should().NotBeNull();

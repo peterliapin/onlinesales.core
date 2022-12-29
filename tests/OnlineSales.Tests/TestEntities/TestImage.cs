@@ -30,7 +30,7 @@ public class TestImage : ImageCreateDto
 
     private static (IFormFile?, string) ReadResource(Stream resourceStream, string fileName)
     {
-        var tempFile = Path.Combine(Path.GetTempPath(), fileName);
+        var tempFile = Path.GetTempFileName();
 
         var tempStream = new FileStream(tempFile, FileMode.Create);
 
