@@ -19,5 +19,9 @@ namespace OnlineSales.DTOs
         public string Latitude { get; set; } = string.Empty;
 
         public string Longitude { get; set; } = string.Empty;
+
+        public string ContinentCode { get; set; } = string.Empty;
+
+        public string CountryCode2 { get; set; } = string.Empty;
     }
 }
