@@ -15,14 +15,12 @@ public class BaseEntity : BaseEntityWithId
 
     public string? CreatedByIp { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public string? CreatedByUserAgent { get; set; } = string.Empty;
 
     public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedByIp { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public string? UpdatedByUserAgent { get; set; } = string.Empty;
 }
 
