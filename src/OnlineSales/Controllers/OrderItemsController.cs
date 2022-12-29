@@ -15,7 +15,7 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrderItemsController : BaseFKController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, Order>
+    public class OrderItemsController : BaseFKController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, Order, OrderItemDetailsDto>
     {
         private readonly IOrderItemService orderItemService;
 
@@ -30,7 +30,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public override async Task<ActionResult<OrderItem>> Post([FromBody] OrderItemCreateDto value)
+        public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
         {
             var existFKItem = await (from fk in this.dbFKSet
                                         where fk.Id == GetFKId(value).Item1
@@ -46,7 +46,10 @@ namespace OnlineSales.Controllers
             var orderItem = mapper.Map<OrderItem>(value);
 
             var createdItemId = await orderItemService.AddOrderItem(existFKItem, orderItem);
-            return CreatedAtAction(nameof(GetOne), new { id = createdItemId }, value);
+
+            var returnedValue = mapper.Map<OrderItemDetailsDto>(orderItem);
+
+            return CreatedAtAction(nameof(GetOne), new { id = createdItemId }, returnedValue);
         }
 
         [HttpPatch("{id}")]
@@ -54,7 +57,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public override async Task<ActionResult<OrderItem>> Patch(int id, [FromBody] OrderItemUpdateDto value)
+        public override async Task<ActionResult<OrderItemDetailsDto>> Patch(int id, [FromBody] OrderItemUpdateDto value)
         {
             var existingEntity = await FindOrThrowNotFound(id);
 
@@ -73,7 +76,9 @@ namespace OnlineSales.Controllers
 
             var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
 
-            return updatedItem;
+            var returnItem = mapper.Map<OrderItemDetailsDto>(updatedItem);
+
+            return returnItem;
         }
 
         [HttpDelete("{id}")]

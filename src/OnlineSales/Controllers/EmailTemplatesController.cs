@@ -13,7 +13,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup>
+public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup, EmailTemplateCreateDto>
 {
     public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper)
     : base(dbContext, mapper)

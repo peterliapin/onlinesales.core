@@ -10,11 +10,12 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers
 {
-    public abstract class BaseFKController<T, TC, TU, TFK> : BaseController<T, TC, TU>
+    public abstract class BaseFKController<T, TC, TU, TFK, TRE> : BaseController<T, TC, TU, TRE>
         where T : BaseEntity, new()
         where TC : class
         where TU : class
         where TFK : BaseEntity
+        where TRE : class
     {
         protected readonly DbSet<TFK> dbFKSet;
 
@@ -30,7 +31,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public override async Task<ActionResult<T>> Post([FromBody] TC value)
+        public override async Task<ActionResult<TRE>> Post([FromBody] TC value)
         {
             var existFKItem = await (from fk in this.dbFKSet
                                      where fk.Id == GetFKId(value).Item1
@@ -47,7 +48,9 @@ namespace OnlineSales.Controllers
             var result = await dbSet.AddAsync(newValue);
             await dbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, value);
+            var returnValue = mapper.Map<TRE>(newValue);
+
+            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, returnValue);
         }
 
         [HttpPatch("{id}")]
@@ -55,7 +58,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public override async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
+        public override async Task<ActionResult<TRE>> Patch(int id, [FromBody] TU value)
         {
             var existingEntity = await FindOrThrowNotFound(id);
 

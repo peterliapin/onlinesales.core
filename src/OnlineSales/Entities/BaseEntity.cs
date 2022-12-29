@@ -4,22 +4,17 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace OnlineSales.Entities;
 
 public class BaseEntity : BaseEntityWithDates
 {
-    [JsonIgnore]
     public string? CreatedByIp { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public string? CreatedByUserAgent { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public string? UpdatedByIp { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public string? UpdatedByUserAgent { get; set; } = string.Empty;
 }
 

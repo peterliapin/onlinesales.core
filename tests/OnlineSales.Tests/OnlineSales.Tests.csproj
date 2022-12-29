@@ -41,6 +41,7 @@
   <ItemGroup>
     <None Remove="Resources\" />
     <None Remove="Resources\wavepoint.png" />
+    <None Remove="Resources\wavepointModified.png" />
   </ItemGroup>
   <ItemGroup>
     <None Update="xunit.runner.json">
@@ -53,5 +54,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\wavepoint.png" />
+    <EmbeddedResource Include="Resources\wavepointModified.png" />
   </ItemGroup>
 </Project>

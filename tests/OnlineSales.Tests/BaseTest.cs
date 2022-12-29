@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Net.Http.Headers;
+using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -115,17 +116,7 @@ public class BaseTest : IDisposable
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        response.StatusCode.Should().Be(expectedCode);
-
-        var location = string.Empty;
-
-        if (expectedCode == HttpStatusCode.Created)
-        {
-            location = response.Headers?.Location?.LocalPath ?? string.Empty;
-            location.Should().StartWith(url);
-        }
-
-        return location;
+        return CheckPostResponce(url, response, expectedCode);
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
@@ -150,5 +141,18 @@ public class BaseTest : IDisposable
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
+    }
+
+    protected string CheckPostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
+    {
+        var location = string.Empty;
+
+        if (expectedCode == HttpStatusCode.Created)
+        {
+            location = response.Headers?.Location?.LocalPath ?? string.Empty;
+            location.Should().StartWith(url);
+        }
+
+        return location;
     }
 }
