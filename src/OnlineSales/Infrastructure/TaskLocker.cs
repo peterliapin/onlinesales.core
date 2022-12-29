@@ -4,6 +4,7 @@
 
 using Medallion.Threading.Postgres;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.Data;
 
 namespace OnlineSales.Infrastructure;
@@ -39,6 +40,16 @@ public class TaskLocker
         }
 
         return instance;
+    }
+
+    public static PostgresDistributedLockHandle? GetSecondaryLock(string lockKey)
+    {
+        using (var dbContext = new ApiDbContext())
+        {
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+
+            return secondaryLock.TryAcquire();
+        }
     }
 
     private static bool CanGetLock(string lockKey)

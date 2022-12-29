@@ -13,6 +13,7 @@ namespace OnlineSales.Infrastructure
     public class TaskRunner : IJob
     {
         private readonly string lockKey = "TaskRunnerPrimaryNodeLock";
+        private readonly string secondaryLockKey = "TaskRunnerExecuteLock";
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
 
@@ -30,21 +31,33 @@ namespace OnlineSales.Infrastructure
 
                 if (taskLock is null)
                 {
+                    Log.Information("This is not the current primary node for task execution");
                     return;
                 }
 
-                foreach (var task in tasks)
+                var secondaryLock = TaskLocker.GetSecondaryLock(secondaryLockKey);
+
+                if (secondaryLock is null)
                 {
-                    var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+                    Log.Error($"This task is already executed.");
+                    return;
+                }
 
-                    if (!IsRightTimeToExecute(currentJob, task))
+                using (secondaryLock)
+                {
+                    foreach (var task in tasks)
                     {
-                        return;
-                    }
+                        var currentJob = await AddOrGetPendingTaskExecutionLog(task);
 
-                    var isCompleted = await task.Execute(currentJob);
+                        if (!IsRightTimeToExecute(currentJob, task))
+                        {
+                            return;
+                        }
 
-                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                        var isCompleted = await task.Execute(currentJob);
+
+                        await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                    } 
                 }
             }
             catch (Exception ex)
