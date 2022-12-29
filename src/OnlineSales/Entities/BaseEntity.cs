@@ -13,7 +13,6 @@ public class BaseEntity : BaseEntityWithId
     [Required]
     public DateTime CreatedAt { get; set; }
 
-    [JsonIgnore]
     public string? CreatedByIp { get; set; } = string.Empty;
 
     [JsonIgnore]
@@ -21,7 +20,6 @@ public class BaseEntity : BaseEntityWithId
 
     public DateTime? UpdatedAt { get; set; }
 
-    [JsonIgnore]
     public string? UpdatedByIp { get; set; } = string.Empty;
 
     [JsonIgnore]
