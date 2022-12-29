@@ -12,23 +12,47 @@ namespace OnlineSales.Tests;
 
 public class ImagesTests : BaseTest
 {
+    private readonly string fileName = "wavepoint.png";
+
     [Fact]
     public async Task CreateAndGetImageTest()
     {
-        var fileName = "wavepoint.png";
+        var stream = CreateImageStream();
+        var testImage = new TestImage(stream!, fileName);
+        var newPostUrl = await PostTest("/api/images", testImage);
+        var imageStream = await GetImageTest(newPostUrl);
+        imageStream.Should().NotBeNull();
+        CompareStreams(stream!, imageStream!).Should().BeTrue();
+    }
 
+    [Fact]
+    public async Task CreateImageAnonymousTest()
+    {
+        var stream = CreateImageStream();
+        var testImage = new TestImage(stream!, fileName);
+        await PostTest("/api/images", testImage, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
+    }
+  
+    [Fact]
+    public async Task GetImageAnonymousTest()
+    {
+        var stream = CreateImageStream();
+        var testImage = new TestImage(stream!, fileName);
+        var newPostUrl = await PostTest("/api/images", testImage);
+        var imageStream = await GetImageTest(newPostUrl, HttpStatusCode.OK, "NonSuccessAuthentification");
+        imageStream.Should().NotBeNull();
+        CompareStreams(stream!, imageStream!).Should().BeTrue();
+    }
+
+    private Stream CreateImageStream()
+    {
         var assembly = Assembly.GetExecutingAssembly();
         assembly.Should().NotBeNull();
         var resourcePath = assembly.GetManifestResourceNames().Single(str => str.EndsWith(fileName));
         resourcePath.Should().NotBeNull();
         var stream = assembly!.GetManifestResourceStream(resourcePath);
         stream.Should().NotBeNull();
-
-        var testImage = new TestImage(stream!, fileName);
-        var newPostUrl = await PostImageTest("/api/images", testImage);
-        var imageStream = await GetImageTest(newPostUrl);
-        imageStream.Should().NotBeNull();
-        CompareStreams(stream!, imageStream!).Should().BeTrue();
+        return stream!;
     }
 
     private bool CompareStreams(Stream s1, Stream s2)
