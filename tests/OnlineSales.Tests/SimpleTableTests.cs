@@ -25,7 +25,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task GetAllTest()
     {
-        await GetAllTestImpl();
+        await GetAllWithAuthentification();
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        await CreateAndGetItemTestImpl();
+        await CreateAndGetItemWithAuthentification();
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         return (testCreateItem, newItemUrl);
     }
 
-    protected async Task GetAllTestImpl(string getAuthToken = "Success")
+    protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
     {
         const int itemsNumber = 10;
 
@@ -139,7 +139,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         items!.Count.Should().Be(itemsNumber);
     }
 
-    protected async Task CreateAndGetItemTestImpl(string getAuthToken = "Success")
+    protected async Task CreateAndGetItemWithAuthentification(string getAuthToken = "Success")
     {
         var testCreateItem = await CreateItem();
 
