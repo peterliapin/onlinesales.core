@@ -110,6 +110,51 @@ public class BaseTest : IDisposable
         }
     }
 
+    protected async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
+    {
+        var response = await GetTest(url, expectedCode);
+
+        var content = await response.Content.ReadAsStreamAsync();
+
+        if (expectedCode == HttpStatusCode.OK)
+        {
+            return content;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    protected async Task<string> PostImageTest(string url, TestImage payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Success")
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, url);
+
+        var stream = new FileStream(payload.FilePath, FileMode.Open);
+
+        var content = new MultipartFormDataContent();
+        content.Add(new StreamContent(stream), "Image", payload.Image!.Name);
+        content.Add(new StringContent(payload.ScopeUid), "ScopeUid");
+
+        request.Content = content;
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+        var response = await Client.SendAsync(request);
+
+        response.StatusCode.Should().Be(expectedCode);
+
+        var location = string.Empty;
+
+        if (expectedCode == HttpStatusCode.Created)
+        {
+            location = response.Headers?.Location?.LocalPath ?? string.Empty;
+            location.Should().StartWith(url);
+        }
+
+        return location;
+    }
+
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Success")
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);
