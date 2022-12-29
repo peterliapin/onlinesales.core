@@ -73,3 +73,12 @@ public class PostUpdateDto
 
     public bool? AllowComments { get; set; }
 }
+
+public class PostDetailsDto : PostCreateDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+}

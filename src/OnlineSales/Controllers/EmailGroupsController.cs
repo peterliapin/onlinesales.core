@@ -13,7 +13,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto>
+public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto, EmailGroupDetailsDto>
 {
     public EmailGroupsController(ApiDbContext dbContext, IMapper mapper)
     : base(dbContext, mapper)

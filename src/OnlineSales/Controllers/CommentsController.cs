@@ -14,7 +14,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class CommentsController : BaseFKController<Comment, CommentCreateDto, CommentUpdateDto, Post>
+public class CommentsController : BaseFKController<Comment, CommentCreateDto, CommentUpdateDto, Post, CommentDetailsDto>
 {
     public CommentsController(ApiDbContext dbContext, IMapper mapper)
         : base(dbContext, mapper)
@@ -26,7 +26,7 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<List<Comment>>> Get([FromQuery] IDictionary<string, string>? parameters)
+    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] IDictionary<string, string>? parameters)
     {
         return base.Get(parameters);
     }
@@ -37,7 +37,7 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<Comment>> GetOne(int id)
+    public override Task<ActionResult<CommentDetailsDto>> GetOne(int id)
     {
         return base.GetOne(id);
     }
@@ -48,7 +48,7 @@ public class CommentsController : BaseFKController<Comment, CommentCreateDto, Co
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override async Task<ActionResult<Comment>> Post([FromBody] CommentCreateDto value)
+    public override async Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
     {
         var existFKItem = await (from fk in this.dbFKSet
                                     where fk.Id == GetFKId(value).Item1

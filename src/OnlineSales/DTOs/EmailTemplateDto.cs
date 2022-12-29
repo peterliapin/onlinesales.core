@@ -51,3 +51,12 @@ public class EmailTemplateUpdateDto
 
     public int? GroupId { get; set; }
 }
+
+public class EmailTemplateDetailsDto : EmailTemplateCreateDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+}

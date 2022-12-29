@@ -12,10 +12,11 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T, TC, TU> : ControllerBase
+    public class BaseController<T, TC, TU, TRE> : ControllerBase
         where T : BaseEntity, new()
         where TC : class
         where TU : class
+        where TRE : class
     {
         protected readonly DbSet<T> dbSet;  
         protected readonly DbContext dbContext;
@@ -35,11 +36,13 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<T>> GetOne(int id)
+        public virtual async Task<ActionResult<TRE>> GetOne(int id)
         {
             var result = await FindOrThrowNotFound(id);
 
-            return Ok(result);
+            var resultConverted = mapper.Map<TRE>(result);
+
+            return Ok(resultConverted);
         }
 
         // POST api/{entity}s
@@ -48,13 +51,15 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]        
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<T>> Post([FromBody] TC value)
+        public virtual async Task<ActionResult<TRE>> Post([FromBody] TC value)
         {
             var newValue = mapper.Map<T>(value);
             var result = await dbSet.AddAsync(newValue);
             await dbContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, newValue);
+            var resultsToClient = mapper.Map<TRE>(newValue);
+
+            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, resultsToClient);
         }
 
         // PUT api/posts/5
@@ -63,14 +68,16 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<T>> Patch(int id, [FromBody] TU value)
+        public virtual async Task<ActionResult<TRE>> Patch(int id, [FromBody] TU value)
         {
             var existingEntity = await FindOrThrowNotFound(id);
 
             mapper.Map(value, existingEntity);
             await dbContext.SaveChangesAsync();
 
-            return Ok(existingEntity);
+            var resultsToClient = mapper.Map<TRE>(existingEntity);
+
+            return Ok(resultsToClient);
         }
 
         // DELETE api/posts/5
@@ -95,7 +102,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<List<T>>> Get([FromQuery] IDictionary<string, string>? parameters)
+        public virtual async Task<ActionResult<List<TRE>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
             var query = this.dbSet!.AsQueryable<T>();
             if (!this.Request.QueryString.HasValue)
@@ -119,10 +126,12 @@ namespace OnlineSales.Controllers
             if (selectExists)
             {
                 var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
-                return Ok(selectResult);
+                var resultConverted = mapper.Map<TRE>(selectResult);
+                return Ok(resultConverted);
             }
 
             var result = await query!.ToListAsync();
+
             return Ok(result);
         }
 

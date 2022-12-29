@@ -62,3 +62,12 @@ public class CustomerUpdateDto
 
     public string? Culture { get; set; }
 }
+
+public class CustomerDetailsDto : CustomerCreateDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+}
