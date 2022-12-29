@@ -337,7 +337,7 @@ namespace OnlineSales.Infrastructure
                         break;
                     case 2:
                         propertyName = valueProps.First().ToLowerInvariant();
-                        methodName = valueProps.ElementAt(1) switch
+                        methodName = valueProps.ElementAt(1).ToLowerInvariant() switch
                         {
                             "asc" => query is IOrderedQueryable<T> ? "ThenBy" : "OrderBy",
                             "desc" => query is IOrderedQueryable<T> ? "ThenByDescending" : "OrderByDescending",

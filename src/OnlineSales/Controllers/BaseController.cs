@@ -113,7 +113,7 @@ namespace OnlineSales.Controllers
             query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
             if (!anyValidCmds && this.Request.QueryString.HasValue)
             {
-                return NotFound();
+                return Ok(Array.Empty<T>());
             }
 
             if (selectExists)

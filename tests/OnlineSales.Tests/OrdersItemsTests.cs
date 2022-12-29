@@ -237,12 +237,17 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         }
     }
 
-    protected override async Task<(TestOrderItem, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrderItem, string)> CreateItem(int fkId, Action<TestOrderItem>? itemTransformation = null)
     {
         var testOrderItem = new TestOrderItem
         {
             OrderId = fkId,
         };
+
+        if (itemTransformation != null)
+        {
+            itemTransformation(testOrderItem);
+        }
 
         var newUrl = await PostTest(itemsUrl, testOrderItem);
 

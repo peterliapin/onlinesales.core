@@ -19,13 +19,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllTestImpl("NonSuccess");
+        await GetAllWithAuthentification("NonSuccess");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemTestImpl("NonSuccess");
+        await CreateAndGetItemWithAuthentification("NonSuccess");
     }
 
     [Fact]
@@ -36,12 +36,17 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
-    protected override async Task<(TestComment, string)> CreateItem(int fkId)
+    protected override async Task<(TestComment, string)> CreateItem(int fkId, Action<TestComment>? itemTransformation = null)
     {
         var testComment = new TestComment()
         {
             PostId = fkId,
         };
+
+        if (itemTransformation != null)
+        {
+            itemTransformation(testComment);
+        }
 
         var newCommentUrl = await PostTest(itemsUrl, testComment);
 
