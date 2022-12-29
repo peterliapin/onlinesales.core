@@ -157,23 +157,23 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         await CreateItems(numberOfItems);
 
-        async void GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
+        async Task GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
         {
-            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[order]=Id%20ASC&filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
             result.Should().NotBeNull();
             result!.Count.Should().Be(expectedItemsNumber);
             for (int i = 0; i < expectedItemsNumber; ++i)
             {
-                result[i].Id.Should().Be(skipItemsNumber + i);
+                result[i].Id.Should().Be(skipItemsNumber + i + 1);
             }
         }
 
-        GetAndCheck(0);
-        GetAndCheck(10);
-        GetAndCheck(20);
-        GetAndCheck(30);
-        GetAndCheck(40);
-        GetAndCheck(50, 0);
+        await GetAndCheck(0);
+        await GetAndCheck(10);
+        await GetAndCheck(20);
+        await GetAndCheck(30);
+        await GetAndCheck(40);
+        await GetAndCheck(50, 0);
     }
 
     [Fact]
