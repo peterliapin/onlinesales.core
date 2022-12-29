@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
