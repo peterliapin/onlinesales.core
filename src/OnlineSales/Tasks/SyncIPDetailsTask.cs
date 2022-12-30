@@ -1,4 +1,4 @@
-﻿// <copyright file="SyncIPDetailsTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="SyncIpDetailsTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -13,12 +13,13 @@ using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
 
-public class SyncIPDetailsTask : ChangeLogTask
+public class SyncIpDetailsTask : ChangeLogTask
 {
     private readonly TaskConfig? taskConfig = new TaskConfig();
     private readonly IOptions<GeolocationApiConfig> options;
+    private readonly IpDetailsService ipDetailsService;
 
-    public SyncIPDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IOptions<GeolocationApiConfig> options)
+    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IOptions<GeolocationApiConfig> options, IpDetailsService ipDetailsService)
         : base(dbContext)
     {
         var config = configuration.GetSection("Tasks:SyncIPDetailsTask") !.Get<TaskConfig>();
@@ -28,6 +29,7 @@ public class SyncIPDetailsTask : ChangeLogTask
         }
 
         this.options = options;
+        this.ipDetailsService = ipDetailsService;
     }
 
     public override string Name => "SyncIPDetailsTask";
@@ -40,66 +42,70 @@ public class SyncIPDetailsTask : ChangeLogTask
 
     internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
-        foreach (var changeLogData in nextBatch)
+        List<IpDetails> ipDetailsCollection = new ();
+
+        List<string> ipList = GetDistinctIps(nextBatch);
+
+        List<string> newIpCollection = GetNewIps(ipList!);
+
+        foreach (var ipItem in newIpCollection)
         {
-            if (string.IsNullOrEmpty(changeLogData.Data))
+            if (string.IsNullOrEmpty(ipItem))
             {
                 continue;
             }
 
-            var newIp = GetIpIfNotExist(changeLogData);
+            var geoIpDetails = ipDetailsService.GetIPDetail(ipItem).Result;
 
-            if (!string.IsNullOrEmpty(newIp))
+            if (geoIpDetails == null)
             {
-                var geoIpDetails = new IpDetailsService(options).GetIPDetail(newIp).Result;
-
-                if (geoIpDetails == null)
-                {
-                    Log.Information("Ip {0} does not have any information", newIp);
-                    continue;
-                }
-
-                var ipDetails = new IpDetails()
-                {
-                    Ip = newIp,
-                    CityName = geoIpDetails!.City,
-                    CountryCode = Enum.TryParse<Country>(geoIpDetails!.CountryCode2, out var countryCode) ? countryCode : Country.ZZ,
-                    ContinentCode = Enum.TryParse<Continent>(geoIpDetails!.ContinentCode, out var continentCode) ? continentCode : Continent.ZZ,
-                    Latitude = double.TryParse(geoIpDetails!.Latitude, out double resultLatitiude) ? resultLatitiude : 0,
-                    Longitude = double.TryParse(geoIpDetails!.Longitude, out double resultLongitude) ? resultLongitude : 0,
-                };
-
-                dbContext.IpDetails!.Add(ipDetails);
-                dbContext.SaveChanges();
+                Log.Information("Ip {0} does not have any information", ipItem);
+                continue;
             }
+
+            var ipDetails = new IpDetails()
+            {
+                Ip = ipItem,
+                CityName = geoIpDetails!.City,
+                CountryCode = Enum.TryParse<Country>(geoIpDetails!.CountryCode2, out var countryCode) ? countryCode : Country.ZZ,
+                ContinentCode = Enum.TryParse<Continent>(geoIpDetails!.ContinentCode, out var continentCode) ? continentCode : Continent.ZZ,
+                Latitude = double.TryParse(geoIpDetails!.Latitude, out double resultLatitiude) ? resultLatitiude : 0,
+                Longitude = double.TryParse(geoIpDetails!.Longitude, out double resultLongitude) ? resultLongitude : 0,
+            };
+
+            ipDetailsCollection.Add(ipDetails); 
+        }
+
+        if (ipDetailsCollection.Any())
+        {
+            dbContext.IpDetails!.AddRange(ipDetailsCollection);
+            dbContext.SaveChanges(); 
         }
     }
 
-    private string GetIpIfNotExist(ChangeLog changeLogData)
+    private List<string> GetDistinctIps(List<ChangeLog> changeLogs)
     {
-        var newIp = string.Empty;
-        IpDetails? existingIpDetails;
+        List<string> distinctIps;
 
-        var ipObject = JsonSerializer.Deserialize<IpObject>(changeLogData.Data!) !;
+        var ipObjects = (from cL in changeLogs select JsonSerializer.Deserialize<IpObject>(cL.Data)).ToList();
 
-        if (changeLogData.EntityState == EntityState.Added)
-        {
-            existingIpDetails = dbContext.IpDetails!.FirstOrDefault(i => i.Ip == ipObject.CreatedByIp);
-            if (existingIpDetails is null)
-            {
-                newIp = ipObject.CreatedByIp!;
-            }
-        }
-        else if (changeLogData.EntityState == EntityState.Modified)
-        {
-            existingIpDetails = dbContext.IpDetails!.FirstOrDefault(i => i.Ip == ipObject.UpdatedByIp);
-            if (existingIpDetails is null)
-            {
-                newIp = ipObject.UpdatedByIp!;
-            }
-        }
+        var resultedIps = (from ip in ipObjects where !string.IsNullOrWhiteSpace(ip.CreatedByIp!) select ip.CreatedByIp).Union(from ip in ipObjects where !string.IsNullOrWhiteSpace(ip.UpdatedByIp!) select ip.UpdatedByIp).ToList();
 
-        return newIp;
+        distinctIps = resultedIps.Distinct().ToList();
+
+        return distinctIps;
+    }
+
+    private List<string> GetNewIps(List<string> ips)
+    {
+        var dbResults = (from i in ips
+                 join di in dbContext.IpDetails! on i equals di.Ip into ps
+                 from di in ps.DefaultIfEmpty()
+                 select new { NewIp = i, Ip = di?.Ip ?? string.Empty }).ToList();
+
+        List<string> newIps = (from dr in dbResults where dr.Ip == string.Empty select dr.NewIp).ToList();
+
+        return newIps;
     }
 }
 
