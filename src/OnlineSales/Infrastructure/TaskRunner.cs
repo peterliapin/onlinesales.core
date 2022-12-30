@@ -27,23 +27,23 @@ namespace OnlineSales.Infrastructure
         {
             try
             {
-                var nodeLock = LockManager.GetNoWaitLock(lockKey);
+                var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(lockKey);
 
-                if (nodeLock is null)
+                if (nodeLockInstance is null)
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
                 }
 
-                var secondaryLock = LockManager.GetSecondaryNoWaitLock(secondaryLockKey);
+                var taskLock = LockManager.GetNoWaitLock(secondaryLockKey);
 
-                if (secondaryLock is null)
+                if (taskLock is null)
                 {
                     Log.Error($"This task is already executed.");
                     return;
                 }
 
-                using (secondaryLock)
+                using (taskLock)
                 {
                     foreach (var task in tasks)
                     {

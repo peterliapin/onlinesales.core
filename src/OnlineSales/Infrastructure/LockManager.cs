@@ -17,7 +17,7 @@ public class LockManager
     {
     }
 
-    public static LockManager? GetNoWaitLock(string lockKey)
+    public static LockManager? GetInstanceWithNoWaitLock(string lockKey)
     {
         if (instance == null)
         {
@@ -34,14 +34,22 @@ public class LockManager
         return instance;
     }
 
-    public static PostgresDistributedLockHandle? GetSecondaryNoWaitLock(string lockKey)
+    public static PostgresDistributedLockHandle? GetNoWaitLock(string lockKey)
     {
         using (var dbContext = new ApiDbContext())
         {
-            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            try
+            {
+                var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
 
-            // pg_try_advisory_lock - Get the lock or skip if not available.
-            return secondaryLock.TryAcquire();
+                // pg_try_advisory_lock - Get the lock or skip if not available.
+                return secondaryLock.TryAcquire();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error when acquiring lock.");
+                return null;
+            }
         }
     }
 
@@ -49,10 +57,18 @@ public class LockManager
     {
         using (var dbContext = new ApiDbContext())
         {
-            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            try
+            {
+                var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
 
-            // pg_advisory_lock - Get or Wait for lock.
-            return secondaryLock.Acquire();
+                // pg_advisory_lock - Get or Wait for lock.
+                return secondaryLock.Acquire();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error when acquiring lock.");
+                return null;
+            }
         }
     }
 
