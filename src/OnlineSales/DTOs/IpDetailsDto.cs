@@ -1,12 +1,10 @@
-﻿// <copyright file="IPDetailsDto.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="IpDetailsDto.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Text.Json.Serialization;
-
 namespace OnlineSales.DTOs
 {
-    public class IPDetailsDto
+    public class IpDetailsDto
     {
         public string Ip { get; set; } = string.Empty;
 
@@ -19,5 +17,9 @@ namespace OnlineSales.DTOs
         public string Latitude { get; set; } = string.Empty;
 
         public string Longitude { get; set; } = string.Empty;
+
+        public string ContinentCode { get; set; } = string.Empty;
+
+        public string CountryCode2 { get; set; } = string.Empty;
     }
 }
