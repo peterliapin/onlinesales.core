@@ -155,17 +155,20 @@ public class Program
 
         if (migrateOnStart)
         {
-            using (var scope = app.Services.CreateScope())
+            using (LockManager.GetWaitLock("MigrationWaitLock"))
             {
-                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-                context.Database.Migrate();
-
-                var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
-
-                foreach (var pluginContext in pluginContexts)
+                using (var scope = app.Services.CreateScope())
                 {
-                    pluginContext.Database.Migrate();
-                }
+                    var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+                    context.Database.Migrate();
+
+                    var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
+
+                    foreach (var pluginContext in pluginContexts)
+                    {
+                        pluginContext.Database.Migrate();
+                    }
+                } 
             }
         }
     }

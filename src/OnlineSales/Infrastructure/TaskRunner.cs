@@ -13,7 +13,7 @@ namespace OnlineSales.Infrastructure
     public class TaskRunner : IJob
     {
         private readonly string lockKey = "TaskRunnerPrimaryNodeLock";
-        private readonly string secondaryLockKey = "TaskRunnerExecuteLock";
+        private readonly string secondaryLockKey = "TaskRunnerExecutionSecondaryLock";
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
 
@@ -27,15 +27,15 @@ namespace OnlineSales.Infrastructure
         {
             try
             {
-                var taskLock = TaskLocker.GetInstance(lockKey);
+                var nodeLock = LockManager.GetNoWaitLock(lockKey);
 
-                if (taskLock is null)
+                if (nodeLock is null)
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
                 }
 
-                var secondaryLock = TaskLocker.GetSecondaryLock(secondaryLockKey);
+                var secondaryLock = LockManager.GetSecondaryNoWaitLock(secondaryLockKey);
 
                 if (secondaryLock is null)
                 {

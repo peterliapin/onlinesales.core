@@ -1,4 +1,4 @@
-﻿// <copyright file="TaskLocker.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="LockManager.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -9,46 +9,50 @@ using OnlineSales.Data;
 
 namespace OnlineSales.Infrastructure;
 
-public class TaskLocker
+public class LockManager
 {
-    protected static readonly object LockObj = new object();
+    private static LockManager? instance;
 
-    private static TaskLocker? instance;
-
-    private TaskLocker()
+    private LockManager()
     {
     }
 
-    public static TaskLocker? GetInstance(string lockKey)
+    public static LockManager? GetNoWaitLock(string lockKey)
     {
         if (instance == null)
         {
-            lock (LockObj)
+            if (CanGetLock(lockKey))
             {
-                if (CanGetLock(lockKey))
-                {
-                    if (instance == null)
-                    {
-                        instance = new TaskLocker();
-                    }
-                }
-                else
-                {
-                    return null;
-                }
+                instance = new LockManager();
+            }
+            else
+            {
+                return null;
             }
         }
 
         return instance;
     }
 
-    public static PostgresDistributedLockHandle? GetSecondaryLock(string lockKey)
+    public static PostgresDistributedLockHandle? GetSecondaryNoWaitLock(string lockKey)
     {
         using (var dbContext = new ApiDbContext())
         {
             var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
 
+            // pg_try_advisory_lock - Get the lock or skip if not available.
             return secondaryLock.TryAcquire();
+        }
+    }
+
+    public static PostgresDistributedLockHandle? GetWaitLock(string lockKey)
+    {
+        using (var dbContext = new ApiDbContext())
+        {
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+
+            // pg_advisory_lock - Get or Wait for lock.
+            return secondaryLock.Acquire();
         }
     }
 
@@ -60,6 +64,7 @@ public class TaskLocker
             {
                 var taskLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
 
+                // pg_try_advisory_lock - Get the lock or skip if not available.
                 var handle = taskLock.TryAcquire();
 
                 if (handle is null)
