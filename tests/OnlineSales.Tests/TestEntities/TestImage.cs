@@ -10,13 +10,38 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestImage : ImageCreateDto
 {
-    public TestImage(string imageResourceName)
+    public readonly string FilePath;
+
+    public TestImage(Stream resourseStream, string imageResourceName)
     {
-        Image = ReadResource(imageResourceName);
+        var imageData = ReadResource(resourseStream, imageResourceName);
+        Image = imageData.Item1;
+        FilePath = imageData.Item2;
         ScopeUid = "test-scope-ui";
     }
 
-    private static IFormFile? ReadResource(string fileName)
+    public TestImage(string imageResourceName)
+    {
+        var imageData = ReadResource(imageResourceName);
+        Image = imageData.Item1;
+        FilePath = imageData.Item2;
+        ScopeUid = "test-scope-ui";
+    }
+
+    private static (IFormFile?, string) ReadResource(Stream resourceStream, string fileName)
+    {
+        var tempFile = Path.GetTempFileName();
+
+        var tempStream = new FileStream(tempFile, FileMode.Create);
+
+        resourceStream.CopyTo(tempStream);
+
+        tempStream.Close();
+
+        return (new FormFile(resourceStream!, 0, resourceStream!.Length, fileName, fileName), tempFile);
+    }
+
+    private static (IFormFile?, string) ReadResource(string fileName)
     {
         var assembly = Assembly.GetExecutingAssembly();
 
@@ -25,12 +50,25 @@ public class TestImage : ImageCreateDto
 
         if (resourcePath is null)
         {
-            return null;
+            return (null, string.Empty);
         }
-
-        using (Stream? stream = assembly!.GetManifestResourceStream(resourcePath))
+        
+        var stream = assembly!.GetManifestResourceStream(resourcePath);
+        if (stream != null)
         {
-            return new FormFile(stream!, 0, stream!.Length, fileName, fileName);
+            var tempFile = Path.Combine(Path.GetTempPath(), fileName);
+
+            var tempStream = new FileStream(tempFile, FileMode.Create);
+
+            stream.CopyTo(tempStream);
+
+            tempStream.Close();
+
+            return (new FormFile(stream!, 0, stream!.Length, fileName, fileName), tempFile);
+        }
+        else
+        {
+            return (null, string.Empty);
         }
     }
 }

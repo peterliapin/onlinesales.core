@@ -13,7 +13,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class CustomersController : BaseController<Customer, CustomerCreateDto, CustomerUpdateDto>
+public class CustomersController : BaseController<Customer, CustomerCreateDto, CustomerUpdateDto, CustomerDetailsDto>
 {
     public CustomersController(ApiDbContext dbContext, IMapper mapper)
         : base(dbContext, mapper)

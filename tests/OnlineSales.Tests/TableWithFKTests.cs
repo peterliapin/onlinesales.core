@@ -55,14 +55,16 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
 
     protected abstract Task<(int, string)> CreateFKItem();
 
-    protected override async Task<(TC, string)> CreateItem()
+    protected override async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
     {
         var fkItem = await CreateFKItem();
 
         var fkId = fkItem.Item1;
 
-        return await CreateItem(fkId);
+        var result = await CreateItem(fkId, itemTransformation);
+
+        return result;
     }
 
-    protected abstract Task<(TC, string)> CreateItem(int fkId);
+    protected abstract Task<(TC, string)> CreateItem(int fkId, Action<TC>? itemTransformation = null);
 }

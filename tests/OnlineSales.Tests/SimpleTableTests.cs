@@ -23,6 +23,12 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Fact]
+    public async Task GetAllTest()
+    {
+        await GetAllWithAuthentification();
+    }
+
+    [Fact]
     public async Task GetItemNotFoundTest()
     {
         await GetTest(itemsUrlNotFound, HttpStatusCode.NotFound);
@@ -31,11 +37,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        var testCreateItem = await CreateItem();
-
-        var item = await GetTest<T>(testCreateItem.Item2);
-
-        item.Should().BeEquivalentTo(testCreateItem.Item1);
+        await CreateAndGetItemWithAuthentification();
     }
 
     [Fact]
@@ -99,14 +101,51 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         payload.Should().NotBeNull();
         payload.Should().HaveCount(payloadItemsCount);
     }
-    
-    protected virtual async Task<(TC, string)> CreateItem()
+
+    protected async Task CreateItems(int numberOfItems, Action<TC>? itemTransformation = null)
+    {
+        for (int i = 0; i < numberOfItems; ++i)
+        {
+            await CreateItem(itemTransformation);
+        }
+    }
+
+    protected virtual async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
     {
         var testCreateItem = new TC();
+
+        if (itemTransformation != null)
+        {
+            itemTransformation(testCreateItem);
+        }
 
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 
         return (testCreateItem, newItemUrl);
+    }
+
+    protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
+    {
+        const int itemsNumber = 10;
+
+        for (int i = 0; i < itemsNumber; ++i)
+        {
+            await CreateItem();
+        }
+
+        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+
+        items.Should().NotBeNull();
+        items!.Count.Should().Be(itemsNumber);
+    }
+
+    protected async Task CreateAndGetItemWithAuthentification(string getAuthToken = "Success")
+    {
+        var testCreateItem = await CreateItem();
+
+        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, getAuthToken);
+
+        item.Should().BeEquivalentTo(testCreateItem.Item1);
     }
 
     protected abstract TU UpdateItem(TC createdItem);

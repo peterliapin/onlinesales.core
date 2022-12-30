@@ -32,7 +32,7 @@ public class CustomerCreateDto
 
     public int Timezone { get; set; } = 0;
 
-    public string Culture { get; set; } = string.Empty;
+    public string Language { get; set; } = string.Empty;
 }
 
 public class CustomerUpdateDto
@@ -61,4 +61,13 @@ public class CustomerUpdateDto
     public int? Timezone { get; set; }
 
     public string? Culture { get; set; }
+}
+
+public class CustomerDetailsDto : CustomerCreateDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
 }

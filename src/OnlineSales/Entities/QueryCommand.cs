@@ -39,7 +39,6 @@ namespace OnlineSales.Entities
 
         public static Dictionary<string, WOperand> OperandMappings { get; } = new Dictionary<string, WOperand>()
         {
-            { "and", WOperand.And },
             { "or", WOperand.Or },
             { "gt", WOperand.GreaterThan },
             { "gte", WOperand.GreaterThanOrEquals },
@@ -53,5 +52,7 @@ namespace OnlineSales.Entities
         public string[] Props { get; set; } = Array.Empty<string>();
 
         public string Value { get; set; } = string.Empty;
+
+        public string Source { get; set; } = string.Empty;
     }
 }

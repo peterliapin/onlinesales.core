@@ -18,3 +18,12 @@ public class EmailGroupUpdateDto
     [NonEmptyString]
     public string? Name { get; set; }
 }
+
+public class EmailGroupDetailsDto : EmailGroupCreateDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+}

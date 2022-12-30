@@ -13,7 +13,7 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer>
+    public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer, OrderDetailsDto>
     {
         public OrdersController(ApiDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)
