@@ -15,12 +15,17 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
     {
     }
 
-    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId)
+    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId, Action<TestEmailTemplate>? itemTransformation = null)
     {
         var testEmailTemplate = new TestEmailTemplate
         {
             GroupId = fkId,
         };
+
+        if (itemTransformation != null)
+        {
+            itemTransformation(testEmailTemplate);
+        }
 
         var newEmailTemplateUrl = await PostTest(itemsUrl, testEmailTemplate);
 

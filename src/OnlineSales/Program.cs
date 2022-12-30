@@ -17,6 +17,7 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using WebApiContrib.Core.Formatter.Csv;
 
 namespace OnlineSales;
 
@@ -71,11 +72,17 @@ public class Program
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddControllers()
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
-            });
+        builder.Services.AddControllers(options =>
+        {
+            options.RespectBrowserAcceptHeader = true;
+            options.ReturnHttpNotAcceptable = true;
+        })
+        .AddXmlSerializerFormatters()
+        .AddCsvSerializerFormatters()
+        .ConfigureApiBehaviorOptions(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
 
         ConfigureSwagger(builder);
 

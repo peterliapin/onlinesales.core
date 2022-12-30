@@ -4,28 +4,26 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace OnlineSales.Entities;
 
-public class BaseEntity : BaseEntityWithId
+public class BaseEntity : BaseEntityWithDates
+{
+    public string? CreatedByIp { get; set; } = string.Empty;
+
+    public string? CreatedByUserAgent { get; set; } = string.Empty;
+
+    public string? UpdatedByIp { get; set; } = string.Empty;
+
+    public string? UpdatedByUserAgent { get; set; } = string.Empty;
+}
+
+public class BaseEntityWithDates : BaseEntityWithId
 {
     [Required]
     public DateTime CreatedAt { get; set; }
 
-    [JsonIgnore]
-    public string? CreatedByIp { get; set; } = string.Empty;
-
-    [JsonIgnore]
-    public string? CreatedByUserAgent { get; set; } = string.Empty;
-
     public DateTime? UpdatedAt { get; set; }
-
-    [JsonIgnore]
-    public string? UpdatedByIp { get; set; } = string.Empty;
-
-    [JsonIgnore]
-    public string? UpdatedByUserAgent { get; set; } = string.Empty;
 }
 
 public class BaseEntityWithId

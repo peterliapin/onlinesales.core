@@ -55,6 +55,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.1" />
+    <PackageReference Include="WebApiContrib.Core.Formatter.Csv" Version="4.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,7 +64,7 @@
     <Folder Include="Migrations\" />
     <Folder Include="Geography\" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="README.md">
       <Pack>True</Pack>
