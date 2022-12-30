@@ -1,10 +1,10 @@
-﻿// <copyright file="IpDetailsDtos.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="IpDetailsDto.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
 namespace OnlineSales.DTOs
 {
-    public class IpDetailsDtos
+    public class IpDetailsDto
     {
         public string Ip { get; set; } = string.Empty;
 

@@ -28,9 +28,9 @@ public class IpDetailsService
         SerializeOptions.Converters.Add(new JsonStringEnumConverter());
     }
 
-    public async Task<IpDetailsDtos?> GetIPDetail(string ip)
+    public async Task<IpDetailsDto?> GetIPDetail(string ip)
     {
-        IpDetailsDtos? ipDetailsDto;
+        IpDetailsDto? ipDetailsDto;
 
         var client = new HttpClient();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -45,7 +45,7 @@ public class IpDetailsService
 
         if (response.IsSuccessStatusCode)
         {
-            ipDetailsDto = JsonSerializer.Deserialize<IpDetailsDtos>(response.Content.ReadAsStringAsync().Result, SerializeOptions);
+            ipDetailsDto = JsonSerializer.Deserialize<IpDetailsDto>(response.Content.ReadAsStringAsync().Result, SerializeOptions);
 
             Log.Information("Success of resolving {0}", ipDetailsDto!.Ip!);
         }

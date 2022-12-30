@@ -1,4 +1,4 @@
-﻿// <copyright file="SyncIpDetailsTasks.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="SyncIpDetailsTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -13,13 +13,13 @@ using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
 
-public class SyncIpDetailsTasks : ChangeLogTask
+public class SyncIpDetailsTask : ChangeLogTask
 {
     private readonly TaskConfig? taskConfig = new TaskConfig();
     private readonly IOptions<GeolocationApiConfig> options;
     private readonly IpDetailsService ipDetailsService;
 
-    public SyncIpDetailsTasks(IConfiguration configuration, ApiDbContext dbContext, IOptions<GeolocationApiConfig> options, IpDetailsService ipDetailsService)
+    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IOptions<GeolocationApiConfig> options, IpDetailsService ipDetailsService)
         : base(dbContext)
     {
         var config = configuration.GetSection("Tasks:SyncIPDetailsTask") !.Get<TaskConfig>();
