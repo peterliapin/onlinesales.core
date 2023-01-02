@@ -13,20 +13,10 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class EmailTemplatesController : BaseFKController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailGroup, EmailTemplateCreateDto>
+public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailTemplateCreateDto>
 {
     public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper)
     : base(dbContext, mapper)
     {
-    }
-
-    protected override (int, string) GetFKId(EmailTemplateCreateDto item)
-    {
-        return (item.GroupId, "GroupId");
-    }
-
-    protected override (int?, string) GetFKId(EmailTemplateUpdateDto item)
-    {
-        return (item.GroupId, "GroupId");
     }
 }

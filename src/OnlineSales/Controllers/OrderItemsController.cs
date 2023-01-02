@@ -15,7 +15,7 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrderItemsController : BaseFKController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, Order, OrderItemDetailsDto>
+    public class OrderItemsController : BaseController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, OrderItemDetailsDto>
     {
         private readonly IOrderItemService orderItemService;
 
@@ -32,20 +32,20 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
         {
-            var existFKItem = await (from fk in this.dbFKSet
-                                        where fk.Id == GetFKId(value).Item1
-                                        select fk).FirstOrDefaultAsync();
+            var existOrder = await (from order in this.dbContext.Orders
+                                        where order.Id == value.OrderId
+                                        select order).FirstOrDefaultAsync();
 
-            if (existFKItem == null)
+            if (existOrder == null)
             {
-                ModelState.AddModelError(GetFKId(value).Item2, "The referenced object was not found");
+                ModelState.AddModelError("OrderId", "The referenced order was not found");
 
                 throw new InvalidModelStateException(ModelState);
             }
 
             var orderItem = mapper.Map<OrderItem>(value);
 
-            var createdItemId = await orderItemService.AddOrderItem(existFKItem, orderItem);
+            var createdItemId = await orderItemService.AddOrderItem(existOrder, orderItem);
 
             var returnedValue = mapper.Map<OrderItemDetailsDto>(orderItem);
 
@@ -61,20 +61,13 @@ namespace OnlineSales.Controllers
         {
             var existingEntity = await FindOrThrowNotFound(id);
 
-            var existFKItem = await (from fk in this.dbFKSet
-                                     where fk.Id == existingEntity.OrderId
-                                     select fk).FirstOrDefaultAsync();
-
-            if (existFKItem == null)
-            {
-                ModelState.AddModelError("OrderId", "The referenced object was not found");
-
-                throw new InvalidModelStateException(ModelState);
-            }
+            var existingOrder = await (from order in this.dbContext.Orders
+                                    where order.Id == existingEntity.OrderId
+                                    select order).FirstOrDefaultAsync();
 
             mapper.Map(value, existingEntity);
 
-            var updatedItem = await orderItemService.UpdateOrderItem(existFKItem, existingEntity);
+            var updatedItem = await orderItemService.UpdateOrderItem(existingOrder!, existingEntity);
 
             var returnItem = mapper.Map<OrderItemDetailsDto>(updatedItem);
 
@@ -90,30 +83,13 @@ namespace OnlineSales.Controllers
         {
             var existingEntity = await FindOrThrowNotFound(id);
 
-            var existFKItem = await (from fk in this.dbFKSet
-                                        where fk.Id == existingEntity.OrderId
-                                        select fk).FirstOrDefaultAsync();
+            var existingOrder = await (from order in this.dbContext.Orders
+                                       where order.Id == existingEntity.OrderId
+                                       select order).FirstOrDefaultAsync();
 
-            if (existFKItem == null)
-            {
-                ModelState.AddModelError("OrderId", "The referenced object was not found");
-
-                throw new InvalidModelStateException(ModelState);
-            }
-
-            await orderItemService.DeleteOrderItem(existFKItem, existingEntity);
+            await orderItemService.DeleteOrderItem(existingOrder!, existingEntity);
 
             return NoContent();
-        }
-
-        protected override (int, string) GetFKId(OrderItemCreateDto item)
-        {
-            return (item.OrderId, "OrderId");
-        }
-
-        protected override (int?, string) GetFKId(OrderItemUpdateDto item)
-        {
-            return (null, string.Empty);
         }
     }
 }

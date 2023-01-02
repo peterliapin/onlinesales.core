@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Controllers;
 
@@ -36,6 +37,14 @@ public class ErrorsController : Controller
 
                 problemDetails.Extensions["entityType"] = entityNotFoundError.EntityType;
                 problemDetails.Extensions["entityUid"] = entityNotFoundError.EntityUid;
+
+                break;
+
+            case DbUpdateException dbUpdateException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status422UnprocessableEntity,
+                    dbUpdateException.InnerException!.Message);
 
                 break;
 
