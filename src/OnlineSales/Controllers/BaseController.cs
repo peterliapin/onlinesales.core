@@ -141,20 +141,6 @@ namespace OnlineSales.Controllers
             return Ok(resultConverted);
         }
 
-        [HttpPost]
-        [Route("import")]
-        public virtual async Task<ActionResult> Import([FromBody]List<TD> records)
-        {
-            foreach (var record in records)
-            {
-                // Console.WriteLine($"Record data {JsonSerializer.Serialize(record)}");
-            }
-
-            await Task.CompletedTask;
-
-            return Ok();
-        }
-
         protected async Task<T> FindOrThrowNotFound(int id)
         {
             var existingEntity = await (from p in this.dbSet

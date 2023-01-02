@@ -41,7 +41,7 @@ public class CsvOutputFormatter : OutputFormatter
 
         await using (var csv = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
         {
-            csv.Context.RegisterCamelCaseClassMapWithOptionalAttributes(itemType!);
+            csv.Context.RegisterCamelCaseClassMap(itemType!);
 
             await csv.WriteRecordsAsync(context.Object as IEnumerable);
         }

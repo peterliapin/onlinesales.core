@@ -15,7 +15,7 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrderItemsController : BaseController<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, OrderItemDetailsDto>
+    public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, OrderItemDetailsDto, OrderItemImportDto>
     {
         private readonly IOrderItemService orderItemService;
 

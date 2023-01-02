@@ -62,7 +62,7 @@ public class CsvInputFormatter : InputFormatter
 
         using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
-            csv.Context.RegisterCamelCaseClassMapWithOptionalAttributes(itemType!);
+            csv.Context.RegisterCamelCaseClassMap(itemType!);
 
             await foreach (var record in csv.GetRecordsAsync(itemTypeInGeneric))
             {

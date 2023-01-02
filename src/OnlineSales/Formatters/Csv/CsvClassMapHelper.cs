@@ -11,14 +11,7 @@ namespace OnlineSales.Formatters.Csv;
 
 public static class CsvClassMapHelper
 {
-    private static readonly List<string> OptionalAttributes = new List<string>
-    {
-        "Id",
-        "CreatedAt",
-        "UpdatedAt",
-    };
-
-    public static void RegisterCamelCaseClassMapWithOptionalAttributes(this CsvContext csvContext, Type itemType)
+    public static void RegisterCamelCaseClassMap(this CsvContext csvContext, Type itemType)
     {
         var mapType = typeof(DefaultClassMap<>);
         var constructedMapType = mapType.MakeGenericType(itemType!);
@@ -28,11 +21,6 @@ public static class CsvClassMapHelper
 
         foreach (var memberMapData in map.MemberMaps.Select(m => m.Data))
         {
-            if (OptionalAttributes.Contains(memberMapData.Member!.Name))
-            {
-                memberMapData.IsOptional = true;
-            }
-
             memberMapData.Names.Add(JsonNamingPolicy.CamelCase.ConvertName(memberMapData.Member!.Name));
         }
 

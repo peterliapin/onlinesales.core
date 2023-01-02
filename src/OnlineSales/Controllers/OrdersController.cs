@@ -13,7 +13,7 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrdersController : BaseController<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto>
+    public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto, OrderImportDto>
     {
         public OrdersController(ApiDbContext dbContext, IMapper mapper)
             : base(dbContext, mapper)

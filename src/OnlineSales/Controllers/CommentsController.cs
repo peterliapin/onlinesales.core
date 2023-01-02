@@ -13,7 +13,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class CommentsController : BaseController<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto>
+public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
     public CommentsController(ApiDbContext dbContext, IMapper mapper)
         : base(dbContext, mapper)
