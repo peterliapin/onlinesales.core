@@ -57,6 +57,7 @@ public class Program
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
+        builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -166,17 +167,20 @@ public class Program
 
         if (migrateOnStart)
         {
-            using (var scope = app.Services.CreateScope())
+            using (LockManager.GetWaitLock("MigrationWaitLock"))
             {
-                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-                context.Database.Migrate();
-
-                var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
-
-                foreach (var pluginContext in pluginContexts)
+                using (var scope = app.Services.CreateScope())
                 {
-                    pluginContext.Database.Migrate();
-                }
+                    var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+                    context.Database.Migrate();
+
+                    var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
+
+                    foreach (var pluginContext in pluginContexts)
+                    {
+                        pluginContext.Database.Migrate();
+                    }
+                } 
             }
         }
     }
@@ -328,6 +332,7 @@ public class Program
     private static void ConfigureTasks(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<ITask, CustomerScheduledEmail>();
+        builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

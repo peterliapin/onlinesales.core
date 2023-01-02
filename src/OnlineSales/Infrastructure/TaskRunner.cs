@@ -12,6 +12,8 @@ namespace OnlineSales.Infrastructure
 {
     public class TaskRunner : IJob
     {
+        private readonly string lockKey = "TaskRunnerPrimaryNodeLock";
+        private readonly string secondaryLockKey = "TaskRunnerExecutionSecondaryLock";
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
 
@@ -25,18 +27,37 @@ namespace OnlineSales.Infrastructure
         {
             try
             {
-                foreach (var task in tasks)
+                var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(lockKey);
+
+                if (nodeLockInstance is null)
                 {
-                    var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+                    Log.Information("This is not the current primary node for task execution");
+                    return;
+                }
 
-                    if (!IsRightTimeToExecute(currentJob, task))
+                var taskLock = LockManager.GetNoWaitLock(secondaryLockKey);
+
+                if (taskLock is null)
+                {
+                    Log.Error($"This task is already executed.");
+                    return;
+                }
+
+                using (taskLock)
+                {
+                    foreach (var task in tasks)
                     {
-                        return;
-                    }
+                        var currentJob = await AddOrGetPendingTaskExecutionLog(task);
 
-                    var isCompleted = await task.Execute(currentJob);
+                        if (!IsRightTimeToExecute(currentJob, task))
+                        {
+                            return;
+                        }
 
-                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                        var isCompleted = await task.Execute(currentJob);
+
+                        await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                    } 
                 }
             }
             catch (Exception ex)
