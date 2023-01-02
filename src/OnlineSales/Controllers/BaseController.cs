@@ -12,14 +12,14 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T, TC, TU, TRE> : ControllerBase
+    public class BaseController<T, TC, TU, TD> : ControllerBase
         where T : BaseEntity, new()
         where TC : class
         where TU : class
-        where TRE : class
+        where TD : class
     {
         protected readonly DbSet<T> dbSet;  
-        protected readonly DbContext dbContext;
+        protected readonly ApiDbContext dbContext;
         protected readonly IMapper mapper;
 
         public BaseController(ApiDbContext dbContext, IMapper mapper)
@@ -36,11 +36,11 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<TRE>> GetOne(int id)
+        public virtual async Task<ActionResult<TD>> GetOne(int id)
         {
             var result = await FindOrThrowNotFound(id);
 
-            var resultConverted = mapper.Map<TRE>(result);
+            var resultConverted = mapper.Map<TD>(result);
 
             return Ok(resultConverted);
         }
@@ -51,13 +51,13 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]        
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<TRE>> Post([FromBody] TC value)
+        public virtual async Task<ActionResult<TD>> Post([FromBody] TC value)
         {
             var newValue = mapper.Map<T>(value);
             var result = await dbSet.AddAsync(newValue);
             await dbContext.SaveChangesAsync();
 
-            var resultsToClient = mapper.Map<TRE>(newValue);
+            var resultsToClient = mapper.Map<TD>(newValue);
 
             return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, resultsToClient);
         }
@@ -68,14 +68,14 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<TRE>> Patch(int id, [FromBody] TU value)
+        public virtual async Task<ActionResult<TD>> Patch(int id, [FromBody] TU value)
         {
             var existingEntity = await FindOrThrowNotFound(id);
 
             mapper.Map(value, existingEntity);
             await dbContext.SaveChangesAsync();
 
-            var resultsToClient = mapper.Map<TRE>(existingEntity);
+            var resultsToClient = mapper.Map<TD>(existingEntity);
 
             return Ok(resultsToClient);
         }
@@ -102,37 +102,57 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<List<TRE>>> Get([FromQuery] IDictionary<string, string>? parameters)
+        public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
             var query = this.dbSet!.AsQueryable<T>();
-            if (!this.Request.QueryString.HasValue)
+
+            IList<T>? selectResult;
+
+            if (this.Request.QueryString.HasValue)
             {
-                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, query.Count().ToString());
-                return Ok(await query.ToListAsync());
+                var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
+                var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
+
+                var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
+
+                query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+                if (!anyValidCmds && this.Request.QueryString.HasValue)
+                {
+                    return Ok(Array.Empty<T>());
+                }
+
+                if (selectExists)
+                {
+                    selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
+                }
+                else
+                {
+                    selectResult = await query!.ToListAsync();
+                }
+            }
+            else
+            {
+                selectResult = await query.ToListAsync();
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, selectResult.Count.ToString());
             }
 
-            var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
-            var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
+            var resultConverted = mapper.Map<List<TD>>(selectResult);
+            return Ok(resultConverted);
+        }
 
-            var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
-            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
-
-            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
-            if (!anyValidCmds && this.Request.QueryString.HasValue)
+        [HttpPost]
+        [Route("import")]
+        public virtual async Task<ActionResult> Import([FromBody]List<TD> records)
+        {
+            foreach (var record in records)
             {
-                return Ok(Array.Empty<T>());
+                // Console.WriteLine($"Record data {JsonSerializer.Serialize(record)}");
             }
 
-            if (selectExists)
-            {
-                var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
-                var resultConverted = mapper.Map<TRE>(selectResult);
-                return Ok(resultConverted);
-            }
+            await Task.CompletedTask;
 
-            var result = await query!.ToListAsync();
-
-            return Ok(result);
+            return Ok();
         }
 
         protected async Task<T> FindOrThrowNotFound(int id)

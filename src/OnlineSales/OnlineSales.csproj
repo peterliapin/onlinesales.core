@@ -54,7 +54,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.1" />
-    <PackageReference Include="WebApiContrib.Core.Formatter.Csv" Version="4.0.0" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,6 +62,8 @@
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Geography\" />
+    <Folder Include="Formatters\" />
+    <Folder Include="Formatters\Csv\" />
   </ItemGroup>
   
   <ItemGroup>
