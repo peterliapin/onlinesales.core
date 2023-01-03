@@ -10,7 +10,7 @@ using OnlineSales.Tests.TestEntities;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace OnlineSales.Tests;
-public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerUpdateDto>
+public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerUpdateDto, CustomerDetailsDto>
 {
     public CustomersTests()
         : base("/api/customers")
