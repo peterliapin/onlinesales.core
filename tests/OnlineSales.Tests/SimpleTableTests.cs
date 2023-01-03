@@ -8,10 +8,11 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU, TRE> : BaseTest
     where T : BaseEntity
     where TC : new()
     where TU : new()
+    where TRE : new()
 {
     protected readonly string itemsUrl;
     protected readonly string itemsUrlNotFound;
@@ -133,7 +134,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
             await CreateItem();
         }
 
-        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+        var items = await GetTest<List<TRE>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 
         items.Should().NotBeNull();
         items!.Count.Should().Be(itemsNumber);

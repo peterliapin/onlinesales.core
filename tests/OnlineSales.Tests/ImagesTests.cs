@@ -101,7 +101,7 @@ public class ImagesTests : BaseTest
     {
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        return CheckPostResponce(url, response, expectedCode);
+        return await CheckPostResponce(url, response, expectedCode);
     }
 
     private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestImage? payload, string authToken = "Success")
