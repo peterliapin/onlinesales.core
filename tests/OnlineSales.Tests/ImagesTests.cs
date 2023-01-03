@@ -101,7 +101,7 @@ public class ImagesTests : BaseTest
     {
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        return await CheckPostResponce(url, response, expectedCode);
+        return CheckImagePostResponce(url, response, expectedCode);
     }
 
     private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestImage? payload, string authToken = "Success")
@@ -138,5 +138,17 @@ public class ImagesTests : BaseTest
         {
             return null;
         }
+    }
+
+    private string CheckImagePostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
+    {
+        var location = string.Empty;
+        if (expectedCode == HttpStatusCode.Created)
+        {
+            location = response.Headers?.Location?.LocalPath ?? string.Empty;
+            location.Should().StartWith(url);
+        }
+
+        return location;
     }
 }

@@ -171,7 +171,7 @@ public class BaseTest : IDisposable
 
         if (isCollection)
         {
-            var resultCollection = DeserializePayload<List<EntityWithRedundantProperties>>(content) !;
+            var resultCollection = DeserializePayload<List<BaseEntity>>(content) !;
             resultCollection.Should().NotBeNull();
             if (resultCollection.Count > 0)
             {
@@ -183,7 +183,7 @@ public class BaseTest : IDisposable
         }
         else
         {
-            var result = DeserializePayload<EntityWithRedundantProperties>(content) !;
+            var result = DeserializePayload<BaseEntity>(content) !;
             result.Should().NotBeNull();
             result.CreatedByIp.Should().BeNull();
             result.UpdatedByIp.Should().BeNull();
@@ -191,15 +191,4 @@ public class BaseTest : IDisposable
             result.UpdatedByUserAgent.Should().BeNull();
         }
     }
-}
-
-public class EntityWithRedundantProperties
-{
-    public string? CreatedByIp { get; set; }
-
-    public string? UpdatedByIp { get; set; }
-
-    public string? CreatedByUserAgent { get; set; }
-
-    public string? UpdatedByUserAgent { get; set; }
 }
