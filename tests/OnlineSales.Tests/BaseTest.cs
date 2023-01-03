@@ -106,6 +106,8 @@ public class BaseTest : IDisposable
 
         if (expectedCode == HttpStatusCode.OK)
         {
+            CheckForRedundantProperties(content);
+
             return DeserializePayload<T>(content);
         }
         else
@@ -162,4 +164,42 @@ public class BaseTest : IDisposable
 
         return location;
     }
+
+    private void CheckForRedundantProperties(string content)
+    {
+        bool isCollection = content.StartsWith("[");
+
+        if (isCollection)
+        {
+            var resultCollection = Newtonsoft.Json.JsonConvert.DeserializeObject<List<EntityWithRedundantProperties>>(content) !;
+            resultCollection.Should().NotBeNull();
+            if (resultCollection.Count > 0)
+            {
+                resultCollection[0].CreatedByIp.Should().BeNull();
+                resultCollection[0].UpdatedByIp.Should().BeNull();
+                resultCollection[0].CreatedByUserAgent.Should().BeNull();
+                resultCollection[0].UpdatedByUserAgent.Should().BeNull(); 
+            }
+        }
+        else
+        {
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<EntityWithRedundantProperties>(content) !;
+            result.Should().NotBeNull();
+            result.CreatedByIp.Should().BeNull();
+            result.UpdatedByIp.Should().BeNull();
+            result.CreatedByUserAgent.Should().BeNull();
+            result.UpdatedByUserAgent.Should().BeNull();
+        }
+    }
+}
+
+public class EntityWithRedundantProperties
+{
+    public object? CreatedByIp { get; set; }
+
+    public object? UpdatedByIp { get; set; }
+
+    public object? CreatedByUserAgent { get; set; }
+
+    public object? UpdatedByUserAgent { get; set; }
 }
