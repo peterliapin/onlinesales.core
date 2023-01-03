@@ -9,6 +9,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentAssertions;
 using Microsoft.OData.UriParser;
+using OnlineSales.DTOs;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
@@ -116,7 +118,7 @@ public class BaseTest : IDisposable
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        return CheckPostResponce(url, response, expectedCode);
+        return await CheckPostResponce(url, response, expectedCode);
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
@@ -143,7 +145,7 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected string CheckPostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
+    protected async Task<string> CheckPostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
     {
         var location = string.Empty;
 
@@ -151,6 +153,11 @@ public class BaseTest : IDisposable
         {
             location = response.Headers?.Location?.LocalPath ?? string.Empty;
             location.Should().StartWith(url);
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = DeserializePayload<BaseEntityWithId>(content);
+            result.Should().NotBeNull();
+            result!.Id.Should().BePositive();
         }
 
         return location;
