@@ -7,7 +7,7 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
-public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto, EmailGroupDetailsDto>
+public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto>
 {
     public EmailGroupsTests()
         : base("/api/email-groups")
