@@ -165,6 +165,11 @@ public class BaseTest : IDisposable
         return location;
     }
 
+    protected void SaveBulkRecords(dynamic bulkItems)
+    {
+        App.PopulateBulkData(bulkItems);
+    }
+
     private void CheckForRedundantProperties(string content)
     {
         bool isCollection = content.StartsWith("[");
@@ -191,11 +196,6 @@ public class BaseTest : IDisposable
             result.UpdatedByUserAgent.Should().BeNull();
         }
     }
-
-    protected void SaveBulkRecords(dynamic bulkItems)
-    {
-        App.PopulateBulkData(bulkItems);
-    }
 }
 
 public class EntityWithRedundantProperties
@@ -207,5 +207,4 @@ public class EntityWithRedundantProperties
     public object? CreatedByUserAgent { get; set; }
 
     public object? UpdatedByUserAgent { get; set; }
-
 }
