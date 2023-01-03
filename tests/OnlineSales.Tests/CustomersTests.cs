@@ -11,7 +11,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace OnlineSales.Tests;
-public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerUpdateDto, TestBulkCustomers>
+public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerUpdateDto, CustomerDetailsDto, TestBulkCustomers>
 {
     public CustomersTests()
         : base("/api/customers")

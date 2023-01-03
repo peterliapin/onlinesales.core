@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentAssertions;
 using Microsoft.OData.UriParser;
+using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
@@ -105,6 +106,8 @@ public class BaseTest : IDisposable
 
         if (expectedCode == HttpStatusCode.OK)
         {
+            CheckForRedundantProperties(content);
+
             return DeserializePayload<T>(content);
         }
         else
@@ -117,7 +120,7 @@ public class BaseTest : IDisposable
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        return CheckPostResponce(url, response, expectedCode);
+        return await CheckPostResponce(url, response, expectedCode);
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
@@ -144,7 +147,7 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected string CheckPostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
+    protected async Task<string> CheckPostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
     {
         var location = string.Empty;
 
@@ -152,13 +155,57 @@ public class BaseTest : IDisposable
         {
             location = response.Headers?.Location?.LocalPath ?? string.Empty;
             location.Should().StartWith(url);
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = DeserializePayload<BaseEntityWithId>(content);
+            result.Should().NotBeNull();
+            result!.Id.Should().BePositive();
         }
 
         return location;
+    }
+
+    private void CheckForRedundantProperties(string content)
+    {
+        bool isCollection = content.StartsWith("[");
+
+        if (isCollection)
+        {
+            var resultCollection = Newtonsoft.Json.JsonConvert.DeserializeObject<List<EntityWithRedundantProperties>>(content) !;
+            resultCollection.Should().NotBeNull();
+            if (resultCollection.Count > 0)
+            {
+                resultCollection[0].CreatedByIp.Should().BeNull();
+                resultCollection[0].UpdatedByIp.Should().BeNull();
+                resultCollection[0].CreatedByUserAgent.Should().BeNull();
+                resultCollection[0].UpdatedByUserAgent.Should().BeNull(); 
+            }
+        }
+        else
+        {
+            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<EntityWithRedundantProperties>(content) !;
+            result.Should().NotBeNull();
+            result.CreatedByIp.Should().BeNull();
+            result.UpdatedByIp.Should().BeNull();
+            result.CreatedByUserAgent.Should().BeNull();
+            result.UpdatedByUserAgent.Should().BeNull();
+        }
     }
 
     protected void SaveBulkRecords(dynamic bulkItems)
     {
         App.PopulateBulkData(bulkItems);
     }
+}
+
+public class EntityWithRedundantProperties
+{
+    public object? CreatedByIp { get; set; }
+
+    public object? UpdatedByIp { get; set; }
+
+    public object? CreatedByUserAgent { get; set; }
+
+    public object? UpdatedByUserAgent { get; set; }
+
 }

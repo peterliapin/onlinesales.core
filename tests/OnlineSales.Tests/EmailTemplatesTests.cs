@@ -9,7 +9,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, TestBulkEmailTemplates>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, EmailTemplateDetailsDto, TestBulkEmailTemplates>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")

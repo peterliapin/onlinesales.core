@@ -10,7 +10,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, TestBulkComments>
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, CommentDetailsDto, TestBulkComments>
 {
     public CommentsTests()
         : base("/api/comments")

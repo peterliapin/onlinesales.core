@@ -8,7 +8,7 @@ using OnlineSales.Entities;
 using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
-public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto, TestBulkEmailGroups>
+public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto, EmailGroupDetailsDto, TestBulkEmailGroups>
 {
     public EmailGroupsTests()
         : base("/api/email-groups")

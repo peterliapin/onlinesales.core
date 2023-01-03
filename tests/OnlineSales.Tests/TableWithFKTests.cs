@@ -9,10 +9,11 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public abstract class TableWithFKTests<T, TC, TU, TB> : SimpleTableTests<T, TC, TU, TB>
+public abstract class TableWithFKTests<T, TC, TU, TRE, TB> : SimpleTableTests<T, TC, TU, TRE, TB>
     where T : BaseEntity
     where TC : new()
     where TU : new()
+    where TRE : new()
     where TB : new()
 {
     protected TableWithFKTests(string url)

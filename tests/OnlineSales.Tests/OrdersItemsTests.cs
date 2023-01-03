@@ -9,7 +9,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, TestBulkOrderItems>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, OrderItemDetailsDto, TestBulkOrderItems>
 {
     public OrdersItemsTests()
         : base("/api/order-items")

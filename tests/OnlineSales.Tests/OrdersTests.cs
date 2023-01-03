@@ -10,7 +10,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, TestBulkOrders>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, OrderDetailsDto, TestBulkOrders>
 {
     public OrdersTests()
         : base("/api/orders")
