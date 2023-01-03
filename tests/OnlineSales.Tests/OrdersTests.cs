@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, OrderDetailsDto>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 {
     public OrdersTests()
         : base("/api/orders")

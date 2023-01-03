@@ -8,7 +8,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, OrderItemDetailsDto>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto>
 {
     public OrdersItemsTests()
         : base("/api/order-items")

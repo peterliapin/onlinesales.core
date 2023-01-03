@@ -8,7 +8,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, PostDetailsDto>
+public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
 {
     public PostsTests()
         : base("/api/posts")

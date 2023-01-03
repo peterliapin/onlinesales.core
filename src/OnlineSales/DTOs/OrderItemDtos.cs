@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
@@ -57,4 +58,31 @@ public class OrderItemDetailsDto : OrderItemCreateDto
     public decimal CurrencyTotal { get; set; } = 0;
 
     public decimal Total { get; set; } = 0;
+}
+
+public class OrderItemImportDto : OrderItemCreateDto
+{
+    [Optional]
+    public int? Id { get; set; }
+
+    [Required]
+    public string OrderRefNo { get; set; } = string.Empty;
+
+    [Optional]
+    public DateTime? CreatedAt { get; set; }
+
+    [Optional]
+    public DateTime? UpdatedAt { get; set; }
+
+    [Optional]
+    public string? CreatedByIp { get; set; }
+
+    [Optional]
+    public string? CreatedByUserAgent { get; set; }
+
+    [Optional]
+    public string? UpdatedByIp { get; set; }
+
+    [Optional]
+    public string? UpdatedByUserAgent { get; set; }
 }

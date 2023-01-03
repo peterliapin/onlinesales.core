@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using CsvHelper.Configuration.Attributes;
 
 namespace OnlineSales.DTOs;
 
@@ -70,4 +71,28 @@ public class CustomerDetailsDto : CustomerCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+}
+
+public class CustomerImportDto : CustomerCreateDto
+{
+    [Optional]
+    public int? Id { get; set; }
+
+    [Optional]
+    public DateTime? CreatedAt { get; set; }
+
+    [Optional]
+    public DateTime? UpdatedAt { get; set; }
+
+    [Optional]
+    public string? CreatedByIp { get; set; }
+
+    [Optional]
+    public string? CreatedByUserAgent { get; set; }
+
+    [Optional]
+    public string? UpdatedByIp { get; set; }
+
+    [Optional]
+    public string? UpdatedByUserAgent { get; set; }
 }

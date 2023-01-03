@@ -8,7 +8,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, EmailTemplateDetailsDto>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")

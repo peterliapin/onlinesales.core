@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, CommentDetailsDto>
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto>
 {
     public CommentsTests()
         : base("/api/comments")
