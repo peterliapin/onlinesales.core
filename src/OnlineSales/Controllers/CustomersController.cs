@@ -13,7 +13,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class CustomersController : BaseController<Customer, CustomerCreateDto, CustomerUpdateDto, CustomerDetailsDto>
 {
