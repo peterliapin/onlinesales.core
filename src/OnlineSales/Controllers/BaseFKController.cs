@@ -5,6 +5,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 
@@ -19,8 +21,8 @@ namespace OnlineSales.Controllers
     {
         protected readonly DbSet<TFK> dbFKSet;
 
-        protected BaseFKController(ApiDbContext dbContext, IMapper mapper)
-            : base(dbContext, mapper)
+        protected BaseFKController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+            : base(dbContext, mapper, apiSettingsConfig)
         {
             this.dbFKSet = dbContext.Set<TFK>();
         }

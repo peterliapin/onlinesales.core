@@ -45,6 +45,11 @@ public class ImagesConfig
     public string? CacheTime { get; set; }
 }
 
+public class ApiSettingsConfig
+{
+    public int MaxListSize { get; set; }
+}
+
 public class GeolocationApiConfig
 {
     public string Url { get; set; } = string.Empty;

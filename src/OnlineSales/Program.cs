@@ -69,6 +69,7 @@ public class Program
         ConfigureIPDetailsResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
+        ConfigureApiSettings(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -255,6 +256,18 @@ public class Program
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+    }
+
+    private static void ConfigureApiSettings(WebApplicationBuilder builder)
+    {
+        var apiSettingsConfig = builder.Configuration.GetSection("ApiSettings");
+
+        if (apiSettingsConfig == null)
+        {
+            throw new MissingConfigurationException("Api settings configuraiton is mandatory.");
+        }
+
+        builder.Services.Configure<ApiSettingsConfig>(apiSettingsConfig);
     }
 
     private static void ConfigureSwagger(WebApplicationBuilder builder)

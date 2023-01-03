@@ -5,10 +5,11 @@
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, TestBulkOrderItems>
 {
     public OrdersItemsTests()
         : base("/api/order-items")

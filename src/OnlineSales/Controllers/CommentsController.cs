@@ -6,6 +6,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -16,8 +18,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseFKController<Comment, CommentCreateDto, CommentUpdateDto, Post, CommentDetailsDto>
 {
-    public CommentsController(ApiDbContext dbContext, IMapper mapper)
-        : base(dbContext, mapper)
+    public CommentsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        : base(dbContext, mapper, apiSettingsConfig)
     {
     }
 

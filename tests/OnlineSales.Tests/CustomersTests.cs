@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Tests.TestEntities;
+using OnlineSales.Tests.TestEntities.BulkPopulate;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace OnlineSales.Tests;
-public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerUpdateDto>
+public class CustomersTests : SimpleTableTests<Customer, TestCustomer, CustomerUpdateDto, TestBulkCustomers>
 {
     public CustomersTests()
         : base("/api/customers")

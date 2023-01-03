@@ -9,10 +9,11 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
+public abstract class TableWithFKTests<T, TC, TU, TB> : SimpleTableTests<T, TC, TU, TB>
     where T : BaseEntity
     where TC : new()
     where TU : new()
+    where TB : new()
 {
     protected TableWithFKTests(string url)
         : base(url)
@@ -64,6 +65,17 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
         var result = await CreateItem(fkId, itemTransformation);
 
         return result;
+    }
+
+    protected override void GenerateBulkRecords(int dataCount)
+    {
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var generateBulkMethod = typeof(TB).GetMethod("GenerateBulk");
+        IEnumerable<T> bulkData = (IEnumerable<T>)generateBulkMethod!.Invoke(new TB(), new object[] { fkId, dataCount }) !;
+
+        SaveBulkRecords(bulkData!);
     }
 
     protected abstract Task<(TC, string)> CreateItem(int fkId, Action<TC>? itemTransformation = null);

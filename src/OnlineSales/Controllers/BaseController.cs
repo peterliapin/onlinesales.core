@@ -6,6 +6,8 @@ using System.Web;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
@@ -21,12 +23,14 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;  
         protected readonly DbContext dbContext;
         protected readonly IMapper mapper;
+        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
 
-        public BaseController(ApiDbContext dbContext, IMapper mapper)
+        public BaseController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
             this.mapper = mapper;
+            this.apiSettingsConfig = apiSettingsConfig;
         }
 
         // GET api/{entity}s/5
@@ -104,11 +108,12 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TRE>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
+            int limit = apiSettingsConfig.Value.MaxListSize;
             var query = this.dbSet!.AsQueryable<T>();
             if (!this.Request.QueryString.HasValue)
             {
                 this.Response.Headers.Add(ResponseHeaderNames.TotalCount, query.Count().ToString());
-                return Ok(await query.ToListAsync());
+                return Ok(await query.Take(limit).ToListAsync()); // change this
             }
 
             var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
@@ -116,6 +121,24 @@ namespace OnlineSales.Controllers
 
             var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
+
+            var hasLimit = queryCommands.Where(i => i.ToLower().Contains("filter[limit]="));
+
+            if (!hasLimit.Any())
+            {
+                string limitQueryString = "filter[limit]=" + limit.ToString();
+                queryCommands = queryCommands.Append(limitQueryString).ToArray();
+            }
+            else
+            {
+                var requestedLimit = Convert.ToInt32(hasLimit !.FirstOrDefault() !.Split("=").Last());
+
+                if (requestedLimit > limit)
+                {
+                    string message = "limit should be less than or equal : " + limit.ToString();
+                    throw new InvalidModelStateException(message);
+                }
+            }
 
             query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
             if (!anyValidCmds && this.Request.QueryString.HasValue)

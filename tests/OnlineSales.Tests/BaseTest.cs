@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentAssertions;
 using Microsoft.OData.UriParser;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
@@ -154,5 +155,10 @@ public class BaseTest : IDisposable
         }
 
         return location;
+    }
+
+    protected void SaveBulkRecords(dynamic bulkItems)
+    {
+        App.PopulateBulkData(bulkItems);
     }
 }
