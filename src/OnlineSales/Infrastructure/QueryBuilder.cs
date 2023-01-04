@@ -50,7 +50,7 @@ namespace OnlineSales.Infrastructure
             return validFieldCommands.Any();
         }
 
-        public static async Task<object?> ExecuteSelectExpression(IQueryable<T> query, string[] queryString)
+        public static async Task<IList<T>?> ExecuteSelectExpression(IQueryable<T> query, string[] queryString)
         {
             var commands = Parse(queryString);
             var typeProperties = typeof(T).GetProperties();
@@ -116,7 +116,7 @@ namespace OnlineSales.Infrastructure
                 var selectResult = (Task)toArrayAsyncMethod.Invoke(selectQueryable, new object?[] { selectQueryable!, null }) !;
                 await selectResult;
                 var taskResult = outputTypeTaskResultProp!.GetValue(selectResult);
-                return taskResult;
+                return taskResult as IList<T>;
             }
 
             return null;

@@ -6,10 +6,12 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.Formatters.Csv;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -17,7 +19,6 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
-using WebApiContrib.Core.Formatter.Csv;
 
 namespace OnlineSales;
 
@@ -78,9 +79,12 @@ public class Program
         {
             options.RespectBrowserAcceptHeader = true;
             options.ReturnHttpNotAcceptable = true;
+            options.OutputFormatters.RemoveType<StringOutputFormatter>();
+            options.InputFormatters.Add(new CsvInputFormatter());
+            options.OutputFormatters.Add(new CsvOutputFormatter());
+            options.FormatterMappings.SetMediaTypeMappingForFormat("csv", "text/csv");
         })
         .AddXmlSerializerFormatters()
-        .AddCsvSerializerFormatters()
         .ConfigureApiBehaviorOptions(options =>
         {
             options.SuppressModelStateInvalidFilter = true;

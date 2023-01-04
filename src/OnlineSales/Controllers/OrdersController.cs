@@ -15,21 +15,11 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer, OrderDetailsDto>
+    public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto, OrderImportDto>
     {
         public OrdersController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
             : base(dbContext, mapper, apiSettingsConfig)
         {
-        }
-
-        protected override (int, string) GetFKId(OrderCreateDto item)
-        {
-            return (item.CustomerId, "CustomerId");
-        }
-
-        protected override (int?, string) GetFKId(OrderUpdateDto item)
-        {
-            return (null, string.Empty);
         }
     }
 }

@@ -14,14 +14,14 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers
 {
-    public class BaseController<T, TC, TU, TRE> : ControllerBase
+    public class BaseController<T, TC, TU, TD> : ControllerBase
         where T : BaseEntity, new()
         where TC : class
         where TU : class
-        where TRE : class
+        where TD : class
     {
         protected readonly DbSet<T> dbSet;  
-        protected readonly DbContext dbContext;
+        protected readonly ApiDbContext dbContext;
         protected readonly IMapper mapper;
         private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
 
@@ -40,11 +40,11 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<TRE>> GetOne(int id)
+        public virtual async Task<ActionResult<TD>> GetOne(int id)
         {
             var result = await FindOrThrowNotFound(id);
 
-            var resultConverted = mapper.Map<TRE>(result);
+            var resultConverted = mapper.Map<TD>(result);
 
             return Ok(resultConverted);
         }
@@ -55,13 +55,13 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]        
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<TRE>> Post([FromBody] TC value)
+        public virtual async Task<ActionResult<TD>> Post([FromBody] TC value)
         {
             var newValue = mapper.Map<T>(value);
             var result = await dbSet.AddAsync(newValue);
             await dbContext.SaveChangesAsync();
 
-            var resultsToClient = mapper.Map<TRE>(newValue);
+            var resultsToClient = mapper.Map<TD>(newValue);
 
             return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, resultsToClient);
         }
@@ -72,14 +72,14 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<TRE>> Patch(int id, [FromBody] TU value)
+        public virtual async Task<ActionResult<TD>> Patch(int id, [FromBody] TU value)
         {
             var existingEntity = await FindOrThrowNotFound(id);
 
             mapper.Map(value, existingEntity);
             await dbContext.SaveChangesAsync();
 
-            var resultsToClient = mapper.Map<TRE>(existingEntity);
+            var resultsToClient = mapper.Map<TD>(existingEntity);
 
             return Ok(resultsToClient);
         }
@@ -106,21 +106,24 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<List<TRE>>> Get([FromQuery] IDictionary<string, string>? parameters)
+        public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
             int limit = apiSettingsConfig.Value.MaxListSize;
             var query = this.dbSet!.AsQueryable<T>();
-            if (!this.Request.QueryString.HasValue)
+
+            IList<T>? selectResult;
+
+            if (this.Request.QueryString.HasValue)
             {
                 this.Response.Headers.Add(ResponseHeaderNames.TotalCount, query.Count().ToString());
                 return Ok(await query.Take(limit).ToListAsync()); // change this
-            }
+            
 
             var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
             var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
 
-            var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
-            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
+                var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
 
             var hasLimit = queryCommands.Where(i => i.ToLower().Contains("filter[limit]="));
 
@@ -146,16 +149,23 @@ namespace OnlineSales.Controllers
                 return Ok(Array.Empty<T>());
             }
 
-            if (selectExists)
+                if (selectExists)
+                {
+                    selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
+                }
+                else
+                {
+                    selectResult = await query!.ToListAsync();
+                }
+            }
+            else
             {
-                var selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
-                var resultConverted = mapper.Map<TRE>(selectResult);
-                return Ok(resultConverted);
+                selectResult = await query.ToListAsync();
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, selectResult.Count.ToString());
             }
 
-            var result = await query!.ToListAsync();
-
-            return Ok(result);
+            var resultConverted = mapper.Map<List<TD>>(selectResult);
+            return Ok(resultConverted);
         }
 
         protected async Task<T> FindOrThrowNotFound(int id)

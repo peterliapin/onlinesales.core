@@ -9,13 +9,13 @@ namespace OnlineSales.Entities;
 
 public class BaseEntity : BaseEntityWithDates
 {
-    public string? CreatedByIp { get; set; } = string.Empty;
+    public string? CreatedByIp { get; set; }
 
-    public string? CreatedByUserAgent { get; set; } = string.Empty;
+    public string? CreatedByUserAgent { get; set; }
 
-    public string? UpdatedByIp { get; set; } = string.Empty;
+    public string? UpdatedByIp { get; set; }
 
-    public string? UpdatedByUserAgent { get; set; } = string.Empty;
+    public string? UpdatedByUserAgent { get; set; }
 }
 
 public class BaseEntityWithDates : BaseEntityWithId

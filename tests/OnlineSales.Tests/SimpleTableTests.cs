@@ -12,7 +12,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU, TRE, TB> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU, TB> : BaseTest
     where T : BaseEntity
     where TC : new()
     where TU : new()
@@ -175,7 +175,7 @@ public abstract class SimpleTableTests<T, TC, TU, TRE, TB> : BaseTest
             await CreateItem();
         }
 
-        var items = await GetTest<List<TRE>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 
         items.Should().NotBeNull();
         items!.Count.Should().Be(itemsNumber);

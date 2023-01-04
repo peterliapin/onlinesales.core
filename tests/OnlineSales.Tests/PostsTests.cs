@@ -9,7 +9,7 @@ using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, PostDetailsDto, TestBulkPosts>
+public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, TestBulkPosts>
 {
     public PostsTests()
         : base("/api/posts")
