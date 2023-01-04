@@ -165,6 +165,11 @@ public class BaseTest : IDisposable
         return location;
     }
 
+    protected void SaveBulkRecords(dynamic bulkItems)
+    {
+        App.PopulateBulkData(bulkItems);
+    }
+
     private void CheckForRedundantProperties(string content)
     {
         bool isCollection = content.StartsWith("[");

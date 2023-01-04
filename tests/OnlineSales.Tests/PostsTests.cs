@@ -5,10 +5,11 @@
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
+public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, TestBulkPosts>
 {
     public PostsTests()
         : base("/api/posts")

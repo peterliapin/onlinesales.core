@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OnlineSales.Data;
+using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 using OnlineSales.Tests.TestServices;
 
@@ -30,6 +31,16 @@ public class TestApplication : WebApplicationFactory<Program>
             var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
             dataContaxt.Database.EnsureDeleted();
             dataContaxt.Database.Migrate();
+        }
+    }
+
+    public void PopulateBulkData(dynamic bulkItems)
+    {
+        using (var scope = Services.CreateScope())
+        {
+            var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+            dataContaxt.AddRange(bulkItems);
+            dataContaxt.SaveChanges();
         }
     }
 

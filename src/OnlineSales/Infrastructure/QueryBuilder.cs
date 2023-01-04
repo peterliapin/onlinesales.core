@@ -21,8 +21,13 @@ namespace OnlineSales.Infrastructure
             validCmds = cmds.Any();
             query = AppendWhereExpression(query, cmds);
             query = AppendSkipExpression(query, cmds);
-            query = AppendLimitExpression(query, cmds);
             query = AppendOrderExpression(query, cmds);
+            query = AppendLimitExpression(query, cmds);
+
+            if (queryString.Count() != cmds.Count())
+            {
+                validCmds = false;
+            }
 
             selectStatementAvailable = IsSelectCommandExists(cmds);
             return query;

@@ -2,16 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Text.Json;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Nest;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
+using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU, TB> : BaseTest
     where T : BaseEntity
     where TC : new()
     where TU : new()
+    where TB : new()
 {
     protected readonly string itemsUrl;
     protected readonly string itemsUrlNotFound;
@@ -102,6 +107,35 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         payload.Should().HaveCount(payloadItemsCount);
     }
 
+    [Theory]
+    [InlineData("", 150, 70)]
+    [InlineData("filter[skip]=0", 150, 70)]
+    [InlineData("filter[limit]=10&filter[skip]=0", 150, 70)]
+    public async Task LimitLists(string filter, int dataCount, int limitPerRequest)
+    {
+        GenerateBulkRecords(dataCount);
+
+        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        response.Should().NotBeNull();
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        var deserialized = JsonSerializer.Deserialize<List<T>>(json!);
+
+        int returendCount = deserialized!.Count!;
+
+        Assert.True(returendCount <= limitPerRequest);
+    }
+
+    [Theory]
+    [InlineData("filter[limit]=550", 150)]
+    public async Task InvalidLimit(string filter, int dataCount)
+    {
+        GenerateBulkRecords(dataCount);
+
+        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.InternalServerError);
+    }
+
     protected async Task CreateItems(int numberOfItems, Action<TC>? itemTransformation = null)
     {
         for (int i = 0; i < numberOfItems; ++i)
@@ -122,6 +156,14 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 
         return (testCreateItem, newItemUrl);
+    }
+
+    protected virtual void GenerateBulkRecords(int dataCount)
+    {
+        var generateBulkMethod = typeof(TB).GetMethod("GenerateBulk");
+        IEnumerable<T> bulkData = (IEnumerable<T>)generateBulkMethod!.Invoke(new TB(), new object[] { dataCount }) !;
+
+        SaveBulkRecords(bulkData!);
     }
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")

@@ -6,10 +6,11 @@ using System.Net;
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto>
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, TestBulkComments>
 {
     public CommentsTests()
         : base("/api/comments")
