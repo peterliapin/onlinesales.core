@@ -20,7 +20,7 @@ namespace OnlineSales.Controllers
         where TU : class
         where TD : class
     {
-        protected readonly DbSet<T> dbSet;  
+        protected readonly DbSet<T> dbSet;
         protected readonly ApiDbContext dbContext;
         protected readonly IMapper mapper;
         private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
@@ -53,7 +53,7 @@ namespace OnlineSales.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]        
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<TD>> Post([FromBody] TC value)
         {
@@ -115,39 +115,36 @@ namespace OnlineSales.Controllers
 
             if (this.Request.QueryString.HasValue)
             {
-                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, query.Count().ToString());
-                return Ok(await query.Take(limit).ToListAsync()); // change this
-            
-
-            var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
-            var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
+                var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
+                var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
 
                 var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
                 this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
 
-            var hasLimit = queryCommands.Where(i => i.ToLower().Contains("filter[limit]="));
+                var hasLimit = queryCommands.Where(i => i.ToLower().Contains("filter[limit]="));
 
-            if (!hasLimit.Any())
-            {
-                string limitQueryString = "filter[limit]=" + limit.ToString();
-                queryCommands = queryCommands.Append(limitQueryString).ToArray();
-            }
-            else
-            {
-                var requestedLimit = Convert.ToInt32(hasLimit !.FirstOrDefault() !.Split("=").Last());
-
-                if (requestedLimit > limit)
+                if (!hasLimit.Any())
                 {
-                    string message = "limit should be less than or equal : " + limit.ToString();
-                    throw new InvalidModelStateException(message);
+                    string limitQueryString = "filter[limit]=" + limit.ToString();
+                    queryCommands = queryCommands.Append(limitQueryString).ToArray();
                 }
-            }
+                else
+                {
+                    var requestedLimit = Convert.ToInt32(hasLimit!.FirstOrDefault() !.Split("=").Last());
 
-            query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
-            if (!anyValidCmds && this.Request.QueryString.HasValue)
-            {
-                return Ok(Array.Empty<T>());
-            }
+                    if (requestedLimit > limit)
+                    {
+                        string message = "limit should be less than or equal : " + limit.ToString();
+                        throw new InvalidModelStateException(message);
+                    }
+                }
+
+                query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+
+                if (!anyValidCmds && this.Request.QueryString.HasValue)
+                {
+                    return Ok(Array.Empty<T>());
+                }
 
                 if (selectExists)
                 {
@@ -160,7 +157,7 @@ namespace OnlineSales.Controllers
             }
             else
             {
-                selectResult = await query.ToListAsync();
+                selectResult = await query.Take(limit).ToListAsync();
                 this.Response.Headers.Add(ResponseHeaderNames.TotalCount, selectResult.Count.ToString());
             }
 

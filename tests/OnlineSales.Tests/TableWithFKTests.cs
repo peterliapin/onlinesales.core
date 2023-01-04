@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU, TB>
+public abstract class TableWithFKTests<T, TC, TU, TB> : SimpleTableTests<T, TC, TU, TB>
     where T : BaseEntity
     where TC : new()
     where TU : new()
