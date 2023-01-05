@@ -6,10 +6,11 @@ using FluentAssertions;
 using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, TestBulkOrders>
 {
     public OrdersTests()
         : base("/api/orders")

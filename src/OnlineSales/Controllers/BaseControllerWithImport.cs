@@ -5,8 +5,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 
@@ -20,8 +20,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     where TD : class
     where TI : class
 {
-    public BaseControllerWithImport(ApiDbContext dbContext, IMapper mapper)
-        : base(dbContext, mapper)
+    public BaseControllerWithImport(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        : base(dbContext, mapper, apiSettingsConfig)
     {
     }
 

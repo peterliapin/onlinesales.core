@@ -165,13 +165,18 @@ public class BaseTest : IDisposable
         return location;
     }
 
+    protected void SaveBulkRecords(dynamic bulkItems)
+    {
+        App.PopulateBulkData(bulkItems);
+    }
+
     private void CheckForRedundantProperties(string content)
     {
         bool isCollection = content.StartsWith("[");
 
         if (isCollection)
         {
-            var resultCollection = Newtonsoft.Json.JsonConvert.DeserializeObject<List<EntityWithRedundantProperties>>(content) !;
+            var resultCollection = DeserializePayload<List<BaseEntity>>(content) !;
             resultCollection.Should().NotBeNull();
             if (resultCollection.Count > 0)
             {
@@ -183,7 +188,7 @@ public class BaseTest : IDisposable
         }
         else
         {
-            var result = Newtonsoft.Json.JsonConvert.DeserializeObject<EntityWithRedundantProperties>(content) !;
+            var result = DeserializePayload<BaseEntity>(content) !;
             result.Should().NotBeNull();
             result.CreatedByIp.Should().BeNull();
             result.UpdatedByIp.Should().BeNull();
@@ -191,15 +196,4 @@ public class BaseTest : IDisposable
             result.UpdatedByUserAgent.Should().BeNull();
         }
     }
-}
-
-public class EntityWithRedundantProperties
-{
-    public object? CreatedByIp { get; set; }
-
-    public object? UpdatedByIp { get; set; }
-
-    public object? CreatedByUserAgent { get; set; }
-
-    public object? UpdatedByUserAgent { get; set; }
 }

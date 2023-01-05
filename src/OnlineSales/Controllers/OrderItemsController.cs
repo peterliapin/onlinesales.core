@@ -6,6 +6,8 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -19,8 +21,8 @@ namespace OnlineSales.Controllers
     {
         private readonly IOrderItemService orderItemService;
 
-        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService)
-            : base(dbContext, mapper)
+        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, IOptions<ApiSettingsConfig> apiSettingsConfig)
+            : base(dbContext, mapper, apiSettingsConfig)
         {
             this.orderItemService = orderItemService;
         }

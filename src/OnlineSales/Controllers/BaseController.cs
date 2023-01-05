@@ -6,6 +6,8 @@ using System.Web;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
@@ -18,15 +20,17 @@ namespace OnlineSales.Controllers
         where TU : class
         where TD : class
     {
-        protected readonly DbSet<T> dbSet;  
+        protected readonly DbSet<T> dbSet;
         protected readonly ApiDbContext dbContext;
         protected readonly IMapper mapper;
+        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
 
-        public BaseController(ApiDbContext dbContext, IMapper mapper)
+        public BaseController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
             this.mapper = mapper;
+            this.apiSettingsConfig = apiSettingsConfig;
         }
 
         // GET api/{entity}s/5
@@ -49,7 +53,7 @@ namespace OnlineSales.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]        
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<TD>> Post([FromBody] TC value)
         {
@@ -104,6 +108,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
+            int limit = apiSettingsConfig.Value.MaxListSize;
             var query = this.dbSet!.AsQueryable<T>();
 
             IList<T>? selectResult;
@@ -116,7 +121,26 @@ namespace OnlineSales.Controllers
                 var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
                 this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
 
+                var hasLimit = queryCommands.Where(i => i.ToLower().Contains("filter[limit]="));
+
+                if (!hasLimit.Any())
+                {
+                    string limitQueryString = "filter[limit]=" + limit.ToString();
+                    queryCommands = queryCommands.Append(limitQueryString).ToArray();
+                }
+                else
+                {
+                    var requestedLimit = Convert.ToInt32(hasLimit!.FirstOrDefault() !.Split("=").Last());
+
+                    if (requestedLimit > limit)
+                    {
+                        string message = "limit should be less than or equal : " + limit.ToString();
+                        throw new InvalidModelStateException(message);
+                    }
+                }
+
                 query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+
                 if (!anyValidCmds && this.Request.QueryString.HasValue)
                 {
                     return Ok(Array.Empty<T>());
@@ -133,7 +157,7 @@ namespace OnlineSales.Controllers
             }
             else
             {
-                selectResult = await query.ToListAsync();
+                selectResult = await query.Take(limit).ToListAsync();
                 this.Response.Headers.Add(ResponseHeaderNames.TotalCount, selectResult.Count.ToString());
             }
 
