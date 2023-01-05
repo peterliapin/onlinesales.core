@@ -94,16 +94,18 @@ public class ApiDbContext : DbContext
         {
             if (entityEntry.State == EntityState.Modified)
             {
-                ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+                var entity = (BaseEntity)entityEntry.Entity;
+                entity.UpdatedAt = entity.UpdatedAt is null ? DateTime.UtcNow : entity.UpdatedAt;
+                entity.UpdatedByIp = string.IsNullOrEmpty(entity.UpdatedByIp) ? httpContextHelper!.IpAddress : entity.UpdatedByIp;
+                entity.UpdatedByUserAgent = string.IsNullOrEmpty(entity.UpdatedByUserAgent) ? httpContextHelper!.UserAgent : entity.UpdatedByUserAgent;
             }
 
             if (entityEntry.State == EntityState.Added)
             {
-                ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+                var entity = (BaseEntity)entityEntry.Entity;
+                entity.CreatedAt = entity.CreatedAt = entity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : entity.CreatedAt;
+                entity.CreatedByIp = string.IsNullOrEmpty(entity.CreatedByIp) ? httpContextHelper!.IpAddress : entity.CreatedByIp;
+                entity.CreatedByUserAgent = string.IsNullOrEmpty(entity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : entity.CreatedByUserAgent;
             }
 
             auditEntries.Add(new AuditEntry()

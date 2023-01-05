@@ -91,5 +91,30 @@ namespace OnlineSales.Controllers
 
             return NoContent();
         }
+
+        protected override List<OrderItem> GetMappedRecords(List<OrderItemImportDto> records)
+        {
+            foreach (var item in records)
+            {
+                if (item.OrderId > 0)
+                {
+                    continue;
+                }
+
+                if (item.OrderId == 0 && !string.IsNullOrEmpty(item.OrderRefNo))
+                {
+                    var referencedOrder = dbContext!.Orders!.Where(o => o.RefNo.ToLower() == item.OrderRefNo.ToLower()).FirstOrDefault();
+
+                    if (referencedOrder is not null)
+                    {
+                        item.OrderId = referencedOrder!.Id; 
+                    }
+                }
+
+                throw new EntityNotFoundException("No referenced order found for order item.");
+            }
+
+            return mapper.Map<List<OrderItem>>(records);
+        }
     }
 }
