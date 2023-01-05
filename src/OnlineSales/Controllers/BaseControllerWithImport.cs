@@ -3,7 +3,6 @@
 // </copyright>
 
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
@@ -12,7 +11,6 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
-[AllowAnonymous]
 public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC, TU, TD>
     where T : BaseEntity, new()
     where TC : class
