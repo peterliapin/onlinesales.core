@@ -109,7 +109,8 @@ namespace OnlineSales.Controllers
 
                     if (referencedOrder is not null)
                     {
-                        item.OrderId = referencedOrder!.Id; 
+                        item.OrderId = referencedOrder!.Id;
+                        continue;
                     }
                 }
 
