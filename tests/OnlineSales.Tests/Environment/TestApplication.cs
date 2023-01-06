@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OnlineSales.Data;
-using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 using OnlineSales.Tests.TestServices;
 
@@ -41,6 +41,14 @@ public class TestApplication : WebApplicationFactory<Program>
             var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
             dataContaxt.AddRange(bulkItems);
             dataContaxt.SaveChanges();
+        }
+    }
+
+    public IMapper GetMapper()
+    {
+        using (var serviceScope = Services.CreateScope())
+        {
+            return serviceScope.ServiceProvider.GetService<IMapper>() !;
         }
     }
 

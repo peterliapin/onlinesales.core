@@ -5,11 +5,10 @@
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, TestBulkOrderItems>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto>
 {
     public OrdersItemsTests()
         : base("/api/order-items")
@@ -31,9 +30,8 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             var quantity = i + 1;
             sumQuantity += quantity;
 
-            var testOrderItem = new TestOrderItem
+            var testOrderItem = new TestOrderItem(string.Empty, orderDetails.Item1)
             {
-                OrderId = orderDetails.Item1,
                 Quantity = quantity,
             };
 
@@ -84,9 +82,8 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         for (var i = 0; i < numberOfOrderItems; ++i)
         {
-            var orderItem = new TestOrderItem
+            var orderItem = new TestOrderItem(string.Empty, orderDetails.Item1)
             {
-                OrderId = orderDetails.Item1,
                 Quantity = i + 1,
             };
 
@@ -150,8 +147,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     {
         var orderDetails = await CreateFKItem();
 
-        var orderItem = new TestOrderItem();
-        orderItem.OrderId = orderDetails.Item1;
+        var orderItem = new TestOrderItem(string.Empty, orderDetails.Item1);
 
         var orderItemUrl = await PostTest(itemsUrl, orderItem);
 
@@ -240,10 +236,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
     protected override async Task<(TestOrderItem, string)> CreateItem(int fkId, Action<TestOrderItem>? itemTransformation = null)
     {
-        var testOrderItem = new TestOrderItem
-        {
-            OrderId = fkId,
-        };
+        var testOrderItem = new TestOrderItem(string.Empty, fkId);
 
         if (itemTransformation != null)
         {
@@ -272,9 +265,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         customer.Should().NotBeNull();
 
-        var orderCreate = new TestOrder();
-
-        orderCreate.CustomerId = customer!.Id;
+        var orderCreate = new TestOrder(string.Empty, customer!.Id);
 
         var orderUrl = await PostTest("/api/orders", orderCreate);
 

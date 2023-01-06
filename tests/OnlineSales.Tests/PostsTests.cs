@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, TestBulkPosts>
+public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
 {
     public PostsTests()
         : base("/api/posts")

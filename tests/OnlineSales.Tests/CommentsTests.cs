@@ -2,15 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net;
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, TestBulkComments>
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto>
 {
     public CommentsTests()
         : base("/api/comments")
@@ -39,10 +37,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
     protected override async Task<(TestComment, string)> CreateItem(int fkId, Action<TestComment>? itemTransformation = null)
     {
-        var testComment = new TestComment()
-        {
-            PostId = fkId,
-        };
+        var testComment = new TestComment(string.Empty, fkId);
 
         if (itemTransformation != null)
         {

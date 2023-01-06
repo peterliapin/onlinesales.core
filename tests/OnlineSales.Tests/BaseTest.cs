@@ -7,6 +7,7 @@ using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AutoMapper;
 using FluentAssertions;
 using Microsoft.OData.UriParser;
 using OnlineSales.DTOs;
@@ -24,7 +25,8 @@ public class BaseTest : IDisposable
 
     protected static readonly TestApplication App = new TestApplication();
 
-    protected readonly HttpClient Client;
+    protected readonly HttpClient client;
+    protected readonly IMapper mapper;
 
     static BaseTest()
     {
@@ -33,13 +35,14 @@ public class BaseTest : IDisposable
 
     public BaseTest()
     {
-        Client = App.CreateClient();
+        client = App.CreateClient();
+        mapper = App.GetMapper();
         App.CleanDatabase();
     }
 
     public virtual void Dispose()
     {
-        Client.Dispose();
+        client.Dispose();
     }
 
     protected static string SerializePayload(object payload)
@@ -85,7 +88,7 @@ public class BaseTest : IDisposable
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
-        return Client.SendAsync(request);
+        return client.SendAsync(request);
     }
 
     protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
@@ -163,11 +166,6 @@ public class BaseTest : IDisposable
         }
 
         return location;
-    }
-
-    protected void SaveBulkRecords(dynamic bulkItems)
-    {
-        App.PopulateBulkData(bulkItems);
     }
 
     private void CheckForRedundantProperties(string content)

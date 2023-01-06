@@ -2,18 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
-using Nest;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public abstract class TableWithFKTests<T, TC, TU, TB> : SimpleTableTests<T, TC, TU, TB>
+public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
     where T : BaseEntity
-    where TC : new()
+    where TC : class
     where TU : new()
-    where TB : new()
 {
     protected TableWithFKTests(string url)
         : base(url)
@@ -23,7 +19,7 @@ public abstract class TableWithFKTests<T, TC, TU, TB> : SimpleTableTests<T, TC, 
     [Fact]
     public virtual async Task CreateItemWithNonExistedFKItemTest()
     {
-        var testItem = new TC();
+        var testItem = TestData.Generate<TC>(string.Empty, 0);
         await PostTest(itemsUrl, testItem, HttpStatusCode.UnprocessableEntity);
     }
 
@@ -72,10 +68,10 @@ public abstract class TableWithFKTests<T, TC, TU, TB> : SimpleTableTests<T, TC, 
         var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
-        var generateBulkMethod = typeof(TB).GetMethod("GenerateBulk");
-        IEnumerable<T> bulkData = (IEnumerable<T>)generateBulkMethod!.Invoke(new TB(), new object[] { fkId, dataCount }) !;
+        var bulkList = TestData.Generate<TC>(dataCount, fkId);
+        var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
 
-        SaveBulkRecords(bulkData!);
+        App.PopulateBulkData(bulkEntitiesList);
     }
 
     protected abstract Task<(TC, string)> CreateItem(int fkId, Action<TC>? itemTransformation = null);

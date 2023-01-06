@@ -3,14 +3,12 @@
 // </copyright>
 
 using FluentAssertions;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, TestBulkOrders>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 {
     public OrdersTests()
         : base("/api/orders")
@@ -231,10 +229,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
 
     protected override async Task<(TestOrder, string)> CreateItem(int fkId, Action<TestOrder>? itemTransformation = null)
     {
-        var testOrder = new TestOrder
-        {
-            CustomerId = fkId,
-        };
+        var testOrder = new TestOrder(string.Empty, fkId);
 
         if (itemTransformation != null)
         {

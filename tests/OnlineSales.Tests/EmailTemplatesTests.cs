@@ -5,11 +5,10 @@
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, TestBulkEmailTemplates>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")
@@ -18,10 +17,7 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
 
     protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId, Action<TestEmailTemplate>? itemTransformation = null)
     {
-        var testEmailTemplate = new TestEmailTemplate
-        {
-            GroupId = fkId,
-        };
+        var testEmailTemplate = new TestEmailTemplate(string.Empty, fkId);
 
         if (itemTransformation != null)
         {
