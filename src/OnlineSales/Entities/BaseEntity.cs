@@ -7,23 +7,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineSales.Entities;
 
-public class BaseEntity : BaseEntityWithDates
+public class BaseEntity : BaseCreateByEntity
 {
-    public string? CreatedByIp { get; set; }
-
-    public string? CreatedByUserAgent { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public string? UpdatedByIp { get; set; }
 
     public string? UpdatedByUserAgent { get; set; }
 }
 
-public class BaseEntityWithDates : BaseEntityWithId
+public class BaseCreateByEntity : BaseEntityWithId
 {
     [Required]
     public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public string? CreatedByIp { get; set; }
+
+    public string? CreatedByUserAgent { get; set; }
 }
 
 public class BaseEntityWithId

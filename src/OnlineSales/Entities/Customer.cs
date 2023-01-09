@@ -4,10 +4,12 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Entities;
 
 [Table("customer")]
+[Index(nameof(Email), IsUnique = true)]
 public class Customer : BaseEntity
 {
     public string? LastName { get; set; }
