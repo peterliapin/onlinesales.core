@@ -30,11 +30,11 @@ namespace OnlineSales.Tasks
                 taskConfig = config;
             }
 
-            var configPrefix = configuration.GetSection("Elasticsearch:IndexPrefix").Get<string>();
+            var elasticPrefix = configuration.GetSection("Elasticsearch:IndexPrefix").Get<string>();
 
-            if (!string.IsNullOrEmpty(configPrefix))
+            if (!string.IsNullOrEmpty(elasticPrefix))
             {
-                prefix = configPrefix + "-";
+                prefix = elasticPrefix + "-";
             }
 
             this.elasticClient = elasticClient;
@@ -47,6 +47,8 @@ namespace OnlineSales.Tasks
         public override int RetryCount => taskConfig!.RetryCount;
 
         public override int RetryInterval => taskConfig!.RetryInterval;
+
+        public override string[] Entities => new[] { "Customer", "Post" };
 
         internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {

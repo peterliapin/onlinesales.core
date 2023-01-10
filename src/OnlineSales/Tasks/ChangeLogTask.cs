@@ -24,6 +24,8 @@ public abstract class ChangeLogTask : ITask
 
     public virtual int ChangeLogBatchSize { get; set; } = 50;
 
+    public virtual string[] Entities { get; set; } = new[] { "Customer", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
+
     public abstract string Name { get; }
 
     public abstract string CronSchedule { get; }
@@ -31,23 +33,19 @@ public abstract class ChangeLogTask : ITask
     public abstract int RetryCount { get; }
 
     public abstract int RetryInterval { get; }
-
+   
     public Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        // entity wise
-
-        var entities = configuration.GetSection("ChangeLogTasksEntities:" + Name).Get<string[]>();
-
-        foreach (var item in entities!)
+        foreach (var entity in Entities!)
         {
-            var taskAndEntity = Name + "_" + item;
+            var taskAndEntity = Name + "_" + entity;
 
             if (IsPreviousTaskInProgress(taskAndEntity))
             {
                 return Task.FromResult(true);
             }
 
-            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity);
+            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, entity);
 
             if (changeLogBatch is not null && changeLogBatch!.Any())
             {
@@ -107,7 +105,7 @@ public abstract class ChangeLogTask : ITask
         return changeLogTaskLogEntry;
     }
 
-    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName)
+    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName, string entity)
     {
         var minLogId = 1;
 
@@ -131,8 +129,6 @@ public abstract class ChangeLogTask : ITask
         {
             minLogId = lastProcessedTask.ChangeLogIdMax + 1;
         }
-
-        var entity = taskName.Split("_").Last();
 
         var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize && c.ObjectType == entity).OrderBy(b => b.Id).ToList();
 
