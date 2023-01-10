@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -96,6 +97,13 @@ namespace OnlineSales.Controllers
 
         protected override List<OrderItem> GetMappedRecords(List<OrderItemImportDto> records)
         {
+            var orders = dbContext!.Orders!.Select(o => new { o.Id, o.RefNo }).ToList();
+
+            var refOrders = from order in orders
+                           join record in records
+                          on order.RefNo equals record.OrderRefNo
+                          select order;
+
             foreach (var item in records)
             {
                 if (item.OrderId > 0)
@@ -103,13 +111,13 @@ namespace OnlineSales.Controllers
                     continue;
                 }
 
-                if (item.OrderId == 0 && !string.IsNullOrEmpty(item.OrderRefNo))
+                if (!string.IsNullOrEmpty(item.OrderRefNo))
                 {
-                    var referencedOrder = dbContext!.Orders!.Where(o => o.RefNo.ToLower() == item.OrderRefNo.ToLower()).FirstOrDefault();
+                    var refOrder = refOrders!.FirstOrDefault(r => r.RefNo == item.OrderRefNo);
 
-                    if (referencedOrder is not null)
+                    if (refOrder is not null)
                     {
-                        item.OrderId = referencedOrder!.Id;
+                        item.OrderId = refOrder.Id;
                         continue;
                     }
                 }

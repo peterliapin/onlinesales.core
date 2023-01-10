@@ -4,6 +4,7 @@
 
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -35,8 +36,6 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult> Import([FromBody] List<TI> records)
     {
-        ValidateUploadFileSize();
-
         var importingRecords = GetMappedRecords(records);
 
         using (var transaction = dbContext.Database.BeginTransaction())
@@ -72,9 +71,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         {
             var batch = importingRecords.Skip(position).Take(ImportBatchSize).ToList();
 
+            var existingItems = dbSet.Where(t => batch.Select(b => b.Id).Contains(t.Id)).AsNoTracking().ToList();
+
             foreach (var item in batch)
             {
-                if (dbSet.Any(t => t.Id == item.Id))
+                if (existingItems.Any(t => t.Id == item.Id))
                 {
                     dbSet.Update(item);
                 }
@@ -82,31 +83,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 {
                     await dbSet.AddAsync(item);
                 }
-
-                position++;
             }
 
             await dbContext.SaveChangesAsync();
-        }
-    }
 
-    private void ValidateUploadFileSize()
-    {
-        long? contentLength = Request.Headers.ContentLength;
-
-        if (contentLength is not null && contentLength > 0)
-        {
-            long? fileSizeInMB = contentLength / (1024 * 1024);
-            if (fileSizeInMB > FileSizeInMB)
-            {
-                ModelState.AddModelError("FileSize", "Maximum upload file size exceeded.");
-                throw new InvalidModelStateException(ModelState);
-            }
-        }
-        else
-        {
-            ModelState.AddModelError("FileSize", "File size information not available.");
-            throw new InvalidModelStateException(ModelState);
+            position += ImportBatchSize;
         }
     }
 }

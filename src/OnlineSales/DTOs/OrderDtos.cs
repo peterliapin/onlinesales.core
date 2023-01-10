@@ -55,14 +55,26 @@ public class OrderDetailsDto : OrderCreateDto
 
 public class OrderImportDto : OrderCreateDto
 {
+    private DateTime? createdAt;
+
+    private DateTime? updatedAt;
+
     [Optional]
     public int? Id { get; set; }
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt
+    {
+        get { return createdAt; }
+        set { createdAt = value is not null ? DateTime.SpecifyKind((DateTime)value, DateTimeKind.Utc) : value; }
+    }
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt
+    {
+        get { return updatedAt; }
+        set { updatedAt = value is not null ? DateTime.SpecifyKind((DateTime)value, DateTimeKind.Utc) : value; }
+    }
 
     [Optional]
     public string? CreatedByIp { get; set; }
