@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -11,15 +12,19 @@ namespace OnlineSales.Tasks;
 public abstract class ChangeLogTask : ITask
 {
     protected readonly ApiDbContext dbContext;
+    private readonly IConfiguration configuration;
 
-    protected ChangeLogTask(ApiDbContext dbContext)
+    protected ChangeLogTask(ApiDbContext dbContext, IConfiguration configuration)
     {
         this.dbContext = dbContext;
+        this.configuration = configuration;
     }
 
     public virtual int LogTaskRetryCount { get; set; } = 0;
 
     public virtual int ChangeLogBatchSize { get; set; } = 50;
+
+    public virtual string[] Entities { get; set; } = new[] { "Customer", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
 
     public abstract string Name { get; }
 
@@ -28,32 +33,37 @@ public abstract class ChangeLogTask : ITask
     public abstract int RetryCount { get; }
 
     public abstract int RetryInterval { get; }
-
+   
     public Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        if (IsPreviousTaskInProgress(Name))
+        foreach (var entity in Entities!)
         {
-            return Task.FromResult(true);
-        }
+            var taskAndEntity = Name + "_" + entity;
 
-        var changeLogBatch = GetNextOrFailedChangeLogBatch(Name);
-
-        if (changeLogBatch is not null)
-        {
-            var taskLog = AddChangeLogTaskLogRecord(Name, changeLogBatch.First().Id, changeLogBatch.Last().Id);
-
-            try
+            if (IsPreviousTaskInProgress(taskAndEntity))
             {
-                ExecuteLogTask(changeLogBatch);
-
-                UpdateChangeLogTaskLogRecord(taskLog, changeLogBatch.Count, TaskExecutionState.Completed);
+                return Task.FromResult(true);
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error occurred when executing task {Name}");
 
-                UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
-                throw;
+            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, entity);
+
+            if (changeLogBatch is not null && changeLogBatch!.Any())
+            {
+                var taskLog = AddChangeLogTaskLogRecord(taskAndEntity, changeLogBatch!.First().Id, changeLogBatch!.Last().Id);
+
+                try
+                {
+                    ExecuteLogTask(changeLogBatch!);
+
+                    UpdateChangeLogTaskLogRecord(taskLog, changeLogBatch!.Count, TaskExecutionState.Completed);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"Error occurred when executing task {Name}");
+
+                    UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
+                    throw;
+                }
             }
         }
 
@@ -95,7 +105,7 @@ public abstract class ChangeLogTask : ITask
         return changeLogTaskLogEntry;
     }
 
-    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName)
+    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName, string entity)
     {
         var minLogId = 1;
 
@@ -120,7 +130,7 @@ public abstract class ChangeLogTask : ITask
             minLogId = lastProcessedTask.ChangeLogIdMax + 1;
         }
 
-        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize).OrderBy(b => b.Id).ToList();
+        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize && c.ObjectType == entity).OrderBy(b => b.Id).ToList();
 
         return changeLogList;
     }
