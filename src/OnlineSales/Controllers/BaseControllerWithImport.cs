@@ -24,9 +24,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     {
     }
 
-    public int ImportBatchSize { get; set; } = 5;
-
-    public long FileSizeInMB { get; set; } = 5;
+    public int ImportBatchSize { get; set; } = 50;
 
     [HttpPost]
     [Route("import")]
