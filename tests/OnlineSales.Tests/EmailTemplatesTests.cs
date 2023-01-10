@@ -5,32 +5,23 @@
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, TestBulkEmailTemplates>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")
     {
     }
 
-    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId, Action<TestEmailTemplate>? itemTransformation = null)
+    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId)
     {
-        var testEmailTemplate = new TestEmailTemplate
-        {
-            GroupId = fkId,
-        };
+        var emailTemplate = new TestEmailTemplate(string.Empty, fkId);
 
-        if (itemTransformation != null)
-        {
-            itemTransformation(testEmailTemplate);
-        }
+        var emailTemplateUrl = await PostTest(itemsUrl, emailTemplate);
 
-        var newEmailTemplateUrl = await PostTest(itemsUrl, testEmailTemplate);
-
-        return (testEmailTemplate, newEmailTemplateUrl);
+        return (emailTemplate, emailTemplateUrl);
     }
 
     protected override async Task<(int, string)> CreateFKItem()

@@ -3,14 +3,12 @@
 // </copyright>
 
 using FluentAssertions;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, TestBulkOrders>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 {
     public OrdersTests()
         : base("/api/orders")
@@ -21,7 +19,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
     public async Task GetWithLimitTest()
     {
         int limit = 5;
-        await CreateItems(limit);
+        GenerateBulkRecords(limit);
 
         var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[limit]={0}", limit));
 
@@ -33,8 +31,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
     public async Task GetWithOrderByIdTest()
     {
         int numberOfItems = 10;
-
-        await CreateItems(numberOfItems);
+        GenerateBulkRecords(numberOfItems);
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20ASC");
 
@@ -60,12 +57,16 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
     [Fact]
     public async Task GetWithOrderByTwoPropertiesTest()
     {
+        var index = 0;
         int numberOfItems = 10;
 
-        for (int i = 0; i < numberOfItems; ++i)
-        {
-            await CreateItem((order) => { order.AffiliateName = (i / 2).ToString(); });
-        }
+        var populateAttributes = (TestOrder order) =>
+        {            
+            order.AffiliateName = (index / 2).ToString();
+            index++;
+        };
+
+        GenerateBulkRecords(numberOfItems, populateAttributes);
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC");
 
@@ -86,8 +87,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
     public async Task GetWithSkipTest()
     {
         int numberOfItems = 30;
-
-        await CreateItems(numberOfItems);
+        GenerateBulkRecords(numberOfItems);
 
         async Task GetAndCheck(int skipItemsNumber)
         {
@@ -110,12 +110,16 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
     [Fact]
     public async Task GetWithWhereTest()
     {
+        var index = 0;
         int numberOfItems = 10;
 
-        for (int i = 0; i < numberOfItems; ++i)
+        var populateAttributes = (TestOrder order) =>
         {
-            await CreateItem((order) => { order.AffiliateName = ((i + 1) % 2 == 0) ? "even" : "odd"; });
-        }              
+            order.AffiliateName = ((index + 1) % 2 == 0) ? "even" : "odd";
+            index++;
+        };
+
+        GenerateBulkRecords(numberOfItems, populateAttributes);
 
         var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
@@ -143,7 +147,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
 
     public async Task GetWithIncorrectQueryTest()
     {
-        await CreateItems(10);
+        GenerateBulkRecords(10);
 
         var result = await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery");
         result.Should().NotBeNull();
@@ -156,7 +160,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
         const int numberOfItems = 100;
         const int pageSize = 10;
 
-        await CreateItems(numberOfItems);
+        GenerateBulkRecords(numberOfItems);
 
         async Task GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
         {
@@ -229,17 +233,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, Te
         }
     }
 
-    protected override async Task<(TestOrder, string)> CreateItem(int fkId, Action<TestOrder>? itemTransformation = null)
+    protected override async Task<(TestOrder, string)> CreateItem(int fkId)
     {
-        var testOrder = new TestOrder
-        {
-            CustomerId = fkId,
-        };
-
-        if (itemTransformation != null)
-        {
-            itemTransformation(testOrder);
-        }
+        var testOrder = new TestOrder(string.Empty, fkId);
 
         var newUrl = await PostTest(itemsUrl, testOrder);
 

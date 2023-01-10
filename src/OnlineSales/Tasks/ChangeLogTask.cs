@@ -64,7 +64,7 @@ public abstract class ChangeLogTask : ITask
 
     private bool IsPreviousTaskInProgress(string name)
     {
-        var inProgressCount = dbContext.ChangeLogTaskLog!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
+        var inProgressCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
 
         return inProgressCount > 0;
     }
@@ -89,7 +89,7 @@ public abstract class ChangeLogTask : ITask
             ChangeLogIdMax = maxLogId,
         };
 
-        dbContext.ChangeLogTaskLog!.Add(changeLogTaskLogEntry);
+        dbContext.ChangeLogTaskLogs!.Add(changeLogTaskLogEntry);
         dbContext.SaveChanges();
 
         return changeLogTaskLogEntry;
@@ -99,11 +99,11 @@ public abstract class ChangeLogTask : ITask
     {
         var minLogId = 1;
 
-        var lastProcessedTask = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
+        var lastProcessedTask = dbContext.ChangeLogTaskLogs!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
 
         if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Failed)
         {
-            var failedTaskCount = dbContext.ChangeLogTaskLog!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
+            var failedTaskCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
             if (failedTaskCount > 0 && failedTaskCount <= LogTaskRetryCount)
             {
                 // If this is a retry, get the same minId of last processed task to re-execute the same batch.
@@ -120,7 +120,7 @@ public abstract class ChangeLogTask : ITask
             minLogId = lastProcessedTask.ChangeLogIdMax + 1;
         }
 
-        var changeLogList = dbContext.ChangeLog!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize).OrderBy(b => b.Id).ToList();
+        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize).OrderBy(b => b.Id).ToList();
 
         return changeLogList;
     }

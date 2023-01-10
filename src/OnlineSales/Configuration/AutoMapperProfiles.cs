@@ -87,6 +87,14 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<Order, OrderDetailsDto>()
            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Link, LinkCreateDto>().ReverseMap();
+        CreateMap<Link, LinkUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<LinkUpdateDto, Link>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Link, LinkDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

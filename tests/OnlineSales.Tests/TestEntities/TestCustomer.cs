@@ -8,8 +8,8 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestCustomer : CustomerCreateDto
 {
-    public TestCustomer()
+    public TestCustomer(string uid = "")
     {
-        Email = "customer@test.net";
+        Email = $"customer{uid}@test.net";
     }
 }

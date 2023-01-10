@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
 using System.Reflection;
 using FluentAssertions;
-using Microsoft.AspNetCore.OData.Query;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
@@ -121,7 +118,7 @@ public class ImagesTests : BaseTest
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
-        return Client.SendAsync(request);
+        return client.SendAsync(request);
     }
 
     private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
