@@ -134,8 +134,8 @@ namespace OnlineSales.Controllers
 
                     if (requestedLimit > limit)
                     {
-                        string message = "limit should be less than or equal : " + limit.ToString();
-                        throw new InvalidModelStateException(message);
+                        ModelState.AddModelError("filter[limit]", "filter[limit] should be less than or equal : " + limit);
+                        throw new InvalidModelStateException(ModelState);
                     }
                 }
 

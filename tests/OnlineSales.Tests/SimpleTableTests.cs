@@ -4,19 +4,15 @@
 
 using System.Text.Json;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Nest;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU, TB> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     where T : BaseEntity
-    where TC : new()
+    where TC : class
     where TU : new()
-    where TB : new()
 {
     protected readonly string itemsUrl;
     protected readonly string itemsUrlNotFound;
@@ -133,52 +129,35 @@ public abstract class SimpleTableTests<T, TC, TU, TB> : BaseTest
     {
         GenerateBulkRecords(dataCount);
 
-        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.InternalServerError);
+        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.UnprocessableEntity);
     }
 
-    protected async Task CreateItems(int numberOfItems, Action<TC>? itemTransformation = null)
+    protected virtual async Task<(TC, string)> CreateItem()
     {
-        for (int i = 0; i < numberOfItems; ++i)
-        {
-            await CreateItem(itemTransformation);
-        }
-    }
-
-    protected virtual async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
-    {
-        var testCreateItem = new TC();
-
-        if (itemTransformation != null)
-        {
-            itemTransformation(testCreateItem);
-        }
+        var testCreateItem = TestData.Generate<TC>();
 
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 
         return (testCreateItem, newItemUrl);
     }
 
-    protected virtual void GenerateBulkRecords(int dataCount)
+    protected virtual void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
     {
-        var generateBulkMethod = typeof(TB).GetMethod("GenerateBulk");
-        IEnumerable<T> bulkData = (IEnumerable<T>)generateBulkMethod!.Invoke(new TB(), new object[] { dataCount }) !;
+        var bulkList = TestData.GenerateAndPopulateAttributes<TC>(dataCount, populateAttributes);
+        var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
 
-        SaveBulkRecords(bulkData!);
+        App.PopulateBulkData(bulkEntitiesList);
     }
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
     {
-        const int itemsNumber = 10;
-
-        for (int i = 0; i < itemsNumber; ++i)
-        {
-            await CreateItem();
-        }
+        const int numberOfItems = 10;
+        GenerateBulkRecords(numberOfItems);
 
         var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 
         items.Should().NotBeNull();
-        items!.Count.Should().Be(itemsNumber);
+        items!.Count.Should().Be(numberOfItems);
     }
 
     protected async Task CreateAndGetItemWithAuthentification(string getAuthToken = "Success")

@@ -2,15 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net;
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, TestBulkComments>
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto>
 {
     public CommentsTests()
         : base("/api/comments")
@@ -20,13 +18,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllWithAuthentification("NonSuccess");
+        await GetAllWithAuthentification("Anonymous");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemWithAuthentification("NonSuccess");
+        await CreateAndGetItemWithAuthentification("Anonymous");
     }
 
     [Fact]
@@ -37,17 +35,9 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
-    protected override async Task<(TestComment, string)> CreateItem(int fkId, Action<TestComment>? itemTransformation = null)
+    protected override async Task<(TestComment, string)> CreateItem(int fkId)
     {
-        var testComment = new TestComment()
-        {
-            PostId = fkId,
-        };
-
-        if (itemTransformation != null)
-        {
-            itemTransformation(testComment);
-        }
+        var testComment = new TestComment(string.Empty, fkId);
 
         var newCommentUrl = await PostTest(itemsUrl, testComment);
 

@@ -2,21 +2,20 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Security.Policy;
 using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
 public class TestEmailTemplate : EmailTemplateCreateDto
 {
-    public TestEmailTemplate()
+    public TestEmailTemplate(string uid = "", int groupId = 0)
     {
-        Name = "TestEmailTemplate";
-        Subject = "TestEmailTemaplteSubject";
-        BodyTemplate = "TestEmailTemaplteSubjectBodyTemplate";
-        FromEmail = "test@test.net";
+        Name = $"TestEmailTemplate{uid}";
+        Subject = $"TestEmailTemaplteSubject{uid}";
+        BodyTemplate = $"TestEmailTemaplteSubjectBodyTemplate{uid}";
+        FromEmail = $"test{uid}@test.net";
         FromName = "TestEmailTemaplteFromName";
         Language = "en";
-        GroupId = 1;
+        GroupId = groupId;
     }
 }

@@ -4,6 +4,7 @@
 
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -74,61 +75,64 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<IpDetails>? IpDetails { get; set; }
 
-    public virtual DbSet<ChangeLog>? ChangeLog { get; set; }
+    public virtual DbSet<ChangeLog>? ChangeLogs { get; set; }
 
-    public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLog { get; set; }
+    public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLogs { get; set; }
+
+    public virtual DbSet<Link>? Links { get; set; }
+
+    public virtual DbSet<LinkLog>? LinkLogs { get; set; }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         List<ChangeLog> changes = new ();
-        List<AuditEntry> auditEntries = new ();
+        List<EntityEntry> auditEntries = new ();
 
         var entries = ChangeTracker
        .Entries()
-       .Where(e => e.Entity is BaseEntity && (
+       .Where(e => (e.Entity is BaseCreateByEntity) && (
                e.State == EntityState.Added
                || e.State == EntityState.Modified
                || e.State == EntityState.Deleted));
 
-        foreach (var entityEntry in entries)
+        if (entries.Any())
         {
-            if (entityEntry.State == EntityState.Modified)
+            foreach (var entityEntry in entries)
             {
-                ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+                if (entityEntry.State == EntityState.Modified && entityEntry.Entity is BaseEntity)
+                {
+                    ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
+                    ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
+                    ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+                }
+
+                if (entityEntry.State == EntityState.Added)
+                {
+                    ((BaseCreateByEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
+                    ((BaseCreateByEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
+                    ((BaseCreateByEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+                }
+
+                auditEntries.Add(entityEntry);
             }
 
-            if (entityEntry.State == EntityState.Added)
+            await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+            foreach (var entry in auditEntries)
             {
-                ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+                ChangeLog change = new ChangeLog()
+                {
+                    ObjectId = ((BaseEntityWithId)entry!.Entity).Id,
+                    ObjectType = entry.Entity.GetType().Name,
+                    EntityState = entry.State,
+                    Data = JsonSerializer.Serialize(entry.Entity),
+                };
+
+                changes.Add(change);
             }
 
-            auditEntries.Add(new AuditEntry()
-            {
-                EntityEntry = entityEntry,
-                EntityState = entityEntry.State,
-            });
-        }
-
-        await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-
-        foreach (var entry in auditEntries)
-        {
-            ChangeLog change = new ChangeLog()
-            {
-                ObjectId = ((BaseEntity)entry!.EntityEntry!.Entity).Id,
-                ObjectType = entry.EntityEntry.Entity.GetType().Name,
-                EntityState = entry.EntityState,
-                Data = JsonSerializer.Serialize(entry.EntityEntry.Entity),
-            };
-
-            changes.Add(change);
-        }
-
-        ChangeLog!.AddRange(changes);
+            ChangeLogs!.AddRange(changes);
+        } 
 
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }

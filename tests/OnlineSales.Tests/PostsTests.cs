@@ -2,14 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Tests.TestEntities.BulkPopulate;
 
 namespace OnlineSales.Tests;
 
-public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, TestBulkPosts>
+public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
 {
     public PostsTests()
         : base("/api/posts")
@@ -19,13 +17,13 @@ public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto, TestBu
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllWithAuthentification("NonSuccess");
+        await GetAllWithAuthentification("Anonymous");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemWithAuthentification("NonSuccess");
+        await CreateAndGetItemWithAuthentification("Anonymous");
     }
 
     protected override PostUpdateDto UpdateItem(TestPost to)

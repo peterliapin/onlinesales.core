@@ -65,6 +65,7 @@
     <Folder Include="Geography\" />
     <Folder Include="Formatters\" />
     <Folder Include="Formatters\Csv\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
   
   <ItemGroup>
