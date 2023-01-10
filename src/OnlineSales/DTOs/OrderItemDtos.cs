@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using Microsoft.AspNetCore.Http.HttpResults;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
@@ -62,6 +63,10 @@ public class OrderItemDetailsDto : OrderItemCreateDto
 
 public class OrderItemImportDto : OrderItemCreateDto
 {
+    private DateTime? createdAt;
+
+    private DateTime? updatedAt;
+
     [Optional]
     public int? Id { get; set; }
 
@@ -69,10 +74,18 @@ public class OrderItemImportDto : OrderItemCreateDto
     public string OrderRefNo { get; set; } = string.Empty;
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt
+    {
+        get { return createdAt; }
+        set { createdAt = value is not null ? DateTime.SpecifyKind((DateTime)value, DateTimeKind.Utc) : value; }
+    }
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt
+    {
+        get { return updatedAt; }
+        set { updatedAt = value is not null ? DateTime.SpecifyKind((DateTime)value, DateTimeKind.Utc) : value; }
+    }
 
     [Optional]
     public string? CreatedByIp { get; set; }

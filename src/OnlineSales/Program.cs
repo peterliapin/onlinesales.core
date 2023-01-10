@@ -3,12 +3,14 @@
 // </copyright>
 
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Formatters.Csv;
@@ -71,6 +73,7 @@ public class Program
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
         ConfigureApiSettings(builder);
+        ConfigureImportSizeLimit(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -114,7 +117,7 @@ public class Program
         // }
 
         app.UseSwagger();
-        app.UseSwaggerUI();        
+        app.UseSwaggerUI();
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
@@ -129,6 +132,58 @@ public class Program
         });
 
         app.Run();
+    }
+
+    private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
+    {
+        string fileSize;
+        string measurement;
+        int size;
+        // With default size
+        long sizeInByte = 30 * 1024 * 1024;
+
+        var maxImportSize = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
+
+        if (string.IsNullOrEmpty(maxImportSize))
+        {
+            throw new MissingConfigurationException("Import file size is mandatory.");
+        }
+
+        measurement = maxImportSize![^2..];
+        fileSize = maxImportSize[..^2];
+
+        if (!measurement.All(char.IsLetter))
+        {
+            measurement = maxImportSize[^1..];
+            fileSize = maxImportSize[..^1];
+        }
+
+        if (!int.TryParse(fileSize, out size))
+        {
+            throw new MissingConfigurationException("Import file size is invalid.");
+        }
+
+        if (measurement.ToUpper().Equals("MB"))
+        {
+            sizeInByte = size * 1024 * 1024;
+        }
+        else if (measurement.ToUpper().Equals("KB"))
+        {
+            sizeInByte = size * 1024;
+        }
+        else if (measurement.ToUpper().Equals("B"))
+        {
+            sizeInByte = size;
+        }
+        else
+        {
+            throw new MissingConfigurationException("Import file size is invalid.");
+        }
+
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.Limits.MaxRequestBodySize = sizeInByte;
+        });
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
@@ -181,7 +236,7 @@ public class Program
                     {
                         pluginContext.Database.Migrate();
                     }
-                } 
+                }
             }
         }
     }
