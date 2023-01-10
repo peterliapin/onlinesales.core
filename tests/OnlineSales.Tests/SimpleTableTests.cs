@@ -132,31 +132,18 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.UnprocessableEntity);
     }
 
-    protected async Task CreateItems(int numberOfItems, Action<TC>? itemTransformation = null)
-    {
-        for (int i = 0; i < numberOfItems; ++i)
-        {
-            await CreateItem(itemTransformation);
-        }
-    }
-
-    protected virtual async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
+    protected virtual async Task<(TC, string)> CreateItem()
     {
         var testCreateItem = TestData.Generate<TC>();
-
-        if (itemTransformation != null)
-        {
-            itemTransformation(testCreateItem);
-        }
 
         var newItemUrl = await PostTest(itemsUrl, testCreateItem);
 
         return (testCreateItem, newItemUrl);
     }
 
-    protected virtual void GenerateBulkRecords(int dataCount)
+    protected virtual void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
     {
-        var bulkList = TestData.Generate<TC>(dataCount);
+        var bulkList = TestData.GenerateAndPopulateAttributes<TC>(dataCount, populateAttributes);
         var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
 
         App.PopulateBulkData(bulkEntitiesList);
@@ -164,17 +151,13 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
     {
-        const int itemsNumber = 10;
-
-        for (int i = 0; i < itemsNumber; ++i)
-        {
-            await CreateItem();
-        }
+        const int numberOfItems = 10;
+        GenerateBulkRecords(numberOfItems);
 
         var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 
         items.Should().NotBeNull();
-        items!.Count.Should().Be(itemsNumber);
+        items!.Count.Should().Be(numberOfItems);
     }
 
     protected async Task CreateAndGetItemWithAuthentification(string getAuthToken = "Success")

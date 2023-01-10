@@ -3,14 +3,11 @@
 // </copyright>
 
 using System.Net.Http.Headers;
-using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using FluentAssertions;
-using Microsoft.OData.UriParser;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
@@ -123,7 +120,22 @@ public class BaseTest : IDisposable
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        return await CheckPostResponce(url, response, expectedCode);
+        response.StatusCode.Should().Be(expectedCode);
+
+        var location = string.Empty;
+
+        if (expectedCode == HttpStatusCode.Created)
+        {
+            location = response.Headers?.Location?.LocalPath ?? string.Empty;
+            location.Should().StartWith(url);
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = DeserializePayload<BaseEntityWithId>(content);
+            result.Should().NotBeNull();
+            result!.Id.Should().BePositive();
+        }
+
+        return location;
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
@@ -148,24 +160,6 @@ public class BaseTest : IDisposable
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
-    }
-
-    protected async Task<string> CheckPostResponce(string url, HttpResponseMessage response, HttpStatusCode expectedCode)
-    {
-        var location = string.Empty;
-
-        if (expectedCode == HttpStatusCode.Created)
-        {
-            location = response.Headers?.Location?.LocalPath ?? string.Empty;
-            location.Should().StartWith(url);
-
-            var content = await response.Content.ReadAsStringAsync();
-            var result = DeserializePayload<BaseEntityWithId>(content);
-            result.Should().NotBeNull();
-            result!.Id.Should().BePositive();
-        }
-
-        return location;
     }
 
     private void CheckForRedundantProperties(string content)

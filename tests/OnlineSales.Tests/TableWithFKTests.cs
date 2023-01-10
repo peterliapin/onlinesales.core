@@ -52,27 +52,27 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
 
     protected abstract Task<(int, string)> CreateFKItem();
 
-    protected override async Task<(TC, string)> CreateItem(Action<TC>? itemTransformation = null)
+    protected override async Task<(TC, string)> CreateItem()
     {
         var fkItem = await CreateFKItem();
 
         var fkId = fkItem.Item1;
 
-        var result = await CreateItem(fkId, itemTransformation);
+        var result = await CreateItem(fkId);
 
         return result;
     }
 
-    protected override void GenerateBulkRecords(int dataCount)
+    protected override void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
     {
         var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
-        var bulkList = TestData.Generate<TC>(dataCount, fkId);
+        var bulkList = TestData.GenerateAndPopulateAttributes<TC>(dataCount, populateAttributes, fkId);
         var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
 
         App.PopulateBulkData(bulkEntitiesList);
     }
 
-    protected abstract Task<(TC, string)> CreateItem(int fkId, Action<TC>? itemTransformation = null);
+    protected abstract Task<(TC, string)> CreateItem(int fkId);
 }
