@@ -20,7 +20,7 @@ public class SyncIpDetailsTask : ChangeLogTask
     private readonly IpDetailsService ipDetailsService;
 
     public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IOptions<GeolocationApiConfig> options, IpDetailsService ipDetailsService)
-        : base(dbContext)
+        : base(dbContext, configuration)
     {
         var config = configuration.GetSection("Tasks:SyncIPDetailsTask") !.Get<TaskConfig>();
         if (config is not null)

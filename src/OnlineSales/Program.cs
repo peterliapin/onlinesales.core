@@ -346,6 +346,7 @@ public class Program
     {
         builder.Services.AddScoped<ITask, CustomerScheduledEmail>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
+        builder.Services.AddScoped<ITask, SyncEsTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)
