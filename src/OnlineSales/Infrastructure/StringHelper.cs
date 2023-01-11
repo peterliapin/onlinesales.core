@@ -11,7 +11,7 @@ public static class StringHelper
     /// <summary>
     /// Calculate a size in bytes using given string based size.
     /// </summary>
-    /// <param name="size">string based size. Exmple: 10MB,100KB.</param>
+    /// <param name="size">String based size. Examples: 10MB,100KB.</param>
     /// <returns>Size in bytes.</returns>
     public static long? GetSizeInBytesFromString(string size)
     {
