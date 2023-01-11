@@ -9,23 +9,20 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.DTOs;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Services;
 
 public class IpDetailsService
 {
-    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-    };
+    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions();
 
     private readonly IOptions<GeolocationApiConfig> options;
 
     public IpDetailsService(IOptions<GeolocationApiConfig> options)
     {
         this.options = options;
-        SerializeOptions.Converters.Add(new JsonStringEnumConverter());
+        JsonHelper.Configure(SerializeOptions, JsonNamingConvention.SnakeCase);
     }
 
     public async Task<IpDetailsDto?> GetIPDetail(string ip)

@@ -19,9 +19,9 @@ public class PostCreateDto
     [Required]
     public string Content { get; set; } = string.Empty;
 
-    public string CoverImageUrl { get; set; } = string.Empty;
+    public string? CoverImageUrl { get; set; }
 
-    public string CoverImageAlt { get; set; } = string.Empty;
+    public string? CoverImageAlt { get; set; }
 
     [Required]
     public string Slug { get; set; } = string.Empty;
@@ -35,9 +35,9 @@ public class PostCreateDto
     [Required]
     public string Language { get; set; } = string.Empty;
 
-    public string Categories { get; set; } = string.Empty;
+    public string? Categories { get; set; }
 
-    public string Tags { get; set; } = string.Empty;
+    public string? Tags { get; set; }
 
     public bool AllowComments { get; set; } = false;
 }

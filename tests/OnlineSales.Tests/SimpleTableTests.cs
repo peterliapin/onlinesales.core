@@ -134,7 +134,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         var totalCountHeader = response.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault();
         totalCountHeader.Should().BeEquivalentTo($"{totalCount}");
         var content = await response.Content.ReadAsStringAsync();
-        var payload = DeserializePayload<List<T>>(content);
+        var payload = JsonSerializer.Deserialize<List<T>>(content);
         payload.Should().NotBeNull();
         payload.Should().HaveCount(payloadItemsCount);
     }

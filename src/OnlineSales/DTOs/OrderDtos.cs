@@ -15,7 +15,7 @@ public class OrderCreateDto
     [Required]
     public string RefNo { get; set; } = string.Empty;
 
-    public string? OrderNumber { get; set; } = string.Empty;
+    public string? OrderNumber { get; set; }
 
     public string? AffiliateName { get; set; }
 

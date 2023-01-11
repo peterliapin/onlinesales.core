@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -12,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Formatters.Csv;
+using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -107,12 +107,6 @@ public class Program
 
         MigrateOnStartIfRequired(app, builder);
 
-        // Configure the HTTP request pipeline.
-        // if (app.Environment.IsDevelopment())
-        // {
-        // app.UseODataRouteDebug();
-        // }
-
         app.UseSwagger();
         app.UseSwaggerUI();        
         app.UseDefaultFiles();
@@ -205,14 +199,8 @@ public class Program
         })
         .AddJsonOptions(opts =>
         {
-            var enumConverter = new JsonStringEnumConverter();
-            opts.JsonSerializerOptions.Converters.Add(enumConverter);
-            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        })
-        /*.AddOData(options => options
-            .Select().Filter().OrderBy()
-            .SetMaxTop(10).Expand().Count()
-            .SkipToken())*/;
+            JsonHelper.Configure(opts.JsonSerializerOptions);
+        });
 
         foreach (var plugin in PluginManager.GetPluginList())
         {
