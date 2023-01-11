@@ -9,10 +9,10 @@ namespace OnlineSales.Infrastructure;
 public static class StringHelper
 {
     /// <summary>
-    /// Calculate a size in bytes using given string based size.
+    /// Calculate a size in bytes using a given string based size with unit.
     /// </summary>
-    /// <param name="size">String based size. Examples: 10MB,100KB.</param>
-    /// <returns>Size in bytes.</returns>
+    /// <param name="size">String based size. Supported units: MB,KB,B. Examples: 10MB,100KB,1024B.</param>
+    /// <returns>Size in Bytes.</returns>
     public static long? GetSizeInBytesFromString(string size)
     {
         long? convertedSize = null;
