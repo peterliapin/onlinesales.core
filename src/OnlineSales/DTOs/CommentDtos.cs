@@ -40,26 +40,14 @@ public class CommentDetailsDto : CommentCreateDto
 
 public class CommentImportDto : CommentCreateDto
 {
-    private DateTime? createdAt;
-
-    private DateTime? updatedAt;
-
     [Optional]
     public int? Id { get; set; }
 
     [Optional]
-    public DateTime? CreatedAt
-    {
-        get { return createdAt; }
-        set { createdAt = value is not null ? DateTime.SpecifyKind((DateTime)value, DateTimeKind.Utc) : value; }
-    }
+    public DateTime? CreatedAt { get; set; }
 
     [Optional]
-    public DateTime? UpdatedAt
-    {
-        get { return updatedAt; }
-        set { updatedAt = value is not null ? DateTime.SpecifyKind((DateTime)value, DateTimeKind.Utc) : value; }
-    }
+    public DateTime? UpdatedAt { get; set; }
 
     [Optional]
     public string? CreatedByIp { get; set; }

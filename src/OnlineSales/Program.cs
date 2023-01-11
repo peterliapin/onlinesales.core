@@ -3,14 +3,12 @@
 // </copyright>
 
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Formatters.Csv;
@@ -136,53 +134,23 @@ public class Program
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
     {
-        string fileSize;
-        string measurement;
-        int size;
-        // With default size
-        long sizeInByte = 30 * 1024 * 1024;
+        var maxImportSizeConfig = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
 
-        var maxImportSize = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
-
-        if (string.IsNullOrEmpty(maxImportSize))
+        if (string.IsNullOrEmpty(maxImportSizeConfig))
         {
             throw new MissingConfigurationException("Import file size is mandatory.");
         }
 
-        measurement = maxImportSize![^2..];
-        fileSize = maxImportSize[..^2];
+        var maxImportSize = StringHelper.GetSizeFromString(maxImportSizeConfig);
 
-        if (!measurement.All(char.IsLetter))
+        if (maxImportSize is null)
         {
-            measurement = maxImportSize[^1..];
-            fileSize = maxImportSize[..^1];
-        }
-
-        if (!int.TryParse(fileSize, out size))
-        {
-            throw new MissingConfigurationException("Import file size is invalid.");
-        }
-
-        if (measurement.ToUpper().Equals("MB"))
-        {
-            sizeInByte = size * 1024 * 1024;
-        }
-        else if (measurement.ToUpper().Equals("KB"))
-        {
-            sizeInByte = size * 1024;
-        }
-        else if (measurement.ToUpper().Equals("B"))
-        {
-            sizeInByte = size;
-        }
-        else
-        {
-            throw new MissingConfigurationException("Import file size is invalid.");
+            throw new MissingConfigurationException("Max import file size is invalid.");
         }
 
         builder.WebHost.UseKestrel(options =>
         {
-            options.Limits.MaxRequestBodySize = sizeInByte;
+            options.Limits.MaxRequestBodySize = maxImportSize;
         });
     }
 

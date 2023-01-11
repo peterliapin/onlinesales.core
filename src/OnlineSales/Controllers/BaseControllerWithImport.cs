@@ -40,6 +40,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         {
             try
             {
+                dbContext.IsImportRequest = true;
+
                 await SaveBatchChangesAsync(importingRecords);
 
                 transaction.Commit();

@@ -49,6 +49,8 @@ public class ApiDbContext : DbContext
         this.httpContextHelper = httpContextHelper;
     }
 
+    public bool IsImportRequest { get; set; }
+
     public virtual DbSet<Post>? Posts { get; set; }
 
     public virtual DbSet<Comment>? Comments { get; set; }
@@ -101,16 +103,19 @@ public class ApiDbContext : DbContext
             {
                 if (entityEntry.State == EntityState.Modified && entityEntry.Entity is BaseEntity)
                 {
-                    ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                    ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
-                    ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+                    var entity = (BaseEntity)entityEntry.Entity;
+                    entity.UpdatedAt = IsImportRequest && entity.UpdatedAt is not null ? GetDateWithKind(entity.UpdatedAt.Value) : DateTime.UtcNow;
+                    entity.CreatedAt = IsImportRequest ? GetDateWithKind(entity.CreatedAt) : entity.CreatedAt;
+                    entity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(entity.UpdatedByIp) ? entity.UpdatedByIp : httpContextHelper!.IpAddress;
+                    entity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(entity.UpdatedByUserAgent) ? entity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
                 }
 
                 if (entityEntry.State == EntityState.Added)
                 {
-                    ((BaseCreateByEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                    ((BaseCreateByEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
-                    ((BaseCreateByEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+                    var entity = (BaseEntity)entityEntry.Entity;
+                    entity.CreatedAt = entity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(entity.CreatedAt);
+                    entity.CreatedByIp = string.IsNullOrEmpty(entity.CreatedByIp) ? httpContextHelper!.IpAddress : entity.CreatedByIp;
+                    entity.CreatedByUserAgent = string.IsNullOrEmpty(entity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : entity.CreatedByUserAgent;
                 }
 
                 auditEntries.Add(entityEntry);
@@ -162,5 +167,15 @@ public class ApiDbContext : DbContext
             Console.WriteLine("Failed to configure ApiDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
             throw;
         }
+    }
+
+    private DateTime GetDateWithKind(DateTime date)
+    {
+        if (date.Kind == DateTimeKind.Unspecified)
+        {
+            return DateTime.SpecifyKind(date, DateTimeKind.Utc);
+        }
+
+        return date;
     }
 }
