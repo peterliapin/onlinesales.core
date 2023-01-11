@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
@@ -87,8 +88,7 @@ public class ApiDbContext : DbContext
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        List<ChangeLog> changes = new ();
-        List<EntityEntry> auditEntries = new ();
+        Dictionary<EntityEntry, ChangeLog> changes = new ();
 
         var entries = ChangeTracker
        .Entries()
@@ -118,25 +118,24 @@ public class ApiDbContext : DbContext
                     entity.CreatedByUserAgent = string.IsNullOrEmpty(entity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : entity.CreatedByUserAgent;
                 }
 
-                auditEntries.Add(entityEntry);
+                // save entity state as it is before SaveChanges call
+                changes[entityEntry] = new ChangeLog
+                {
+                    ObjectType = entityEntry.Entity.GetType().Name,
+                    EntityState = entityEntry.State,
+                };
             }
 
             await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
 
-            foreach (var entry in auditEntries)
+            foreach (var change in changes)
             {
-                ChangeLog change = new ChangeLog()
-                {
-                    ObjectId = ((BaseEntityWithId)entry!.Entity).Id,
-                    ObjectType = entry.Entity.GetType().Name,
-                    EntityState = entry.State,
-                    Data = JsonSerializer.Serialize(entry.Entity),
-                };
-
-                changes.Add(change);
+                // save object id which we only recieve after SaveChanges (for new records)
+                change.Value.ObjectId = ((BaseEntityWithId)change.Key.Entity).Id;
+                change.Value.Data = JsonSerializer.Serialize(change.Key.Entity);
             }
 
-            ChangeLogs!.AddRange(changes);
+            ChangeLogs!.AddRange(changes.Values);
         } 
 
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);

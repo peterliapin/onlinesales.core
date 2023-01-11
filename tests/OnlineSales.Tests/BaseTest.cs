@@ -4,31 +4,19 @@
 
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using AutoMapper;
 using FluentAssertions;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
 public class BaseTest : IDisposable
 {
-    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-    };
-
     protected static readonly TestApplication App = new TestApplication();
 
     protected readonly HttpClient client;
     protected readonly IMapper mapper;
-
-    static BaseTest()
-    {
-        SerializeOptions.Converters.Add(new JsonStringEnumConverter());
-    }
 
     public BaseTest()
     {
@@ -42,29 +30,9 @@ public class BaseTest : IDisposable
         client.Dispose();
     }
 
-    protected static string SerializePayload(object payload)
-    {
-        return JsonSerializer.Serialize(payload, SerializeOptions);
-    }
-
-    protected static T? DeserializePayload<T>(string content)
-        where T : class
-    {
-        if (string.IsNullOrEmpty(content))
-        {
-            return null;
-        }
-        else
-        {
-            var result = JsonSerializer.Deserialize<T>(content, SerializeOptions);
-
-            return result;
-        }
-    }
-
     protected static StringContent PayloadToStringContent(object payload)
     {
-        var payloadString = SerializePayload(payload);
+        var payloadString = JsonHelper.Serialize(payload);
 
         return new StringContent(payloadString, Encoding.UTF8, "application/json");
     }
@@ -108,7 +76,7 @@ public class BaseTest : IDisposable
         {
             CheckForRedundantProperties(content);
 
-            return DeserializePayload<T>(content);
+            return JsonHelper.Deserialize<T>(content);
         }
         else
         {
@@ -130,7 +98,7 @@ public class BaseTest : IDisposable
             location.Should().StartWith(url);
 
             var content = await response.Content.ReadAsStringAsync();
-            var result = DeserializePayload<BaseEntityWithId>(content);
+            var result = JsonHelper.Deserialize<BaseEntityWithId>(content);
             result.Should().NotBeNull();
             result!.Id.Should().BePositive();
         }
@@ -168,7 +136,7 @@ public class BaseTest : IDisposable
 
         if (isCollection)
         {
-            var resultCollection = DeserializePayload<List<BaseEntity>>(content) !;
+            var resultCollection = JsonHelper.Deserialize<List<BaseEntity>>(content) !;
             resultCollection.Should().NotBeNull();
             if (resultCollection.Count > 0)
             {
@@ -180,7 +148,7 @@ public class BaseTest : IDisposable
         }
         else
         {
-            var result = DeserializePayload<BaseEntity>(content) !;
+            var result = JsonHelper.Deserialize<BaseEntity>(content) !;
             result.Should().NotBeNull();
             result.CreatedByIp.Should().BeNull();
             result.UpdatedByIp.Should().BeNull();

@@ -3,8 +3,7 @@
 // </copyright>
 
 using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using OnlineSales.Helpers;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.DTOs;
 using OnlineSales.Plugin.Sms.Exceptions;
@@ -14,12 +13,6 @@ namespace OnlineSales.Plugin.Sms.Services;
 
 public class GetshoutoutService : ISmsService
 {
-    private static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-    };
-
     private readonly GetshoutoutConfig getshoutoutConfig;
 
     public GetshoutoutService(GetshoutoutConfig getshoutoutConfig)
@@ -47,7 +40,7 @@ public class GetshoutoutService : ISmsService
             },
         };
 
-        var messageDtoJson = JsonSerializer.Serialize(messageDto, SerializeOptions);
+        var messageDtoJson = JsonHelper.Serialize(messageDto);
         var content = new StringContent(messageDtoJson, new MediaTypeHeaderValue("application/json"));
 
         var result = await client.PostAsync("/coreservice/messages", content);

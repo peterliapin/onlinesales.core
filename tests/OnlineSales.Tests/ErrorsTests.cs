@@ -5,6 +5,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.DTOs;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
@@ -35,7 +36,7 @@ public class ErrorsTests : BaseTest
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var problemDetails = DeserializePayload<ValidationProblemDetails>(responseContent);
+        var problemDetails = JsonHelper.Deserialize<ValidationProblemDetails>(responseContent);
         problemDetails!.Status.Should().Be(422);
         problemDetails!.Title.Should().NotBe(string.Empty);
         problemDetails!.Errors.Count.Should().BeGreaterThan(0);
@@ -50,7 +51,7 @@ public class ErrorsTests : BaseTest
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
-        var problemDetails = DeserializePayload<ProblemDetails>(responseContent);
+        var problemDetails = JsonHelper.Deserialize<ProblemDetails>(responseContent);
         problemDetails!.Status.Should().Be(500);
         problemDetails!.Title.Should().NotBe(string.Empty);
     }
