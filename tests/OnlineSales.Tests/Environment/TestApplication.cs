@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -42,6 +43,19 @@ public class TestApplication : WebApplicationFactory<Program>
             dataContaxt.AddRange(bulkItems);
             dataContaxt.SaveChanges();
         }
+    }
+
+    public T? Get<T>(Expression<Func<T, bool>> predicate)
+        where T : class
+    {
+        T? result = null;
+        using (var scope = Services.CreateScope())
+        {
+            var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+            result = dataContaxt.Set<T>().FirstOrDefault(predicate); 
+        }
+
+        return result!;
     }
 
     public IMapper GetMapper()
