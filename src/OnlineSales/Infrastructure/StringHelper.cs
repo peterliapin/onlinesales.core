@@ -8,7 +8,12 @@ namespace OnlineSales.Infrastructure;
 
 public static class StringHelper
 {
-    public static long? GetSizeFromString(string size)
+    /// <summary>
+    /// Calculate a size in bytes using given string based size.
+    /// </summary>
+    /// <param name="size">string based size. Exmple: 10MB,100KB.</param>
+    /// <returns>Size in bytes.</returns>
+    public static long? GetSizeInBytesFromString(string size)
     {
         long? convertedSize = null;
         string pattern = @"(\d+)(\D+)";

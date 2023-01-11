@@ -135,7 +135,7 @@ public class Program
             throw new MissingConfigurationException("Import file size is mandatory.");
         }
 
-        var maxImportSize = StringHelper.GetSizeFromString(maxImportSizeConfig);
+        var maxImportSize = StringHelper.GetSizeInBytesFromString(maxImportSizeConfig);
 
         if (maxImportSize is null)
         {
