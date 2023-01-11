@@ -45,17 +45,11 @@ public class TestApplication : WebApplicationFactory<Program>
         }
     }
 
-    public T? Get<T>(Expression<Func<T, bool>> predicate)
-        where T : class
+    public ApiDbContext? GetDbContext()
     {
-        T? result = null;
-        using (var scope = Services.CreateScope())
-        {
-            var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-            result = dataContaxt.Set<T>().FirstOrDefault(predicate); 
-        }
-
-        return result!;
+        var scope = Services.CreateScope();
+        var dataContext = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+        return dataContext;
     }
 
     public IMapper GetMapper()
