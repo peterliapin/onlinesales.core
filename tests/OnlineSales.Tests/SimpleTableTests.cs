@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq.Expressions;
 using System.Text.Json;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 
@@ -48,17 +50,37 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Fact]
-    public async Task CreateAndUpdateItemTest()
+    public virtual async Task CreateAndCheckEntityState_ChangeLog()
     {
         var testCreateItem = await CreateItem();
 
-        var testUpdateItem = UpdateItem(testCreateItem.Item1);
-
-        await PatchTest(testCreateItem.Item2, testUpdateItem!);
-
         var item = await GetTest<T>(testCreateItem.Item2);
 
-        item.Should().BeEquivalentTo(testCreateItem.Item1);
+        var result = App.GetDbContext() !.Set<ChangeLog>().FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added) !;
+
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task CreateAndUpdateItemTest()
+    {
+        var createAndUpdateItems = await CreateAndUpdateItem();
+
+        var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
+
+        item.Should().BeEquivalentTo(createAndUpdateItems.testCreateItem.Item1);
+    }
+
+    [Fact]
+    public virtual async Task CreateAndUpdateCheckEntityState_ChangeLog()
+    {
+        var createAndUpdateItems = await CreateAndUpdateItem();
+
+        var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
+
+        var result = App.GetDbContext() !.Set<ChangeLog>().FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified) !;
+
+        result.Should().NotBeNull();
     }
 
     [Fact]
@@ -75,6 +97,20 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await DeleteTest(testCreateItem.Item2);
 
         await GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreateAndDeleteCheckEntityState_ChangeLog()
+    {
+        var testCreateItem = await CreateItem();
+
+        var item = await GetTest<T>(testCreateItem.Item2);
+
+        await DeleteTest(testCreateItem.Item2);
+
+        var result = App.GetDbContext() !.Set<ChangeLog>().FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted) !;
+
+        result.Should().NotBeNull();
     }
 
     [Theory]
@@ -170,4 +206,15 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     protected abstract TU UpdateItem(TC createdItem);
+
+    private async Task<((TC, string) testCreateItem, TU? testUpdateItem)> CreateAndUpdateItem()
+    {
+        var testCreateItem = await CreateItem();
+
+        var testUpdateItem = UpdateItem(testCreateItem.Item1);
+
+        await PatchTest(testCreateItem.Item2, testUpdateItem!);
+
+        return (testCreateItem, testUpdateItem);
+    }
 }
