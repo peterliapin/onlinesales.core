@@ -181,9 +181,7 @@ public class VstoLocalLinksWatcher
     {
         private readonly VstoLocalLinksWatcher linksWatcher;
 
-        #pragma warning disable S1450
         private readonly FileSystemWatcher watcher;
-        #pragma warning restore S1450
 
         private readonly Mutex linksMutex = new Mutex();
 
