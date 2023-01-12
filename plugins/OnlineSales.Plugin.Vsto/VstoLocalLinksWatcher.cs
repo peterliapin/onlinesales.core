@@ -107,7 +107,7 @@ public class VstoLocalLinksWatcher : IDisposable
                         }
                     }
 
-                    dbContext.SaveChanges();
+                    dbContext.SaveChangesAsync().Wait();
                 }                
             }
         }
@@ -127,7 +127,7 @@ public class VstoLocalLinksWatcher : IDisposable
                         dbContext.Remove(dbContext.Links.Single(l => l.Uid == link.Uid));
                     }
 
-                    dbContext.SaveChanges();
+                    dbContext.SaveChangesAsync().Wait();
                 }
             }
         }
@@ -150,7 +150,7 @@ public class VstoLocalLinksWatcher : IDisposable
                         }
                     }
 
-                    dbContext.SaveChanges();
+                    dbContext.SaveChangesAsync().Wait();
                 }
             }
         }
