@@ -67,6 +67,7 @@ public class VstoLocalLinksWatcher
             var ed = DictionaryExtensions.TryGetAndReturn(exeDirs, e.FullPath);
             if (ed != null)
             {
+                ed.StopAndClear();
                 exeDirs.Remove(e.FullPath);
             }
         }
@@ -184,6 +185,8 @@ public class VstoLocalLinksWatcher
         private readonly FileSystemWatcher watcher;
         #pragma warning restore S1450
 
+        private readonly Mutex linksMutex = new Mutex();
+
         private readonly DirectoryInfo parenDir;
 
         private HashSet<OnlineSales.Entities.Link> links;
@@ -194,7 +197,7 @@ public class VstoLocalLinksWatcher
 
         private FileInfo? vstoFile;
 
-        private DirectoryInfo? appDir;        
+        private DirectoryInfo? appDir;               
 
         public ExeDirectory(VstoLocalLinksWatcher linksWatcher, DirectoryInfo di)
         {
@@ -222,6 +225,20 @@ public class VstoLocalLinksWatcher
         public HashSet<OnlineSales.Entities.Link> GetLinks()
         {
             return links;
+        }
+
+        public void StopAndClear()
+        {
+            linksMutex.WaitOne();
+            try
+            {
+                watcher.EnableRaisingEvents = false;
+                linksWatcher.RemoveLinks(links);
+            }
+            finally
+            {
+                linksMutex.ReleaseMutex();  
+            }
         }
 
         private HashSet<OnlineSales.Entities.Link> CreateLinks()
@@ -273,38 +290,41 @@ public class VstoLocalLinksWatcher
 
         private void HandleChanged(object sender, FileSystemEventArgs e)
         {
-            if (e.ChangeType == WatcherChangeTypes.Deleted && exeFile != null && e.FullPath == exeFile.FullName)
+            linksMutex.WaitOne();
+            try
             {
-                watcher.EnableRaisingEvents = false;
-            }
-
-            if (valid)
-            {
-                CheckAndInit();
-                if (!valid)
+                if (valid)
                 {
-                    linksWatcher.RemoveLinks(links);
-                    links.Clear();
+                    CheckAndInit();
+                    if (!valid)
+                    {
+                        linksWatcher.RemoveLinks(links);
+                        links.Clear();
+                    }
+                    else
+                    {
+                        var newLinks = CreateLinks();
+                        if (!links.SetEquals(newLinks))
+                        {
+                            linksWatcher.RemoveLinks(links);
+                            links = newLinks;
+                            linksWatcher.AddLinks(links);
+                        }
+                    }
                 }
                 else
                 {
-                    var newLinks = CreateLinks();
-                    if (!links.SetEquals(newLinks))
+                    CheckAndInit();
+                    if (valid)
                     {
-                        linksWatcher.RemoveLinks(links);
-                        links = newLinks;
+                        links = CreateLinks();
                         linksWatcher.AddLinks(links);
                     }
                 }
             }
-            else
+            finally
             {
-                CheckAndInit();
-                if (valid)
-                {
-                    links = CreateLinks();
-                    linksWatcher.AddLinks(links);
-                }
+                linksMutex.ReleaseMutex();
             }
         }               
 
