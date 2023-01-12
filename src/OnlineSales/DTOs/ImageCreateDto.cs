@@ -11,7 +11,6 @@ namespace OnlineSales.DTOs
     {
         [Required]
         [ImageExtension]
-        [ImageFileSize]
         public IFormFile? Image { get; set; }
 
         [Required]

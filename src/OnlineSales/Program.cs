@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -71,6 +72,7 @@ public class Program
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
         ConfigureApiSettings(builder);
+        ConfigureImportSizeLimit(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -108,7 +110,7 @@ public class Program
         MigrateOnStartIfRequired(app, builder);
 
         app.UseSwagger();
-        app.UseSwaggerUI();        
+        app.UseSwaggerUI();
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
@@ -117,12 +119,66 @@ public class Program
 
         app.MapControllers();
 
+        SetImageUploadSizeLimit(app, builder);
+
         app.UseSpa(spa =>
         {
             // works out of the box, no configuration required
         });
 
         app.Run();
+    }
+
+    private static void SetImageUploadSizeLimit(WebApplication app, WebApplicationBuilder builder)
+    {
+        var maxUploadSizeConfig = builder.Configuration.GetValue<string>("Images:MaxSize");
+
+        if (string.IsNullOrEmpty(maxUploadSizeConfig))
+        {
+            throw new MissingConfigurationException("Image upload size is mandatory.");
+        }
+
+        long? maxUploadSize = StringHelper.GetSizeInBytesFromString(maxUploadSizeConfig);
+
+        if (maxUploadSize is null)
+        {
+            throw new MissingConfigurationException("Image upload size is invalid.");
+        }
+
+        app.UseWhen(
+            context => context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/images"),
+            appBuilder => appBuilder.Use(async (c, next) =>
+            {
+                var feature = c.Features.Get<IHttpMaxRequestBodySizeFeature>();
+                if (feature is not null)
+                {
+                    feature.MaxRequestBodySize = maxUploadSize; 
+                }
+
+                await next();
+            }));
+    }
+
+    private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
+    {
+        var maxImportSizeConfig = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
+
+        if (string.IsNullOrEmpty(maxImportSizeConfig))
+        {
+            throw new MissingConfigurationException("Import file size is mandatory.");
+        }
+
+        var maxImportSize = StringHelper.GetSizeInBytesFromString(maxImportSizeConfig);
+
+        if (maxImportSize is null)
+        {
+            throw new MissingConfigurationException("Max import file size is invalid.");
+        }
+
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.Limits.MaxRequestBodySize = maxImportSize;
+        });
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
@@ -175,7 +231,7 @@ public class Program
                     {
                         pluginContext.Database.Migrate();
                     }
-                } 
+                }
             }
         }
     }
