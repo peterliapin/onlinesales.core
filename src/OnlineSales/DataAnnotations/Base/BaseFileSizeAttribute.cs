@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.DataAnnotations.Base
 {
@@ -12,8 +13,7 @@ namespace OnlineSales.DataAnnotations.Base
 
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            long sizeInByte;
-            int size;
+            long? sizeInByte;
 
             var file = value as IFormFile;
 
@@ -22,33 +22,9 @@ namespace OnlineSales.DataAnnotations.Base
                 return ValidationResult.Success!;
             }
 
-            var measurement = MaxFileSize![^2..];
-            var fileSize = MaxFileSize![0..^2];
+            sizeInByte = StringHelper.GetSizeInBytesFromString(MaxFileSize);
 
-            if (!measurement.All(char.IsLetter))
-            {
-                measurement = MaxFileSize![^1..];
-                fileSize = MaxFileSize![0..^1];
-            }
-
-            if (!int.TryParse(fileSize, out size))
-            {
-                return new ValidationResult("Config error, File Size is invalid");
-            }
-
-            if (measurement.ToUpper().Equals("MB"))
-            {
-                sizeInByte = size * 1024 * 1024;
-            }
-            else if (measurement.ToUpper().Equals("KB"))
-            {
-                sizeInByte = size * 1024;
-            }
-            else if (measurement.ToUpper().Equals("B"))
-            {
-                sizeInByte = size;
-            }
-            else
+            if (sizeInByte is null)
             {
                 return new ValidationResult("Config Error, Measurement is invalid");
             }

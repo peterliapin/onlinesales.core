@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.DataAnnotations
 {
@@ -19,11 +20,8 @@ namespace OnlineSales.DataAnnotations
 
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            string fileSize;
             string maxFileSize;
-            string measurement;
-            int size;
-            long sizeInByte;
+            long? sizeInByte;
 
             if (type.Equals("Image"))
             {
@@ -40,33 +38,9 @@ namespace OnlineSales.DataAnnotations
                 return new ValidationResult("Config error, File Size is not available");
             }
 
-            measurement = maxFileSize[^2..];
-            fileSize = maxFileSize[..^2];
+            sizeInByte = StringHelper.GetSizeInBytesFromString(maxFileSize);
 
-            if (!measurement.All(char.IsLetter))
-            {
-                measurement = maxFileSize[^1..];
-                fileSize = maxFileSize[..^1];
-            }
-
-            if (!int.TryParse(fileSize, out size))
-            {
-                return new ValidationResult("Config error, File Size is invalid");
-            }
-
-            if (measurement.ToUpper().Equals("MB"))
-            {
-                sizeInByte = size * 1024 * 1024;
-            }
-            else if (measurement.ToUpper().Equals("KB"))
-            {
-                sizeInByte = size * 1024;
-            }
-            else if (measurement.ToUpper().Equals("B"))
-            {
-                sizeInByte = size;
-            }
-            else
+            if (sizeInByte is null)
             {
                 return new ValidationResult("Config Error, Measurement is invalid");
             }

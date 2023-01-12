@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -118,12 +119,39 @@ public class Program
 
         app.MapControllers();
 
+        SetImageUploadSizeLimit(app, builder);
+
         app.UseSpa(spa =>
         {
             // works out of the box, no configuration required
         });
 
         app.Run();
+    }
+
+    private static void SetImageUploadSizeLimit(WebApplication app, WebApplicationBuilder builder)
+    {
+        var maxUploadSizeConfig = builder.Configuration.GetValue<string>("Images:MaxSize");
+
+        if (string.IsNullOrEmpty(maxUploadSizeConfig))
+        {
+            throw new MissingConfigurationException("Image upload size is mandatory.");
+        }
+
+        long? maxUploadSize = StringHelper.GetSizeInBytesFromString(maxUploadSizeConfig);
+
+        if (maxUploadSize is null)
+        {
+            throw new MissingConfigurationException("Image upload size is invalid.");
+        }
+
+        app.UseWhen(
+            context => context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/images"),
+            appBuilder => appBuilder.Use(async (c, next) =>
+            {
+                c.Features.Get<IHttpMaxRequestBodySizeFeature>() !.MaxRequestBodySize = maxUploadSize;
+                await next();
+            }));
     }
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
