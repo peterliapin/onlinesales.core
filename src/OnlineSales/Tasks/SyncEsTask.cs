@@ -2,16 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Configuration;
 using System.Text;
-using System.Text.Json;
 using Elasticsearch.Net;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Tasks
 {
@@ -40,8 +38,6 @@ namespace OnlineSales.Tasks
             this.elasticClient = elasticClient;
         }
 
-        public override string Name => "SyncEsTask";
-
         public override string CronSchedule => taskConfig!.CronSchedule;
 
         public override int RetryCount => taskConfig!.RetryCount;
@@ -61,14 +57,14 @@ namespace OnlineSales.Tasks
                 if (entityState == EntityState.Added)
                 {
                     var createItem = new { index = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
-                    bulkPayload.AppendLine(JsonSerializer.Serialize(createItem));
+                    bulkPayload.AppendLine(JsonHelper.Serialize(createItem));
                     bulkPayload.AppendLine(item.Data);
                 }
 
                 if (entityState == EntityState.Deleted)
                 {
                     var deleteItem = new { delete = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
-                    bulkPayload.AppendLine(JsonSerializer.Serialize(deleteItem));
+                    bulkPayload.AppendLine(JsonHelper.Serialize(deleteItem));
                 }
             }
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -26,7 +25,13 @@ public abstract class ChangeLogTask : ITask
 
     public virtual string[] Entities { get; set; } = new[] { "Customer", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
 
-    public abstract string Name { get; }
+    public string Name
+    {
+        get
+        {
+            return this.GetType().Name;
+        }
+    }
 
     public abstract string CronSchedule { get; }
 

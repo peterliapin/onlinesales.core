@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using AutoMapper;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 
@@ -20,7 +21,12 @@ public class BaseTest : IDisposable
 
     public BaseTest()
     {
-        client = App.CreateClient();
+        client = App.CreateClient(
+            new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
         mapper = App.GetMapper();
         App.CleanDatabase();
     }
