@@ -10,7 +10,7 @@ using Quartz.Util;
 
 namespace OnlineSales.Plugin.Vsto;
 
-public class VstoLocalLinksWatcher
+public class VstoLocalLinksWatcher : IDisposable
 {
     public readonly string VstoLocalPath;
 
@@ -18,9 +18,7 @@ public class VstoLocalLinksWatcher
 
     private readonly IServiceCollection services;
 
-    #pragma warning disable S1450  
     private readonly FileSystemWatcher exeWatcher;
-    #pragma warning restore S1450
 
     private readonly Dictionary<string, ExeDirectory> exeDirs = new Dictionary<string, ExeDirectory>();
 
@@ -40,6 +38,11 @@ public class VstoLocalLinksWatcher
         exeWatcher.Renamed += HandleRenamed;
 
         exeWatcher.EnableRaisingEvents = true;
+    }
+
+    public void Dispose()
+    {
+        exeWatcher.Dispose();
     }
 
     private void HandleRenamed(object sender, RenamedEventArgs e)
@@ -104,7 +107,7 @@ public class VstoLocalLinksWatcher
                         }
                     }
 
-                    dbContext.SaveChanges();
+                    dbContext.SaveChangesAsync().Wait();
                 }                
             }
         }
@@ -124,7 +127,7 @@ public class VstoLocalLinksWatcher
                         dbContext.Remove(dbContext.Links.Single(l => l.Uid == link.Uid));
                     }
 
-                    dbContext.SaveChanges();
+                    dbContext.SaveChangesAsync().Wait();
                 }
             }
         }
@@ -147,7 +150,7 @@ public class VstoLocalLinksWatcher
                         }
                     }
 
-                    dbContext.SaveChanges();
+                    dbContext.SaveChangesAsync().Wait();
                 }
             }
         }
@@ -181,9 +184,7 @@ public class VstoLocalLinksWatcher
     {
         private readonly VstoLocalLinksWatcher linksWatcher;
 
-        #pragma warning disable S1450
         private readonly FileSystemWatcher watcher;
-        #pragma warning restore S1450
 
         private readonly Mutex linksMutex = new Mutex();
 
