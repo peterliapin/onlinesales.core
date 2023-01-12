@@ -149,7 +149,12 @@ public class Program
             context => context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/images"),
             appBuilder => appBuilder.Use(async (c, next) =>
             {
-                c.Features.Get<IHttpMaxRequestBodySizeFeature>() !.MaxRequestBodySize = maxUploadSize;
+                var feature = c.Features.Get<IHttpMaxRequestBodySizeFeature>();
+                if (feature is not null)
+                {
+                    feature.MaxRequestBodySize = maxUploadSize; 
+                }
+
                 await next();
             }));
     }
