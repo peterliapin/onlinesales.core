@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
@@ -112,7 +111,7 @@ public class ApiDbContext : DbContext
 
                 if (entityEntry.State == EntityState.Added)
                 {
-                    var entity = (BaseEntity)entityEntry.Entity;
+                    var entity = (BaseCreateByEntity)entityEntry.Entity;
                     entity.CreatedAt = entity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(entity.CreatedAt);
                     entity.CreatedByIp = string.IsNullOrEmpty(entity.CreatedByIp) ? httpContextHelper!.IpAddress : entity.CreatedByIp;
                     entity.CreatedByUserAgent = string.IsNullOrEmpty(entity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : entity.CreatedByUserAgent;

@@ -15,6 +15,8 @@ public class VstoPlugin : IPlugin, IPluginApplication
 {
     private IServiceCollection? services;
 
+    private VstoLocalLinksWatcher? localLinksWatcher;
+
     public static string VstoLocalPath { get; private set; } = string.Empty;
 
     public static PluginConfig Configuration { get; private set; } = new PluginConfig();
@@ -49,5 +51,7 @@ public class VstoPlugin : IPlugin, IPluginApplication
             FileProvider = new VstoFileProvider(VstoLocalPath, httpContextHelper, services!),
             ServeUnknownFileTypes = true,
         });
+
+        localLinksWatcher = new VstoLocalLinksWatcher(VstoLocalPath, Configuration.Vsto.RequestPath, services!);
     }
 }

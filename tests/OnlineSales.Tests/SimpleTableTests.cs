@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Linq.Expressions;
 using System.Text.Json;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +55,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
         var item = await GetTest<T>(testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.Set<ChangeLog>().FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added) !;
+        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added) !;
 
         result.Should().NotBeNull();
     }
@@ -78,7 +77,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
         var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.Set<ChangeLog>().FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified) !;
+        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified) !;
 
         result.Should().NotBeNull();
     }
@@ -108,7 +107,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
         await DeleteTest(testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.Set<ChangeLog>().FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted) !;
+        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted) !;
 
         result.Should().NotBeNull();
     }

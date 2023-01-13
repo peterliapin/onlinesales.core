@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Geography;
+using OnlineSales.Helpers;
 using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
@@ -32,8 +32,6 @@ public class SyncIpDetailsTask : ChangeLogTask
         this.ipDetailsService = ipDetailsService;
     }
 
-    public override string Name => "SyncIPDetailsTask";
-
     public override string CronSchedule => taskConfig!.CronSchedule;
 
     public override int RetryCount => taskConfig!.RetryCount;
@@ -44,30 +42,28 @@ public class SyncIpDetailsTask : ChangeLogTask
 
     internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
-        List<IpDetails> ipDetailsCollection = new ();
+        var ipDetailsCollection = new List<IpDetails>();
+        var ipList = GetDistinctIps(nextBatch);
+        var newIpCollection = GetNewIps(ipList!);
 
-        List<string> ipList = GetDistinctIps(nextBatch);
-
-        List<string> newIpCollection = GetNewIps(ipList!);
-
-        foreach (var ipItem in newIpCollection)
+        foreach (var ip in newIpCollection)
         {
-            if (string.IsNullOrEmpty(ipItem))
+            if (string.IsNullOrEmpty(ip))
             {
                 continue;
             }
 
-            var geoIpDetails = ipDetailsService.GetIPDetail(ipItem).Result;
+            var geoIpDetails = ipDetailsService.GetIPDetail(ip).Result;
 
             if (geoIpDetails == null)
             {
-                Log.Information("Ip {0} does not have any information", ipItem);
+                Log.Information("Ip {0} does not have any information", ip);
                 continue;
             }
 
             var ipDetails = new IpDetails()
             {
-                Ip = ipItem,
+                Ip = ip,
                 CityName = geoIpDetails!.City,
                 CountryCode = Enum.TryParse<Country>(geoIpDetails!.CountryCode2, out var countryCode) ? countryCode : Country.ZZ,
                 ContinentCode = Enum.TryParse<Continent>(geoIpDetails!.ContinentCode, out var continentCode) ? continentCode : Continent.ZZ,
@@ -89,7 +85,7 @@ public class SyncIpDetailsTask : ChangeLogTask
     {
         List<string> distinctIps;
 
-        var ipObjects = (from cL in changeLogs select JsonSerializer.Deserialize<IpObject>(cL.Data)).ToList();
+        var ipObjects = (from cL in changeLogs select JsonHelper.Deserialize<IpObject>(cL.Data)).ToList();
 
         var resultedIps = (from ip in ipObjects where !string.IsNullOrWhiteSpace(ip.CreatedByIp!) select ip.CreatedByIp).Union(from ip in ipObjects where !string.IsNullOrWhiteSpace(ip.UpdatedByIp!) select ip.UpdatedByIp).ToList();
 
@@ -105,7 +101,7 @@ public class SyncIpDetailsTask : ChangeLogTask
                  from di in ps.DefaultIfEmpty()
                  select new { NewIp = i, Ip = di?.Ip ?? string.Empty }).ToList();
 
-        List<string> newIps = (from dr in dbResults where dr.Ip == string.Empty select dr.NewIp).ToList();
+        var newIps = (from dr in dbResults where dr.Ip == string.Empty select dr.NewIp).ToList();
 
         return newIps;
     }
