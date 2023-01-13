@@ -19,7 +19,7 @@ public class LinkTests : BaseTest
 
         location.Should().NotBeNull();
 
-        var response = await GetTest("/l/" + link.Uid, HttpStatusCode.TemporaryRedirect, "Anonymous");
+        var response = await GetTest("/go/" + link.Uid, HttpStatusCode.TemporaryRedirect, "Anonymous");
 
         var destination = response.Headers?.Location?.AbsoluteUri ?? string.Empty;
 

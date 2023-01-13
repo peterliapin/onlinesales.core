@@ -38,7 +38,7 @@ public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto
 
     [HttpGet]
     [AllowAnonymous]
-    [Route("/l/{uid}")]
+    [Route("/go/{uid}")]
     public async Task<ActionResult> Follow(string uid)
     {
         var link = await (from l in dbContext.Links

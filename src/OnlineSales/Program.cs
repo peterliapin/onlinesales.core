@@ -59,6 +59,7 @@ public class Program
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
+        builder.Services.AddSingleton<ILockService, LockService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -388,7 +389,7 @@ public class Program
 
     private static void ConfigureTasks(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<ITask, CustomerScheduledEmail>();
+        builder.Services.AddScoped<ITask, CustomerScheduledEmailTask>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, SyncEsTask>();
     }

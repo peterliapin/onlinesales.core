@@ -11,13 +11,13 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tasks;
 
-public class CustomerScheduledEmail : ITask
+public class CustomerScheduledEmailTask : ITask
 {
     private readonly ApiDbContext dbContext;
     private readonly IEmailFromTemplateService emailFromTemplateService;
     private readonly TaskConfig? taskConfig = new TaskConfig();
 
-    public CustomerScheduledEmail(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration)
+    public CustomerScheduledEmailTask(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration)
     {
         this.dbContext = dbContext;
         this.emailFromTemplateService = emailFromTemplateService;
@@ -29,13 +29,19 @@ public class CustomerScheduledEmail : ITask
         }
     }
 
-    public string Name => "CustomerScheduledEmailTask";
-
     public string CronSchedule => taskConfig!.CronSchedule;
 
     public int RetryCount => taskConfig!.RetryCount;
 
     public int RetryInterval => taskConfig!.RetryInterval;
+
+    public string Name
+    {
+        get
+        {
+            return this.GetType().Name;
+        }
+    }
 
     public async Task<bool> Execute(TaskExecutionLog currentJob)
     {
