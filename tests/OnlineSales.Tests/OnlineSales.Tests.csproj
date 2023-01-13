@@ -36,10 +36,17 @@
   <ItemGroup>
     <Folder Include="TestEntities\" />
     <Folder Include="Environment\" />
-    <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Resources\" />
+    <None Remove="Resources\comments.csv" />
+    <None Remove="Resources\ImportFiles\commentsBasic.json" />
+    <None Remove="Resources\ImportFiles\commentsFull.csv" />
+    <None Remove="Resources\ImportFiles\commentsFull.json" />
+    <None Remove="Resources\ImportFiles\orderItems.csv" />
+    <None Remove="Resources\ImportFiles\orderItems.json" />
+    <None Remove="Resources\ImportFiles\orderItemsNoRef.csv" />
+    <None Remove="Resources\ImportFiles\orderItemsNoRef.json" />
     <None Remove="Resources\wavepoint.png" />
     <None Remove="Resources\wavepointModified.png" />
   </ItemGroup>
@@ -53,6 +60,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ImportFiles\orderItemsNoRef.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\orderItemsNoRef.json" />
+    <EmbeddedResource Include="Resources\ImportFiles\orderItems.json" />
+    <EmbeddedResource Include="Resources\ImportFiles\orderItems.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsFull.json" />
+    <EmbeddedResource Include="Resources\ImportFiles\commentsFull.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsBasic.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsBasic.json" />
     <EmbeddedResource Include="Resources\wavepoint.png" />
     <EmbeddedResource Include="Resources\wavepointModified.png" />
   </ItemGroup>

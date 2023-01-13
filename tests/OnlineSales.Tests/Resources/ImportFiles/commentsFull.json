@@ -1,0 +1,30 @@
+[
+  {
+    "id": 0,
+    "createdAt": "2023-01-04T08:38:30",
+    "updatedAt": null,
+    "authorName": "TestComment2",
+    "authorEmail": "TestAuthor2@wa.com",
+    "content": "TestContent2",
+    "postId": 1,
+    "parentId": null,
+    "createdByIp": "192.168.1.2",
+    "updatedByIp": null,
+    "createdByUserAgent": "TestAgent2",
+    "updatedByUserAgent": null
+  },
+  {
+    "id": 1,
+    "createdAt": null,
+    "updatedAt": "2023-01-06T09:36:16",
+    "authorName": "TestComment1",
+    "authorEmail": "TestAuthor1@wa.com",
+    "content": "TestContent1",
+    "postId": 1,
+    "parentId": null,
+    "createdByIp": "192.168.1.1",
+    "updatedByIp": "192.168.1.3",
+    "createdByUserAgent": "TestAgent1",
+    "updatedByUserAgent": "TestAgent3"
+  }
+]

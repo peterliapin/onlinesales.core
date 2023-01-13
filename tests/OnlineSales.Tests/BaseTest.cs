@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using AutoMapper;
 using FluentAssertions;
@@ -106,6 +107,13 @@ public class BaseTest : IDisposable
         return location;
     }
 
+    protected async Task PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    {
+        var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName, authToken);
+
+        response.StatusCode.Should().Be(expectedCode);
+    }
+
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
     {
         var response = await Request(HttpMethod.Patch, url, payload, authToken);
@@ -155,5 +163,54 @@ public class BaseTest : IDisposable
             result.CreatedByUserAgent.Should().BeNull();
             result.UpdatedByUserAgent.Should().BeNull();
         }
+    }
+
+    private Task<HttpResponseMessage> ImportRequest(HttpMethod method, string url, string importFileName, string authToken = "Success")
+    {
+        StringContent content;
+
+        var request = new HttpRequestMessage(method, url);
+
+        var file = GetCsvResouceContent(importFileName);
+
+        if (Path.GetExtension(importFileName) !.ToLower() == ".csv")
+        {
+            content = new StringContent(file!, Encoding.UTF8, "text/csv"); 
+        }
+        else
+        {
+            content = new StringContent(file!, Encoding.UTF8, "application/json");
+        }
+
+        request.Content = content;
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+        return client.SendAsync(request);
+    }
+
+    private string? GetCsvResouceContent(string fileName)
+    {
+        string? content = null;
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var resourcePath = assembly.GetManifestResourceNames()
+                .Single(str => str.EndsWith(fileName));
+
+        if (resourcePath is null)
+        {
+            return null;
+        }
+
+        var stream = assembly!.GetManifestResourceStream(resourcePath);
+        if (stream != null)
+        {
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                content = reader.ReadToEnd();
+            }
+        }
+
+        return content;
     }
 }
