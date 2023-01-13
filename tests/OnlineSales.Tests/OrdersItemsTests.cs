@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Text.Json;
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -232,6 +233,40 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
                 updatedOrderItem.CurrencyTotal.Should().Be(addedOrderItem.CurrencyTotal);
             }
         }
+    }
+
+    [Theory]
+    [InlineData("orderItems.csv", 3)]
+    [InlineData("orderItems.json", 3)]
+    public async Task ImportFileAddUpdateTest(string fileName, int expectedCount)
+    {
+        await CreateItem();
+        await PostImportTest(itemsUrl, fileName);
+
+        var allOrderItemsResponse = await GetTest(itemsUrl);
+        allOrderItemsResponse.Should().NotBeNull();
+
+        var content = await allOrderItemsResponse.Content.ReadAsStringAsync();
+        var allOrderItems = JsonSerializer.Deserialize<List<OrderItem>>(content);
+        allOrderItems.Should().NotBeNull();
+        allOrderItems!.Count.Should().Be(expectedCount);
+    }
+
+    [Theory]
+    [InlineData("orderItemsNoRef.csv", 1)]
+    [InlineData("orderItemsNoRef.json", 1)]
+    public async Task ImportFileNoOrderRefNotFoundTest(string fileName, int expectedCount)
+    {
+        await CreateItem();
+        await PostImportTest(itemsUrl, fileName, HttpStatusCode.NotFound);
+
+        var allOrderItemsResponse = await GetTest(itemsUrl);
+        allOrderItemsResponse.Should().NotBeNull();
+
+        var content = await allOrderItemsResponse.Content.ReadAsStringAsync();
+        var allOrderItems = JsonSerializer.Deserialize<List<OrderItem>>(content);
+        allOrderItems.Should().NotBeNull();
+        allOrderItems!.Count.Should().Be(expectedCount);
     }
 
     protected override async Task<(TestOrderItem, string)> CreateItem(int fkId)

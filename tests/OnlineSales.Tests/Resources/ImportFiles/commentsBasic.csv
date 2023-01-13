@@ -1,0 +1,3 @@
+id,createdAt,updatedAt,authorName,authorEmail,content,postId,parentId
+0,01/04/2023 08:38:30,,TestComment2,TestAuthor2@wa.com,TestContent2,1,
+1,01/04/2023 08:38:30,01/06/2023 09:36:16,TestComment1,TestAuthor1@wa.com,TestContent1,1,

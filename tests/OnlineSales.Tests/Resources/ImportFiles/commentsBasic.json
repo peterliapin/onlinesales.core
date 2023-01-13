@@ -1,0 +1,22 @@
+[
+  {
+    "id": 0,
+    "createdAt": "2023-01-04T08:38:30",
+    "updatedAt": null,
+    "authorName": "TestComment2",
+    "authorEmail": "TestAuthor2@wa.com",
+    "content": "TestContent2",
+    "postId": 1,
+    "parentId": null
+  },
+  {
+    "id": 1,
+    "createdAt": "2023-01-04T08:38:30",
+    "updatedAt": "2023-01-05T18:38:30",
+    "authorName": "TestComment1",
+    "authorEmail": "TestAuthor1@wa.com",
+    "content": "TestContent1",
+    "postId": 1,
+    "parentId": null
+  }
+]
