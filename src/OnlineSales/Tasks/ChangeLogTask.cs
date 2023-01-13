@@ -19,8 +19,6 @@ public abstract class ChangeLogTask : ITask
         this.configuration = configuration;
     }
 
-    public virtual int LogTaskRetryCount { get; set; } = 0;
-
     public virtual int ChangeLogBatchSize { get; set; } = 50;
 
     public virtual string[] Entities { get; set; } = new[] { "Customer", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
@@ -119,15 +117,17 @@ public abstract class ChangeLogTask : ITask
         if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Failed)
         {
             var failedTaskCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
-            if (failedTaskCount > 0 && failedTaskCount <= LogTaskRetryCount)
+            if (failedTaskCount > 0 && failedTaskCount <= RetryCount)
             {
                 // If this is a retry, get the same minId of last processed task to re-execute the same batch.
                 minLogId = lastProcessedTask.ChangeLogIdMin;
             }
             else
             {
-                // If all retries are completed get the next batch.
-                minLogId = lastProcessedTask.ChangeLogIdMax + 1;
+                // If all retries are completed then discontinue.
+                Log.Error($"Error in executing task {taskName} for entity {entity} from Id {lastProcessedTask.ChangeLogIdMin} to {lastProcessedTask.ChangeLogIdMax}");
+
+                return Enumerable.Empty<ChangeLog>().ToList();
             }
         }
         else if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Completed)
