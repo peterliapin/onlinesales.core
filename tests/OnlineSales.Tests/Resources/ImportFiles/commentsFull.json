@@ -15,7 +15,7 @@
   },
   {
     "id": 1,
-    "createdAt": null,
+    "createdAt": "2023-01-05T10:36:16",
     "updatedAt": "2023-01-06T09:36:16",
     "authorName": "TestComment1",
     "authorEmail": "TestAuthor1@wa.com",

@@ -86,27 +86,27 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         await CreateAndGetItemWithAuthentification("Anonymous");
         await PostImportTest(itemsUrl, fileName);
 
-        var updatedComment = await GetTest<Comment>($"{itemsUrl}/1");
+        var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
 
         updatedComment!.PostId.Should().Be(1);
         updatedComment!.AuthorName.Should().Be("TestComment1");
         updatedComment!.UpdatedAt.Should().Be(DateTime.Parse("01/06/2023 09:36:16"));
-        /*updatedComment!.CreatedAt.Should().BeAfter(DateTime.MinValue);
+        updatedComment!.CreatedAt.Should().Be(DateTime.Parse("01/05/2023 10:36:16"));
         updatedComment!.CreatedByIp.Should().Be("192.168.1.1");
         updatedComment!.UpdatedByIp.Should().Be("192.168.1.3");
         updatedComment!.CreatedByUserAgent.Should().Be("TestAgent1");
-        updatedComment!.UpdatedByUserAgent.Should().Be("TestAgent3");*/
+        updatedComment!.UpdatedByUserAgent.Should().Be("TestAgent3");
 
-        var newComment = await GetTest<Comment>($"{itemsUrl}/2");
+        var newComment = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
         newComment.Should().NotBeNull();
 
         newComment!.PostId.Should().Be(1);
         newComment!.AuthorName.Should().Be("TestComment2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-04T08:38:30"));
         newComment!.UpdatedAt.Should().BeNull();
-        /*newComment!.CreatedByIp.Should().Be("192.168.1.2");
-        newComment!.CreatedByUserAgent.Should().Be("TestAgent2");*/
+        newComment!.CreatedByIp.Should().Be("192.168.1.2");
+        newComment!.CreatedByUserAgent.Should().Be("TestAgent2");
     }
 
     protected override async Task<(TestComment, string)> CreateItem(int fkId)
