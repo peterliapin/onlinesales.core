@@ -251,11 +251,11 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var fkItemCreate = new TestCustomer();
+        var fkItemCreate = new TestContact();
 
-        var fkUrl = await PostTest("/api/customers", fkItemCreate);
+        var fkUrl = await PostTest("/api/contacts", fkItemCreate);
 
-        var fkItem = await GetTest<Customer>(fkUrl);
+        var fkItem = await GetTest<Contact>(fkUrl);
 
         fkItem.Should().NotBeNull();
 

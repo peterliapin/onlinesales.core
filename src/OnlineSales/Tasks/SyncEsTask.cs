@@ -44,7 +44,7 @@ namespace OnlineSales.Tasks
 
         public override int RetryInterval => taskConfig!.RetryInterval;
 
-        public override string[] Entities => new[] { "Customer", "Post" };
+        public override string[] Entities => new[] { "Contact", "Post" };
 
         internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {

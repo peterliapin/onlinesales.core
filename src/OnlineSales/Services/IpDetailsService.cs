@@ -25,7 +25,7 @@ public class IpDetailsService
         JsonHelper.Configure(SerializeOptions, JsonNamingConvention.SnakeCase);
     }
 
-    public async Task<IpDetailsDto?> GetIPDetail(string ip)
+    public async Task<IpDetailsDto?> GetIpDetails(string ip)
     {
         IpDetailsDto? ipDetailsDto;
 
@@ -50,7 +50,7 @@ public class IpDetailsService
         {
             var responseContent = await response.Content.ReadAsStringAsync();
 
-            throw new IPDetailsException(responseContent);
+            throw new IpDetailsException(responseContent);
         }
 
         return ipDetailsDto;

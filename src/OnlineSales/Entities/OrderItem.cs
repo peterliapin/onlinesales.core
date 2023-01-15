@@ -19,7 +19,7 @@ public class OrderItem : BaseEntity
 
     [JsonIgnore]
     [ForeignKey("OrderId")]
-    public virtual Order? Customer { get; set; }
+    public virtual Order? Contact { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the product as defined by vendor.

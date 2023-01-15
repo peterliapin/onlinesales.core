@@ -175,7 +175,7 @@ namespace OnlineSales.Migrations
                     b.ToTable("comment", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Customer", b =>
+            modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -258,16 +258,16 @@ namespace OnlineSales.Migrations
                         .HasColumnName("zip");
 
                     b.HasKey("Id")
-                        .HasName("pk_customer");
+                        .HasName("pk_contact");
 
                     b.HasIndex("Email")
                         .IsUnique()
-                        .HasDatabaseName("ix_customer_email");
+                        .HasDatabaseName("ix_contact_email");
 
-                    b.ToTable("customer", (string)null);
+                    b.ToTable("contact", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
+            modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -275,6 +275,10 @@ namespace OnlineSales.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("integer")
+                        .HasColumnName("contact_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -287,10 +291,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("CreatedByUserAgent")
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("customer_id");
 
                     b.Property<int>("ScheduleId")
                         .HasColumnType("integer")
@@ -313,15 +313,15 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_customer_email_schedule");
+                        .HasName("pk_contact_email_schedule");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_customer_email_schedule_customer_id");
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_contact_email_schedule_contact_id");
 
                     b.HasIndex("ScheduleId")
-                        .HasDatabaseName("ix_customer_email_schedule_schedule_id");
+                        .HasDatabaseName("ix_contact_email_schedule_schedule_id");
 
-                    b.ToTable("customer_email_schedule", (string)null);
+                    b.ToTable("contact_email_schedule", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
@@ -439,9 +439,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int?>("ContactId")
                         .HasColumnType("integer")
-                        .HasColumnName("customer_id");
+                        .HasColumnName("contact_id");
 
                     b.Property<string>("FromEmail")
                         .IsRequired()
@@ -859,13 +859,13 @@ namespace OnlineSales.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("currency_total");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int>("ContactId")
                         .HasColumnType("integer")
-                        .HasColumnName("customer_id");
+                        .HasColumnName("contact_id");
 
-                    b.Property<string>("CustomerIp")
+                    b.Property<string>("ContactIp")
                         .HasColumnType("text")
-                        .HasColumnName("customer_ip");
+                        .HasColumnName("contact_ip");
 
                     b.Property<string>("Data")
                         .HasColumnType("jsonb")
@@ -911,8 +911,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_order");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_order_contact_id");
 
                     b.ToTable("order", (string)null);
                 });
@@ -1154,23 +1154,23 @@ namespace OnlineSales.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
+            modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Customer", "Customer")
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_customer_email_schedule_customer_customer_id");
+                        .HasConstraintName("fk_contact_email_schedule_contact_contact_id");
 
                     b.HasOne("OnlineSales.Entities.EmailSchedule", "Schedule")
                         .WithMany()
                         .HasForeignKey("ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_customer_email_schedule_email_schedule_schedule_id");
+                        .HasConstraintName("fk_contact_email_schedule_email_schedule_schedule_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Contact");
 
                     b.Navigation("Schedule");
                 });
@@ -1213,26 +1213,26 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Customer", "Customer")
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_customer_customer_id");
+                        .HasConstraintName("fk_order_contact_contact_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Order", "Customer")
+                    b.HasOne("OnlineSales.Entities.Order", "Contact")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_item_order_order_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Post", b =>

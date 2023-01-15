@@ -69,7 +69,7 @@ public class Program
         ConfigureElasticSearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
-        ConfigureIPDetailsResolver(builder);
+        ConfigureIpDetailsResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
         ConfigureApiSettings(builder);
@@ -283,7 +283,7 @@ public class Program
         builder.Services.AddElasticsearch(elasticConfig);
     }
 
-    private static void ConfigureIPDetailsResolver(WebApplicationBuilder builder)
+    private static void ConfigureIpDetailsResolver(WebApplicationBuilder builder)
     {
         var geolocationApiConfig = builder.Configuration.GetSection("GeolocationApi");
 
@@ -389,7 +389,7 @@ public class Program
 
     private static void ConfigureTasks(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<ITask, CustomerScheduledEmailTask>();
+        builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, SyncEsTask>();
     }

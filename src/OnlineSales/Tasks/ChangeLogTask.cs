@@ -19,7 +19,7 @@ public abstract class ChangeLogTask : ITask
 
     public virtual int ChangeLogBatchSize { get; set; } = 50;
 
-    public virtual string[] Entities { get; set; } = new[] { "Customer", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
+    public virtual string[] Entities { get; set; } = new[] { "Contact", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
 
     public string Name
     {

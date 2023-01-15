@@ -64,14 +64,14 @@ public class AutoMapperProfiles : Profile
         CreateMap<EmailTemplate, EmailTemplateDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
-        CreateMap<CustomerCreateDto, Customer>().ReverseMap();
-        CreateMap<CustomerUpdateDto, Customer>()
+        CreateMap<ContactCreateDto, Contact>().ReverseMap();
+        CreateMap<ContactUpdateDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Customer, CustomerUpdateDto>()
+        CreateMap<Contact, ContactUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Customer, CustomerDetailsDto>()
+        CreateMap<Contact, ContactDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<CustomerImportDto, Customer>()
+        CreateMap<ContactImportDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();

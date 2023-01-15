@@ -1,4 +1,4 @@
-﻿// <copyright file="Customer.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="Contact.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Entities;
 
-[Table("customer")]
+[Table("contact")]
 [Index(nameof(Email), IsUnique = true)]
-public class Customer : BaseEntity
+public class Contact : BaseEntity
 {
     public string? LastName { get; set; }
 

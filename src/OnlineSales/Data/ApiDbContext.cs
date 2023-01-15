@@ -55,7 +55,7 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<Comment>? Comments { get; set; }
 
-    public virtual DbSet<Customer>? Customers { get; set; }
+    public virtual DbSet<Contact>? Contacts { get; set; }
 
     public virtual DbSet<Order>? Orders { get; set; }
 
@@ -71,7 +71,7 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<EmailTemplate>? EmailTemplates { get; set; }
 
-    public virtual DbSet<CustomerEmailSchedule>? CustomerEmailSchedules { get; set; }
+    public virtual DbSet<ContactEmailSchedule>? ContactEmailSchedules { get; set; }
 
     public virtual DbSet<EmailLog>? EmailLogs { get; set; }
 

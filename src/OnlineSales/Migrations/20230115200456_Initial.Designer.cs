@@ -12,18 +12,99 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20221213050859_UpdateEmailEntitiesForeignKeys")]
-    partial class UpdateEmailEntitiesForeignKeys
+    [Migration("20230115200456_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "7.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("OnlineSales.Entities.ChangeLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
+
+                    b.Property<int>("EntityState")
+                        .HasColumnType("integer")
+                        .HasColumnName("entity_state");
+
+                    b.Property<int>("ObjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("object_id");
+
+                    b.Property<string>("ObjectType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("object_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_change_log");
+
+                    b.ToTable("change_log", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.ChangeLogTaskLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChangeLogIdMax")
+                        .HasColumnType("integer")
+                        .HasColumnName("change_log_id_max");
+
+                    b.Property<int>("ChangeLogIdMin")
+                        .HasColumnType("integer")
+                        .HasColumnName("change_log_id_min");
+
+                    b.Property<int>("ChangesProcessed")
+                        .HasColumnType("integer")
+                        .HasColumnName("changes_processed");
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start");
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer")
+                        .HasColumnName("state");
+
+                    b.Property<string>("TaskName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("task_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_change_log_task_log");
+
+                    b.ToTable("change_log_task_log", (string)null);
+                });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
                 {
@@ -97,7 +178,7 @@ namespace OnlineSales.Migrations
                     b.ToTable("comment", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Customer", b =>
+            modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -130,10 +211,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<string>("Culture")
-                        .HasColumnType("text")
-                        .HasColumnName("culture");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text")
@@ -142,6 +219,10 @@ namespace OnlineSales.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("text")
                         .HasColumnName("first_name");
+
+                    b.Property<string>("Language")
+                        .HasColumnType("text")
+                        .HasColumnName("language");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text")
@@ -180,12 +261,16 @@ namespace OnlineSales.Migrations
                         .HasColumnName("zip");
 
                     b.HasKey("Id")
-                        .HasName("pk_customer");
+                        .HasName("pk_contact");
 
-                    b.ToTable("customer", (string)null);
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_contact_email");
+
+                    b.ToTable("contact", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
+            modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -193,6 +278,10 @@ namespace OnlineSales.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("integer")
+                        .HasColumnName("contact_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -205,10 +294,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("CreatedByUserAgent")
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("customer_id");
 
                     b.Property<int>("ScheduleId")
                         .HasColumnType("integer")
@@ -231,15 +316,55 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_customer_email_schedule");
+                        .HasName("pk_contact_email_schedule");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_customer_email_schedule_customer_id");
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_contact_email_schedule_contact_id");
 
                     b.HasIndex("ScheduleId")
-                        .HasDatabaseName("ix_customer_email_schedule_schedule_id");
+                        .HasDatabaseName("ix_contact_email_schedule_schedule_id");
 
-                    b.ToTable("customer_email_schedule", (string)null);
+                    b.ToTable("contact_email_schedule", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("Disposable")
+                        .HasColumnType("boolean")
+                        .HasColumnName("disposable");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<bool>("Shared")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shared");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_domain");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_domain_name");
+
+                    b.ToTable("domain", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
@@ -317,9 +442,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int?>("ContactId")
                         .HasColumnType("integer")
-                        .HasColumnName("customer_id");
+                        .HasColumnName("contact_id");
 
                     b.Property<string>("FromEmail")
                         .IsRequired()
@@ -569,6 +694,140 @@ namespace OnlineSales.Migrations
                     b.ToTable("image", (string)null);
                 });
 
+            modelBuilder.Entity("OnlineSales.Entities.IpDetails", b =>
+                {
+                    b.Property<string>("Ip")
+                        .HasColumnType("text")
+                        .HasColumnName("ip");
+
+                    b.Property<string>("CityName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("city_name");
+
+                    b.Property<int>("ContinentCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("continent_code");
+
+                    b.Property<int>("CountryCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("country_code");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.HasKey("Ip")
+                        .HasName("pk_ip_details");
+
+                    b.ToTable("ip_details", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Link", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("destination");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Uid")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("uid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_link");
+
+                    b.HasIndex("Uid")
+                        .IsUnique()
+                        .HasDatabaseName("ix_link_uid");
+
+                    b.ToTable("link", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("destination");
+
+                    b.Property<int>("LinkId")
+                        .HasColumnType("integer")
+                        .HasColumnName("link_id");
+
+                    b.Property<string>("Referrer")
+                        .HasColumnType("text")
+                        .HasColumnName("referrer");
+
+                    b.HasKey("Id")
+                        .HasName("pk_link_log");
+
+                    b.HasIndex("LinkId")
+                        .HasDatabaseName("ix_link_log_link_id");
+
+                    b.ToTable("link_log", (string)null);
+                });
+
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -603,13 +862,13 @@ namespace OnlineSales.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("currency_total");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int>("ContactId")
                         .HasColumnType("integer")
-                        .HasColumnName("customer_id");
+                        .HasColumnName("contact_id");
 
-                    b.Property<string>("CustomerIp")
+                    b.Property<string>("ContactIp")
                         .HasColumnType("text")
-                        .HasColumnName("customer_ip");
+                        .HasColumnName("contact_ip");
 
                     b.Property<string>("Data")
                         .HasColumnType("jsonb")
@@ -655,8 +914,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_order");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_order_customer_id");
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_order_contact_id");
 
                     b.ToTable("order", (string)null);
                 });
@@ -833,6 +1092,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_post");
 
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_post_slug");
+
                     b.ToTable("post", (string)null);
                 });
 
@@ -853,18 +1116,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("comment");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
                     b.Property<int>("RetryCount")
                         .HasColumnType("integer")
                         .HasColumnName("retry_count");
@@ -880,18 +1131,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("TaskName")
                         .HasColumnType("text")
                         .HasColumnName("task_name");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
                         .HasName("pk_task_execution_log");
@@ -918,23 +1157,23 @@ namespace OnlineSales.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.CustomerEmailSchedule", b =>
+            modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Customer", "Customer")
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_customer_email_schedule_customer_customer_id");
+                        .HasConstraintName("fk_contact_email_schedule_contact_contact_id");
 
                     b.HasOne("OnlineSales.Entities.EmailSchedule", "Schedule")
                         .WithMany()
                         .HasForeignKey("ScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_customer_email_schedule_email_schedule_schedule_id");
+                        .HasConstraintName("fk_contact_email_schedule_email_schedule_schedule_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Contact");
 
                     b.Navigation("Schedule");
                 });
@@ -963,28 +1202,40 @@ namespace OnlineSales.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Order", b =>
+            modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Customer", "Customer")
+                    b.HasOne("OnlineSales.Entities.Link", "Link")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("LinkId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_order_customer_customer_id");
+                        .HasConstraintName("fk_link_log_link_link_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Link");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Order", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_order_contact_contact_id");
+
+                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Order", "Customer")
+                    b.HasOne("OnlineSales.Entities.Order", "Contact")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_item_order_order_id");
 
-                    b.Navigation("Customer");
+                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Post", b =>

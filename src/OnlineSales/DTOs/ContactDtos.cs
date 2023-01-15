@@ -1,4 +1,4 @@
-// <copyright file="CustomerDtos.cs" company="WavePoint Co. Ltd.">
+// <copyright file="ContactDtos.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -7,7 +7,7 @@ using CsvHelper.Configuration.Attributes;
 
 namespace OnlineSales.DTOs;
 
-public abstract class BaseCustomerDto
+public abstract class BaseContactDto
 {
     public string? LastName { get; set; }
 
@@ -32,20 +32,20 @@ public abstract class BaseCustomerDto
     public string? Language { get; set; }
 }
 
-public class CustomerCreateDto : BaseCustomerDto
+public class ContactCreateDto : BaseContactDto
 {
     [Required]
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
 }
 
-public class CustomerUpdateDto : BaseCustomerDto
+public class ContactUpdateDto : BaseContactDto
 {
     [EmailAddress]
     public string? Email { get; set; }
 }
 
-public class CustomerDetailsDto : CustomerCreateDto
+public class ContactDetailsDto : ContactCreateDto
 {
     public int Id { get; set; }
 
@@ -54,7 +54,7 @@ public class CustomerDetailsDto : CustomerCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class CustomerImportDto : CustomerCreateDto
+public class ContactImportDto : ContactCreateDto
 {
     [Optional]
     public int? Id { get; set; }

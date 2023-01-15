@@ -1,4 +1,4 @@
-﻿// <copyright file="CustomerEmailSchedule.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="ContactEmailSchedule.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -14,18 +14,18 @@ namespace OnlineSales.Entities
         Completed = 1,
     }
 
-    [Table("customer_email_schedule")]
-    public class CustomerEmailSchedule : BaseEntity
+    [Table("contact_email_schedule")]
+    public class ContactEmailSchedule : BaseEntity
     {
         /// <summary>
-        /// Gets or sets reference to the customer table.
+        /// Gets or sets reference to the contact table.
         /// </summary>
         [Required]
-        public int CustomerId { get; set; }
+        public int ContactId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey("CustomerId")]
-        public virtual Customer? Customer { get; set; }
+        [ForeignKey("ContactId")]
+        public virtual Contact? Contact { get; set; }
 
         /// <summary>
         /// Gets or sets reference to the EmailSchedule table.

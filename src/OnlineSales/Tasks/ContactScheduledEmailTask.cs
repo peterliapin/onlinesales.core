@@ -1,4 +1,4 @@
-﻿// <copyright file="CustomerScheduledEmail.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="ContactScheduledEmailTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -11,18 +11,18 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tasks;
 
-public class CustomerScheduledEmailTask : ITask
+public class ContactScheduledEmailTask : ITask
 {
     private readonly ApiDbContext dbContext;
     private readonly IEmailFromTemplateService emailFromTemplateService;
     private readonly TaskConfig? taskConfig = new TaskConfig();
 
-    public CustomerScheduledEmailTask(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration)
+    public ContactScheduledEmailTask(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration)
     {
         this.dbContext = dbContext;
         this.emailFromTemplateService = emailFromTemplateService;
 
-        var config = configuration.GetSection("Tasks:CustomerScheduledEmail") !.Get<TaskConfig>();
+        var config = configuration.GetSection("Tasks:ContactScheduledEmail") !.Get<TaskConfig>();
         if (config is not null)
         {
             taskConfig = config;
@@ -47,10 +47,10 @@ public class CustomerScheduledEmailTask : ITask
     {
         try
         {
-            // Load all the customer schedules in CustomerEmailSchedule table by pending status
-            var schedules = dbContext.CustomerEmailSchedules!
+            // Load all the contact schedules in ContactEmailSchedule table by pending status
+            var schedules = dbContext.ContactEmailSchedules!
                 .Include(c => c.Schedule)
-                .Include(c => c.Customer)
+                .Include(c => c.Contact)
                 .Where(s => s.Status == ScheduleStatus.Pending).ToList();
 
             foreach (var schedule in schedules)
@@ -60,7 +60,7 @@ public class CustomerScheduledEmailTask : ITask
 
                 var lastEmailLog = dbContext.EmailLogs!.Where(
                         e => e.ScheduleId == schedule.ScheduleId &&
-                        e.CustomerId == schedule.CustomerId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+                        e.ContactId == schedule.ContactId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
 
                 var lastEmailTemplate = lastEmailLog is not null
                     ? dbContext.EmailTemplates!.FirstOrDefault(e => e.Id == lastEmailLog!.TemplateId)
@@ -71,7 +71,7 @@ public class CustomerScheduledEmailTask : ITask
                 {
                     var emailNotSentCount = dbContext.EmailLogs!.Count(
                             e => e.ScheduleId == schedule.ScheduleId
-                            && e.CustomerId == schedule.CustomerId
+                            && e.ContactId == schedule.ContactId
                             && e.TemplateId == lastEmailLog.TemplateId
                             && e.Status == EmailStatus.NotSent);
 
@@ -92,11 +92,11 @@ public class CustomerScheduledEmailTask : ITask
                     nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate!, schedule.Schedule!.GroupId);
                 }
 
-                // All emails in the schedule are sent for the given customer.
+                // All emails in the schedule are sent for the given contact.
                 if (nextEmailTemplateToSend is null)
                 {
-                    var customerSchedule = dbContext.CustomerEmailSchedules!.FirstOrDefault(c => c.Id == schedule.Id);
-                    customerSchedule!.Status = ScheduleStatus.Completed;
+                    var contactSchedule = dbContext.ContactEmailSchedules!.FirstOrDefault(c => c.Id == schedule.Id);
+                    contactSchedule!.Status = ScheduleStatus.Completed;
                     await dbContext.SaveChangesAsync();
 
                     break;
@@ -111,7 +111,7 @@ public class CustomerScheduledEmailTask : ITask
 
                     if (executeNow)
                     {
-                        await emailFromTemplateService.SendToCustomerAsync(schedule.CustomerId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                        await emailFromTemplateService.SendToContactAsync(schedule.ContactId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
                     }
                 }
             }
@@ -120,7 +120,7 @@ public class CustomerScheduledEmailTask : ITask
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Error occurred when executing customer scheduled task in task runner {currentJob.Id}");
+            Log.Error(ex, $"Error occurred when executing contact scheduled task in task runner {currentJob.Id}");
             return false;
         }
     }
@@ -145,7 +145,7 @@ public class CustomerScheduledEmailTask : ITask
 
     private Dictionary<string, string> GetTemplateArguments()
     {
-        // TODO: customer based template arguments
+        // TODO: contact based template arguments
         // Get related variable dictionary from variable service.
         // Add any required scope based variables into the dictionary.
         return new Dictionary<string, string> { { "Key", "Value" } };
@@ -161,11 +161,11 @@ public class CustomerScheduledEmailTask : ITask
         return false;
     }
 
-    private DateTime? GetNextExecutionTime(CustomerEmailSchedule schedule, int retryDelay, EmailLog? lastEmailLog)
+    private DateTime? GetNextExecutionTime(ContactEmailSchedule schedule, int retryDelay, EmailLog? lastEmailLog)
     {
-        var customerSchedule = JsonSerializer.Deserialize<Schedule>(schedule.Schedule!.Schedule);
-        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + schedule.Customer!.Timezone!.Value;
-        var lastRunTime = lastEmailLog is null ? schedule.Customer!.CreatedAt : lastEmailLog.CreatedAt;
+        var contactSchedule = JsonSerializer.Deserialize<Schedule>(schedule.Schedule!.Schedule);
+        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + schedule.Contact!.Timezone!.Value;
+        var lastRunTime = lastEmailLog is null ? schedule.Contact!.CreatedAt : lastEmailLog.CreatedAt;
 
         // If a retry scenario, adding the retry interval. No need to evaluate schedule.
         if (retryDelay > 0)
@@ -174,9 +174,9 @@ public class CustomerScheduledEmailTask : ITask
         }
 
         // Evaluate CRON based schedule
-        if (!string.IsNullOrEmpty(customerSchedule!.Cron))
+        if (!string.IsNullOrEmpty(contactSchedule!.Cron))
         {
-            Quartz.CronExpression expression = new Quartz.CronExpression(customerSchedule.Cron);
+            Quartz.CronExpression expression = new Quartz.CronExpression(contactSchedule.Cron);
 
             var nextRunTimeForUser = expression.GetNextValidTimeAfter(lastRunTime.AddMinutes(-userToServerTimeZoneOffset));
             var nextRunTime = nextRunTimeForUser!.Value.AddMinutes(userToServerTimeZoneOffset);
@@ -187,17 +187,17 @@ public class CustomerScheduledEmailTask : ITask
         {
             // Evaluate custom scheudle based on day and time.
 
-            var days = customerSchedule.Day!.Split(',').Select(int.Parse).ToArray();
+            var days = contactSchedule.Day!.Split(',').Select(int.Parse).ToArray();
 
             var emailSentCount = dbContext.EmailLogs!.Count(
                             e => e.ScheduleId == schedule.ScheduleId
-                            && e.CustomerId == schedule.CustomerId
+                            && e.ContactId == schedule.ContactId
                             && e.Status == EmailStatus.Sent);
 
             // Skip the days already the mail is sent 
-            var nextRunDate = schedule.Customer!.CreatedAt.AddDays(days[emailSentCount]);
+            var nextRunDate = schedule.Contact!.CreatedAt.AddDays(days[emailSentCount]);
             // Add given time in the schedule + user timezone adjustment.
-            var nextRunDateTime = DateOnly.FromDateTime(nextRunDate).ToDateTime(customerSchedule!.Time!.Value).AddMinutes(userToServerTimeZoneOffset);
+            var nextRunDateTime = DateOnly.FromDateTime(nextRunDate).ToDateTime(contactSchedule!.Time!.Value).AddMinutes(userToServerTimeZoneOffset);
 
             return DateTime.SpecifyKind(nextRunDateTime, DateTimeKind.Utc);
         }

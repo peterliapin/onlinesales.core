@@ -20,7 +20,7 @@ public class SyncIpDetailsTask : ChangeLogTask
     public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IpDetailsService ipDetailsService)
         : base(dbContext)
     {
-        var config = configuration.GetSection("Tasks:SyncIPDetailsTask") !.Get<TaskConfig>();
+        var config = configuration.GetSection("Tasks:SyncIpDetailsTask") !.Get<TaskConfig>();
         if (config is not null)
         {
             taskConfig = config;
@@ -35,7 +35,7 @@ public class SyncIpDetailsTask : ChangeLogTask
 
     public override int RetryInterval => taskConfig!.RetryInterval;
 
-    public override string[] Entities => new[] { "Customer", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
+    public override string[] Entities => new[] { "Contact", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
 
     internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
@@ -50,7 +50,7 @@ public class SyncIpDetailsTask : ChangeLogTask
                 continue;
             }
 
-            var geoIpDetails = ipDetailsService.GetIPDetail(ip).Result;
+            var geoIpDetails = ipDetailsService.GetIpDetails(ip).Result;
 
             if (geoIpDetails == null)
             {

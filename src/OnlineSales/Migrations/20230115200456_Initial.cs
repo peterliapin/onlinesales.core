@@ -7,13 +7,49 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OnlineSales.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "customer",
+                name: "change_log",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    objecttype = table.Column<string>(name: "object_type", type: "text", nullable: false),
+                    objectid = table.Column<int>(name: "object_id", type: "integer", nullable: false),
+                    entitystate = table.Column<int>(name: "entity_state", type: "integer", nullable: false),
+                    data = table.Column<string>(type: "jsonb", nullable: false),
+                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_change_log", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "change_log_task_log",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    taskname = table.Column<string>(name: "task_name", type: "text", nullable: false),
+                    changelogidmin = table.Column<int>(name: "change_log_id_min", type: "integer", nullable: false),
+                    changelogidmax = table.Column<int>(name: "change_log_id_max", type: "integer", nullable: false),
+                    state = table.Column<int>(type: "integer", nullable: false),
+                    start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    changesprocessed = table.Column<int>(name: "changes_processed", type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_change_log_task_log", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "contact",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -29,7 +65,7 @@ namespace OnlineSales.Migrations
                     location = table.Column<string>(type: "text", nullable: true),
                     phone = table.Column<string>(type: "text", nullable: true),
                     timezone = table.Column<int>(type: "integer", nullable: true),
-                    culture = table.Column<string>(type: "text", nullable: true),
+                    language = table.Column<string>(type: "text", nullable: true),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
                     createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
                     createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
@@ -39,7 +75,24 @@ namespace OnlineSales.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_customer", x => x.id);
+                    table.PrimaryKey("pk_contact", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "domain",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    shared = table.Column<bool>(type: "boolean", nullable: false),
+                    disposable = table.Column<bool>(type: "boolean", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
+                    updatedat = table.Column<DateTime>(name: "updated_at", type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_domain", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -69,7 +122,7 @@ namespace OnlineSales.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     scheduleid = table.Column<int>(name: "schedule_id", type: "integer", nullable: true),
-                    customerid = table.Column<int>(name: "customer_id", type: "integer", nullable: true),
+                    contactid = table.Column<int>(name: "contact_id", type: "integer", nullable: true),
                     templateid = table.Column<int>(name: "template_id", type: "integer", nullable: true),
                     subject = table.Column<string>(type: "text", nullable: false),
                     recipient = table.Column<string>(type: "text", nullable: false),
@@ -113,6 +166,43 @@ namespace OnlineSales.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ip_details",
+                columns: table => new
+                {
+                    ip = table.Column<string>(type: "text", nullable: false),
+                    continentcode = table.Column<int>(name: "continent_code", type: "integer", nullable: false),
+                    countrycode = table.Column<int>(name: "country_code", type: "integer", nullable: false),
+                    cityname = table.Column<string>(name: "city_name", type: "text", nullable: false),
+                    latitude = table.Column<double>(type: "double precision", nullable: false),
+                    longitude = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_ip_details", x => x.ip);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "link",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    uid = table.Column<string>(type: "text", nullable: false),
+                    destination = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
+                    createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
+                    createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
+                    updatedat = table.Column<DateTime>(name: "updated_at", type: "timestamp with time zone", nullable: true),
+                    updatedbyip = table.Column<string>(name: "updated_by_ip", type: "text", nullable: true),
+                    updatedbyuseragent = table.Column<string>(name: "updated_by_user_agent", type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_link", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "post",
                 columns: table => new
                 {
@@ -153,13 +243,7 @@ namespace OnlineSales.Migrations
                     actualexecutiontime = table.Column<DateTime>(name: "actual_execution_time", type: "timestamp with time zone", nullable: false),
                     status = table.Column<int>(type: "integer", nullable: false),
                     retrycount = table.Column<int>(name: "retry_count", type: "integer", nullable: false),
-                    comment = table.Column<string>(type: "text", nullable: true),
-                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
-                    createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
-                    createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
-                    updatedat = table.Column<DateTime>(name: "updated_at", type: "timestamp with time zone", nullable: true),
-                    updatedbyip = table.Column<string>(name: "updated_by_ip", type: "text", nullable: true),
-                    updatedbyuseragent = table.Column<string>(name: "updated_by_user_agent", type: "text", nullable: true)
+                    comment = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -172,8 +256,8 @@ namespace OnlineSales.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    customerid = table.Column<int>(name: "customer_id", type: "integer", nullable: false),
-                    customerip = table.Column<string>(name: "customer_ip", type: "text", nullable: true),
+                    contactid = table.Column<int>(name: "contact_id", type: "integer", nullable: false),
+                    contactip = table.Column<string>(name: "contact_ip", type: "text", nullable: true),
                     refno = table.Column<string>(name: "ref_no", type: "text", nullable: false),
                     ordernumber = table.Column<string>(name: "order_number", type: "text", nullable: true),
                     total = table.Column<decimal>(type: "numeric", nullable: false),
@@ -195,9 +279,9 @@ namespace OnlineSales.Migrations
                 {
                     table.PrimaryKey("pk_order", x => x.id);
                     table.ForeignKey(
-                        name: "fk_order_customer_customer_id",
-                        column: x => x.customerid,
-                        principalTable: "customer",
+                        name: "fk_order_contact_contact_id",
+                        column: x => x.contactid,
+                        principalTable: "contact",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -210,7 +294,6 @@ namespace OnlineSales.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     schedule = table.Column<string>(type: "text", nullable: false),
                     groupid = table.Column<int>(name: "group_id", type: "integer", nullable: false),
-                    emailgroupid = table.Column<int>(name: "email_group_id", type: "integer", nullable: true),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
                     createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
                     createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true),
@@ -222,10 +305,11 @@ namespace OnlineSales.Migrations
                 {
                     table.PrimaryKey("pk_email_schedule", x => x.id);
                     table.ForeignKey(
-                        name: "fk_email_schedule_email_group_email_group_id",
-                        column: x => x.emailgroupid,
+                        name: "fk_email_schedule_email_group_group_id",
+                        column: x => x.groupid,
                         principalTable: "email_group",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -257,6 +341,30 @@ namespace OnlineSales.Migrations
                         name: "fk_email_template_email_group_group_id",
                         column: x => x.groupid,
                         principalTable: "email_group",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "link_log",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    linkid = table.Column<int>(name: "link_id", type: "integer", nullable: false),
+                    destination = table.Column<string>(type: "text", nullable: false),
+                    referrer = table.Column<string>(type: "text", nullable: true),
+                    createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
+                    createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
+                    createdbyuseragent = table.Column<string>(name: "created_by_user_agent", type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_link_log", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_link_log_link_link_id",
+                        column: x => x.linkid,
+                        principalTable: "link",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -329,14 +437,13 @@ namespace OnlineSales.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "customer_email_schedule",
+                name: "contact_email_schedule",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    customerid = table.Column<int>(name: "customer_id", type: "integer", nullable: false),
+                    contactid = table.Column<int>(name: "contact_id", type: "integer", nullable: false),
                     scheduleid = table.Column<int>(name: "schedule_id", type: "integer", nullable: false),
-                    emailscheduleid = table.Column<int>(name: "email_schedule_id", type: "integer", nullable: true),
                     status = table.Column<int>(type: "integer", nullable: false),
                     createdat = table.Column<DateTime>(name: "created_at", type: "timestamp with time zone", nullable: false),
                     createdbyip = table.Column<string>(name: "created_by_ip", type: "text", nullable: true),
@@ -347,18 +454,19 @@ namespace OnlineSales.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_customer_email_schedule", x => x.id);
+                    table.PrimaryKey("pk_contact_email_schedule", x => x.id);
                     table.ForeignKey(
-                        name: "fk_customer_email_schedule_customer_customer_id",
-                        column: x => x.customerid,
-                        principalTable: "customer",
+                        name: "fk_contact_email_schedule_contact_contact_id",
+                        column: x => x.contactid,
+                        principalTable: "contact",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_customer_email_schedule_email_schedule_email_schedule_id",
-                        column: x => x.emailscheduleid,
+                        name: "fk_contact_email_schedule_email_schedule_schedule_id",
+                        column: x => x.scheduleid,
                         principalTable: "email_schedule",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -372,19 +480,31 @@ namespace OnlineSales.Migrations
                 column: "post_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_customer_email_schedule_customer_id",
-                table: "customer_email_schedule",
-                column: "customer_id");
+                name: "ix_contact_email",
+                table: "contact",
+                column: "email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_customer_email_schedule_email_schedule_id",
-                table: "customer_email_schedule",
-                column: "email_schedule_id");
+                name: "ix_contact_email_schedule_contact_id",
+                table: "contact_email_schedule",
+                column: "contact_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_email_schedule_email_group_id",
+                name: "ix_contact_email_schedule_schedule_id",
+                table: "contact_email_schedule",
+                column: "schedule_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_domain_name",
+                table: "domain",
+                column: "name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_email_schedule_group_id",
                 table: "email_schedule",
-                column: "email_group_id");
+                column: "group_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_email_template_group_id",
@@ -392,24 +512,50 @@ namespace OnlineSales.Migrations
                 column: "group_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_order_customer_id",
+                name: "ix_link_uid",
+                table: "link",
+                column: "uid",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_link_log_link_id",
+                table: "link_log",
+                column: "link_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_order_contact_id",
                 table: "order",
-                column: "customer_id");
+                column: "contact_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_order_item_order_id",
                 table: "order_item",
                 column: "order_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_post_slug",
+                table: "post",
+                column: "slug",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "change_log");
+
+            migrationBuilder.DropTable(
+                name: "change_log_task_log");
+
+            migrationBuilder.DropTable(
                 name: "comment");
 
             migrationBuilder.DropTable(
-                name: "customer_email_schedule");
+                name: "contact_email_schedule");
+
+            migrationBuilder.DropTable(
+                name: "domain");
 
             migrationBuilder.DropTable(
                 name: "email_log");
@@ -419,6 +565,12 @@ namespace OnlineSales.Migrations
 
             migrationBuilder.DropTable(
                 name: "image");
+
+            migrationBuilder.DropTable(
+                name: "ip_details");
+
+            migrationBuilder.DropTable(
+                name: "link_log");
 
             migrationBuilder.DropTable(
                 name: "order_item");
@@ -433,13 +585,16 @@ namespace OnlineSales.Migrations
                 name: "email_schedule");
 
             migrationBuilder.DropTable(
+                name: "link");
+
+            migrationBuilder.DropTable(
                 name: "order");
 
             migrationBuilder.DropTable(
                 name: "email_group");
 
             migrationBuilder.DropTable(
-                name: "customer");
+                name: "contact");
         }
     }
 }

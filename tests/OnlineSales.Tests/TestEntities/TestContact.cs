@@ -1,4 +1,4 @@
-﻿// <copyright file="TestCustomer.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="TestContact.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -6,10 +6,10 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestCustomer : CustomerCreateDto
+public class TestContact : ContactCreateDto
 {
-    public TestCustomer(string uid = "")
+    public TestContact(string uid = "")
     {
-        Email = $"customer{uid}@test.net";
+        Email = $"contact{uid}@test.net";
     }
 }

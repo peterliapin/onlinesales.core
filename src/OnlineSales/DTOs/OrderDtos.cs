@@ -10,7 +10,7 @@ namespace OnlineSales.DTOs;
 public class OrderCreateDto
 {
     [Required]
-    public int CustomerId { get; set; }
+    public int ContactId { get; set; }
 
     [Required]
     public string RefNo { get; set; } = string.Empty;

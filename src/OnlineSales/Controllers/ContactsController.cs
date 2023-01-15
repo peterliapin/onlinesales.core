@@ -1,4 +1,4 @@
-// <copyright file="CustomersController.cs" company="WavePoint Co. Ltd.">
+// <copyright file="ContactsController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -15,9 +15,9 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class CustomersController : BaseControllerWithImport<Customer, CustomerCreateDto, CustomerUpdateDto, CustomerDetailsDto, CustomerImportDto>
+public class ContactsController : BaseControllerWithImport<Contact, ContactCreateDto, ContactUpdateDto, ContactDetailsDto, ContactImportDto>
 {
-    public CustomersController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public ContactsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         : base(dbContext, mapper, apiSettingsConfig)
     {
     }

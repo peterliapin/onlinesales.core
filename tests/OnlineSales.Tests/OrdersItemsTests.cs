@@ -287,15 +287,15 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var customerCreate = new TestCustomer();
+        var contactCreate = new TestContact();
 
-        var customerUrl = await PostTest("/api/customers", customerCreate);
+        var contactUrl = await PostTest("/api/contacts", contactCreate);
 
-        var customer = await GetTest<Customer>(customerUrl);
+        var contact = await GetTest<Contact>(contactUrl);
 
-        customer.Should().NotBeNull();
+        contact.Should().NotBeNull();
 
-        var orderCreate = new TestOrder(string.Empty, customer!.Id);
+        var orderCreate = new TestOrder(string.Empty, contact!.Id);
 
         var orderUrl = await PostTest("/api/orders", orderCreate);
 

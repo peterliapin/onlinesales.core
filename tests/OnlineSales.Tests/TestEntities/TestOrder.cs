@@ -9,12 +9,12 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestOrder : OrderCreateDto
 {
-    public TestOrder(string uid = "", int customerId = 0)
+    public TestOrder(string uid = "", int contactId = 0)
     {
         RefNo = $"1000{uid}";
         Currency = "USD";
         ExchangeRate = 2;
-        CustomerId = customerId;
+        ContactId = contactId;
     }
 }
 
