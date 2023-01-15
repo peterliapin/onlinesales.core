@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
@@ -85,13 +85,15 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<LinkLog>? LinkLogs { get; set; }
 
+    public virtual DbSet<Domain>? Domains { get; set; }
+
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         Dictionary<EntityEntry, ChangeLog> changes = new ();
 
         var entries = ChangeTracker
        .Entries()
-       .Where(e => (e.Entity is BaseCreateByEntity) && (
+       .Where(e => (e.Entity is BaseEntityWithId) && (
                e.State == EntityState.Added
                || e.State == EntityState.Modified
                || e.State == EntityState.Deleted));
@@ -141,6 +143,7 @@ public class ApiDbContext : DbContext
                 {
                     ObjectType = entityEntry.Entity.GetType().Name,
                     EntityState = entityEntry.State,
+                    CreatedAt = DateTime.UtcNow,
                 };
             }
 
@@ -150,7 +153,7 @@ public class ApiDbContext : DbContext
             {
                 // save object id which we only recieve after SaveChanges (for new records)
                 change.Value.ObjectId = ((BaseEntityWithId)change.Key.Entity).Id;
-                change.Value.Data = JsonSerializer.Serialize(change.Key.Entity);
+                change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
             }
 
             ChangeLogs!.AddRange(changes.Values);

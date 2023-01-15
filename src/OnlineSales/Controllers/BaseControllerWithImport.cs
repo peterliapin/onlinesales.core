@@ -13,7 +13,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Controllers;
 
 public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC, TU, TD>
-    where T : BaseEntity, new()
+    where T : BaseEntityWithId, new()
     where TC : class
     where TU : class
     where TD : class

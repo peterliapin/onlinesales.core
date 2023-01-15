@@ -3,16 +3,20 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Entities;
 
+[Table("domain")]
+[Index(nameof(Name), IsUnique = true)]
 public class Domain : BaseEntityWithIdAndDates
 {
-    [Required]
-    public string Name { get; set; } = string.Empty;
-
     public bool Shared { get; set; }
 
-    public bool Disposable { get; set; }    
+    public bool Disposable { get; set; }
+
+    [Required]
+    public string Name { get; set; } = string.Empty;
 }
 

@@ -5,7 +5,6 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Entities;
@@ -13,7 +12,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Infrastructure
 {
     public static class QueryBuilder<T>
-        where T : BaseEntity
+        where T : BaseEntityWithId
     {
         public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds)
         {

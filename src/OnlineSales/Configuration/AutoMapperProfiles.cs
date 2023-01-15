@@ -95,6 +95,14 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Link, LinkDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Domain, DomainCreateDto>().ReverseMap();
+        CreateMap<Domain, DomainUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DomainUpdateDto, Domain>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Domain, DomainDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

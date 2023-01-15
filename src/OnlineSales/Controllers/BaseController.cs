@@ -15,7 +15,7 @@ using OnlineSales.Infrastructure;
 namespace OnlineSales.Controllers
 {
     public class BaseController<T, TC, TU, TD> : ControllerBase
-        where T : BaseEntity, new()
+        where T : BaseEntityWithId, new()
         where TC : class
         where TU : class
         where TD : class
