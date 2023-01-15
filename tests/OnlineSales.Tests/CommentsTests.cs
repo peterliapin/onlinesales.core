@@ -75,7 +75,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
         newComment!.PostId.Should().Be(1);
         newComment!.AuthorName.Should().Be("TestComment2");
-        newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-04T08:38:30"));
+        newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
     }
 
     [Theory]
@@ -91,8 +91,8 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
         updatedComment!.PostId.Should().Be(1);
         updatedComment!.AuthorName.Should().Be("TestComment1");
-        updatedComment!.UpdatedAt.Should().Be(DateTime.Parse("01/06/2023 09:36:16"));
-        updatedComment!.CreatedAt.Should().Be(DateTime.Parse("01/05/2023 10:36:16"));
+        updatedComment!.UpdatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
+        updatedComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         updatedComment!.CreatedByIp.Should().Be("192.168.1.1");
         updatedComment!.UpdatedByIp.Should().Be("192.168.1.3");
         updatedComment!.CreatedByUserAgent.Should().Be("TestAgent1");
@@ -103,7 +103,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
         newComment!.PostId.Should().Be(1);
         newComment!.AuthorName.Should().Be("TestComment2");
-        newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-04T08:38:30"));
+        newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         newComment!.UpdatedAt.Should().BeNull();
         newComment!.CreatedByIp.Should().Be("192.168.1.2");
         newComment!.CreatedByUserAgent.Should().Be("TestAgent2");

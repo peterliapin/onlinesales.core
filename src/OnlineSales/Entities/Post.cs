@@ -4,10 +4,12 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Entities;
 
 [Table("post")]
+[Index(nameof(Slug), IsUnique = true)]
 public class Post : BaseEntity
 {
     [Required]

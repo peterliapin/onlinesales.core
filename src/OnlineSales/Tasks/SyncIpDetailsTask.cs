@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -16,11 +15,10 @@ namespace OnlineSales.Tasks;
 public class SyncIpDetailsTask : ChangeLogTask
 {
     private readonly TaskConfig? taskConfig = new TaskConfig();
-    private readonly IOptions<GeolocationApiConfig> options;
     private readonly IpDetailsService ipDetailsService;
 
-    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IOptions<GeolocationApiConfig> options, IpDetailsService ipDetailsService)
-        : base(dbContext, configuration)
+    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IpDetailsService ipDetailsService)
+        : base(dbContext)
     {
         var config = configuration.GetSection("Tasks:SyncIPDetailsTask") !.Get<TaskConfig>();
         if (config is not null)
@@ -28,7 +26,6 @@ public class SyncIpDetailsTask : ChangeLogTask
             taskConfig = config;
         }
 
-        this.options = options;
         this.ipDetailsService = ipDetailsService;
     }
 

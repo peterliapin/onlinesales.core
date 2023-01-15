@@ -11,12 +11,10 @@ namespace OnlineSales.Tasks;
 public abstract class ChangeLogTask : ITask
 {
     protected readonly ApiDbContext dbContext;
-    private readonly IConfiguration configuration;
 
-    protected ChangeLogTask(ApiDbContext dbContext, IConfiguration configuration)
+    protected ChangeLogTask(ApiDbContext dbContext)
     {
         this.dbContext = dbContext;
-        this.configuration = configuration;
     }
 
     public virtual int ChangeLogBatchSize { get; set; } = 50;

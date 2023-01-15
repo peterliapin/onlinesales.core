@@ -27,6 +27,8 @@ services:
     container_name: postgres
     image: postgres:14.5
     environment:
+      TZ: 'UTC'
+      PGTZ: 'UTC'
       POSTGRES_DB: onlinesales
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

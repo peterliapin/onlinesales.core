@@ -100,21 +100,40 @@ public class ApiDbContext : DbContext
         {
             foreach (var entityEntry in entries)
             {
-                if (entityEntry.State == EntityState.Modified && entityEntry.Entity is BaseEntity)
-                {
-                    var entity = (BaseEntity)entityEntry.Entity;
-                    entity.UpdatedAt = IsImportRequest && entity.UpdatedAt is not null ? GetDateWithKind(entity.UpdatedAt.Value) : DateTime.UtcNow;
-                    entity.CreatedAt = IsImportRequest ? GetDateWithKind(entity.CreatedAt) : entity.CreatedAt;
-                    entity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(entity.UpdatedByIp) ? entity.UpdatedByIp : httpContextHelper!.IpAddress;
-                    entity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(entity.UpdatedByUserAgent) ? entity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
-                }
-
                 if (entityEntry.State == EntityState.Added)
                 {
-                    var entity = (BaseCreateByEntity)entityEntry.Entity;
-                    entity.CreatedAt = entity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(entity.CreatedAt);
-                    entity.CreatedByIp = string.IsNullOrEmpty(entity.CreatedByIp) ? httpContextHelper!.IpAddress : entity.CreatedByIp;
-                    entity.CreatedByUserAgent = string.IsNullOrEmpty(entity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : entity.CreatedByUserAgent;
+                    var createdAtEntity = entityEntry.Entity as IHasCreatedAt;
+
+                    if (createdAtEntity is not null)
+                    {
+                        createdAtEntity.CreatedAt = createdAtEntity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(createdAtEntity.CreatedAt);
+                    }
+
+                    var createdByEntity = entityEntry.Entity as IHasCreatedByIpAndUserAgent;
+
+                    if (createdByEntity is not null)
+                    {
+                        createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? httpContextHelper!.IpAddress : createdByEntity.CreatedByIp;
+                        createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : createdByEntity.CreatedByUserAgent;
+                    }
+                }
+
+                if (entityEntry.State == EntityState.Modified)
+                {
+                    var updatedAtEntity = entityEntry.Entity as IHasUpdatedAt;
+
+                    if (updatedAtEntity is not null)
+                    {
+                        updatedAtEntity.UpdatedAt = IsImportRequest && updatedAtEntity.UpdatedAt is not null ? GetDateWithKind(updatedAtEntity.UpdatedAt.Value) : DateTime.UtcNow;
+                    }
+
+                    var updatedByEntity = entityEntry.Entity as IHasUpdatedByIpAndUserAgent;
+
+                    if (updatedByEntity is not null)
+                    {
+                        updatedByEntity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : httpContextHelper!.IpAddress;
+                        updatedByEntity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
+                    }
                 }
 
                 // save entity state as it is before SaveChanges call

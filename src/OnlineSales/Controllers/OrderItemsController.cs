@@ -99,9 +99,9 @@ namespace OnlineSales.Controllers
             var orders = dbContext!.Orders!.Select(o => new { o.Id, o.RefNo }).ToList();
 
             var refOrders = from order in orders
-                           join record in records
-                          on order.RefNo equals record.OrderRefNo
-                          select order;
+                                join record in records
+                                    on order.RefNo equals record.OrderRefNo
+                            select order;
 
             foreach (var item in records)
             {

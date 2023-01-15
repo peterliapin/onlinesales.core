@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineSales.Entities;
 
-public class BaseEntity : BaseCreateByEntity
+public class BaseEntity : BaseCreateByEntity, IHasUpdatedAt, IHasUpdatedByIpAndUserAgent
 {
     public DateTime? UpdatedAt { get; set; }
 
@@ -16,7 +16,7 @@ public class BaseEntity : BaseCreateByEntity
     public string? UpdatedByUserAgent { get; set; }
 }
 
-public class BaseCreateByEntity : BaseEntityWithId
+public class BaseCreateByEntity : BaseEntityWithId, IHasCreatedAt, IHasCreatedByIpAndUserAgent
 {
     [Required]
     public DateTime CreatedAt { get; set; }
@@ -26,9 +26,41 @@ public class BaseCreateByEntity : BaseEntityWithId
     public string? CreatedByUserAgent { get; set; }
 }
 
+public class BaseEntityWithIdAndDates : BaseEntityWithId, IHasCreatedAt, IHasUpdatedAt
+{
+    [Required]
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+}
+
 public class BaseEntityWithId
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+}
+
+public interface IHasCreatedAt
+{
+    public DateTime CreatedAt { get; set; }
+}
+
+public interface IHasUpdatedAt
+{
+    public DateTime? UpdatedAt { get; set; }
+}
+
+public interface IHasCreatedByIpAndUserAgent
+{
+    public string? CreatedByIp { get; set; }
+
+    public string? CreatedByUserAgent { get; set; }
+}
+
+public interface IHasUpdatedByIpAndUserAgent
+{
+    public string? UpdatedByIp { get; set; }
+
+    public string? UpdatedByUserAgent { get; set; }
 }

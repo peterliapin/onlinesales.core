@@ -7,6 +7,8 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 
@@ -62,6 +64,10 @@ public class CsvInputFormatter : InputFormatter
 
         using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
+            var utcTimeZone = TimeZoneInfo.Utc;
+            csv.Context.TypeConverterCache.RemoveConverter<DateTime?>();
+            csv.Context.TypeConverterCache.AddConverter<DateTime?>(new NullableDateTimeToUtcConverter(typeof(DateTime?), csv.Context.TypeConverterCache, utcTimeZone));
+
             csv.Context.RegisterCamelCaseClassMap(itemType!);
 
             await foreach (var record in csv.GetRecordsAsync(itemTypeInGeneric))
@@ -98,3 +104,29 @@ public class CsvInputFormatter : InputFormatter
         return false;
     }
 }
+
+public class NullableDateTimeToUtcConverter : NullableConverter
+{
+    private readonly TimeZoneInfo timeZoneInfo;
+
+    public NullableDateTimeToUtcConverter(Type type, TypeConverterCache typeConverterFactory, TimeZoneInfo timeZoneInfo)
+        : base(type, typeConverterFactory)
+    {
+        this.timeZoneInfo = timeZoneInfo;
+    }
+
+    public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
+    {
+        var parsedDate = base.ConvertFromString(text, row, memberMapData);
+
+        if (parsedDate is not null)
+        {
+            return ((DateTime)parsedDate).ToUniversalTime();
+        }
+        else
+        {
+            return null;
+        }
+    }
+}
+

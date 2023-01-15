@@ -20,7 +20,7 @@ namespace OnlineSales.Tasks
         private readonly string prefix = string.Empty;
 
         public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, ElasticClient elasticClient)
-            : base(dbContext, configuration)
+            : base(dbContext)
         {
             var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<TaskConfig>();
             if (config is not null)
