@@ -37,7 +37,7 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
 
         for (var i = 0; i < numberOfItems; ++i)
         {
-            var testItem = await CreateItem(fkItemId);
+            var testItem = await CreateItem(i.ToString(), fkItemId);
 
             itemsUrls[i] = testItem.Item2;
         }
@@ -58,9 +58,7 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
 
         var fkId = fkItem.Item1;
 
-        var result = await CreateItem(fkId);
-
-        return result;
+        return await CreateItem(string.Empty, fkId);
     }
 
     protected override void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
@@ -74,5 +72,5 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
         App.PopulateBulkData(bulkEntitiesList);
     }
 
-    protected abstract Task<(TC, string)> CreateItem(int fkId);
+    protected abstract Task<(TC, string)> CreateItem(string uid, int fkId);
 }

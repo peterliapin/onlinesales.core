@@ -109,9 +109,9 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         newComment!.CreatedByUserAgent.Should().Be("TestAgent2");
     }
 
-    protected override async Task<(TestComment, string)> CreateItem(int fkId)
+    protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
-        var testComment = new TestComment(string.Empty, fkId);
+        var testComment = new TestComment(uid, fkId);
 
         var newCommentUrl = await PostTest(itemsUrl, testComment);
 

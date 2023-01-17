@@ -233,9 +233,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         }
     }
 
-    protected override async Task<(TestOrder, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrder, string)> CreateItem(string uid, int fkId)
     {
-        var testOrder = new TestOrder(string.Empty, fkId);
+        var testOrder = new TestOrder(uid, fkId);
 
         var newUrl = await PostTest(itemsUrl, testOrder);
 
