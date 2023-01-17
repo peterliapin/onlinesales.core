@@ -27,7 +27,7 @@
     <PackageVersion>$(ReleaseVersion)</PackageVersion>
     <Version>$(ReleaseVersion)</Version>
     <IsPackable>true</IsPackable>
-    <Configurations>Debug;Release;Migration</Configurations>
+    <Configurations>Debug;Migration;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />

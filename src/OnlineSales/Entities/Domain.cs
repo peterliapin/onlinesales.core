@@ -19,6 +19,10 @@ public class Domain : BaseEntityWithIdAndDates
 
     public string? Description { get; set; }
 
+    public string? Url { get; set; }
+
+    public bool? HttpCheck { get; set; }
+
     public bool? Free { get; set; }
 
     public bool? Disposable { get; set; }
@@ -27,6 +31,8 @@ public class Domain : BaseEntityWithIdAndDates
 
     [Column(TypeName = "jsonb")]
     public string? DnsRecords { get; set; }
+
+    public bool? DnsCheck { get; set; }
 }
 
 

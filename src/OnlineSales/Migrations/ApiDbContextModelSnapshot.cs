@@ -349,6 +349,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("disposable");
 
+                    b.Property<bool?>("DnsCheck")
+                        .HasColumnType("boolean")
+                        .HasColumnName("dns_check");
+
                     b.Property<string>("DnsRecords")
                         .HasColumnType("jsonb")
                         .HasColumnName("dns_records");
@@ -356,6 +360,10 @@ namespace OnlineSales.Migrations
                     b.Property<bool?>("Free")
                         .HasColumnType("boolean")
                         .HasColumnName("free");
+
+                    b.Property<bool?>("HttpCheck")
+                        .HasColumnType("boolean")
+                        .HasColumnName("http_check");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -369,6 +377,10 @@ namespace OnlineSales.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("text")
+                        .HasColumnName("url");
 
                     b.HasKey("Id")
                         .HasName("pk_domain");

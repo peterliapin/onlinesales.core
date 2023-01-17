@@ -34,6 +34,12 @@ namespace OnlineSales.Migrations
                 type: "text",
                 nullable: true);
 
+            migrationBuilder.AddColumn<bool>(
+                name: "dns_check",
+                table: "domain",
+                type: "boolean",
+                nullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "dns_records",
                 table: "domain",
@@ -46,8 +52,20 @@ namespace OnlineSales.Migrations
                 type: "boolean",
                 nullable: true);
 
+            migrationBuilder.AddColumn<bool>(
+                name: "http_check",
+                table: "domain",
+                type: "boolean",
+                nullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "title",
+                table: "domain",
+                type: "text",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "url",
                 table: "domain",
                 type: "text",
                 nullable: true);
@@ -85,6 +103,10 @@ namespace OnlineSales.Migrations
                 table: "domain");
 
             migrationBuilder.DropColumn(
+                name: "dns_check",
+                table: "domain");
+
+            migrationBuilder.DropColumn(
                 name: "dns_records",
                 table: "domain");
 
@@ -93,7 +115,15 @@ namespace OnlineSales.Migrations
                 table: "domain");
 
             migrationBuilder.DropColumn(
+                name: "http_check",
+                table: "domain");
+
+            migrationBuilder.DropColumn(
                 name: "title",
+                table: "domain");
+
+            migrationBuilder.DropColumn(
+                name: "url",
                 table: "domain");
 
             migrationBuilder.AlterColumn<bool>(
