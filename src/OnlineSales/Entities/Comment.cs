@@ -17,7 +17,8 @@ public enum CommentStatus
 }
 
 [Table("comment")]
-[SupportChangeLog]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Comment : BaseEntity
 {
     public string AuthorName { get; set; } = string.Empty;

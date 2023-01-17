@@ -76,9 +76,9 @@ public class SyncIpDetailsTask : ChangeLogTask
         }
     }
 
-    protected override bool IsTypeInWork(Type type)
+    protected override bool IsTypeSupported(Type type)
     {
-        return typeof(IHasCreatedByIpAndUserAgent).IsAssignableFrom(type) && typeof(IHasUpdatedByIpAndUserAgent).IsAssignableFrom(type);
+        return typeof(IHasCreatedByIpAndUserAgent).IsAssignableFrom(type) || typeof(IHasUpdatedByIpAndUserAgent).IsAssignableFrom(type);
     }
 
     private List<string> GetDistinctIps(List<ChangeLog> changeLogs)

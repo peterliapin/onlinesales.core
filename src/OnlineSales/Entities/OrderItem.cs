@@ -10,7 +10,8 @@ using OnlineSales.DataAnnotations;
 namespace OnlineSales.Entities;
 
 [Table("order_item")]
-[SupportChangeLog]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class OrderItem : BaseEntity
 {
     /// <summary>

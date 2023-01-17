@@ -11,7 +11,7 @@ namespace OnlineSales.Entities;
 
 [Table("link")]
 [Index(nameof(Uid), IsUnique = true)]
-[SupportChangeLog]
+[SupportsChangeLog]
 public class Link : BaseEntity
 {
     [Required]

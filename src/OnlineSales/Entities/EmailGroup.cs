@@ -9,7 +9,7 @@ using OnlineSales.DataAnnotations;
 namespace OnlineSales.Entities
 {
     [Table("email_group")]
-    [SupportChangeLog]
+    [SupportsChangeLog]
     public class EmailGroup : BaseEntity
     {
         /// <summary>

@@ -95,7 +95,7 @@ public abstract class ChangeLogTask : ITask
         
         foreach (var type in types.Select(type => type.ClrType))
         {
-            if (type != null && IsChangeLogAttribute(type) && IsTypeInWork(type))
+            if (type != null && IsChangeLogAttribute(type) && IsTypeSupported(type))
             {
                 res.Add(type);
             }
@@ -104,11 +104,11 @@ public abstract class ChangeLogTask : ITask
         return res;
     }
 
-    protected abstract bool IsTypeInWork(Type type);
+    protected abstract bool IsTypeSupported(Type type);
 
     private bool IsChangeLogAttribute(Type type)
     {
-        return type.GetCustomAttributes<SupportChangeLogAttribute>().Any();
+        return type.GetCustomAttributes<SupportsChangeLogAttribute>().Any();
     }
 
     private bool IsPreviousTaskInProgress(string name)

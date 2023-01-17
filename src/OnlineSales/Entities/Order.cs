@@ -12,7 +12,8 @@ namespace OnlineSales.Entities;
 
 [Table("order")]
 [Index(nameof(RefNo), IsUnique = true)]
-[SupportChangeLog]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Order : BaseEntity
 {
     /// <summary>

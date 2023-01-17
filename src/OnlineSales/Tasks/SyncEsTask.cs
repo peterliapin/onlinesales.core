@@ -73,9 +73,9 @@ namespace OnlineSales.Tasks
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
         }
 
-        protected override bool IsTypeInWork(Type type)
+        protected override bool IsTypeSupported(Type type)
         {
-            return type.GetCustomAttribute<SupportElasticSearchAttribute>() != null;
+            return type.GetCustomAttribute<SupportsElasticSearchAttribute>() != null;
         }
     }
 }

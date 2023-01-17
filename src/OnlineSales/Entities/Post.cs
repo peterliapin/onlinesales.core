@@ -11,8 +11,8 @@ namespace OnlineSales.Entities;
 
 [Table("post")]
 [Index(nameof(Slug), IsUnique = true)]
-[SupportElasticSearch]
-[SupportChangeLog]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Post : BaseEntity
 {
     [Required]

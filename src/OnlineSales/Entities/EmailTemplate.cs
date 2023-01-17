@@ -10,7 +10,7 @@ using OnlineSales.DataAnnotations;
 namespace OnlineSales.Entities
 {
     [Table("email_template")]
-    [SupportChangeLog]
+    [SupportsChangeLog]
     public class EmailTemplate : BaseEntity
     {
         [Required]

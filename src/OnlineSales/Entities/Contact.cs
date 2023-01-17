@@ -11,8 +11,8 @@ namespace OnlineSales.Entities;
 
 [Table("contact")]
 [Index(nameof(Email), IsUnique = true)]
-[SupportElasticSearch]
-[SupportChangeLog]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Contact : BaseEntity
 {
     public string? LastName { get; set; }

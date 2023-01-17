@@ -15,7 +15,8 @@ namespace OnlineSales.Entities
     }
 
     [Table("email_log")]
-    [SupportChangeLog]
+    [SupportsElasticSearch]
+    [SupportsChangeLog]
     public class EmailLog : BaseEntity
     {
         /// <summary>

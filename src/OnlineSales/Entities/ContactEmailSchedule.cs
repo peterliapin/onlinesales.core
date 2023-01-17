@@ -16,7 +16,7 @@ namespace OnlineSales.Entities
     }
 
     [Table("contact_email_schedule")]
-    [SupportChangeLog]
+    [SupportsChangeLog]
     public class ContactEmailSchedule : BaseEntity
     {
         /// <summary>
