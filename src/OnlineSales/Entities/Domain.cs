@@ -12,11 +12,21 @@ namespace OnlineSales.Entities;
 [Index(nameof(Name), IsUnique = true)]
 public class Domain : BaseEntityWithIdAndDates
 {
-    public bool Shared { get; set; }
-
-    public bool Disposable { get; set; }
-
     [Required]
     public string Name { get; set; } = string.Empty;
+
+    public string? Title { get; set; }
+
+    public string? Description { get; set; }
+
+    public bool? Free { get; set; }
+
+    public bool? Disposable { get; set; }
+
+    public bool? CatchAll { get; set; }
+
+    [Column(TypeName = "jsonb")]
+    public string? DnsRecords { get; set; }
 }
+
 
