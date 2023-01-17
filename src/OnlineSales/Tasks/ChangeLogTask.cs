@@ -2,24 +2,38 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System;
+using System.Reflection;
+using Microsoft.AspNetCore.Components.Web;
 using OnlineSales.Data;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tasks;
 
 public abstract class ChangeLogTask : ITask
-{
+{    
     protected readonly ApiDbContext dbContext;
 
-    protected ChangeLogTask(ApiDbContext dbContext)
+    protected readonly IEnumerable<PluginDbContextBase> pluginDbContexts;
+
+    private readonly HashSet<Type> loggedTypes;
+
+    protected ChangeLogTask(ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts)
     {
         this.dbContext = dbContext;
+        this.pluginDbContexts = pluginDbContexts;
+        this.loggedTypes = GetTypes(dbContext);
+
+        foreach (var pt in pluginDbContexts)
+        {
+            var lt = GetTypes(pt);
+            this.loggedTypes.UnionWith(lt);
+        }
     }
 
     public virtual int ChangeLogBatchSize { get; set; } = 50;
-
-    public virtual string[] Entities { get; set; } = new[] { "Contact", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
 
     public string Name
     {
@@ -34,19 +48,19 @@ public abstract class ChangeLogTask : ITask
     public abstract int RetryCount { get; }
 
     public abstract int RetryInterval { get; }
-   
+
     public Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        foreach (var entity in Entities!)
+        foreach (var typeName in loggedTypes.Select(type => type.Name))
         {
-            var taskAndEntity = Name + "_" + entity;
+            var taskAndEntity = Name + "_" + typeName;
 
             if (IsPreviousTaskInProgress(taskAndEntity))
             {
                 return Task.FromResult(true);
             }
 
-            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, entity);
+            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, typeName);
 
             if (changeLogBatch is not null && changeLogBatch!.Any())
             {
@@ -72,6 +86,30 @@ public abstract class ChangeLogTask : ITask
     }
 
     internal abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
+
+    protected HashSet<Type> GetTypes(ApiDbContext context)
+    {
+        var res = new HashSet<Type>();
+
+        var types = context.Model.GetEntityTypes();
+        
+        foreach (var type in types.Select(type => type.ClrType))
+        {
+            if (type != null && IsChangeLogAttribute(type) && IsTypeSupported(type))
+            {
+                res.Add(type);
+            }
+        }
+
+        return res;
+    }
+
+    protected abstract bool IsTypeSupported(Type type);
+
+    private bool IsChangeLogAttribute(Type type)
+    {
+        return type.GetCustomAttributes<SupportsChangeLogAttribute>().Any();
+    }
 
     private bool IsPreviousTaskInProgress(string name)
     {
