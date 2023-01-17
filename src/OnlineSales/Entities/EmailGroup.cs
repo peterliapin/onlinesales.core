@@ -4,10 +4,12 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
 {
     [Table("email_group")]
+    [SupportsChangeLog]
     public class EmailGroup : BaseEntity
     {
         /// <summary>
