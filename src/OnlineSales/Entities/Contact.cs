@@ -5,11 +5,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("contact")]
 [Index(nameof(Email), IsUnique = true)]
+[SupportElasticSearch]
+[SupportChangeLog]
 public class Contact : BaseEntity
 {
     public string? LastName { get; set; }

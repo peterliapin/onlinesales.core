@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
 {
@@ -15,6 +16,7 @@ namespace OnlineSales.Entities
     }
 
     [Table("contact_email_schedule")]
+    [SupportChangeLog]
     public class ContactEmailSchedule : BaseEntity
     {
         /// <summary>

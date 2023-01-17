@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Reflection;
 using System.Text;
 using Elasticsearch.Net;
 using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 
@@ -19,8 +21,8 @@ namespace OnlineSales.Tasks
         private readonly ElasticClient elasticClient;
         private readonly string prefix = string.Empty;
 
-        public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, ElasticClient elasticClient)
-            : base(dbContext)
+        public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, ElasticClient elasticClient)
+            : base(dbContext, pluginDbContexts)
         {
             var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<TaskConfig>();
             if (config is not null)
@@ -43,8 +45,6 @@ namespace OnlineSales.Tasks
         public override int RetryCount => taskConfig!.RetryCount;
 
         public override int RetryInterval => taskConfig!.RetryInterval;
-
-        public override string[] Entities => new[] { "Contact", "Post" };
 
         internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {
@@ -71,6 +71,11 @@ namespace OnlineSales.Tasks
             var bulkResponse = elasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString());
 
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
+        }
+
+        protected override bool IsTypeInWork(Type type)
+        {
+            return type.GetCustomAttribute<SupportElasticSearchAttribute>() != null;
         }
     }
 }
