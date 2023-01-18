@@ -8,8 +8,8 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestDomain : DomainCreateDto
 {
-    public TestDomain(string name)
+    public TestDomain(string name = "")
     {
-        Name = $"gmail{name}.com";
+        Name = $"gmail{name}";
     }
 }

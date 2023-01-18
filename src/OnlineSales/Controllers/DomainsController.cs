@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Xml.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,10 +25,8 @@ public class DomainsController : BaseController<Domain, DomainCreateDto, DomainU
     {
     }
 
-    /*
     // GET api/{entity}s/gmail.com
-    [HttpGet("{name}")]
-    // [EnableQuery]
+    [HttpGet("names/{name}")]    
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -39,12 +38,12 @@ public class DomainsController : BaseController<Domain, DomainCreateDto, DomainU
         if (existingEntity != null && existingEntity.Any())
         {
             var domain = await existingEntity.FirstAsync();
-            return mapper.Map<DomainDetailsDto>(domain); 
+            return mapper.Map<DomainDetailsDto>(domain);
         }
         else
         {
             return new NotFoundResult();
         }
-    }*/
+    }
 }
 

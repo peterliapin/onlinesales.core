@@ -95,9 +95,6 @@ public class BaseTest : IDisposable
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
-        var s = await response.Content.ReadAsStringAsync();
-        Console.WriteLine(s);
-
         response.StatusCode.Should().Be(expectedCode);
 
         var location = string.Empty;

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -12,8 +13,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         : base("/api/domains")
     {
     }
-
-    /*
+                
     [Fact]
     public async Task CreateAndGetItemByNameTest()
     {
@@ -23,12 +23,14 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
 
         await PostTest(itemsUrl, testDomain);
 
-        var url = itemsUrl + "/" + domainName;
+        var url = itemsUrl + "/names/" + domainName;
 
         var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
+        item.Should().NotBeNull();
+
         item.Should().BeEquivalentTo(testDomain);
-    }*/
+    }
 
     protected override DomainUpdateDto UpdateItem(TestDomain to)
     {
