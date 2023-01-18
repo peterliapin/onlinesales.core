@@ -17,8 +17,8 @@ public class SyncIpDetailsTask : ChangeLogTask
     private readonly TaskConfig? taskConfig = new TaskConfig();
     private readonly IpDetailsService ipDetailsService;
 
-    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IpDetailsService ipDetailsService)
-        : base(dbContext)
+    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, IpDetailsService ipDetailsService)
+        : base(dbContext, pluginDbContexts)
     {
         var config = configuration.GetSection("Tasks:SyncIpDetailsTask") !.Get<TaskConfig>();
         if (config is not null)
@@ -34,8 +34,6 @@ public class SyncIpDetailsTask : ChangeLogTask
     public override int RetryCount => taskConfig!.RetryCount;
 
     public override int RetryInterval => taskConfig!.RetryInterval;
-
-    public override string[] Entities => new[] { "Contact", "Post", "EmailGroup", "EmailLog", "Order", "OrderItem" };
 
     internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
@@ -76,6 +74,11 @@ public class SyncIpDetailsTask : ChangeLogTask
             dbContext.IpDetails!.AddRange(ipDetailsCollection);
             dbContext.SaveChanges(); 
         }
+    }
+
+    protected override bool IsTypeSupported(Type type)
+    {
+        return typeof(IHasCreatedByIpAndUserAgent).IsAssignableFrom(type) || typeof(IHasUpdatedByIpAndUserAgent).IsAssignableFrom(type);
     }
 
     private List<string> GetDistinctIps(List<ChangeLog> changeLogs)

@@ -5,10 +5,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("order_item")]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class OrderItem : BaseEntity
 {
     /// <summary>

@@ -269,9 +269,9 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         allOrderItems!.Count.Should().Be(expectedCount);
     }
 
-    protected override async Task<(TestOrderItem, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrderItem, string)> CreateItem(string uid, int fkId)
     {
-        var testOrderItem = new TestOrderItem(string.Empty, fkId);
+        var testOrderItem = new TestOrderItem(uid, fkId);
 
         var newUrl = await PostTest(itemsUrl, testOrderItem);
 
