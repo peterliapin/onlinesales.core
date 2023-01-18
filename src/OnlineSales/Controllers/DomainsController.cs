@@ -2,13 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Xml.Linq;
 using AutoMapper;
 using DnsClient;
+using Elasticsearch.Net;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -67,7 +70,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         var responce = await RequestGetUrl(httpUrl);
         if (responce != null)
         {
-            d.HttpCheck = true;            
+            d.HttpCheck = true;
             if (responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
             {
                 d.Url = responce.RequestMessage.RequestUri.ToString();
@@ -76,8 +79,8 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 
                 if (htmlDoc != null)
                 {
-                    d.Title = GetNodeContent(htmlDoc, "title");
-                    d.Description = GetNodeContent(htmlDoc, "description");
+                    d.Title = GetTitle(htmlDoc); 
+                    d.Description = GetDescription(htmlDoc);
                 }
             }
         }
@@ -104,6 +107,39 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         }
     }
 
+    private string? GetTitle(HtmlDocument htmlDoc)
+    {
+        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode("//title");
+        if (htmlNode != null)
+        {
+            return htmlNode.InnerText;
+        }
+
+        return GetNodeContentByTag(htmlDoc, "title");
+    }
+
+    private string? GetDescription(HtmlDocument htmlDoc)
+    {
+        return GetNodeContentByTag(htmlDoc, "description");
+    }
+
+    private string? GetNodeContentByTag(HtmlDocument htmlDoc, string value)
+    {
+        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", value));
+        if (htmlNode != null)
+        {
+            return htmlNode.GetAttributeValue("content", null);
+        }
+
+        htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='og:{0}']", value));
+        if (htmlNode != null)
+        {
+            return htmlNode.GetAttributeValue("content", null);
+        }
+
+        return null;
+    }
+
     private string? GetNodeContent(HtmlDocument htmlDoc, string node)
     {
         var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", node));
@@ -121,7 +157,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
             return await client.SendAsync(request);
         }
         catch (Exception)
