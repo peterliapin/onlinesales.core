@@ -56,6 +56,7 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
+        builder.Services.AddTransient<IDomainCheckService, DomainCheckService>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
@@ -392,6 +393,7 @@ public class Program
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, SyncEsTask>();
+        builder.Services.AddScoped<ITask, DomainCheckTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

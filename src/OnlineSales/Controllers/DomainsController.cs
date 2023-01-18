@@ -17,6 +17,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
@@ -24,9 +25,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDto, DomainUpdateDto, DomainDetailsDto, DomainImportDto>
 {
-    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    private readonly IDomainCheckService domainCheckService;
+
+    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainCheckService domainCheckService)
         : base(dbContext, mapper, apiSettingsConfig)
     {
+        this.domainCheckService = domainCheckService;
     }
 
     // GET api/domains/names/gmail.com
@@ -49,120 +53,13 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
             var domain = new Domain();
             domain.Name = name;
 
-            await HttpCheck("http://" + name, domain);
-            if (domain.HttpCheck == false)
-            {
-                await HttpCheck("https://" + name, domain);
-            }
-
-            await GetDnsRecords(name, domain);
+            await domainCheckService.HttpCheck(domain);
+            await domainCheckService.DnsCheck(domain);
 
             var result = await dbSet.AddAsync(domain);
             await dbContext.SaveChangesAsync();
 
             return await GetOne(result.Entity.Id);
-        }
-    }
-
-    private async Task HttpCheck(string httpUrl, Domain d)
-    {
-        d.HttpCheck = false;
-        var responce = await RequestGetUrl(httpUrl);
-        if (responce != null)
-        {
-            d.HttpCheck = true;
-            if (responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
-            {
-                d.Url = responce.RequestMessage.RequestUri.ToString();
-                HtmlWeb web = new HtmlWeb();
-                var htmlDoc = web.Load(d.Url);
-
-                if (htmlDoc != null)
-                {
-                    d.Title = GetTitle(htmlDoc); 
-                    d.Description = GetDescription(htmlDoc);
-                }
-            }
-        }
-    }
-
-    private async Task GetDnsRecords(string domainName, Domain d)
-    {
-        d.DnsRecords = null;
-        d.DnsCheck = false;
-
-        try
-        {
-            var lookup = new LookupClient();
-            var result = await lookup.QueryAsync(domainName, QueryType.MX);
-            if (result.Answers.Any())
-            {
-                d.DnsRecords = JsonHelper.Serialize(result.Answers);
-                d.DnsCheck = true;
-            }
-        }
-        catch 
-        {
-            // do nothing
-        }
-    }
-
-    private string? GetTitle(HtmlDocument htmlDoc)
-    {
-        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode("//title");
-        if (htmlNode != null)
-        {
-            return htmlNode.InnerText;
-        }
-
-        return GetNodeContentByTag(htmlDoc, "title");
-    }
-
-    private string? GetDescription(HtmlDocument htmlDoc)
-    {
-        return GetNodeContentByTag(htmlDoc, "description");
-    }
-
-    private string? GetNodeContentByTag(HtmlDocument htmlDoc, string value)
-    {
-        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", value));
-        if (htmlNode != null)
-        {
-            return htmlNode.GetAttributeValue("content", null);
-        }
-
-        htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='og:{0}']", value));
-        if (htmlNode != null)
-        {
-            return htmlNode.GetAttributeValue("content", null);
-        }
-
-        return null;
-    }
-
-    private string? GetNodeContent(HtmlDocument htmlDoc, string node)
-    {
-        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", node));
-        if (htmlNode != null)
-        {
-            return htmlNode.GetAttributeValue("content", null);
-        }
-
-        return null;
-    }
-
-    private async Task<HttpResponseMessage?> RequestGetUrl(string url)
-    {
-        var client = new HttpClient();        
-
-        try
-        {
-            var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
-            return await client.SendAsync(request);
-        }
-        catch (Exception)
-        {
-            return null;
         }
     }
 }

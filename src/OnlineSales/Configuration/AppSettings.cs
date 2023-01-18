@@ -68,6 +68,20 @@ public class TaskConfig
     public int RetryInterval { get; set; }
 }
 
+public class DomainCheckTaskConfig : TaskConfig
+{
+    public DomainCheckTaskConfig()
+    {
+        CronSchedule = "* 0/1 * * * ?";
+
+        RetryCount = 2;
+
+        RetryInterval = 5;
+    }
+
+    public int BatchSize { get; } = 100;
+}
+
 public class CacheProfileSettings
 {
     public string Type { get; set; } = string.Empty;
