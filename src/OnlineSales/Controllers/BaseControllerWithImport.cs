@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -73,6 +74,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             var existingItems = dbSet.Where(t => batch.Select(b => b.Id).Contains(t.Id)).AsNoTracking().ToList();
 
+            UpdateExistingItemsAndBatchItemsByIndexes(batch, existingItems);
+
             foreach (var item in batch)
             {
                 if (existingItems.Any(t => t.Id == item.Id))
@@ -89,6 +92,66 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             position += ImportBatchSize;
         }
+    }
+
+    private void UpdateExistingItemsAndBatchItemsByIndexes(List<T> batch, List<T> existingItems)
+    {
+        var entityType = dbContext.Model.FindEntityType(typeof(T));
+
+        var properties = entityType!.GetProperties();
+
+        foreach (var prop in properties)
+        {
+            if (prop.IsUniqueIndex() && !prop.IsPrimaryKey())
+            {
+                var filterProperty = prop.Name;
+
+                var filterValues = batch.Where(b => b.Id == 0).Select(b => b.GetType().GetProperty(filterProperty) !.GetValue(b)).ToList();
+
+                var parameter = Expression.Parameter(typeof(T), "t");
+
+                var property = Expression.Property(parameter, filterProperty);
+
+                var containsMethod = typeof(List<object>).GetMethod("Contains", new[] { typeof(object) });
+
+                var filterExpression = Expression.Call(Expression.Constant(filterValues), containsMethod!, property);
+
+                var lambda = Expression.Lambda<Func<T, bool>>(filterExpression, parameter);
+
+                var filteredData = dbSet.Where(lambda).AsNoTracking().ToList();
+
+                existingItems.AddRange(filteredData);
+
+                UpdateBatchItemId(batch, filteredData, filterProperty);
+            }
+        }
+    }
+
+    private void UpdateBatchItemId(List<T> batch, List<T> existingItems, string filterProperty)
+    {
+        foreach (var item in existingItems)
+        {
+            var batchItem = GetMatchingItem(batch, item, filterProperty);
+            if (batchItem is not null)
+            {
+                batchItem.Id = item.Id;
+            }
+        }
+    }
+
+    private T? GetMatchingItem(List<T> batch, T item, string filterProperty)
+    {
+        var parameter = Expression.Parameter(typeof(T), "t");
+
+        var property = Expression.Property(parameter, filterProperty);
+
+        var filterValue = Expression.Constant(item.GetType().GetProperty(filterProperty) !.GetValue(item));
+
+        var filterExpression = Expression.Equal(property, filterValue);
+
+        var lambda = Expression.Lambda<Func<T, bool>>(filterExpression, parameter);
+
+        return batch.FirstOrDefault(lambda.Compile());
     }
 }
 
