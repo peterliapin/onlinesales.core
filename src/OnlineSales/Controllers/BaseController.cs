@@ -116,29 +116,6 @@ namespace OnlineSales.Controllers
             if (this.Request.QueryString.HasValue)
             {
                 var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
-                var countQueryCommands = queryCommands.Where(i => !i.ToLower().StartsWith("filter[limit]") && !i.ToLower().StartsWith("filter[skip]")).ToArray();
-
-                var countQuery = QueryBuilder<T>.ReadIntoQuery(query, countQueryCommands);
-                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, countQuery.Count().ToString());
-
-                var hasLimit = queryCommands.Where(i => i.ToLower().Contains("filter[limit]="));
-
-                if (!hasLimit.Any())
-                {
-                    string limitQueryString = "filter[limit]=" + limit.ToString();
-                    queryCommands = queryCommands.Append(limitQueryString).ToArray();
-                }
-                else
-                {
-                    var requestedLimit = Convert.ToInt32(hasLimit!.FirstOrDefault() !.Split("=").Last());
-
-                    if (requestedLimit > limit)
-                    {
-                        ModelState.AddModelError("filter[limit]", "filter[limit] should be less than or equal : " + limit);
-                        throw new InvalidModelStateException(ModelState);
-                    }
-                }
-
                 query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
 
                 if (!anyValidCmds && this.Request.QueryString.HasValue)

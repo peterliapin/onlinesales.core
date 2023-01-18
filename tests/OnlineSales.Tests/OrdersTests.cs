@@ -149,9 +149,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         GenerateBulkRecords(10);
 
-        var result = await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery");
-        result.Should().NotBeNull();
-        result!.Count.Should().Be(0);
+        await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery", HttpStatusCode.BadRequest);
     }
 
     [Fact]

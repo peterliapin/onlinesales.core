@@ -286,7 +286,7 @@ namespace OnlineSales.Infrastructure
             var rawOperand = cmd.Props.ElementAtOrDefault(1 + orOperandShift);
             if (rawOperand == null)
             {
-                throw new QueryException(cmd.Source, "Operand not found");
+                rawOperand = "eq";
             }
 
             if (string.IsNullOrEmpty(rawOperand))
