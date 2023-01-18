@@ -32,6 +32,40 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         item.Should().BeEquivalentTo(testDomain);
     }
 
+    [Fact]
+    public async Task GetUnexistedValidDomainTest()
+    {
+        var domainName = "gmail.com";
+
+        var url = itemsUrl + "/names/" + domainName;
+
+        var item = await GetTest<Domain>(url, HttpStatusCode.OK);
+
+        item.Should().NotBeNull();
+
+        item!.Name.Should().Be(domainName);
+        item!.HttpCheck.Should().BeTrue();
+        item!.DnsCheck.Should().BeTrue();
+        item!.DnsRecords.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetUnexistedInvalidDomainTest()
+    {
+        var domainName = "SomeIncorrectDomainName";
+
+        var url = itemsUrl + "/names/" + domainName;
+
+        var item = await GetTest<Domain>(url, HttpStatusCode.OK);
+
+        item.Should().NotBeNull();
+
+        item!.Name.Should().Be(domainName);
+        item!.HttpCheck.Should().BeFalse();
+        item!.DnsCheck.Should().BeFalse();
+        item!.DnsRecords.Should().BeNull();
+    }
+
     protected override DomainUpdateDto UpdateItem(TestDomain to)
     {
         var from = new DomainUpdateDto();
