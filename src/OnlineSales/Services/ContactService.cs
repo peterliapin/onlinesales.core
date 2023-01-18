@@ -59,24 +59,41 @@ namespace OnlineSales.Services
 
         public List<Contact> EnrichWithDomainId(List<Contact> contacts)
         {
-            var domainsQueryResult = (from contact in contacts
-                                      join domain in apiDbContext.Domains! on GetDomainFromEmail(contact.Email) equals domain.Name into domainTemp
+            Dictionary<string, Domain> newDomains = new Dictionary<string, Domain>();
+
+            var contactsWithDomain = from contact in contacts select new { Contact = contact, DomainName = GetDomainFromEmail(contact.Email) };
+
+            var domainsQueryResult = (from contactWithDomain in contactsWithDomain
+                                      join domain in apiDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
                                       from domain in domainTemp.DefaultIfEmpty()
-                                      select new { EnteredDomain = contact, DomainId = domain?.Id ?? 0 }).ToList();
+                                      select new { EnteredContact = contactWithDomain.Contact, DomainName = contactWithDomain.DomainName, DomainId = domain?.Id ?? 0 }).ToList();
 
             foreach (var domainItem in domainsQueryResult)
             {
                 if (domainItem.DomainId != 0)
                 {
-                    domainItem.EnteredDomain.DomainId = domainItem.DomainId;
+                    domainItem.EnteredContact.DomainId = domainItem.DomainId;
                 }
                 else
                 {
-                    domainItem.EnteredDomain.Domain = new Domain() { Name = GetDomainFromEmail(domainItem.EnteredDomain.Email) };
+                    var domain = new Domain() { Name = domainItem.DomainName };
+
+                    var existingDomain = from domainDictionary in newDomains where domainDictionary.Key == domain.Name select domainDictionary;
+
+                    if (!existingDomain.Any())
+                    {
+                        newDomains.Add(domain.Name, domain);
+                        apiDbContext.Add(domain);
+                        domainItem.EnteredContact.Domain = domain;
+                    }
+                    else
+                    {
+                        domainItem.EnteredContact.Domain = existingDomain.FirstOrDefault().Value;
+                    }
                 }
             }
 
-            var transformedContacts = (from dq in domainsQueryResult select dq.EnteredDomain).ToList();
+            var transformedContacts = (from dq in domainsQueryResult select dq.EnteredContact).ToList();
 
             return transformedContacts;
         }

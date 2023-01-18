@@ -3,13 +3,14 @@
 // </copyright>
 
 using OnlineSales.DTOs;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestContact : ContactCreateDto
+public class TestContact : ContactCreateWithDomainDto
 {
     public TestContact(string uid = "")
     {
-        Email = $"contact{uid}@test.net";
+        Email = $"contact{uid}@test{uid}.net";
     }
 }

@@ -19,4 +19,21 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         to.Email = from.Email = "Updated" + to.Email;
         return from;
     }
+
+    protected override void GenerateBulkRecords(int dataCount, Action<TestContact>? populateAttributes = null)
+    {
+        List<TestContact> testContacts = new List<TestContact>();
+
+        for (int i = 0; i < dataCount; i++)
+        {
+             var contact = new TestContact(i.ToString());
+             contact.Domain = new Domain() { Name = contact.Email.Split("@").Last() };
+
+             testContacts.Add(contact);
+        }
+
+        var dbData = mapper.Map<List<Contact>>(testContacts);
+
+        App.PopulateBulkData(dbData);
+    }
 }
