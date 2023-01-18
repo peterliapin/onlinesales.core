@@ -5,6 +5,8 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -13,21 +15,11 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class OrdersController : BaseFKController<Order, OrderCreateDto, OrderUpdateDto, Customer>
+    public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto, OrderImportDto>
     {
-        public OrdersController(ApiDbContext dbContext, IMapper mapper)
-            : base(dbContext, mapper)
+        public OrdersController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+            : base(dbContext, mapper, apiSettingsConfig)
         {
-        }
-
-        protected override (int, string) GetFKId(OrderCreateDto item)
-        {
-            return (item.CustomerId, "CustomerId");
-        }
-
-        protected override (int?, string) GetFKId(OrderUpdateDto item)
-        {
-            return (null, string.Empty);
         }
     }
 }

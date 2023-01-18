@@ -5,10 +5,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
 {
     [Table("email_template")]
+    [SupportsChangeLog]
     public class EmailTemplate : BaseEntity
     {
         [Required]

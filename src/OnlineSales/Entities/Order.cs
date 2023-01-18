@@ -5,26 +5,31 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("order")]
+[Index(nameof(RefNo), IsUnique = true)]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Order : BaseEntity
 {
     /// <summary>
-    /// Gets or sets reference to a customer table.
+    /// Gets or sets reference to a contact table.
     /// </summary>
     [Required]
-    public int CustomerId { get; set; }
+    public int ContactId { get; set; }
 
     [JsonIgnore]
-    [ForeignKey("CustomerId")]
-    public virtual Customer? Customer { get; set; }
+    [ForeignKey("ContactId")]
+    public virtual Contact? Contact { get; set; }
 
     /// <summary>
-    /// Gets or sets customer IP address detected by the payment processing system.
+    /// Gets or sets contact  address detected by the payment processing system.
     /// </summary>
-    public string? CustomerIp { get; set; }
+    public string? ContactIp { get; set; }
 
     /// <summary>
     /// Gets or sets a unique reference numbers across all orders.

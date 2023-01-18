@@ -2,14 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.Formatters.Csv;
+using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -55,6 +58,8 @@ public class Program
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
+        builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
+        builder.Services.AddSingleton<ILockService, LockService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -64,18 +69,29 @@ public class Program
         ConfigureElasticSearch(builder);
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
-        ConfigureIPDetailsResolver(builder);
+        ConfigureIpDetailsResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
+        ConfigureApiSettings(builder);
+        ConfigureImportSizeLimit(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
 
-        builder.Services.AddControllers()
-            .ConfigureApiBehaviorOptions(options =>
-            {
-                options.SuppressModelStateInvalidFilter = true;
-            });
+        builder.Services.AddControllers(options =>
+        {
+            options.RespectBrowserAcceptHeader = true;
+            options.ReturnHttpNotAcceptable = true;
+            options.OutputFormatters.RemoveType<StringOutputFormatter>();
+            options.InputFormatters.Add(new CsvInputFormatter());
+            options.OutputFormatters.Add(new CsvOutputFormatter());
+            options.FormatterMappings.SetMediaTypeMappingForFormat("csv", "text/csv");
+        })
+        .AddXmlSerializerFormatters()
+        .ConfigureApiBehaviorOptions(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
 
         ConfigureSwagger(builder);
 
@@ -94,14 +110,8 @@ public class Program
 
         MigrateOnStartIfRequired(app, builder);
 
-        // Configure the HTTP request pipeline.
-        // if (app.Environment.IsDevelopment())
-        // {
-        // app.UseODataRouteDebug();
-        // }
-
         app.UseSwagger();
-        app.UseSwaggerUI();        
+        app.UseSwaggerUI();
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
@@ -110,12 +120,66 @@ public class Program
 
         app.MapControllers();
 
+        SetImageUploadSizeLimit(app, builder);
+
         app.UseSpa(spa =>
         {
             // works out of the box, no configuration required
         });
 
         app.Run();
+    }
+
+    private static void SetImageUploadSizeLimit(WebApplication app, WebApplicationBuilder builder)
+    {
+        var maxUploadSizeConfig = builder.Configuration.GetValue<string>("Images:MaxSize");
+
+        if (string.IsNullOrEmpty(maxUploadSizeConfig))
+        {
+            throw new MissingConfigurationException("Image upload size is mandatory.");
+        }
+
+        long? maxUploadSize = StringHelper.GetSizeInBytesFromString(maxUploadSizeConfig);
+
+        if (maxUploadSize is null)
+        {
+            throw new MissingConfigurationException("Image upload size is invalid.");
+        }
+
+        app.UseWhen(
+            context => context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/images"),
+            appBuilder => appBuilder.Use(async (c, next) =>
+            {
+                var feature = c.Features.Get<IHttpMaxRequestBodySizeFeature>();
+                if (feature is not null)
+                {
+                    feature.MaxRequestBodySize = maxUploadSize; 
+                }
+
+                await next();
+            }));
+    }
+
+    private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
+    {
+        var maxImportSizeConfig = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
+
+        if (string.IsNullOrEmpty(maxImportSizeConfig))
+        {
+            throw new MissingConfigurationException("Import file size is mandatory.");
+        }
+
+        var maxImportSize = StringHelper.GetSizeInBytesFromString(maxImportSizeConfig);
+
+        if (maxImportSize is null)
+        {
+            throw new MissingConfigurationException("Max import file size is invalid.");
+        }
+
+        builder.WebHost.UseKestrel(options =>
+        {
+            options.Limits.MaxRequestBodySize = maxImportSize;
+        });
     }
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
@@ -155,16 +219,19 @@ public class Program
 
         if (migrateOnStart)
         {
-            using (var scope = app.Services.CreateScope())
+            using (LockManager.GetWaitLock("MigrationWaitLock"))
             {
-                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-                context.Database.Migrate();
-
-                var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
-
-                foreach (var pluginContext in pluginContexts)
+                using (var scope = app.Services.CreateScope())
                 {
-                    pluginContext.Database.Migrate();
+                    var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+                    context.Database.Migrate();
+
+                    var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
+
+                    foreach (var pluginContext in pluginContexts)
+                    {
+                        pluginContext.Database.Migrate();
+                    }
                 }
             }
         }
@@ -189,14 +256,8 @@ public class Program
         })
         .AddJsonOptions(opts =>
         {
-            var enumConverter = new JsonStringEnumConverter();
-            opts.JsonSerializerOptions.Converters.Add(enumConverter);
-            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        })
-        /*.AddOData(options => options
-            .Select().Filter().OrderBy()
-            .SetMaxTop(10).Expand().Count()
-            .SkipToken())*/;
+            JsonHelper.Configure(opts.JsonSerializerOptions);
+        });
 
         foreach (var plugin in PluginManager.GetPluginList())
         {
@@ -222,7 +283,7 @@ public class Program
         builder.Services.AddElasticsearch(elasticConfig);
     }
 
-    private static void ConfigureIPDetailsResolver(WebApplicationBuilder builder)
+    private static void ConfigureIpDetailsResolver(WebApplicationBuilder builder)
     {
         var geolocationApiConfig = builder.Configuration.GetSection("GeolocationApi");
 
@@ -244,6 +305,18 @@ public class Program
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+    }
+
+    private static void ConfigureApiSettings(WebApplicationBuilder builder)
+    {
+        var apiSettingsConfig = builder.Configuration.GetSection("ApiSettings");
+
+        if (apiSettingsConfig == null)
+        {
+            throw new MissingConfigurationException("Api settings configuraiton is mandatory.");
+        }
+
+        builder.Services.Configure<ApiSettingsConfig>(apiSettingsConfig);
     }
 
     private static void ConfigureSwagger(WebApplicationBuilder builder)
@@ -316,7 +389,9 @@ public class Program
 
     private static void ConfigureTasks(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<ITask, CustomerScheduledEmail>();
+        builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
+        builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
+        builder.Services.AddScoped<ITask, SyncEsTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

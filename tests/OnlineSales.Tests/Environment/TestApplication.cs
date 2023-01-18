@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq.Expressions;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,31 @@ public class TestApplication : WebApplicationFactory<Program>
             var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
             dataContaxt.Database.EnsureDeleted();
             dataContaxt.Database.Migrate();
+        }
+    }
+
+    public void PopulateBulkData(dynamic bulkItems)
+    {
+        using (var scope = Services.CreateScope())
+        {
+            var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+            dataContaxt.AddRange(bulkItems);
+            dataContaxt.SaveChanges();
+        }
+    }
+
+    public ApiDbContext? GetDbContext()
+    {
+        var scope = Services.CreateScope();
+        var dataContext = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+        return dataContext;
+    }
+
+    public IMapper GetMapper()
+    {
+        using (var serviceScope = Services.CreateScope())
+        {
+            return serviceScope.ServiceProvider.GetService<IMapper>() !;
         }
     }
 

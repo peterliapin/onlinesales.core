@@ -16,6 +16,172 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     }
 
     [Fact]
+    public async Task GetWithLimitTest()
+    {
+        int limit = 5;
+        GenerateBulkRecords(limit);
+
+        var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[limit]={0}", limit));
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(limit);
+    }
+
+    [Fact]
+    public async Task GetWithOrderByIdTest()
+    {
+        int numberOfItems = 10;
+        GenerateBulkRecords(numberOfItems);
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20ASC");
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(numberOfItems);
+
+        for (int i = 0; i < numberOfItems; ++i)
+        {
+            result[i].Id.Should().Be(i + 1);
+        }
+
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20DESC");
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(numberOfItems);
+
+        for (int i = 0; i < numberOfItems; ++i)
+        {
+            result[i].Id.Should().Be(numberOfItems - i);
+        }
+    }
+
+    [Fact]
+    public async Task GetWithOrderByTwoPropertiesTest()
+    {
+        var index = 0;
+        int numberOfItems = 10;
+
+        var populateAttributes = (TestOrder order) =>
+        {            
+            order.AffiliateName = (index / 2).ToString();
+            index++;
+        };
+
+        GenerateBulkRecords(numberOfItems, populateAttributes);
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC");
+
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(numberOfItems);
+
+        for (int i = 0; i < numberOfItems; ++i)
+        {
+            result[i].AffiliateName.Should().Be((i / 2).ToString());
+            if (i + 1 < numberOfItems && result[i].AffiliateName == result[i + 1].AffiliateName)
+            {
+                result[i + 1].Id.Should().BeLessThan(result[i].Id);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task GetWithSkipTest()
+    {
+        int numberOfItems = 30;
+        GenerateBulkRecords(numberOfItems);
+
+        async Task GetAndCheck(int skipItemsNumber)
+        {
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[skip]={0}", skipItemsNumber));
+            result.Should().NotBeNull();
+            result!.Count.Should().Be(numberOfItems >= skipItemsNumber ? numberOfItems - skipItemsNumber : 0);
+        }
+
+        await GetAndCheck(0 * numberOfItems);
+
+        await GetAndCheck((int)(0.25 * numberOfItems));
+
+        await GetAndCheck((int)(0.5 * numberOfItems));
+
+        await GetAndCheck(numberOfItems);
+
+        await GetAndCheck((int)(1.5 * numberOfItems));
+    }
+
+    [Fact]
+    public async Task GetWithWhereTest()
+    {
+        var index = 0;
+        int numberOfItems = 10;
+
+        var populateAttributes = (TestOrder order) =>
+        {
+            order.AffiliateName = ((index + 1) % 2 == 0) ? "even" : "odd";
+            index++;
+        };
+
+        GenerateBulkRecords(numberOfItems, populateAttributes);
+
+        var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+        result[0].Id.Should().Be(numberOfItems / 2);
+
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][neq]={0}", numberOfItems / 2));
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(numberOfItems - 1);
+                
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][gte]={0}", numberOfItems / 2));
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1 + (numberOfItems / 2));
+
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}", numberOfItems / 2));
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(numberOfItems / 2);
+
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(4);        
+    }
+
+    [Fact]
+
+    public async Task GetWithIncorrectQueryTest()
+    {
+        GenerateBulkRecords(10);
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetWithPagingTest()
+    {
+        const int numberOfItems = 100;
+        const int pageSize = 10;
+
+        GenerateBulkRecords(numberOfItems);
+
+        async Task GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
+        {
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
+            result.Should().NotBeNull();
+            result!.Count.Should().Be(expectedItemsNumber);
+            for (int i = 0; i < expectedItemsNumber; ++i)
+            {
+                result[i].Id.Should().Be(skipItemsNumber + i + 1);
+            }
+        }
+
+        await GetAndCheck(0);
+        await GetAndCheck(10);
+        await GetAndCheck(20);
+        await GetAndCheck(30);
+        await GetAndCheck(40);
+        await GetAndCheck(50, 0);
+    }
+
+    [Fact]
     public override async Task UpdateItemNotFoundTest()
     {
         var updateOrder = new OrderUpdateDto();
@@ -67,12 +233,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         }
     }
 
-    protected override async Task<(TestOrder, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrder, string)> CreateItem(string uid, int fkId)
     {
-        var testOrder = new TestOrder
-        {
-            CustomerId = fkId,
-        };
+        var testOrder = new TestOrder(uid, fkId);
 
         var newUrl = await PostTest(itemsUrl, testOrder);
 
@@ -88,11 +251,11 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var fkItemCreate = new TestCustomer();
+        var fkItemCreate = new TestContact();
 
-        var fkUrl = await PostTest("/api/customers", fkItemCreate);
+        var fkUrl = await PostTest("/api/contacts", fkItemCreate);
 
-        var fkItem = await GetTest<Customer>(fkUrl);
+        var fkItem = await GetTest<Contact>(fkUrl);
 
         fkItem.Should().NotBeNull();
 

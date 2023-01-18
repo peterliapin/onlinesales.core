@@ -33,13 +33,13 @@ namespace OnlineSales.Services
             await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipients, updatedBodyTemplate, attachments, template.Id);
         }
 
-        public async Task SendToCustomerAsync(int customerId, string templateName, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
+        public async Task SendToContactAsync(int contactId, string templateName, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
         {
-            var template = await GetEmailTemplate(templateName, customerId);
+            var template = await GetEmailTemplate(templateName, contactId);
 
             var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
 
-            await emailWithLogService.SendToCustomerAsync(customerId, template.Subject, template.FromEmail, template.FromName, updatedBodyTemplate, attachments, scheduleId, template.Id);
+            await emailWithLogService.SendToContactAsync(contactId, template.Subject, template.FromEmail, template.FromName, updatedBodyTemplate, attachments, scheduleId, template.Id);
         }
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
@@ -49,11 +49,11 @@ namespace OnlineSales.Services
             return template!;
         }
 
-        private async Task<EmailTemplate> GetEmailTemplate(string name, int customerId)
+        private async Task<EmailTemplate> GetEmailTemplate(string name, int contactId)
         {
-            var customerLanguage = apiDbContext.Customers!.FirstOrDefault(c => c.Id == customerId) !.Language;
+            var contactLanguage = apiDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId) !.Language;
 
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(customerLanguage));
+            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(contactLanguage));
 
             return template!;
         }

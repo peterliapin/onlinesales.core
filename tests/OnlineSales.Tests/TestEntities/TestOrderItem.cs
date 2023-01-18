@@ -4,19 +4,19 @@
 
 using System.ComponentModel.DataAnnotations;
 using OnlineSales.DTOs;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Tests.TestEntities;
 
 public class TestOrderItem : OrderItemCreateDto
 {
-    public TestOrderItem()
+    public TestOrderItem(string uid = "", int orderId = 0)
     {
         Currency = "USD";
-        LicenseCode = "LicenseCode";
-        ProductName = "ProductName";
+        LicenseCode = $"LicenseCode{uid}";
+        ProductName = $"ProductName{uid}";
         UnitPrice = 1.99m;
         Quantity = 1;
+        OrderId = orderId;
     }
 }
 

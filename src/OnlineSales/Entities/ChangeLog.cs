@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace OnlineSales.Entities
 {
     [Table("change_log")]
-    public class ChangeLog : BaseEntityWithId
+    public class ChangeLog : BaseEntityWithId, IHasCreatedAt
     {
         public string ObjectType { get; set; } = string.Empty;
 
@@ -18,6 +18,8 @@ namespace OnlineSales.Entities
 
         [Column(TypeName = "jsonb")]
         public string Data { get; set; } = string.Empty;
+
+        public DateTime CreatedAt { get; set; }
     }
 }
 

@@ -2,10 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
@@ -48,11 +49,13 @@ public class ApiDbContext : DbContext
         this.httpContextHelper = httpContextHelper;
     }
 
+    public bool IsImportRequest { get; set; }
+
     public virtual DbSet<Post>? Posts { get; set; }
 
     public virtual DbSet<Comment>? Comments { get; set; }
 
-    public virtual DbSet<Customer>? Customers { get; set; }
+    public virtual DbSet<Contact>? Contacts { get; set; }
 
     public virtual DbSet<Order>? Orders { get; set; }
 
@@ -68,67 +71,93 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<EmailTemplate>? EmailTemplates { get; set; }
 
-    public virtual DbSet<CustomerEmailSchedule>? CustomerEmailSchedules { get; set; }
+    public virtual DbSet<ContactEmailSchedule>? ContactEmailSchedules { get; set; }
 
     public virtual DbSet<EmailLog>? EmailLogs { get; set; }
 
     public virtual DbSet<IpDetails>? IpDetails { get; set; }
 
-    public virtual DbSet<ChangeLog>? ChangeLog { get; set; }
+    public virtual DbSet<ChangeLog>? ChangeLogs { get; set; }
 
-    public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLog { get; set; }
+    public virtual DbSet<ChangeLogTaskLog>? ChangeLogTaskLogs { get; set; }
+
+    public virtual DbSet<Link>? Links { get; set; }
+
+    public virtual DbSet<LinkLog>? LinkLogs { get; set; }
+
+    public virtual DbSet<Domain>? Domains { get; set; }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        List<ChangeLog> changes = new ();
-        List<AuditEntry> auditEntries = new ();
+        Dictionary<EntityEntry, ChangeLog> changes = new ();
 
         var entries = ChangeTracker
        .Entries()
-       .Where(e => e.Entity is BaseEntity && (
+       .Where(e => (e.Entity is BaseEntityWithId) && (
                e.State == EntityState.Added
                || e.State == EntityState.Modified
                || e.State == EntityState.Deleted));
 
-        foreach (var entityEntry in entries)
+        if (entries.Any())
         {
-            if (entityEntry.State == EntityState.Modified)
+            foreach (var entityEntry in entries)
             {
-                ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).UpdatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).UpdatedByUserAgent = httpContextHelper!.UserAgent;
+                if (entityEntry.State == EntityState.Added)
+                {
+                    var createdAtEntity = entityEntry.Entity as IHasCreatedAt;
+
+                    if (createdAtEntity is not null)
+                    {
+                        createdAtEntity.CreatedAt = createdAtEntity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(createdAtEntity.CreatedAt);
+                    }
+
+                    var createdByEntity = entityEntry.Entity as IHasCreatedByIpAndUserAgent;
+
+                    if (createdByEntity is not null)
+                    {
+                        createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? httpContextHelper!.IpAddress : createdByEntity.CreatedByIp;
+                        createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : createdByEntity.CreatedByUserAgent;
+                    }
+                }
+
+                if (entityEntry.State == EntityState.Modified)
+                {
+                    var updatedAtEntity = entityEntry.Entity as IHasUpdatedAt;
+
+                    if (updatedAtEntity is not null)
+                    {
+                        updatedAtEntity.UpdatedAt = IsImportRequest && updatedAtEntity.UpdatedAt is not null ? GetDateWithKind(updatedAtEntity.UpdatedAt.Value) : DateTime.UtcNow;
+                    }
+
+                    var updatedByEntity = entityEntry.Entity as IHasUpdatedByIpAndUserAgent;
+
+                    if (updatedByEntity is not null)
+                    {
+                        updatedByEntity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : httpContextHelper!.IpAddress;
+                        updatedByEntity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
+                    }
+                }
+
+                // save entity state as it is before SaveChanges call
+                changes[entityEntry] = new ChangeLog
+                {
+                    ObjectType = entityEntry.Entity.GetType().Name,
+                    EntityState = entityEntry.State,
+                    CreatedAt = DateTime.UtcNow,
+                };
             }
 
-            if (entityEntry.State == EntityState.Added)
+            await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+            foreach (var change in changes)
             {
-                ((BaseEntity)entityEntry.Entity).CreatedAt = DateTime.UtcNow;
-                ((BaseEntity)entityEntry.Entity).CreatedByIp = httpContextHelper!.IpAddress;
-                ((BaseEntity)entityEntry.Entity).CreatedByUserAgent = httpContextHelper!.UserAgent;
+                // save object id which we only recieve after SaveChanges (for new records)
+                change.Value.ObjectId = ((BaseEntityWithId)change.Key.Entity).Id;
+                change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
             }
 
-            auditEntries.Add(new AuditEntry()
-            {
-                EntityEntry = entityEntry,
-                EntityState = entityEntry.State,
-            });
-        }
-
-        await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-
-        foreach (var entry in auditEntries)
-        {
-            ChangeLog change = new ChangeLog()
-            {
-                ObjectId = ((BaseEntity)entry!.EntityEntry!.Entity).Id,
-                ObjectType = entry.EntityEntry.Entity.GetType().Name,
-                EntityState = entry.EntityState,
-                Data = JsonSerializer.Serialize(entry.EntityEntry.Entity),
-            };
-
-            changes.Add(change);
-        }
-
-        ChangeLog!.AddRange(changes);
+            ChangeLogs!.AddRange(changes.Values);
+        } 
 
         return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
@@ -158,5 +187,15 @@ public class ApiDbContext : DbContext
             Console.WriteLine("Failed to configure ApiDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
             throw;
         }
+    }
+
+    private DateTime GetDateWithKind(DateTime date)
+    {
+        if (date.Kind == DateTimeKind.Unspecified)
+        {
+            return DateTime.SpecifyKind(date, DateTimeKind.Utc);
+        }
+
+        return date;
     }
 }

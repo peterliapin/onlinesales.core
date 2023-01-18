@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales", "src\OnlineSales\OnlineSales.csproj", "{D340D06E-35D2-4C38-809A-E7EBDA9BE1B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Tests", "tests\OnlineSales.Tests\OnlineSales.Tests.csproj", "{D8B4F2A5-5C3E-464C-B1B7-FF4C716D09FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Tests", "tests\OnlineSales.Tests\OnlineSales.Tests.csproj", "{D8B4F2A5-5C3E-464C-B1B7-FF4C716D09FC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-compose", "docker-compose", "{FA384976-BE97-4044-85A4-8EF1853C948B}"
 	ProjectSection(SolutionItems) = preProject
@@ -109,6 +109,6 @@ Global
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
 		$0.TextStylePolicy = $3
-		version = 1.0.26-pre
+		version = 1.0.28-pre
 	EndGlobalSection
 EndGlobal

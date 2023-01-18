@@ -15,16 +15,13 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
     {
     }
 
-    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId)
+    protected override async Task<(TestEmailTemplate, string)> CreateItem(string uid, int fkId)
     {
-        var testEmailTemplate = new TestEmailTemplate
-        {
-            GroupId = fkId,
-        };
+        var emailTemplate = new TestEmailTemplate(uid, fkId);
 
-        var newEmailTemplateUrl = await PostTest(itemsUrl, testEmailTemplate);
+        var emailTemplateUrl = await PostTest(itemsUrl, emailTemplate);
 
-        return (testEmailTemplate, newEmailTemplateUrl);
+        return (emailTemplate, emailTemplateUrl);
     }
 
     protected override async Task<(int, string)> CreateFKItem()

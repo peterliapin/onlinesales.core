@@ -1,0 +1,2 @@
+id,orderRefNo,createdAt,updatedAt,orderId,productName,licenseCode,unitPrice,currency,quantity,updatedByIp,updatedByUserAgent,createdByIp
+0,1001noref,2023-01-15T17:32:02.074179Z,,0,testProduct2,LC2,10,lkr,570,127.0.0.0,,

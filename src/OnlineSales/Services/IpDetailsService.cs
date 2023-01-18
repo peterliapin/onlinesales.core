@@ -9,28 +9,25 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.DTOs;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Services;
 
 public class IpDetailsService
 {
-    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-    };
+    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions();
 
     private readonly IOptions<GeolocationApiConfig> options;
 
     public IpDetailsService(IOptions<GeolocationApiConfig> options)
     {
         this.options = options;
-        SerializeOptions.Converters.Add(new JsonStringEnumConverter());
+        JsonHelper.Configure(SerializeOptions, JsonNamingConvention.SnakeCase);
     }
 
-    public async Task<IPDetailsDto?> GetIPDetail(string ip)
+    public async Task<IpDetailsDto?> GetIpDetails(string ip)
     {
-        IPDetailsDto? ipDetailsDto;
+        IpDetailsDto? ipDetailsDto;
 
         var client = new HttpClient();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -45,7 +42,7 @@ public class IpDetailsService
 
         if (response.IsSuccessStatusCode)
         {
-            ipDetailsDto = JsonSerializer.Deserialize<IPDetailsDto>(response.Content.ReadAsStringAsync().Result, SerializeOptions);
+            ipDetailsDto = JsonSerializer.Deserialize<IpDetailsDto>(response.Content.ReadAsStringAsync().Result, SerializeOptions);
 
             Log.Information("Success of resolving {0}", ipDetailsDto!.Ip!);
         }
@@ -53,7 +50,7 @@ public class IpDetailsService
         {
             var responseContent = await response.Content.ReadAsStringAsync();
 
-            throw new IPDetailsException(responseContent);
+            throw new IpDetailsException(responseContent);
         }
 
         return ipDetailsDto;

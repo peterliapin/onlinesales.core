@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
 {
@@ -14,17 +15,19 @@ namespace OnlineSales.Entities
     }
 
     [Table("email_log")]
+    [SupportsElasticSearch]
+    [SupportsChangeLog]
     public class EmailLog : BaseEntity
     {
         /// <summary>
-        /// Gets or sets reference to the CustomerEmailSchedule table.
+        /// Gets or sets reference to the ContactEmailSchedule table.
         /// </summary>
         public int? ScheduleId { get; set; }
 
         /// <summary>
-        /// Gets or sets reference to the customer table.
+        /// Gets or sets reference to the contact table.
         /// </summary>
-        public int? CustomerId { get; set; }
+        public int? ContactId { get; set; }
 
         /// <summary>
         /// Gets or sets reference to the EmailTemplate table.

@@ -21,11 +21,19 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<CommentUpdateDto, Comment>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Comment, CommentDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<CommentImportDto, Comment>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<PostCreateDto, Post>().ReverseMap();
         CreateMap<PostUpdateDto, Post>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Post, PostUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Post, PostDetailsDto>()
+           .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<PostImportDto, Post>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<OrderCreateDto, Order>().ReverseMap();
@@ -33,11 +41,19 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Order, OrderUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Order, OrderDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<OrderImportDto, Order>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<OrderItemCreateDto, OrderItem>().ReverseMap();
         CreateMap<OrderItemUpdateDto, OrderItem>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<OrderItem, OrderItemUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<OrderItem, OrderItemDetailsDto>()
+           .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<OrderItemImportDto, OrderItem>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailTemplateCreateDto, EmailTemplate>().ReverseMap();
@@ -45,17 +61,47 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<EmailTemplate, EmailTemplateUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-
-        CreateMap<CustomerCreateDto, Customer>().ReverseMap();
-        CreateMap<CustomerUpdateDto, Customer>()
+        CreateMap<EmailTemplate, EmailTemplateDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Customer, CustomerUpdateDto>()
+
+        CreateMap<ContactCreateDto, Contact>().ReverseMap();
+        CreateMap<ContactUpdateDto, Contact>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Contact, ContactUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Contact, ContactDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<ContactImportDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();
         CreateMap<EmailGroupUpdateDto, EmailGroup>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<EmailGroup, EmailGroupUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<EmailGroup, EmailGroupDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<OrderItem, OrderItemDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Order, OrderDetailsDto>()
+           .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Link, LinkCreateDto>().ReverseMap();
+        CreateMap<Link, LinkUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<LinkUpdateDto, Link>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Link, LinkDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Domain, DomainCreateDto>().ReverseMap();
+        CreateMap<Domain, DomainUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DomainUpdateDto, Domain>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Domain, DomainDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 

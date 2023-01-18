@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using CsvHelper.Configuration.Attributes;
 
 namespace OnlineSales.DTOs;
 
@@ -26,4 +27,37 @@ public class CommentUpdateDto
 {
     [Required]
     public string Content { get; set; } = string.Empty;
+}
+
+public class CommentDetailsDto : CommentCreateDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+}
+
+public class CommentImportDto : CommentCreateDto
+{
+    [Optional]
+    public int? Id { get; set; }
+
+    [Optional]
+    public DateTime? CreatedAt { get; set; }
+
+    [Optional]
+    public DateTime? UpdatedAt { get; set; }
+
+    [Optional]
+    public string? CreatedByIp { get; set; }
+
+    [Optional]
+    public string? CreatedByUserAgent { get; set; }
+
+    [Optional]
+    public string? UpdatedByIp { get; set; }
+
+    [Optional]
+    public string? UpdatedByUserAgent { get; set; }
 }

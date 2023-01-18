@@ -7,7 +7,7 @@
     <RootNamespace>OnlineSales</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>98270385-43f2-4d3c-98d5-02d0d77fc2d9</UserSecretsId>
-    <ReleaseVersion>1.0.26-pre</ReleaseVersion>
+    <ReleaseVersion>1.0.28-pre</ReleaseVersion>
     <AssemblyName>OnlineSales</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>OnlineSales</PackageId>
@@ -27,10 +27,13 @@
     <PackageVersion>$(ReleaseVersion)</PackageVersion>
     <Version>$(ReleaseVersion)</Version>
     <IsPackable>true</IsPackable>
-    <Configurations>Debug;Release;Migration</Configurations>
+    <Configurations>Debug;Migration;Release</Configurations>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Migration|AnyCPU' " />
   <ItemGroup>
+    <PackageReference Include="DistributedLock.Postgres" Version="1.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.5.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
@@ -41,19 +44,20 @@
     <PackageReference Include="Elasticsearch.Net" Version="7.17.5" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="EFCore.NamingConventions" Version="7.0.0" />
+    <PackageReference Include="EFCore.NamingConventions" Version="7.0.2" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.12" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.2" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,8 +65,11 @@
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Geography\" />
+    <Folder Include="Formatters\" />
+    <Folder Include="Formatters\Csv\" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="README.md">
       <Pack>True</Pack>

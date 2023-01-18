@@ -2,26 +2,46 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System;
+using System.Reflection;
+using Microsoft.AspNetCore.Components.Web;
 using OnlineSales.Data;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tasks;
 
 public abstract class ChangeLogTask : ITask
-{
+{    
     protected readonly ApiDbContext dbContext;
 
-    protected ChangeLogTask(ApiDbContext dbContext)
+    protected readonly IEnumerable<PluginDbContextBase> pluginDbContexts;
+
+    private readonly HashSet<Type> loggedTypes;
+
+    protected ChangeLogTask(ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts)
     {
         this.dbContext = dbContext;
-    }
+        this.pluginDbContexts = pluginDbContexts;
+        this.loggedTypes = GetTypes(dbContext);
 
-    public virtual int LogTaskRetryCount { get; set; } = 0;
+        foreach (var pt in pluginDbContexts)
+        {
+            var lt = GetTypes(pt);
+            this.loggedTypes.UnionWith(lt);
+        }
+    }
 
     public virtual int ChangeLogBatchSize { get; set; } = 50;
 
-    public abstract string Name { get; }
+    public string Name
+    {
+        get
+        {
+            return this.GetType().Name;
+        }
+    }
 
     public abstract string CronSchedule { get; }
 
@@ -31,29 +51,34 @@ public abstract class ChangeLogTask : ITask
 
     public Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        if (IsPreviousTaskInProgress(Name))
+        foreach (var typeName in loggedTypes.Select(type => type.Name))
         {
-            return Task.FromResult(true);
-        }
+            var taskAndEntity = Name + "_" + typeName;
 
-        var changeLogBatch = GetNextOrFailedChangeLogBatch(Name);
-
-        if (changeLogBatch is not null)
-        {
-            var taskLog = AddChangeLogTaskLogRecord(Name, changeLogBatch.First().Id, changeLogBatch.Last().Id);
-
-            try
+            if (IsPreviousTaskInProgress(taskAndEntity))
             {
-                ExecuteLogTask(changeLogBatch);
-
-                UpdateChangeLogTaskLogRecord(taskLog, changeLogBatch.Count, TaskExecutionState.Completed);
+                return Task.FromResult(true);
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Error occurred when executing task {Name}");
 
-                UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
-                throw;
+            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, typeName);
+
+            if (changeLogBatch is not null && changeLogBatch!.Any())
+            {
+                var taskLog = AddChangeLogTaskLogRecord(taskAndEntity, changeLogBatch!.First().Id, changeLogBatch!.Last().Id);
+
+                try
+                {
+                    ExecuteLogTask(changeLogBatch!);
+
+                    UpdateChangeLogTaskLogRecord(taskLog, changeLogBatch!.Count, TaskExecutionState.Completed);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"Error occurred when executing task {Name}");
+
+                    UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
+                    throw;
+                }
             }
         }
 
@@ -62,9 +87,33 @@ public abstract class ChangeLogTask : ITask
 
     internal abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
 
+    protected HashSet<Type> GetTypes(ApiDbContext context)
+    {
+        var res = new HashSet<Type>();
+
+        var types = context.Model.GetEntityTypes();
+        
+        foreach (var type in types.Select(type => type.ClrType))
+        {
+            if (type != null && IsChangeLogAttribute(type) && IsTypeSupported(type))
+            {
+                res.Add(type);
+            }
+        }
+
+        return res;
+    }
+
+    protected abstract bool IsTypeSupported(Type type);
+
+    private bool IsChangeLogAttribute(Type type)
+    {
+        return type.GetCustomAttributes<SupportsChangeLogAttribute>().Any();
+    }
+
     private bool IsPreviousTaskInProgress(string name)
     {
-        var inProgressCount = dbContext.ChangeLogTaskLog!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
+        var inProgressCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
 
         return inProgressCount > 0;
     }
@@ -89,30 +138,32 @@ public abstract class ChangeLogTask : ITask
             ChangeLogIdMax = maxLogId,
         };
 
-        dbContext.ChangeLogTaskLog!.Add(changeLogTaskLogEntry);
+        dbContext.ChangeLogTaskLogs!.Add(changeLogTaskLogEntry);
         dbContext.SaveChanges();
 
         return changeLogTaskLogEntry;
     }
 
-    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName)
+    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName, string entity)
     {
         var minLogId = 1;
 
-        var lastProcessedTask = dbContext.ChangeLogTaskLog!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
+        var lastProcessedTask = dbContext.ChangeLogTaskLogs!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
 
         if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Failed)
         {
-            var failedTaskCount = dbContext.ChangeLogTaskLog!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
-            if (failedTaskCount > 0 && failedTaskCount <= LogTaskRetryCount)
+            var failedTaskCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
+            if (failedTaskCount > 0 && failedTaskCount <= RetryCount)
             {
                 // If this is a retry, get the same minId of last processed task to re-execute the same batch.
                 minLogId = lastProcessedTask.ChangeLogIdMin;
             }
             else
             {
-                // If all retries are completed get the next batch.
-                minLogId = lastProcessedTask.ChangeLogIdMax + 1;
+                // If all retries are completed then discontinue.
+                Log.Error($"Error in executing task {taskName} for entity {entity} from Id {lastProcessedTask.ChangeLogIdMin} to {lastProcessedTask.ChangeLogIdMax}");
+
+                return Enumerable.Empty<ChangeLog>().ToList();
             }
         }
         else if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Completed)
@@ -120,7 +171,7 @@ public abstract class ChangeLogTask : ITask
             minLogId = lastProcessedTask.ChangeLogIdMax + 1;
         }
 
-        var changeLogList = dbContext.ChangeLog!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize).OrderBy(b => b.Id).ToList();
+        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize && c.ObjectType == entity).OrderBy(b => b.Id).ToList();
 
         return changeLogList;
     }

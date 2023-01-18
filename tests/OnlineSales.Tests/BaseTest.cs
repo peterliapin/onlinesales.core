@@ -3,65 +3,43 @@
 // </copyright>
 
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using AutoMapper;
 using FluentAssertions;
-using Microsoft.OData.UriParser;
+using Microsoft.AspNetCore.Mvc.Testing;
+using OnlineSales.Entities;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
 public class BaseTest : IDisposable
 {
-    protected static readonly JsonSerializerOptions SerializeOptions = new JsonSerializerOptions
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-    };
-
     protected static readonly TestApplication App = new TestApplication();
 
-    protected readonly HttpClient Client;
-
-    static BaseTest()
-    {
-        SerializeOptions.Converters.Add(new JsonStringEnumConverter());
-    }
+    protected readonly HttpClient client;
+    protected readonly IMapper mapper;
 
     public BaseTest()
     {
-        Client = App.CreateClient();
+        client = App.CreateClient(
+            new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+
+        mapper = App.GetMapper();
         App.CleanDatabase();
     }
 
     public virtual void Dispose()
     {
-        Client.Dispose();
-    }
-
-    protected static string SerializePayload(object payload)
-    {
-        return JsonSerializer.Serialize(payload, SerializeOptions);
-    }
-
-    protected static T? DeserializePayload<T>(string content)
-        where T : class
-    {
-        if (string.IsNullOrEmpty(content))
-        {
-            return null;
-        }
-        else
-        {
-            var result = JsonSerializer.Deserialize<T>(content, SerializeOptions);
-
-            return result;
-        }
+        client.Dispose();
     }
 
     protected static StringContent PayloadToStringContent(object payload)
     {
-        var payloadString = SerializePayload(payload);
+        var payloadString = JsonHelper.Serialize(payload);
 
         return new StringContent(payloadString, Encoding.UTF8, "application/json");
     }
@@ -82,7 +60,7 @@ public class BaseTest : IDisposable
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
-        return Client.SendAsync(request);
+        return client.SendAsync(request);
     }
 
     protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
@@ -103,7 +81,9 @@ public class BaseTest : IDisposable
 
         if (expectedCode == HttpStatusCode.OK)
         {
-            return DeserializePayload<T>(content);
+            CheckForRedundantProperties(content);
+
+            return JsonHelper.Deserialize<T>(content);
         }
         else
         {
@@ -123,9 +103,21 @@ public class BaseTest : IDisposable
         {
             location = response.Headers?.Location?.LocalPath ?? string.Empty;
             location.Should().StartWith(url);
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonHelper.Deserialize<BaseEntityWithId>(content);
+            result.Should().NotBeNull();
+            result!.Id.Should().BePositive();
         }
 
         return location;
+    }
+
+    protected async Task PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    {
+        var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName, authToken);
+
+        response.StatusCode.Should().Be(expectedCode);
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
@@ -150,5 +142,81 @@ public class BaseTest : IDisposable
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
+    }
+
+    private void CheckForRedundantProperties(string content)
+    {
+        bool isCollection = content.StartsWith("[");
+
+        if (isCollection)
+        {
+            var resultCollection = JsonHelper.Deserialize<List<BaseEntity>>(content) !;
+            resultCollection.Should().NotBeNull();
+            if (resultCollection.Count > 0)
+            {
+                resultCollection[0].CreatedByIp.Should().BeNull();
+                resultCollection[0].UpdatedByIp.Should().BeNull();
+                resultCollection[0].CreatedByUserAgent.Should().BeNull();
+                resultCollection[0].UpdatedByUserAgent.Should().BeNull(); 
+            }
+        }
+        else
+        {
+            var result = JsonHelper.Deserialize<BaseEntity>(content) !;
+            result.Should().NotBeNull();
+            result.CreatedByIp.Should().BeNull();
+            result.UpdatedByIp.Should().BeNull();
+            result.CreatedByUserAgent.Should().BeNull();
+            result.UpdatedByUserAgent.Should().BeNull();
+        }
+    }
+
+    private Task<HttpResponseMessage> ImportRequest(HttpMethod method, string url, string importFileName, string authToken = "Success")
+    {
+        StringContent content;
+
+        var request = new HttpRequestMessage(method, url);
+
+        var file = GetCsvResouceContent(importFileName);
+
+        if (Path.GetExtension(importFileName) !.ToLower() == ".csv")
+        {
+            content = new StringContent(file!, Encoding.UTF8, "text/csv"); 
+        }
+        else
+        {
+            content = new StringContent(file!, Encoding.UTF8, "application/json");
+        }
+
+        request.Content = content;
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+
+        return client.SendAsync(request);
+    }
+
+    private string? GetCsvResouceContent(string fileName)
+    {
+        string? content = null;
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var resourcePath = assembly.GetManifestResourceNames()
+                .Single(str => str.EndsWith(fileName));
+
+        if (resourcePath is null)
+        {
+            return null;
+        }
+
+        var stream = assembly!.GetManifestResourceStream(resourcePath);
+        if (stream != null)
+        {
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                content = reader.ReadToEnd();
+            }
+        }
+
+        return content;
     }
 }

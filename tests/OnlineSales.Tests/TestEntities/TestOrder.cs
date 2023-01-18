@@ -4,17 +4,17 @@
 
 using System.ComponentModel.DataAnnotations;
 using OnlineSales.DTOs;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Tests.TestEntities;
 
 public class TestOrder : OrderCreateDto
 {
-    public TestOrder()
+    public TestOrder(string uid = "", int contactId = 0)
     {
-        RefNo = "1000";
+        RefNo = $"1000{uid}";
         Currency = "USD";
         ExchangeRate = 2;
+        ContactId = contactId;
     }
 }
 

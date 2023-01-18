@@ -5,17 +5,14 @@
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
 {
     public static class QueryBuilder<T>
-        where T : BaseEntity
+        where T : BaseEntityWithId
     {
         public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds)
         {
@@ -47,7 +44,7 @@ namespace OnlineSales.Infrastructure
             return validFieldCommands.Any();
         }
 
-        public static async Task<object?> ExecuteSelectExpression(IQueryable<T> query, string[] queryString)
+        public static async Task<IList<T>?> ExecuteSelectExpression(IQueryable<T> query, string[] queryString)
         {
             var commands = Parse(queryString);
             var typeProperties = typeof(T).GetProperties();
@@ -113,7 +110,7 @@ namespace OnlineSales.Infrastructure
                 var selectResult = (Task)toArrayAsyncMethod.Invoke(selectQueryable, new object?[] { selectQueryable!, null }) !;
                 await selectResult;
                 var taskResult = outputTypeTaskResultProp!.GetValue(selectResult);
-                return taskResult;
+                return taskResult as IList<T>;
             }
 
             return null;
@@ -380,7 +377,7 @@ namespace OnlineSales.Infrastructure
                         break;
                     case 2:
                         propertyName = valueProps.First().ToLowerInvariant();
-                        methodName = valueProps.ElementAt(1) switch
+                        methodName = valueProps.ElementAt(1).ToLowerInvariant() switch
                         {
                             "asc" => query is IOrderedQueryable<T> ? "ThenBy" : "OrderBy",
                             "desc" => query is IOrderedQueryable<T> ? "ThenByDescending" : "OrderByDescending",

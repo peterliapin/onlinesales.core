@@ -45,14 +45,14 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task SendToCustomerAsync(int customerId, string subject, string fromEmail, string fromName, string body, List<AttachmentDto>? attachments, int scheduleId = 0, int templateId = 0)
+        public async Task SendToContactAsync(int contactId, string subject, string fromEmail, string fromName, string body, List<AttachmentDto>? attachments, int scheduleId = 0, int templateId = 0)
         {
             var emailStatus = false;
             var recipient = string.Empty;
 
             try
             {
-                recipient = await GetCustomerEmailById(customerId);
+                recipient = await GetContactEmailById(contactId);
 
                 var recipientCollection = new[] { recipient };
 
@@ -68,19 +68,19 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, customerId, scheduleId, templateId);
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, contactId, scheduleId, templateId);
             }
         }
 
-        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, int customerId = 0, int scheduleId = 0, int templateId = 0)
+        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, int contactId = 0, int scheduleId = 0, int templateId = 0)
         {
             try
             {
                 var log = new EmailLog();
 
-                if (customerId > 0)
+                if (contactId > 0)
                 {
-                    log.CustomerId = customerId;
+                    log.ContactId = contactId;
                 }
 
                 if (scheduleId > 0)
@@ -109,11 +109,11 @@ namespace OnlineSales.Services
             }
         }
 
-        private async Task<string> GetCustomerEmailById(int customerId)
+        private async Task<string> GetContactEmailById(int contactId)
         {
-            var customer = await apiDbContext.Customers!.FirstOrDefaultAsync(x => x.Id == customerId);
+            var contact = await apiDbContext.Contacts!.FirstOrDefaultAsync(x => x.Id == contactId);
 
-            return customer!.Email;
+            return contact!.Email;
         }
     }
 }
