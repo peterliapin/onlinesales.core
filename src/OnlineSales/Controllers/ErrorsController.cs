@@ -39,6 +39,15 @@ public class ErrorsController : Controller
                 problemDetails.Extensions["entityUid"] = entityNotFoundError.EntityUid;
 
                 break;
+            case QueryException queryException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest);
+                queryException.FailedCommands.ForEach(cmd =>
+                {
+                    problemDetails.Extensions[cmd.Key] = cmd.Value;
+                });
+                break;
 
             case DbUpdateException dbUpdateException:
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(
