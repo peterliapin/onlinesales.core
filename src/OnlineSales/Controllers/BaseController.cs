@@ -116,7 +116,8 @@ namespace OnlineSales.Controllers
             if (this.Request.QueryString.HasValue)
             {
                 var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
-                query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds);
+                query = QueryBuilder<T>.ReadIntoQuery(query, queryCommands, out var selectExists, out var anyValidCmds, out var recordsCount);
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, recordsCount.ToString());
 
                 if (!anyValidCmds && this.Request.QueryString.HasValue)
                 {

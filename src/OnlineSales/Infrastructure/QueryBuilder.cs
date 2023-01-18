@@ -14,14 +14,17 @@ namespace OnlineSales.Infrastructure
     public static class QueryBuilder<T>
         where T : BaseEntityWithId
     {
-        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds)
+        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds, out int recordsCount)
         {
             var cmds = Parse(queryString);
             validCmds = cmds.Any();
             query = AppendWhereExpression(query, cmds);
+            query = AppendOrderExpression(query, cmds);
+
+            recordsCount = query.Count();
+
             query = AppendSkipExpression(query, cmds);
             query = AppendLimitExpression(query, cmds);
-            query = AppendOrderExpression(query, cmds);
 
             selectStatementAvailable = IsSelectCommandExists(cmds);
             return query;
