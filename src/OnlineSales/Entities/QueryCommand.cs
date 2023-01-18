@@ -39,6 +39,7 @@ namespace OnlineSales.Entities
 
         public static Dictionary<string, WOperand> OperandMappings { get; } = new Dictionary<string, WOperand>()
         {
+            { "eq", WOperand.Equal },
             { "and", WOperand.And },
             { "or", WOperand.Or },
             { "gt", WOperand.GreaterThan },
@@ -47,6 +48,8 @@ namespace OnlineSales.Entities
             { "lte", WOperand.LessThanOrEquals },
             { "neq", WOperand.NotEqual },
         };
+
+        public static string AvailableCommandString => FilterMappings.Keys.Aggregate(string.Empty, (acc, key) => $"{acc}{key}, ");
 
         public FilterType Type { get; set; } = FilterType.None;
 

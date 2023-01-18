@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Net.Quic;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,6 +38,15 @@ public class ErrorsController : Controller
                 problemDetails.Extensions["entityType"] = entityNotFoundError.EntityType;
                 problemDetails.Extensions["entityUid"] = entityNotFoundError.EntityUid;
 
+                break;
+            case QueryException queryException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest);
+                queryException.FailedCommands.ForEach(cmd =>
+                {
+                    problemDetails.Extensions[cmd.Key] = cmd.Value;
+                });
                 break;
 
             default:
