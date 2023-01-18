@@ -12,6 +12,6 @@ namespace OnlineSales.Interfaces
 
         Task<Contact> UpdateContact(Contact contact);
 
-        List<Contact> DomainMapperWithContacts(List<Contact> contacts);
+        List<Contact> EnrichWithDomainId(List<Contact> contacts);
     }
 }

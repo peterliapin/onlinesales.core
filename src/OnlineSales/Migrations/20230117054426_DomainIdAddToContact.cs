@@ -28,7 +28,7 @@ namespace OnlineSales.Migrations
                 column: "domain_id",
                 principalTable: "domain",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />

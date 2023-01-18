@@ -19,52 +19,71 @@ namespace OnlineSales.Services
 
         public async Task<Contact> AddContact(Contact contact)
         {
-            var contactWrappWithList = new List<Contact>()
-            { contact };
+            var returnedValue = EnrichWithDomainId(contact);
 
-            var returnedValue = DomainMapperWithContacts(contactWrappWithList);
-
-            await apiDbContext.Contacts!.AddRangeAsync(returnedValue);
+            await apiDbContext.Contacts!.AddAsync(returnedValue);
 
             await apiDbContext.SaveChangesAsync();
 
-            return returnedValue!.FirstOrDefault() !;
+            return returnedValue!;
         }
 
         public async Task<Contact> UpdateContact(Contact contact)
         {
-            var contactWrappWithList = new List<Contact>()
-            { contact };
+            var returnedValue = EnrichWithDomainId(contact);
 
-            var returnedValue = DomainMapperWithContacts(contactWrappWithList);
-
-            apiDbContext.Contacts!.UpdateRange(returnedValue);
+            apiDbContext.Contacts!.Update(returnedValue);
 
             await apiDbContext.SaveChangesAsync();
 
-            return contactWrappWithList!.FirstOrDefault() !;
+            return returnedValue;
         }
 
-        public List<Contact> DomainMapperWithContacts(List<Contact> contacts)
+        public Contact EnrichWithDomainId(Contact contact)
         {
-            var domainsQueryResult = (from ed in contacts
-                                      join dom in apiDbContext.Domains! on ed.Email.Split("@").Last() equals dom.Name into domTm
-                                      from dom in domTm.DefaultIfEmpty()
-                                      select new { EnteredDomain = ed, DomId = dom?.Id ?? 0 }).ToList();
+            var domainName = GetDomainFromEmail(contact.Email);
 
-            foreach (var item in domainsQueryResult!.Where(dr => dr.DomId == 0).Select(ed => ed.EnteredDomain))
+            var domainsQueryResult = apiDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefault();
+
+            if (domainsQueryResult != null)
             {
-                item.Domain = new Domain() { Name = item.Email.Split("@").Last() };
+                contact.DomainId = domainsQueryResult.Id;
+            }
+            else
+            {
+                contact.Domain = new Domain() { Name = domainName };
             }
 
-            foreach (var item in domainsQueryResult!.Where(dr => dr.DomId != 0))
+            return contact;
+        }
+
+        public List<Contact> EnrichWithDomainId(List<Contact> contacts)
+        {
+            var domainsQueryResult = (from contact in contacts
+                                      join domain in apiDbContext.Domains! on GetDomainFromEmail(contact.Email) equals domain.Name into domainTemp
+                                      from domain in domainTemp.DefaultIfEmpty()
+                                      select new { EnteredDomain = contact, DomainId = domain?.Id ?? 0 }).ToList();
+
+            foreach (var domainItem in domainsQueryResult)
             {
-                item.EnteredDomain.DomainId = item.DomId;
+                if (domainItem.DomainId != 0)
+                {
+                    domainItem.EnteredDomain.DomainId = domainItem.DomainId;
+                }
+                else
+                {
+                    domainItem.EnteredDomain.Domain = new Domain() { Name = GetDomainFromEmail(domainItem.EnteredDomain.Email) };
+                }
             }
 
             var transformedContacts = (from dq in domainsQueryResult select dq.EnteredDomain).ToList();
 
             return transformedContacts;
+        }
+
+        public string GetDomainFromEmail(string email)
+        {
+            return email.Split("@").Last().ToString();
         }
     }
 }

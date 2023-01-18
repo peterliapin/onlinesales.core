@@ -1166,7 +1166,7 @@ namespace OnlineSales.Migrations
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
                         .WithMany()
                         .HasForeignKey("DomainId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_contact_domain_domain_id");
 

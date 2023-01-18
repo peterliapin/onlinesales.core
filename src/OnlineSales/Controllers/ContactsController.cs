@@ -29,6 +29,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<ContactDetailsDto>> Post([FromBody] ContactCreateDto value)
     {
         var contact = mapper.Map<Contact>(value);
@@ -44,15 +46,14 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<ContactDetailsDto>> Patch(int id, [FromBody] ContactUpdateDto value)
     {
-        var existingContact = (from c in dbContext.Contacts where c.Id == id select c).FirstOrDefault();
+        var existingContact = (from contact in dbContext.Contacts where contact.Id == id select contact).FirstOrDefault();
 
         if (existingContact == null)
         {
-            ModelState.AddModelError("ContactId", "Requested contact is not found for update");
-
-            throw new InvalidModelStateException(ModelState);
+            throw new EntityNotFoundException("Contact", id.ToString());
         }
 
         mapper.Map(value, existingContact);
@@ -66,7 +67,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
  
     protected override Task SaveBatchChangesAsync(List<Contact> importingRecords)
     {
-        var newItems = contactService.DomainMapperWithContacts(importingRecords);
+        var newItems = contactService.EnrichWithDomainId(importingRecords);
         
         return base.SaveBatchChangesAsync(newItems);
     }
