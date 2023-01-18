@@ -15,9 +15,9 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
     {
     }
 
-    protected override async Task<(TestEmailTemplate, string)> CreateItem(int fkId)
+    protected override async Task<(TestEmailTemplate, string)> CreateItem(string uid, int fkId)
     {
-        var emailTemplate = new TestEmailTemplate(string.Empty, fkId);
+        var emailTemplate = new TestEmailTemplate(uid, fkId);
 
         var emailTemplateUrl = await PostTest(itemsUrl, emailTemplate);
 

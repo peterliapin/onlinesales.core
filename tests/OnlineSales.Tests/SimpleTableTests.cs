@@ -164,7 +164,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     {
         GenerateBulkRecords(dataCount);
 
-        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.UnprocessableEntity);
+        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.BadRequest);
     }
 
     protected virtual async Task<(TC, string)> CreateItem()

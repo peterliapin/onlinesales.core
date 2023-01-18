@@ -149,9 +149,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         GenerateBulkRecords(10);
 
-        var result = await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery");
-        result.Should().NotBeNull();
-        result!.Count.Should().Be(0);
+        await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery", HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -233,9 +231,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         }
     }
 
-    protected override async Task<(TestOrder, string)> CreateItem(int fkId)
+    protected override async Task<(TestOrder, string)> CreateItem(string uid, int fkId)
     {
-        var testOrder = new TestOrder(Guid.NewGuid().ToString(), fkId);
+        var testOrder = new TestOrder(uid, fkId);
 
         var newUrl = await PostTest(itemsUrl, testOrder);
 
