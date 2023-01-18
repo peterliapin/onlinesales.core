@@ -14,31 +14,18 @@ namespace OnlineSales.Infrastructure
     public static class QueryBuilder<T>
         where T : BaseEntityWithId
     {
-        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds, out int recordsCount)
-        {
-            var cmds = Parse(queryString);
-            validCmds = cmds.Any();
-            query = AppendWhereExpression(query, cmds);
-            query = AppendOrderExpression(query, cmds);
-
-            recordsCount = query.Count();
-
-            query = AppendSkipExpression(query, cmds);
-            query = AppendLimitExpression(query, cmds);
-
-            selectStatementAvailable = IsSelectCommandExists(cmds);
-            return query;
-        }
-
-        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString)
+        public static async Task<(IQueryable<T>, bool, bool, int)> ReadIntoQuery(IQueryable<T> query, string[] queryString, int maxLimitSize)
         {
             var cmds = Parse(queryString);
             query = AppendWhereExpression(query, cmds);
-            query = AppendSkipExpression(query, cmds);
-            query = AppendLimitExpression(query, cmds);
             query = AppendOrderExpression(query, cmds);
 
-            return query;
+            var recordsCount = await query.CountAsync();
+
+            query = AppendSkipExpression(query, cmds);
+            query = AppendLimitExpression(query, cmds, maxLimitSize);
+
+            return (query, IsSelectCommandExists(cmds), cmds.Any(), recordsCount);
         }
 
         public static bool IsSelectCommandExists(QueryCommand[] commands)
@@ -425,20 +412,35 @@ namespace OnlineSales.Infrastructure
                 throw new QueryException(skipCommand.Source, $"Failed to parse number '{skipCommand.Value}'");
             }
 
+            if (skipCount < 0)
+            {
+                throw new QueryException(skipCommand.Source, $"Invalid skip size");
+            }
+
             return query.Skip(skipCount);
         }
 
-        private static IQueryable<T> AppendLimitExpression(IQueryable<T> query, QueryCommand[] commands)
+        private static IQueryable<T> AppendLimitExpression(IQueryable<T> query, QueryCommand[] commands, int maxLimitSize)
         {
             var limitCommand = commands.FirstOrDefault(c => c.Type == FilterType.Limit);
             if (limitCommand == null)
             {
-                return query;
+                return query.Take(maxLimitSize);
             }
 
             if (!int.TryParse(limitCommand.Value, out var limitCount))
             {
                 throw new QueryException(limitCommand.Source, $"Failed to parse number '{limitCommand.Value}'");
+            }
+
+            if (limitCount <= 0)
+            {
+                throw new QueryException(limitCommand.Source, $"Invalid limit size. (Maximum {maxLimitSize}");
+            }
+
+            if (limitCount > maxLimitSize)
+            {
+                throw new QueryException(limitCommand.Source, $"Max limit size exceeded. (Maximum {maxLimitSize}");
             }
 
             return query.Take(limitCount);
