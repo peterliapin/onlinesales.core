@@ -153,7 +153,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 
     private async Task<HttpResponseMessage?> RequestGetUrl(string url)
     {
-        HttpClient client = new HttpClient();        
+        var client = new HttpClient();        
 
         try
         {

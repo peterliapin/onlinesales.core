@@ -33,7 +33,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     }
 
     [Fact]
-    public async Task GetUnexistedValidDomainTest()
+    public async Task GetNewValidDomainTest()
     {
         var domainName = "gmail.com";
 
@@ -50,7 +50,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     }
 
     [Fact]
-    public async Task GetUnexistedInvalidDomainTest()
+    public async Task GetNewInvalidDomainTest()
     {
         var domainName = "SomeIncorrectDomainName";
 
