@@ -3,16 +3,14 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using CsvHelper.Configuration.Attributes;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace OnlineSales.DTOs;
 
 public class DomainCreateDto
 {
-    public bool Shared { get; set; }
-
-    public bool Disposable { get; set; }
-
     [Required]
     public string Name { get; set; } = string.Empty;
 }
@@ -26,15 +24,9 @@ public class DomainUpdateDto
     public string? Name { get; set; }
 }
 
-public class DomainDetailsDto : CommentCreateDto
+public class DomainDetailsDto : DomainCreateDto
 {
     public int Id { get; set; }
-
-    public bool? Shared { get; set; }
-
-    public bool? Disposable { get; set; }
-
-    public string? Name { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

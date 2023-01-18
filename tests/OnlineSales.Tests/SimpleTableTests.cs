@@ -11,7 +11,7 @@ using OnlineSales.Infrastructure;
 namespace OnlineSales.Tests;
 
 public abstract class SimpleTableTests<T, TC, TU> : BaseTest
-    where T : BaseEntity
+    where T : BaseEntityWithId
     where TC : class
     where TU : new()
 {
