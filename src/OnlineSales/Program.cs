@@ -58,6 +58,7 @@ public class Program
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
+        builder.Services.AddTransient<IDomainService, DomainService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();

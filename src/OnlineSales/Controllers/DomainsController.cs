@@ -2,21 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Xml.Linq;
 using AutoMapper;
-using DnsClient;
-using Elasticsearch.Net;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
@@ -24,146 +18,42 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDto, DomainUpdateDto, DomainDetailsDto, DomainImportDto>
 {
-    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    protected readonly IDomainService domainService;
+
+    public DomainsController(ApiDbContext dbContext, IMapper mapper, IDomainService domainService, IOptions<ApiSettingsConfig> apiSettingsConfig)
         : base(dbContext, mapper, apiSettingsConfig)
     {
+        this.domainService = domainService;
     }
 
     // GET api/domains/names/gmail.com
-    [HttpGet("names/{name}")]    
+    [HttpGet("verify/{name}")]    
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DomainDetailsDto>> GetOne(string name)
+    public async Task<ActionResult<DomainDetailsDto>> Verify(string name)
     {
-        var existingEntity = from d in this.dbSet where d.Name == name select d;
+        var domain = (from d in this.dbSet
+                      where d.Name == name
+                      select d).FirstOrDefault();
 
-        if (existingEntity != null && existingEntity.Any())
+        if (domain == null)
         {
-            var domain = await existingEntity.FirstAsync();
-            return mapper.Map<DomainDetailsDto>(domain);
-        }
-        else
-        {
-            var domain = new Domain();
-            domain.Name = name;
-
-            await HttpCheck("http://" + name, domain);
-            if (domain.HttpCheck == false)
+            domain = new Domain
             {
-                await HttpCheck("https://" + name, domain);
-            }
+                Name = name,
+            };
 
-            await GetDnsRecords(name, domain);
-
-            var result = await dbSet.AddAsync(domain);
-            await dbContext.SaveChangesAsync();
-
-            return await GetOne(result.Entity.Id);
-        }
-    }
-
-    private async Task HttpCheck(string httpUrl, Domain d)
-    {
-        d.HttpCheck = false;
-        var responce = await RequestGetUrl(httpUrl);
-        if (responce != null)
-        {
-            d.HttpCheck = true;
-            if (responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
-            {
-                d.Url = responce.RequestMessage.RequestUri.ToString();
-                HtmlWeb web = new HtmlWeb();
-                var htmlDoc = web.Load(d.Url);
-
-                if (htmlDoc != null)
-                {
-                    d.Title = GetTitle(htmlDoc); 
-                    d.Description = GetDescription(htmlDoc);
-                }
-            }
-        }
-    }
-
-    private async Task GetDnsRecords(string domainName, Domain d)
-    {
-        d.DnsRecords = null;
-        d.DnsCheck = false;
-
-        try
-        {
-            var lookup = new LookupClient();
-            var result = await lookup.QueryAsync(domainName, QueryType.MX);
-            if (result.Answers.Any())
-            {
-                d.DnsRecords = JsonHelper.Serialize(result.Answers);
-                d.DnsCheck = true;
-            }
-        }
-        catch 
-        {
-            // do nothing
-        }
-    }
-
-    private string? GetTitle(HtmlDocument htmlDoc)
-    {
-        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode("//title");
-        if (htmlNode != null)
-        {
-            return htmlNode.InnerText;
+            await dbSet.AddAsync(domain);
         }
 
-        return GetNodeContentByTag(htmlDoc, "title");
-    }
+        await domainService.Verify(domain);
+        await dbContext.SaveChangesAsync();
 
-    private string? GetDescription(HtmlDocument htmlDoc)
-    {
-        return GetNodeContentByTag(htmlDoc, "description");
-    }
+        var resultConverted = mapper.Map<DomainDetailsDto>(domain);
 
-    private string? GetNodeContentByTag(HtmlDocument htmlDoc, string value)
-    {
-        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", value));
-        if (htmlNode != null)
-        {
-            return htmlNode.GetAttributeValue("content", null);
-        }
-
-        htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='og:{0}']", value));
-        if (htmlNode != null)
-        {
-            return htmlNode.GetAttributeValue("content", null);
-        }
-
-        return null;
-    }
-
-    private string? GetNodeContent(HtmlDocument htmlDoc, string node)
-    {
-        var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", node));
-        if (htmlNode != null)
-        {
-            return htmlNode.GetAttributeValue("content", null);
-        }
-
-        return null;
-    }
-
-    private async Task<HttpResponseMessage?> RequestGetUrl(string url)
-    {
-        var client = new HttpClient();        
-
-        try
-        {
-            var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
-            return await client.SendAsync(request);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        return Ok(resultConverted);
     }
 }
 
