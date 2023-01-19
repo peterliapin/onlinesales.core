@@ -6,11 +6,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("contact")]
 [Index(nameof(Email), IsUnique = true)]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Contact : BaseEntity
 {
     public string? LastName { get; set; }

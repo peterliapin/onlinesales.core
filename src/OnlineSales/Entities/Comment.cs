@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
@@ -16,6 +17,8 @@ public enum CommentStatus
 }
 
 [Table("comment")]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Comment : BaseEntity
 {
     public string AuthorName { get; set; } = string.Empty;

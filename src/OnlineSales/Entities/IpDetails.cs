@@ -4,11 +4,13 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using OnlineSales.Geography;
 
 namespace OnlineSales.Entities;
 
 [Table("ip_details")]
+[Index(nameof(Ip), IsUnique = true)]
 public class IpDetails
 {
     [Key]

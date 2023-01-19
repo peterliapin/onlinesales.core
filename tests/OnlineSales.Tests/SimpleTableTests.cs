@@ -11,7 +11,7 @@ using OnlineSales.Infrastructure;
 namespace OnlineSales.Tests;
 
 public abstract class SimpleTableTests<T, TC, TU> : BaseTest
-    where T : BaseEntity
+    where T : BaseEntityWithId
     where TC : class
     where TU : new()
 {
@@ -164,7 +164,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     {
         GenerateBulkRecords(dataCount);
 
-        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.UnprocessableEntity);
+        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.BadRequest);
     }
 
     protected virtual async Task<(TC, string)> CreateItem()

@@ -5,10 +5,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("order")]
+[Index(nameof(RefNo), IsUnique = true)]
+[SupportsElasticSearch]
+[SupportsChangeLog]
 public class Order : BaseEntity
 {
     /// <summary>

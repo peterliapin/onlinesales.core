@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230117125408_DomainEntity")]
+    partial class DomainEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -208,10 +211,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<int>("DomainId")
-                        .HasColumnType("integer")
-                        .HasColumnName("domain_id");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text")
@@ -263,9 +262,6 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_contact");
-
-                    b.HasIndex("DomainId")
-                        .HasDatabaseName("ix_contact_domain_id");
 
                     b.HasIndex("Email")
                         .IsUnique()
@@ -1195,18 +1191,6 @@ namespace OnlineSales.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.Domain", "Domain")
-                        .WithMany()
-                        .HasForeignKey("DomainId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_contact_domain_domain_id");
-
-                    b.Navigation("Domain");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
