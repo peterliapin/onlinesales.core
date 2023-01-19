@@ -5,6 +5,7 @@
 using System.Text;
 using DnsClient;
 using HtmlAgilityPack;
+using Microsoft.AspNetCore.OData.Formatter;
 using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -89,29 +90,45 @@ namespace OnlineSales.Interfaces
                 return htmlNode.InnerText;
             }
 
-            return GetNodeContentByTag(htmlDoc, "title");
+            return GetNodeContentByAttr(htmlDoc, "title");
         }
 
         private string? GetDescription(HtmlDocument htmlDoc)
         {
-            return GetNodeContentByTag(htmlDoc, "description");
+            return GetNodeContentByAttr(htmlDoc, "description");
         }
 
-        private string? GetNodeContentByTag(HtmlDocument htmlDoc, string value)
+        private string? GetNodeContentByAttr(HtmlDocument htmlDoc, string value)
         {
-            var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='{0}']", value));
-            if (htmlNode != null)
+            var result = GetNodeContentByAttr(htmlDoc, "name", value);
+            if (result == null)
             {
-                return htmlNode.GetAttributeValue("content", null);
+                result = GetNodeContentByAttr(htmlDoc, "property", value);
             }
 
-            htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@name='og:{0}']", value));
-            if (htmlNode != null)
+            return result;
+        }
+
+        private string? GetNodeContentByAttr(HtmlDocument htmlDoc, string attrName, string value)
+        {
+            string? GetNodeContent(HtmlDocument htmlDoc, string attrName, string value)
             {
-                return htmlNode.GetAttributeValue("content", null);
+                var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@{0}='{1}']", attrName, value));
+                if (htmlNode != null && htmlNode.Attributes.Contains("content"))
+                {
+                    return htmlNode.GetAttributeValue("content", null);
+                }
+
+                return null;
             }
 
-            return null;
+            var res = GetNodeContent(htmlDoc, attrName, value);
+            if (res == null)
+            {
+                res = GetNodeContent(htmlDoc, attrName, "og:" + value);
+            }
+
+            return res;
         }
     }
 }
