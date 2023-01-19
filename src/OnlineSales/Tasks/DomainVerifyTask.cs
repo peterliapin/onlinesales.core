@@ -2,11 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System;
-using System.Configuration;
-using System.Reflection;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.OData.ModelBuilder;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
@@ -48,20 +43,18 @@ public class DomainVerifyTask : ITask
     {
         try
         {
-            var domainsToCheck = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null).Take(taskConfig.BatchSize);
-
-            foreach (var domain in domainsToCheck)
+            dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null).Take(taskConfig.BatchSize).AsParallel().ForAll(domain =>
             {
                 if (domain.HttpCheck == null)
                 {
-                    await domainService.VerifyHttp(domain);
+                    domainService.VerifyHttp(domain).Wait();
                 }
 
                 if (domain.DnsCheck == null)
                 {
-                    await domainService.VerifyDns(domain);
+                    domainService.VerifyDns(domain).Wait();
                 }
-            }
+            });
 
             await dbContext.SaveChangesAsync();
         }

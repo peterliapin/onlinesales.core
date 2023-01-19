@@ -72,7 +72,7 @@ public class DomainCheckTaskConfig : TaskConfig
 {
     public DomainCheckTaskConfig()
     {
-        CronSchedule = "* 0/1 * * * ?";
+        CronSchedule = "* 0/5 * * * ?";
 
         RetryCount = 2;
 
