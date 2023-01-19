@@ -46,6 +46,38 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         item!.HttpCheck.Should().BeTrue();
         item!.DnsCheck.Should().BeTrue();
         item!.DnsRecords.Should().NotBeNull();
+        item!.Url.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetExistedValidDomainTest()
+    {
+        var testDomain = new TestDomain();
+
+        var domainName = testDomain.Name;
+        domainName.Should().NotBeEmpty();
+
+        var location = await PostTest(itemsUrl, testDomain);
+
+        var addedItem = await GetTest<Domain>(location, HttpStatusCode.OK);
+
+        addedItem.Should().NotBeNull();
+        addedItem!.Name.Should().Be(domainName);
+        addedItem!.DnsRecords!.Should().BeNull();
+        addedItem!.Url!.Should().BeNull();
+        addedItem!.HttpCheck.Should().BeNull();
+        addedItem!.DnsCheck.Should().BeNull();
+
+        var url = itemsUrl + "/verify/" + domainName;
+
+        addedItem = await GetTest<Domain>(url, HttpStatusCode.OK);
+
+        addedItem.Should().NotBeNull();
+        addedItem!.Name.Should().Be(domainName);
+        addedItem!.DnsRecords!.Should().NotBeNull();
+        addedItem!.Url!.Should().NotBeNull();
+        addedItem!.HttpCheck.Should().BeTrue();
+        addedItem!.DnsCheck.Should().BeTrue();
     }
 
     [Fact]
