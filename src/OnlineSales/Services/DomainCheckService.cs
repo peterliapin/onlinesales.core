@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using ARSoft.Tools.Net.Dns;
+using System.Text;
 using DnsClient;
 using HtmlAgilityPack;
 using Nest;
@@ -55,7 +55,7 @@ namespace OnlineSales.Interfaces
                 {
                     d.Url = responce.RequestMessage.RequestUri.ToString();
                     HtmlWeb web = new HtmlWeb();
-                    var htmlDoc = web.Load(d.Url);
+                    var htmlDoc = await web.LoadFromWebAsync(d.Url, Encoding.UTF8);
 
                     if (htmlDoc != null)
                     {

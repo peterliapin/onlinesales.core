@@ -36,8 +36,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     [Fact]
     public async Task GetNewValidDomainTest()
     {
-        // var domainName = "gmail.com";
-        var domainName = "xltools.net";
+        var domainName = "gmail.com";
 
         var url = itemsUrl + "/names/" + domainName;
 
