@@ -43,6 +43,7 @@
     <None Remove="Resources\ImportFiles\commentsBasic.json" />
     <None Remove="Resources\ImportFiles\commentsFull.csv" />
     <None Remove="Resources\ImportFiles\commentsFull.json" />
+    <None Remove="Resources\ImportFiles\contacts.json" />
     <None Remove="Resources\ImportFiles\orderItems.csv" />
     <None Remove="Resources\ImportFiles\orderItems.json" />
     <None Remove="Resources\ImportFiles\orderItemsNoRef.csv" />
@@ -60,6 +61,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ImportFiles\contacts.json" />
     <EmbeddedResource Include="Resources\ImportFiles\orderItemsNoRef.csv">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
