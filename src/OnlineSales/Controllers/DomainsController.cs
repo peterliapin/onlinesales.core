@@ -2,21 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Xml.Linq;
 using AutoMapper;
-using DnsClient;
-using Elasticsearch.Net;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -34,33 +27,33 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
     }
 
     // GET api/domains/names/gmail.com
-    [HttpGet("names/{name}")]    
+    [HttpGet("verify/{name}")]    
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DomainDetailsDto>> GetOne(string name)
+    public async Task<ActionResult<DomainDetailsDto>> Verify(string name)
     {
-        var existingEntity = from d in this.dbSet where d.Name == name select d;
+        var domain = (from d in this.dbSet
+                      where d.Name == name
+                      select d).FirstOrDefault();
 
-        if (existingEntity != null && existingEntity.Any())
+        if (domain == null)
         {
-            var domain = await existingEntity.FirstAsync();
-            return mapper.Map<DomainDetailsDto>(domain);
+            domain = new Domain
+            {
+                Name = name,
+            };
+
+            await dbSet.AddAsync(domain);
         }
-        else
-        {
-            var domain = new Domain();
-            domain.Name = name;
 
-            await domainCheckService.HttpCheck(domain);
-            await domainCheckService.DnsCheck(domain);
+        await domainCheckService.Verify(domain);
+        await dbContext.SaveChangesAsync();
 
-            var result = await dbSet.AddAsync(domain);
-            await dbContext.SaveChangesAsync();
+        var resultConverted = mapper.Map<DomainDetailsDto>(domain);
 
-            return await GetOne(result.Entity.Id);
-        }
+        return Ok(resultConverted);
     }
 }
 

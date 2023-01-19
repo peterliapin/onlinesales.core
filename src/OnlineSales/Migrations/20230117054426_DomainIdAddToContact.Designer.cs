@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -11,9 +12,11 @@ using OnlineSales.Data;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230117054426_DomainIdAddToContact")]
+    partial class DomainIdAddToContact
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -340,54 +343,26 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("CatchAll")
-                        .HasColumnType("boolean")
-                        .HasColumnName("catch_all");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<bool?>("Disposable")
+                    b.Property<bool>("Disposable")
                         .HasColumnType("boolean")
                         .HasColumnName("disposable");
-
-                    b.Property<bool?>("DnsCheck")
-                        .HasColumnType("boolean")
-                        .HasColumnName("dns_check");
-
-                    b.Property<string>("DnsRecords")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("dns_records");
-
-                    b.Property<bool?>("Free")
-                        .HasColumnType("boolean")
-                        .HasColumnName("free");
-
-                    b.Property<bool?>("HttpCheck")
-                        .HasColumnType("boolean")
-                        .HasColumnName("http_check");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<string>("Title")
-                        .HasColumnType("text")
-                        .HasColumnName("title");
+                    b.Property<bool>("Shared")
+                        .HasColumnType("boolean")
+                        .HasColumnName("shared");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("text")
-                        .HasColumnName("url");
 
                     b.HasKey("Id")
                         .HasName("pk_domain");
@@ -756,10 +731,6 @@ namespace OnlineSales.Migrations
                     b.HasKey("Ip")
                         .HasName("pk_ip_details");
 
-                    b.HasIndex("Ip")
-                        .IsUnique()
-                        .HasDatabaseName("ix_ip_details_ip");
-
                     b.ToTable("ip_details", (string)null);
                 });
 
@@ -952,10 +923,6 @@ namespace OnlineSales.Migrations
 
                     b.HasIndex("ContactId")
                         .HasDatabaseName("ix_order_contact_id");
-
-                    b.HasIndex("RefNo")
-                        .IsUnique()
-                        .HasDatabaseName("ix_order_ref_no");
 
                     b.ToTable("order", (string)null);
                 });
@@ -1202,7 +1169,7 @@ namespace OnlineSales.Migrations
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
                         .WithMany()
                         .HasForeignKey("DomainId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_contact_domain_domain_id");
 

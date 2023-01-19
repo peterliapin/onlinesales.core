@@ -15,6 +15,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<bool?, bool>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<int?, int>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<decimal?, decimal>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<List<DnsRecord>?, List<DnsRecord>>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()
@@ -72,6 +73,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<Contact, ContactDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<ContactImportDto, Contact>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<ContactCreateWithDomainDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();

@@ -24,13 +24,11 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
 
         await PostTest(itemsUrl, testDomain);
 
-        var url = itemsUrl + "/names/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
         var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
-
-        item.Should().BeEquivalentTo(testDomain);
     }
 
     [Fact]
@@ -38,7 +36,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     {
         var domainName = "gmail.com";
 
-        var url = itemsUrl + "/names/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
         var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
@@ -55,16 +53,16 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     {
         var domainName = "SomeIncorrectDomainName";
 
-        var url = itemsUrl + "/names/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
         var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
 
         item!.Name.Should().Be(domainName);
-        item!.HttpCheck.Should().BeFalse();
         item!.DnsCheck.Should().BeFalse();
         item!.DnsRecords.Should().BeNull();
+        item!.HttpCheck.Should().BeNull();        
     }
 
     protected override DomainUpdateDto UpdateItem(TestDomain to)

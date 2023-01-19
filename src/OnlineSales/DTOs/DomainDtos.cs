@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using CsvHelper.Configuration.Attributes;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -29,7 +30,7 @@ public class DomainCreateDto
     public bool? CatchAll { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public string? DnsRecords { get; set; }
+    public List<DnsRecord>? DnsRecords { get; set; }
 
     public bool? DnsCheck { get; set; }
 }
@@ -53,7 +54,7 @@ public class DomainUpdateDto
     public bool? CatchAll { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public string? DnsRecords { get; set; }
+    public List<DnsRecord>? DnsRecords { get; set; }
 
     public bool? DnsCheck { get; set; }
 }
@@ -98,7 +99,7 @@ public class DomainImportDto
 
     [Optional]
     [Column(TypeName = "jsonb")]
-    public string? DnsRecords { get; set; }
+    public List<DnsRecord>? DnsRecords { get; set; }
 
     [Optional]
     public bool? DnsCheck { get; set; }
