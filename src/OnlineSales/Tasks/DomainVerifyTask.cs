@@ -1,4 +1,4 @@
-﻿// <copyright file="DomainCheckTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DomainVerifyTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -15,18 +15,18 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tasks;
 
-public class DomainCheckTask : ITask
+public class DomainVerifyTask : ITask
 {
     protected readonly ApiDbContext dbContext;
 
     private readonly DomainCheckTaskConfig taskConfig = new DomainCheckTaskConfig();
 
-    private readonly IDomainCheckService domainCheckService;
+    private readonly IDomainVerifyService domainService;
 
-    public DomainCheckTask(ApiDbContext dbContext, IConfiguration configuration, IDomainCheckService domainCheckService)
+    public DomainVerifyTask(ApiDbContext dbContext, IConfiguration configuration, IDomainVerifyService domainService)
     {
         this.dbContext = dbContext;
-        this.domainCheckService = domainCheckService;
+        this.domainService = domainService;
 
         var section = configuration.GetSection("Tasks:DomainCheckTask");        
         var config = section.Get<DomainCheckTaskConfig>();
@@ -54,12 +54,12 @@ public class DomainCheckTask : ITask
             {
                 if (domain.HttpCheck == null)
                 {
-                    await domainCheckService.HttpCheck(domain);
+                    await domainService.VerifyHttp(domain);
                 }
 
                 if (domain.DnsCheck == null)
                 {
-                    await domainCheckService.DnsCheck(domain);
+                    await domainService.VerifyDns(domain);
                 }
             }
 

@@ -3,7 +3,6 @@
 // </copyright>
 
 using OnlineSales.DTOs;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Tests.TestEntities;
 
