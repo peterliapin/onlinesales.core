@@ -1,4 +1,4 @@
-﻿// <copyright file="DomainVerifyService.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DomainService.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -14,7 +14,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Interfaces
 {
-    public class DomainVerifyService : IDomainVerifyService
+    public class DomainService : IDomainService
     {
         private static readonly List<QueryType> DnsQueryTypes = new List<QueryType>
         {

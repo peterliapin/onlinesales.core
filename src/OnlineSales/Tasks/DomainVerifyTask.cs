@@ -16,9 +16,9 @@ public class DomainVerifyTask : ITask
 
     private readonly DomainCheckTaskConfig taskConfig = new DomainCheckTaskConfig();
 
-    private readonly IDomainVerifyService domainService;
+    private readonly IDomainService domainService;
 
-    public DomainVerifyTask(ApiDbContext dbContext, IConfiguration configuration, IDomainVerifyService domainService)
+    public DomainVerifyTask(ApiDbContext dbContext, IConfiguration configuration, IDomainService domainService)
     {
         this.dbContext = dbContext;
         this.domainService = domainService;
