@@ -43,10 +43,14 @@ public class DomainVerifyTask : ITask
     {
         try
         {
-            dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null).Take(taskConfig.BatchSize).AsParallel().ForAll(domain =>
+            int totalSize = dbContext.Domains!.Count();
+            for (int start = 0; start < totalSize; start += taskConfig.BatchSize)
             {
-                domainService.Verify(domain).Wait();
-            });
+                dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null).Skip(start).Take(taskConfig.BatchSize).AsParallel().ForAll(domain =>
+                {
+                    domainService.Verify(domain).Wait();
+                });
+            }
 
             await dbContext.SaveChangesAsync();
         }
