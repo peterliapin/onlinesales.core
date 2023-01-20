@@ -5,13 +5,12 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class TasksController : ControllerBase
 {
