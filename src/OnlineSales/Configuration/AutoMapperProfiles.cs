@@ -5,6 +5,7 @@
 using AutoMapper;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Configuration;
 
@@ -107,8 +108,13 @@ public class AutoMapperProfiles : Profile
         CreateMap<Domain, DomainDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
-        CreateMap<OnlineSales.Interfaces.ITask, TaskDetailsDto>().
-            ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<ITask, TaskDetailsDto>().ConstructUsing(task => new TaskDetailsDto()
+        {
+            Name = task.Name,
+            CronSchedule = task.CronSchedule,
+            RetryCount = task.RetryCount,
+            RetryInterval = task.RetryInterval,
+        });
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

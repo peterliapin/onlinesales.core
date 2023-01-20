@@ -11,11 +11,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.DTOs;
 public class TaskDetailsDto 
 {
-    public string Name { get; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-    public string CronSchedule { get; } = string.Empty;
+    public string CronSchedule { get; set; } = string.Empty;
 
-    public int RetryCount { get; }
+    public int RetryCount { get; set; }
 
-    public int RetryInterval { get; }
+    public int RetryInterval { get; set; }
 }

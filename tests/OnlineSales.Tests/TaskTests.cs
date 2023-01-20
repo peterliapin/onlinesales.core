@@ -1,20 +1,14 @@
-﻿// <copyright file="DomainTaskTests.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="TaskTests.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Security.Policy;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.OData.UriParser;
 using OnlineSales.DTOs;
-using OnlineSales.Entities;
 using OnlineSales.Helpers;
-using OnlineSales.Interfaces;
-using OnlineSales.Tasks;
 
 namespace OnlineSales.Tests;
 
-public class DomainTaskTests : BaseTest
+public class TaskTests : BaseTest
 {   
     private readonly string tasksUrl = "api/tasks";
 
@@ -41,13 +35,9 @@ public class DomainTaskTests : BaseTest
     {
         var name = "SyncEsTask";
 
-        var responce = await GetRequest(tasksUrl + "/" + name);
+        var responce = await GetTest<TaskDetailsDto>(tasksUrl + "/" + name);
 
-        var content = await responce.Content.ReadAsStringAsync();
-
-        var task = JsonHelper.Deserialize<TaskDetailsDto>(content);
-
-        task.Should().NotBeNull();
-        task!.Name.Should().Contain("SyncEsTask");
+        responce.Should().NotBeNull();
+        responce!.Name.Should().Contain("SyncEsTask");
     }
 }
