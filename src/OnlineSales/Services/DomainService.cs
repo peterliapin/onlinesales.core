@@ -33,9 +33,16 @@ namespace OnlineSales.Interfaces
             {
                 await VerifyHttp(domain);
             }
+            else
+            {
+                domain.HttpCheck = false;
+                domain.Url = null;
+                domain.Title = null;
+                domain.Description = null;
+            }
         }
 
-        public async Task VerifyHttp(Domain domain)
+        private async Task VerifyHttp(Domain domain)
         {
             domain.HttpCheck = false;
 
@@ -70,7 +77,7 @@ namespace OnlineSales.Interfaces
             }
         }
 
-        public async Task VerifyDns(Domain domain)
+        private async Task VerifyDns(Domain domain)
         {
             try
             {

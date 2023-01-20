@@ -45,15 +45,7 @@ public class DomainVerifyTask : ITask
         {
             dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null).Take(taskConfig.BatchSize).AsParallel().ForAll(domain =>
             {
-                if (domain.HttpCheck == null)
-                {
-                    domainService.VerifyHttp(domain).Wait();
-                }
-
-                if (domain.DnsCheck == null)
-                {
-                    domainService.VerifyDns(domain).Wait();
-                }
+                domainService.Verify(domain).Wait();
             });
 
             await dbContext.SaveChangesAsync();

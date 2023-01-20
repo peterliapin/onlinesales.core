@@ -10,9 +10,5 @@ namespace OnlineSales.Interfaces
     public interface IDomainService
     {
         public Task Verify(Domain domain);
-
-        public Task VerifyHttp(Domain domain);
-
-        public Task VerifyDns(Domain domain);
     }
 }
