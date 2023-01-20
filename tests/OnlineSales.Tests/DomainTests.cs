@@ -43,10 +43,12 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         item.Should().NotBeNull();
 
         item!.Name.Should().Be(domainName);
-        item!.HttpCheck.Should().BeTrue();
         item!.DnsCheck.Should().BeTrue();
         item!.DnsRecords.Should().NotBeNull();
+        item!.HttpCheck.Should().BeTrue();
         item!.Url.Should().NotBeNull();
+        item!.Title.Should().NotBeNull();
+        item!.Description.Should().NotBeNull();
     }
 
     [Fact]
@@ -59,25 +61,29 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
 
         var location = await PostTest(itemsUrl, testDomain);
 
-        var addedItem = await GetTest<Domain>(location, HttpStatusCode.OK);
+        var item = await GetTest<Domain>(location, HttpStatusCode.OK);
 
-        addedItem.Should().NotBeNull();
-        addedItem!.Name.Should().Be(domainName);
-        addedItem!.DnsRecords!.Should().BeNull();
-        addedItem!.Url!.Should().BeNull();
-        addedItem!.HttpCheck.Should().BeNull();
-        addedItem!.DnsCheck.Should().BeNull();
+        item.Should().NotBeNull();
+        item!.Name.Should().Be(domainName);
+        item!.DnsCheck.Should().BeNull();
+        item!.DnsRecords.Should().BeNull();
+        item!.HttpCheck.Should().BeNull();
+        item!.Url.Should().BeNull();
+        item!.Title.Should().BeNull();
+        item!.Description.Should().BeNull();
 
         var url = itemsUrl + "/verify/" + domainName;
 
-        addedItem = await GetTest<Domain>(url, HttpStatusCode.OK);
+        item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
-        addedItem.Should().NotBeNull();
-        addedItem!.Name.Should().Be(domainName);
-        addedItem!.DnsRecords!.Should().NotBeNull();
-        addedItem!.Url!.Should().NotBeNull();
-        addedItem!.HttpCheck.Should().BeTrue();
-        addedItem!.DnsCheck.Should().BeTrue();
+        item.Should().NotBeNull();
+        item!.Name.Should().Be(domainName);
+        item!.DnsCheck.Should().BeTrue();
+        item!.DnsRecords.Should().NotBeNull();
+        item!.HttpCheck.Should().BeTrue();
+        item!.Url.Should().NotBeNull();
+        item!.Title.Should().NotBeNull();
+        item!.Description.Should().NotBeNull();
     }
 
     [Fact]
@@ -90,11 +96,13 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
-
         item!.Name.Should().Be(domainName);
         item!.DnsCheck.Should().BeFalse();
         item!.DnsRecords.Should().BeNull();
-        item!.HttpCheck.Should().BeNull();        
+        item!.HttpCheck.Should().BeFalse();
+        item!.Url.Should().BeNull();
+        item!.Title.Should().BeNull();
+        item!.Description.Should().BeNull();
     }
 
     protected override DomainUpdateDto UpdateItem(TestDomain to)
