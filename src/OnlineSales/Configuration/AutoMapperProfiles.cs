@@ -106,6 +106,9 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Domain, DomainDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<OnlineSales.Interfaces.ITask, TaskDetailsDto>().
+            ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)
