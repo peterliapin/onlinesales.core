@@ -64,7 +64,7 @@ namespace OnlineSales.Interfaces
 
                     domain.Url = responce.RequestMessage.RequestUri.ToString();
                     var web = new HtmlWeb();
-                    var htmlDoc = web.Load(domain.Url);
+                    var htmlDoc = await web.LoadFromWebAsync(domain.Url, Encoding.UTF8);
 
                     if (htmlDoc != null)
                     {
