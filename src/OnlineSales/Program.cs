@@ -345,17 +345,21 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        builder.Services.AddQuartz(q =>
+        var startTasks = builder.Configuration.GetValue<bool>("StartTasks");
+        if (startTasks)
         {
-            q.UseMicrosoftDependencyInjectionJobFactory();
+            builder.Services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
 
-            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+                q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 
-            q.AddTrigger(opts =>
-                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
-        });
+                q.AddTrigger(opts =>
+                    opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
+            });
 
-        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+        }
     }
 
     private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
