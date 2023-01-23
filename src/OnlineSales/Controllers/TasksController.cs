@@ -73,7 +73,30 @@ public class TasksController : ControllerBase
         return StartOrStop(name, false);
     }
 
-    public TaskDetailsDto StartOrStop(string name, bool start)
+    [HttpGet("execute/{name}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<TaskExecutionDto> Execute(string name)
+    {
+        var result = tasks.Where(t => t.Name == name);
+
+        if (!result.Any())
+        {
+            throw new TaskNotFoundException(name);
+        }
+        else
+        {
+            var completed = await taskRunner.ExecuteTask(result.First());
+            return new TaskExecutionDto
+            {
+                Name = name,
+                Completed = completed,
+            };
+        }
+    }
+
+    private TaskDetailsDto StartOrStop(string name, bool start)
     {
         CheckTaskRunnerEnabed();
 
@@ -86,25 +109,6 @@ public class TasksController : ControllerBase
         else
         {
             result.First().SetRunning(start);
-            return CreateTaskDetailsDto(result.First());
-        }
-    }
-
-    [HttpGet("execute/{name}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<TaskDetailsDto> Execute(string name)
-    {
-        var result = tasks.Where(t => t.Name == name);
-
-        if (!result.Any())
-        {
-            throw new TaskNotFoundException(name);
-        }
-        else
-        {
-            await taskRunner.ExecuteTask(result.First());
             return CreateTaskDetailsDto(result.First());
         }
     }

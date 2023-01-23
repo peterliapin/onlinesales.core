@@ -21,3 +21,10 @@ public class TaskDetailsDto
 
     public bool IsRunning { get; set; }
 }
+
+public class TaskExecutionDto
+{
+    public string Name { get; set; } = string.Empty;
+
+    public bool Completed { get; set; } = false;
+}

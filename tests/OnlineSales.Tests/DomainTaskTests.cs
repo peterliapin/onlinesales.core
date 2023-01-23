@@ -64,7 +64,10 @@ public class DomainTaskTests : BaseTest
         var filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
 
-        await GetTest<TaskDetailsDto>(tasksUrl + "/execute/" + taskName);
+        var executeResponce = await GetTest<TaskExecutionDto>(tasksUrl + "/execute/" + taskName);
+        executeResponce.Should().NotBeNull();
+        executeResponce!.Name.Should().Be(taskName);
+        executeResponce!.Completed.Should().BeTrue();
 
         validDomainAdded = await GetTest<Domain>(validDomainLocation);
         validDomainAdded.Should().NotBeNull();

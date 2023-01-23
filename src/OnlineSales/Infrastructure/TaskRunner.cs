@@ -35,7 +35,27 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var task in tasks)
                 {
-                    await ExecuteTask(task, false);
+                    var taskLock = LockManager.GetNoWaitLock(task.Name);
+
+                    if (taskLock is null)
+                    {
+                        Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
+                        return;
+                    }
+
+                    using (taskLock)
+                    {
+                        var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+
+                        var isCompleted = false;
+
+                        if (IsRightTimeToExecute(currentJob, task))
+                        {
+                            isCompleted = await task.Execute(currentJob);
+
+                            await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -44,14 +64,30 @@ namespace OnlineSales.Infrastructure
             }
         }             
 
-        public async Task ExecuteTask(ITask task)
+        public async Task<bool> ExecuteTask(ITask task)
         {
             if (!CheckPrimaryNode())
             {
                 throw new NonPrimaryNodeException();
             }
 
-            await ExecuteTask(task, true);
+            var taskLock = LockManager.GetNoWaitLock(task.Name);
+
+            if (taskLock is null)
+            {
+                throw new TaskNotCompletedException();
+            }
+
+            using (taskLock)
+            {
+                var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+
+                var isCompleted = await task.Execute(currentJob);
+
+                await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+
+                return isCompleted;
+            }
         }
 
         private bool CheckPrimaryNode()
@@ -65,36 +101,6 @@ namespace OnlineSales.Infrastructure
             }
 
             return true;
-        }
-
-        private async Task ExecuteTask(ITask task, bool onDemand)
-        {
-            var taskLock = LockManager.GetNoWaitLock(task.Name);
-
-            if (taskLock is null)
-            {
-                if (onDemand)
-                {
-                    throw new TaskNotCompletedException();
-                }
-                else
-                {
-                    Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
-                    return;
-                }
-            }
-
-            using (taskLock)
-            {
-                var currentJob = await AddOrGetPendingTaskExecutionLog(task);
-
-                if (IsRightTimeToExecute(currentJob, task, onDemand))
-                {
-                    var isCompleted = await task.Execute(currentJob);
-
-                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
-                }
-            }
         }
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
@@ -135,13 +141,8 @@ namespace OnlineSales.Infrastructure
             await dbContext.SaveChangesAsync();
         }
 
-        private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task, bool onDemand)
+        private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)
         {
-            if (onDemand)
-            {
-                return true;
-            }
-
             if (!task.IsRunning || job.RetryCount >= task.RetryCount)
             {
                 return false;
