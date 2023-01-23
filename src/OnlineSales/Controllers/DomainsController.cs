@@ -18,9 +18,9 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDto, DomainUpdateDto, DomainDetailsDto, DomainImportDto>
 {
-    protected readonly IDomainService domainService;
+    private readonly IDomainService domainService;
 
-    public DomainsController(ApiDbContext dbContext, IMapper mapper, IDomainService domainService, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService)
         : base(dbContext, mapper, apiSettingsConfig)
     {
         this.domainService = domainService;

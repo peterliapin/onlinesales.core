@@ -68,6 +68,11 @@ public class TaskConfig
     public int RetryInterval { get; set; }
 }
 
+public class ChangeLogTaskConfig : TaskConfig
+{
+    public int BatchSize { get; set; }
+}
+
 public class CacheProfileSettings
 {
     public string Type { get; set; } = string.Empty;

@@ -107,6 +107,8 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Domain, DomainDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DomainImportDto, Domain>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<ITask, TaskDetailsDto>().ConstructUsing(task => new TaskDetailsDto()
         {

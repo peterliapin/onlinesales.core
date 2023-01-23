@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineSales.Entities;
 
-public class BaseEntity : BaseCreateByEntity, IHasUpdatedAt, IHasUpdatedByIpAndUserAgent
+public class BaseEntity : BaseCreateByEntity, IHasUpdatedAt, IHasUpdatedBy
 {
     public DateTime? UpdatedAt { get; set; }
 
@@ -16,7 +16,7 @@ public class BaseEntity : BaseCreateByEntity, IHasUpdatedAt, IHasUpdatedByIpAndU
     public string? UpdatedByUserAgent { get; set; }
 }
 
-public class BaseCreateByEntity : BaseEntityWithId, IHasCreatedAt, IHasCreatedByIpAndUserAgent
+public class BaseCreateByEntity : BaseEntityWithId, IHasCreatedAt, IHasCreatedBy
 {
     [Required]
     public DateTime CreatedAt { get; set; }
@@ -51,14 +51,14 @@ public interface IHasUpdatedAt
     public DateTime? UpdatedAt { get; set; }
 }
 
-public interface IHasCreatedByIpAndUserAgent
+public interface IHasCreatedBy
 {
     public string? CreatedByIp { get; set; }
 
     public string? CreatedByUserAgent { get; set; }
 }
 
-public interface IHasUpdatedByIpAndUserAgent
+public interface IHasUpdatedBy
 {
     public string? UpdatedByIp { get; set; }
 

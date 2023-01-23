@@ -17,14 +17,14 @@ namespace OnlineSales.Tasks
 {
     public class SyncEsTask : ChangeLogTask
     {
-        private readonly TaskConfig? taskConfig = new TaskConfig();
+        private readonly ChangeLogTaskConfig? taskConfig = new ChangeLogTaskConfig();
         private readonly ElasticClient elasticClient;
         private readonly string prefix = string.Empty;
 
         public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, ElasticClient elasticClient)
             : base(dbContext, pluginDbContexts)
         {
-            var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<TaskConfig>();
+            var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<ChangeLogTaskConfig>();
             if (config is not null)
             {
                 taskConfig = config;
@@ -40,6 +40,8 @@ namespace OnlineSales.Tasks
             this.elasticClient = elasticClient;
         }
 
+        public override int ChangeLogBatchSize => taskConfig!.BatchSize;
+
         public override string CronSchedule => taskConfig!.CronSchedule;
 
         public override int RetryCount => taskConfig!.RetryCount;
@@ -52,9 +54,9 @@ namespace OnlineSales.Tasks
             
             foreach (var item in nextBatch)
             {
-                EntityState entityState = item.EntityState;
+                var entityState = item.EntityState;
 
-                if (entityState == EntityState.Added)
+                if (entityState == EntityState.Added || entityState == EntityState.Modified)
                 {
                     var createItem = new { index = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
                     bulkPayload.AppendLine(JsonHelper.Serialize(createItem));

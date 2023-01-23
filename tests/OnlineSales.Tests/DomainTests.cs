@@ -3,6 +3,7 @@
 // </copyright>
 
 using FluentAssertions;
+using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -42,9 +43,47 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         item.Should().NotBeNull();
 
         item!.Name.Should().Be(domainName);
-        item!.HttpCheck.Should().BeTrue();
         item!.DnsCheck.Should().BeTrue();
         item!.DnsRecords.Should().NotBeNull();
+        item!.HttpCheck.Should().BeTrue();
+        item!.Url.Should().NotBeNull();
+        item!.Title.Should().NotBeNull();
+        item!.Description.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetExistedValidDomainTest()
+    {
+        var testDomain = new TestDomain();
+
+        var domainName = testDomain.Name;
+        domainName.Should().NotBeEmpty();
+
+        var location = await PostTest(itemsUrl, testDomain);
+
+        var item = await GetTest<Domain>(location, HttpStatusCode.OK);
+
+        item.Should().NotBeNull();
+        item!.Name.Should().Be(domainName);
+        item!.DnsCheck.Should().BeNull();
+        item!.DnsRecords.Should().BeNull();
+        item!.HttpCheck.Should().BeNull();
+        item!.Url.Should().BeNull();
+        item!.Title.Should().BeNull();
+        item!.Description.Should().BeNull();
+
+        var url = itemsUrl + "/verify/" + domainName;
+
+        item = await GetTest<Domain>(url, HttpStatusCode.OK);
+
+        item.Should().NotBeNull();
+        item!.Name.Should().Be(domainName);
+        item!.DnsCheck.Should().BeTrue();
+        item!.DnsRecords.Should().NotBeNull();
+        item!.HttpCheck.Should().BeTrue();
+        item!.Url.Should().NotBeNull();
+        item!.Title.Should().NotBeNull();
+        item!.Description.Should().NotBeNull();
     }
 
     [Fact]
@@ -57,11 +96,13 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
         var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
-
         item!.Name.Should().Be(domainName);
         item!.DnsCheck.Should().BeFalse();
         item!.DnsRecords.Should().BeNull();
-        item!.HttpCheck.Should().BeNull();        
+        item!.HttpCheck.Should().BeFalse();
+        item!.Url.Should().BeNull();
+        item!.Title.Should().BeNull();
+        item!.Description.Should().BeNull();
     }
 
     protected override DomainUpdateDto UpdateItem(TestDomain to)
