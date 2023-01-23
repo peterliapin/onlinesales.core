@@ -56,7 +56,7 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
-        builder.Services.AddTransient<IDomainService, DomainService>();
+        builder.Services.AddSingleton<IDomainService, DomainService>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
@@ -211,7 +211,7 @@ public class Program
         {
             AutoRegisterTemplate = true,
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
+            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",            
         };
     }
 
@@ -345,17 +345,24 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        builder.Services.AddQuartz(q =>
+        var taskRunnerEnabled = builder.Configuration.GetValue<bool>("TaskRunner:Enable") !;
+
+        if (taskRunnerEnabled)
         {
-            q.UseMicrosoftDependencyInjectionJobFactory();
+            var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
 
-            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+            builder.Services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
 
-            q.AddTrigger(opts =>
-                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
-        });
+                q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 
-        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+                q.AddTrigger(opts =>
+                    opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(taskRunnerSchedule));
+            });
+
+            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+        }
     }
 
     private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
@@ -394,7 +401,7 @@ public class Program
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, SyncEsTask>();
-        builder.Services.AddScoped<ITask, DomainVerifyTask>();
+        builder.Services.AddScoped<ITask, DomainVerificationTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

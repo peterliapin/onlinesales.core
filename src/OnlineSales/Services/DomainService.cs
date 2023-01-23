@@ -6,24 +6,22 @@ using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
-using Microsoft.AspNetCore.OData.Formatter;
-using Nest;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Helpers;
 
 namespace OnlineSales.Interfaces
 {
     public class DomainService : IDomainService
-    {
-        private static readonly List<QueryType> DnsQueryTypes = new List<QueryType>
+    {       
+        private readonly LookupClient lookupClient;
+
+        public DomainService()
         {
-            QueryType.A,
-            QueryType.CNAME,
-            QueryType.MX,
-            QueryType.TXT,
-            QueryType.NS,
-        };
+            lookupClient = new LookupClient(new LookupClientOptions
+            {
+                UseCache = true,
+                Timeout = new TimeSpan(0, 0, 60),
+            });
+        }
 
         public async Task Verify(Domain domain)
         {
@@ -51,12 +49,12 @@ namespace OnlineSales.Interfaces
             "https://" + domain.Name,
             "https://www." + domain.Name,
             "http://" + domain.Name,
-            "http://www" + domain.Name,
+            "http://www." + domain.Name,
             };
 
             foreach (var url in urls)
             {
-                var responce = await RequestGetUrl(url);
+                var responce = await GetRequest(url);
 
                 if (responce != null && responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
                 {
@@ -64,7 +62,7 @@ namespace OnlineSales.Interfaces
 
                     domain.Url = responce.RequestMessage.RequestUri.ToString();
                     var web = new HtmlWeb();
-                    var htmlDoc = web.Load(domain.Url);
+                    var htmlDoc = await web.LoadFromWebAsync(domain.Url, Encoding.UTF8);
 
                     if (htmlDoc != null)
                     {
@@ -79,33 +77,17 @@ namespace OnlineSales.Interfaces
 
         private async Task VerifyDns(Domain domain)
         {
-            try
+            domain.DnsRecords = null;
+            domain.DnsCheck = false;
+                     
+            var result = await lookupClient.QueryAsync(domain.Name, QueryType.ANY);
+
+            var dnsRecords = GetDnsRecords(result, domain);
+
+            if (dnsRecords.Count > 0)
             {
-                domain.DnsRecords = null;
-                domain.DnsCheck = false;
-
-                var dnsRecords = new List<DnsRecord>();
-
-                foreach (var queryType in DnsQueryTypes)
-                {
-                    var lookup = new LookupClient();
-                    var result = await lookup.QueryAsync(domain.Name, queryType);
-
-                    if (result.AllRecords.Any())
-                    {
-                        dnsRecords.AddRange(GetDnsRecords(result, domain));
-                    }
-                }
-
-                if (dnsRecords.Count > 0)
-                {
-                    domain.DnsCheck = true;
-                    domain.DnsRecords = dnsRecords;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error reading DNS records.");
+                domain.DnsCheck = true;
+                domain.DnsRecords = dnsRecords;
             }
         }
 
@@ -163,7 +145,7 @@ namespace OnlineSales.Interfaces
             return dnsRecords;
         }
 
-        private async Task<HttpResponseMessage?> RequestGetUrl(string url)
+        private async Task<HttpResponseMessage?> GetRequest(string url)
         {
             HttpClient client = new HttpClient();
 
@@ -172,8 +154,9 @@ namespace OnlineSales.Interfaces
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 return await client.SendAsync(request);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Error(ex, $"Failed to fetch url: {url}");
                 return null;
             }
         }
@@ -181,12 +164,27 @@ namespace OnlineSales.Interfaces
         private string? GetTitle(HtmlDocument htmlDoc)
         {
             var htmlNode = htmlDoc.DocumentNode.SelectSingleNode("//title");
-            if (htmlNode != null)
+
+            if (htmlNode != null && !string.IsNullOrEmpty(htmlNode.InnerText))
             {
                 return htmlNode.InnerText;
             }
 
-            return GetNodeContentByAttr(htmlDoc, "title");
+            var title = GetNodeContentByAttr(htmlDoc, "title");
+
+            if (!string.IsNullOrEmpty(title))
+            {
+                return title;
+            }
+
+            htmlNode = htmlDoc.DocumentNode.SelectSingleNode("//h1");
+
+            if (htmlNode != null && !string.IsNullOrEmpty(htmlNode.InnerText))
+            {
+                return htmlNode.InnerText;
+            }
+
+            return null;
         }
 
         private string? GetDescription(HtmlDocument htmlDoc)

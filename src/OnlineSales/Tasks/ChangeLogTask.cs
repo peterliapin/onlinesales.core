@@ -31,9 +31,7 @@ public abstract class ChangeLogTask : ITask
             var lt = GetTypes(pt);
             this.loggedTypes.UnionWith(lt);
         }
-    }
-
-    public virtual int ChangeLogBatchSize { get; set; } = 50;
+    }    
 
     public string Name
     {
@@ -42,6 +40,8 @@ public abstract class ChangeLogTask : ITask
             return this.GetType().Name;
         }
     }
+
+    public abstract int ChangeLogBatchSize { get; }
 
     public abstract string CronSchedule { get; }
 

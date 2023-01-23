@@ -1,30 +1,29 @@
-﻿// <copyright file="DomainVerifyTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DomainVerificationTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
 using OnlineSales.Configuration;
 using OnlineSales.Data;
-using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tasks;
 
-public class DomainVerifyTask : ITask
+public class DomainVerificationTask : ITask
 {
     protected readonly ApiDbContext dbContext;
 
-    private readonly DomainCheckTaskConfig taskConfig = new DomainCheckTaskConfig();
+    private readonly ChangeLogTaskConfig taskConfig = new ChangeLogTaskConfig();
 
     private readonly IDomainService domainService;
 
-    public DomainVerifyTask(ApiDbContext dbContext, IConfiguration configuration, IDomainService domainService)
+    public DomainVerificationTask(ApiDbContext dbContext, IConfiguration configuration, IDomainService domainService)
     {
         this.dbContext = dbContext;
         this.domainService = domainService;
 
-        var section = configuration.GetSection("Tasks:DomainCheckTask");        
-        var config = section.Get<DomainCheckTaskConfig>();
+        var section = configuration.GetSection("Tasks:DomainVerificationTask");        
+        var config = section.Get<ChangeLogTaskConfig>();
         if (config is not null)
         {
             taskConfig = config;
@@ -45,15 +44,16 @@ public class DomainVerifyTask : ITask
         {
             var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null);
             int totalSize = domains.Count();
+
             for (int start = 0; start < totalSize; start += taskConfig.BatchSize)
             {
                 domains.Skip(start).Take(taskConfig.BatchSize).AsParallel().ForAll(domain =>
                 {
                     domainService.Verify(domain).Wait();
                 });
-            }
 
-            await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync(); 
+            }
         }
         catch (Exception ex)
         {

@@ -12,8 +12,8 @@ namespace OnlineSales.Infrastructure
 {
     public class TaskRunner : IJob
     {
-        private readonly string lockKey = "TaskRunnerPrimaryNodeLock";
-        private readonly string secondaryLockKey = "TaskRunnerExecutionSecondaryLock";
+        private const string TaskRunnerNodeLockKey = "TaskRunnerPrimaryNodeLock";
+
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
 
@@ -27,7 +27,7 @@ namespace OnlineSales.Infrastructure
         {
             try
             {
-                var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(lockKey);
+                var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(TaskRunnerNodeLockKey);
 
                 if (nodeLockInstance is null)
                 {
@@ -35,29 +35,27 @@ namespace OnlineSales.Infrastructure
                     return;
                 }
 
-                var taskLock = LockManager.GetNoWaitLock(secondaryLockKey);
-
-                if (taskLock is null)
+                foreach (var task in tasks)
                 {
-                    Log.Error($"This task is already executed.");
-                    return;
-                }
+                    var taskLock = LockManager.GetNoWaitLock(task.Name);
 
-                using (taskLock)
-                {
-                    foreach (var task in tasks)
+                    if (taskLock is null)
+                    {
+                        Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
+                        continue;
+                    }
+
+                    using (taskLock)
                     {
                         var currentJob = await AddOrGetPendingTaskExecutionLog(task);
 
-                        if (!IsRightTimeToExecute(currentJob, task))
+                        if (IsRightTimeToExecute(currentJob, task))
                         {
-                            return;
+                            var isCompleted = await task.Execute(currentJob);
+
+                            await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
                         }
-
-                        var isCompleted = await task.Execute(currentJob);
-
-                        await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
-                    } 
+                    }
                 }
             }
             catch (Exception ex)
@@ -81,7 +79,7 @@ namespace OnlineSales.Infrastructure
                 TaskName = task.Name,
                 ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
                 Status = TaskExecutionStatus.Pending,
-                RetryCount = -1,
+                RetryCount = null,
             };
 
             await dbContext.TaskExecutionLogs!.AddAsync(pendingTask);
@@ -106,12 +104,12 @@ namespace OnlineSales.Infrastructure
 
         private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)
         {
-            if (job.RetryCount == task.RetryCount)
+            if (job.RetryCount >= task.RetryCount)
             {
                 return false;
             }
 
-            if (job.RetryCount > -1)
+            if (job.RetryCount > 0)
             {
                 return job.ActualExecutionTime.AddMinutes(task.RetryInterval) <= DateTime.UtcNow;
             }
