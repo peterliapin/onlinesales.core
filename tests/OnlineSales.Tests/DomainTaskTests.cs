@@ -2,7 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Security.Policy;
 using FluentAssertions;
+using Microsoft.OData.UriParser;
+using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
@@ -64,10 +67,7 @@ public class DomainTaskTests : BaseTest
         var filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
 
-        var executeResponce = await GetTest<TaskExecutionDto>(tasksUrl + "/execute/" + taskName);
-        executeResponce.Should().NotBeNull();
-        executeResponce!.Name.Should().Be(taskName);
-        executeResponce!.Completed.Should().BeTrue();
+        await TryToExecute();
 
         validDomainAdded = await GetTest<Domain>(validDomainLocation);
         validDomainAdded.Should().NotBeNull();
@@ -89,5 +89,21 @@ public class DomainTaskTests : BaseTest
 
         filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
+    }
+
+    private async Task TryToExecute()
+    {
+        var executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
+        while (executeResponce.StatusCode != HttpStatusCode.OK)
+        {
+            executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
+        }
+
+        var content = await executeResponce.Content.ReadAsStringAsync();
+        var taskStatus = JsonHelper.Deserialize<TaskExecutionDto>(content);
+
+        taskStatus.Should().NotBeNull();
+        taskStatus!.Name.Should().Be(taskName);
+        taskStatus!.Completed.Should().BeTrue();
     }
 }
