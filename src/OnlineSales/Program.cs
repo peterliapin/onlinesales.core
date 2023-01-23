@@ -62,6 +62,7 @@ public class Program
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
+        builder.Services.AddTransient<IEmailVerifyService, EmailVerifyService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -76,6 +77,7 @@ public class Program
         ConfigureTasks(builder);
         ConfigureApiSettings(builder);
         ConfigureImportSizeLimit(builder);
+        ConfigureEmailVerification(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -307,6 +309,18 @@ public class Program
         }
 
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+    }
+
+    private static void ConfigureEmailVerification(WebApplicationBuilder builder)
+    {
+        var emailVerificationConfig = builder.Configuration.GetSection("EmailVerificationApi");
+
+        if (emailVerificationConfig == null)
+        {
+            throw new MissingConfigurationException("Email Verification Api configuration is mandatory.");
+        }
+
+        builder.Services.Configure<EmailVerificationApiConfig>(emailVerificationConfig);
     }
 
     private static void ConfigureApiSettings(WebApplicationBuilder builder)
