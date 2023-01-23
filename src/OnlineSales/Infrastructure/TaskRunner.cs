@@ -30,6 +30,7 @@ namespace OnlineSales.Infrastructure
             {
                 if (!CheckPrimaryNode())
                 {
+                    Log.Information("This is not the current primary node for task execution");
                     return;
                 }                    
 
@@ -40,14 +41,12 @@ namespace OnlineSales.Infrastructure
                     if (taskLock is null)
                     {
                         Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
-                        return;
+                        continue;
                     }
 
                     using (taskLock)
                     {
                         var currentJob = await AddOrGetPendingTaskExecutionLog(task);
-
-                        var isCompleted = false;
 
                         if (IsRightTimeToExecute(currentJob, task))
                         {
