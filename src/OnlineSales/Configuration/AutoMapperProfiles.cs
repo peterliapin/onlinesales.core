@@ -109,14 +109,6 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<DomainImportDto, Domain>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-
-        CreateMap<ITask, TaskDetailsDto>().ConstructUsing(task => new TaskDetailsDto()
-        {
-            Name = task.Name,
-            CronSchedule = task.CronSchedule,
-            RetryCount = task.RetryCount,
-            RetryInterval = task.RetryInterval,
-        });
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

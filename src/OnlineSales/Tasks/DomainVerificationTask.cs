@@ -6,10 +6,11 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
 
-public class DomainVerificationTask : ITask
+public class DomainVerificationTask : BaseTask
 {
     protected readonly ApiDbContext dbContext;
 
@@ -17,7 +18,8 @@ public class DomainVerificationTask : ITask
 
     private readonly IDomainService domainService;
 
-    public DomainVerificationTask(ApiDbContext dbContext, IConfiguration configuration, IDomainService domainService)
+    public DomainVerificationTask(ApiDbContext dbContext, IConfiguration configuration, IDomainService domainService, TaskStatusService taskStatusService)
+        : base(taskStatusService)
     {
         this.dbContext = dbContext;
         this.domainService = domainService;
@@ -30,15 +32,13 @@ public class DomainVerificationTask : ITask
         }
     }
 
-    public string Name => this.GetType().Name;
+    public override string CronSchedule => taskConfig.CronSchedule;
 
-    public string CronSchedule => taskConfig.CronSchedule;
+    public override int RetryCount => taskConfig.RetryCount;
 
-    public int RetryCount => taskConfig.RetryCount;
+    public override int RetryInterval => taskConfig.RetryInterval;
 
-    public int RetryInterval => taskConfig.RetryInterval;
-
-    public async Task<bool> Execute(TaskExecutionLog currentJob)
+    public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {
         try
         {

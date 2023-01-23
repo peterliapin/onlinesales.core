@@ -18,4 +18,6 @@ public class TaskDetailsDto
     public int RetryCount { get; set; }
 
     public int RetryInterval { get; set; }
+
+    public bool IsRunning { get; set; }
 }

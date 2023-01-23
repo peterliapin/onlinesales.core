@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -27,40 +28,72 @@ namespace OnlineSales.Infrastructure
         {
             try
             {
-                var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(TaskRunnerNodeLockKey);
-
-                if (nodeLockInstance is null)
+                if (!CheckPrimaryNode())
                 {
-                    Log.Information("This is not the current primary node for task execution");
                     return;
-                }
+                }                    
 
                 foreach (var task in tasks)
                 {
-                    var taskLock = LockManager.GetNoWaitLock(task.Name);
-
-                    if (taskLock is null)
-                    {
-                        Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
-                        continue;
-                    }
-
-                    using (taskLock)
-                    {
-                        var currentJob = await AddOrGetPendingTaskExecutionLog(task);
-
-                        if (IsRightTimeToExecute(currentJob, task))
-                        {
-                            var isCompleted = await task.Execute(currentJob);
-
-                            await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
-                        }
-                    }
+                    await ExecuteTask(task, false);
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error executing task runner");
+            }
+        }             
+
+        public async Task ExecuteTask(ITask task)
+        {
+            if (!CheckPrimaryNode())
+            {
+                throw new NonPrimaryNodeException();
+            }
+
+            await ExecuteTask(task, true);
+        }
+
+        private bool CheckPrimaryNode()
+        {
+            var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(TaskRunnerNodeLockKey);
+
+            if (nodeLockInstance is null)
+            {
+                Log.Information("This is not the current primary node for task execution");
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task ExecuteTask(ITask task, bool onDemand)
+        {
+            var taskLock = LockManager.GetNoWaitLock(task.Name);
+
+            if (taskLock is null)
+            {
+                if (onDemand)
+                {
+                    throw new TaskNotCompletedException();
+                }
+                else
+                {
+                    Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
+                    return;
+                }
+            }
+
+            using (taskLock)
+            {
+                var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+
+                if (IsRightTimeToExecute(currentJob, task, onDemand))
+                {
+                    var isCompleted = await task.Execute(currentJob);
+
+                    await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                }
             }
         }
 
@@ -102,9 +135,14 @@ namespace OnlineSales.Infrastructure
             await dbContext.SaveChangesAsync();
         }
 
-        private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)
+        private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task, bool onDemand)
         {
-            if (job.RetryCount >= task.RetryCount)
+            if (onDemand)
+            {
+                return true;
+            }
+
+            if (!task.IsRunning || job.RetryCount >= task.RetryCount)
             {
                 return false;
             }

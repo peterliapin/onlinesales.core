@@ -8,16 +8,18 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
 
-public class ContactScheduledEmailTask : ITask
+public class ContactScheduledEmailTask : BaseTask
 {
     private readonly ApiDbContext dbContext;
     private readonly IEmailFromTemplateService emailFromTemplateService;
     private readonly TaskConfig? taskConfig = new TaskConfig();
 
-    public ContactScheduledEmailTask(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration)
+    public ContactScheduledEmailTask(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration, TaskStatusService taskStatusService)
+        : base(taskStatusService)
     {
         this.dbContext = dbContext;
         this.emailFromTemplateService = emailFromTemplateService;
@@ -29,21 +31,13 @@ public class ContactScheduledEmailTask : ITask
         }
     }
 
-    public string CronSchedule => taskConfig!.CronSchedule;
+    public override string CronSchedule => taskConfig!.CronSchedule;
 
-    public int RetryCount => taskConfig!.RetryCount;
+    public override int RetryCount => taskConfig!.RetryCount;
 
-    public int RetryInterval => taskConfig!.RetryInterval;
+    public override int RetryInterval => taskConfig!.RetryInterval;
 
-    public string Name
-    {
-        get
-        {
-            return this.GetType().Name;
-        }
-    }
-
-    public async Task<bool> Execute(TaskExecutionLog currentJob)
+    public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {
         try
         {

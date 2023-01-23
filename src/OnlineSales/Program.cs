@@ -62,6 +62,7 @@ public class Program
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
+        builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -363,6 +364,8 @@ public class Program
 
             builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
+
+        builder.Services.AddTransient<TaskRunner>();
     }
 
     private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
