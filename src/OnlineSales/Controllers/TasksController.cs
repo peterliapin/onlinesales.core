@@ -11,7 +11,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class TasksController : ControllerBase
 {
