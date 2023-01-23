@@ -19,7 +19,7 @@ public class TaskTests : BaseTest
 
         var content = await responce.Content.ReadAsStringAsync();
 
-        var tasks = JsonHelper.Deserialize<IList<string>>(content);
+        var tasks = JsonHelper.Deserialize<IList<TaskDetailsDto>>(content);
 
         tasks.Should().NotBeEmpty();
     }
@@ -39,5 +39,23 @@ public class TaskTests : BaseTest
 
         responce.Should().NotBeNull();
         responce!.Name.Should().Contain("SyncEsTask");
+    }
+
+    [Fact]
+    public async Task StartAndStopTaskTest()
+    {
+        var name = "SyncEsTask";
+
+        var responce = await GetTest<TaskDetailsDto>(tasksUrl + "/" + name);
+        responce.Should().NotBeNull();
+        responce!.IsRunning.Should().BeTrue();
+
+        responce = await GetTest<TaskDetailsDto>(tasksUrl + "/stop/" + name);
+        responce.Should().NotBeNull();
+        responce!.IsRunning.Should().BeFalse();
+
+        responce = await GetTest<TaskDetailsDto>(tasksUrl + "/start/" + name);
+        responce.Should().NotBeNull();
+        responce!.IsRunning.Should().BeTrue();
     }
 }
