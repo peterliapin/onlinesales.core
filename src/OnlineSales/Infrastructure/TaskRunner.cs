@@ -34,7 +34,7 @@ namespace OnlineSales.Infrastructure
                     return;
                 }                    
 
-                foreach (var task in tasks)
+                foreach (var task in tasks.Where(t => t.IsRunning))
                 {
                     var taskLock = LockManager.GetNoWaitLock(task.Name);
 
@@ -50,7 +50,7 @@ namespace OnlineSales.Infrastructure
 
                         if (IsRightTimeToExecute(currentJob, task))
                         {
-                            isCompleted = await task.Execute(currentJob);
+                            var isCompleted = await task.Execute(currentJob);
 
                             await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
                         }
@@ -142,7 +142,7 @@ namespace OnlineSales.Infrastructure
 
         private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)
         {
-            if (!task.IsRunning || job.RetryCount >= task.RetryCount)
+            if (job.RetryCount >= task.RetryCount)
             {
                 return false;
             }
