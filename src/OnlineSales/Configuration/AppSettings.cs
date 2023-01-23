@@ -75,18 +75,9 @@ public class TaskConfig
     public int RetryInterval { get; set; }
 }
 
-public class DomainCheckTaskConfig : TaskConfig
+public class ChangeLogTaskConfig : TaskConfig
 {
-    public DomainCheckTaskConfig()
-    {
-        CronSchedule = "* 0/5 * * * ?";
-
-        RetryCount = 2;
-
-        RetryInterval = 5;
-    }
-
-    public int BatchSize { get; } = 100;
+    public int BatchSize { get; set; }
 }
 
 public class CacheProfileSettings

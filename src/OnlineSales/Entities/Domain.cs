@@ -5,10 +5,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("domain")]
+[SupportsChangeLog]
+[SupportsElasticSearch]
 [Index(nameof(Name), IsUnique = true)]
 public class Domain : BaseEntityWithIdAndDates
 {

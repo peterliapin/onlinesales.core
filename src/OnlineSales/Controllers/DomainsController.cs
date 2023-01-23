@@ -18,12 +18,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDto, DomainUpdateDto, DomainDetailsDto, DomainImportDto>
 {
-    private readonly IDomainService domainCheckService;
+    private readonly IDomainService domainService;
 
-    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainCheckService)
+    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService)
         : base(dbContext, mapper, apiSettingsConfig)
     {
-        this.domainCheckService = domainCheckService;
+        this.domainService = domainService;
     }
 
     // GET api/domains/names/gmail.com
@@ -48,7 +48,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
             await dbSet.AddAsync(domain);
         }
 
-        await domainCheckService.Verify(domain);
+        await domainService.Verify(domain);
         await dbContext.SaveChangesAsync();
 
         var resultConverted = mapper.Map<DomainDetailsDto>(domain);
