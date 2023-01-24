@@ -109,6 +109,7 @@ namespace OnlineSales.Infrastructure
                 return false;
             }
 
+            Log.Information("Checking primary node was successful.");
             return true;
         }
 
