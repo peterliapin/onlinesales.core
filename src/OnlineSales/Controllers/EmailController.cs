@@ -4,7 +4,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;

@@ -2,16 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net.Http.Headers;
-using System.Text.Json;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services

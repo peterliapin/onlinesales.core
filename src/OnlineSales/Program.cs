@@ -62,8 +62,8 @@ public class Program
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
-        builder.Services.AddTransient<IEmailVerifyService, EmailVerifyService>();
-        builder.Services.AddTransient<IEmailValidationExternalService, EmailValidationExternalService>();
+        builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
+        builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
 
         ConfigureCacheProfiles(builder);
 
