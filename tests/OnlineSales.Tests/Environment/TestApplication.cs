@@ -65,6 +65,7 @@ public class TestApplication : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             services.AddScoped<IEmailService, TestEmailService>();
+            services.AddScoped<IEmailValidationExternalService, TestEmailValidationExternalService>();
 
             services.AddAuthentication(defaultScheme: "TestScheme")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(

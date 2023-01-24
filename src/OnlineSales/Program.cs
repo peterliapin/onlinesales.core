@@ -63,6 +63,7 @@ public class Program
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
         builder.Services.AddTransient<IEmailVerifyService, EmailVerifyService>();
+        builder.Services.AddTransient<IEmailValidationExternalService, EmailValidationExternalService>();
 
         ConfigureCacheProfiles(builder);
 
