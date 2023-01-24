@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -15,20 +14,30 @@ namespace OnlineSales.Infrastructure
     {
         private const string TaskRunnerNodeLockKey = "TaskRunnerPrimaryNodeLock";
 
+        private static bool? isPrimaryNode;
+
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
+        private readonly LockManager lockManager;
 
-        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext)
+        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext, LockManager lockManager)
         {
             this.dbContext = dbContext;
             this.tasks = tasks;
+            this.lockManager = lockManager;
+
+            if (isPrimaryNode == null)
+            {
+                #pragma warning disable S3010
+                isPrimaryNode = CheckPrimaryNode(); 
+            }
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             try
             {
-                if (!CheckPrimaryNode())
+                if (isPrimaryNode! == false)
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
@@ -36,7 +45,7 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var task in tasks.Where(t => t.IsRunning))
                 {
-                    var taskLock = LockManager.GetNoWaitLock(task.Name);
+                    var taskLock = lockManager.GetNoWaitLock(task.Name);
 
                     if (taskLock is null)
                     {
@@ -65,12 +74,12 @@ namespace OnlineSales.Infrastructure
 
         public async Task<bool> ExecuteTask(ITask task)
         {
-            if (!CheckPrimaryNode())
+            if (isPrimaryNode! == false)
             {
                 throw new NonPrimaryNodeException();
             }
 
-            var taskLock = LockManager.GetNoWaitLock(task.Name);
+            var taskLock = lockManager.GetNoWaitLock(task.Name);
 
             if (taskLock is null)
             {
@@ -91,7 +100,7 @@ namespace OnlineSales.Infrastructure
 
         public void StartOrStopTask(ITask task, bool start)
         {
-            if (!CheckPrimaryNode())
+            if (isPrimaryNode! == false)
             {
                 throw new NonPrimaryNodeException();
             }
@@ -101,16 +110,7 @@ namespace OnlineSales.Infrastructure
 
         private bool CheckPrimaryNode()
         {
-            var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(TaskRunnerNodeLockKey);
-
-            if (nodeLockInstance is null)
-            {
-                Log.Information("This is not the current primary node for task execution");
-                return false;
-            }
-
-            Log.Information("Checking primary node was successful.");
-            return true;
+            return lockManager.GetNoWaitLock(TaskRunnerNodeLockKey) != null;
         }
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
