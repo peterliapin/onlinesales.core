@@ -3,7 +3,9 @@
 // </copyright>
 
 using System.Text.Json;
+using System.Web;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
@@ -201,6 +203,90 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     public async Task ValidQueryParameter(string filter, HttpStatusCode code)
     {
         await GetTest($"{this.itemsUrl}?{filter}", code);
+    }
+
+    [Fact]
+    public async Task ValidWherePropertyType()
+    {
+        var query = string.Empty;
+        var typeProperties = typeof(T).GetProperties();
+        foreach (var property in typeProperties)
+        {
+            if (!property.PropertyType.IsValueType || (Nullable.GetUnderlyingType(property.PropertyType) != null))
+            {
+                continue;
+            }
+
+            object? defValue;
+            if (property.PropertyType == typeof(string))
+            {
+                defValue = "abc";
+            }
+            else if (property.PropertyType == typeof(DateTime))
+            {
+                defValue = DateTime.MinValue.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+            }
+            else
+            {
+                defValue = Activator.CreateInstance(property.PropertyType);
+            }
+
+            query += HttpUtility.UrlEncode($"filter[where][{property.Name}][eq]={defValue}") + "&";
+        }
+
+        query = query.Substring(0, query.Length - 1); // Remove latest '&'
+        await GetTest($"{this.itemsUrl}?{query}", HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task InvalidWherePropertyType()
+    {
+        var baseTypesList = new Type[]
+        {
+            typeof(string),
+            typeof(DateTime),
+            typeof(int),
+        };
+        var query = string.Empty;
+        var typeProperties = typeof(T).GetProperties();
+        foreach (var property in typeProperties)
+        {
+            if (!property.PropertyType.IsValueType
+                || (Nullable.GetUnderlyingType(property.PropertyType) != null)
+                || property.PropertyType == typeof(decimal) // Default value for decimal, double, float, long serializes as 0 so skip them
+                || property.PropertyType == typeof(double)
+                || property.PropertyType == typeof(float)
+                || property.PropertyType == typeof(long))
+            {
+                continue;
+            }
+
+            query += baseTypesList.Where(t => t != property.PropertyType).Select(type =>
+            {
+                object? defValue;
+                if (type == typeof(string))
+                {
+                    defValue = "abc";
+                }
+                else if (type == typeof(DateTime))
+                {
+                    defValue = DateTime.MinValue.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+                }
+                else
+                {
+                    defValue = Activator.CreateInstance(type);
+                }
+
+                return HttpUtility.UrlEncode($"filter[where][{property.Name}][eq]={defValue}") + "&";
+            }).Aggregate(string.Empty, (acc, value) => acc + value);
+        }
+
+        query = query.Substring(0, query.Length - 1); // Remove latest '&'
+        var queryCmdsCount = query.Split('&').Length;
+
+        var result = await GetTestRawContentSerialize<ProblemDetails>($"{this.itemsUrl}?{query}", HttpStatusCode.BadRequest);
+        result.Should().NotBeNull();
+        result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount);
     }
 
     protected virtual async Task<(TC, string)> CreateItem()

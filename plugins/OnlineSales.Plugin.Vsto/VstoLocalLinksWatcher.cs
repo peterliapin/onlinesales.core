@@ -78,7 +78,12 @@ public class VstoLocalLinksWatcher : IDisposable
 
     private void Init()
     {
-        var exeFiles = Directory.GetFiles(VstoLocalPath, "*.exe", SearchOption.AllDirectories);
+        string[] exeFiles = Array.Empty<string>();
+        if (Directory.Exists(VstoLocalPath))
+        {
+            exeFiles = Directory.GetFiles(VstoLocalPath, "*.exe", SearchOption.AllDirectories);
+        }
+
         var allLinks = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
         foreach (var exeFile in exeFiles)
         {            
