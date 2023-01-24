@@ -282,11 +282,13 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         }
 
         query = query.Substring(0, query.Length - 1); // Remove latest '&'
-        var queryCmdsCount = query.Split('&').Length;
+        var queryCmds = query.Split('&').Select(s => HttpUtility.UrlDecode(s)).ToList();
+        var queryCmdsCount = queryCmds.Count;
 
         var result = await GetTestRawContentSerialize<ProblemDetails>($"{this.itemsUrl}?{query}", HttpStatusCode.BadRequest);
         result.Should().NotBeNull();
-        result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount);
+        var resultDiff = queryCmds.Except(result!.Extensions.Keys).Aggregate(string.Empty, (acc, value) => $"{acc} \n {value}");
+        result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount, resultDiff);
     }
 
     protected virtual async Task<(TC, string)> CreateItem()
