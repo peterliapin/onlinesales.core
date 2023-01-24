@@ -76,10 +76,20 @@ public class LockManager
     {
         using (var dbContext = new ApiDbContext())
         {
+            PostgresDistributedLock taskLock;
             try
             {
-                var taskLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+                taskLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            }
+            catch (Exception ex)
+            {
+                Log.Information("Exception in  ctor: " + ex.Message);
+                Log.Error(ex, "Error when acquiring lock.");
+                return false;
+            }
 
+            try
+            { 
                 // pg_try_advisory_lock - Get the lock or skip if not available.
                 var handle = taskLock.TryAcquire();
 
@@ -94,6 +104,7 @@ public class LockManager
             }
             catch (Exception ex)
             {
+                Log.Information("Exception in TryAcquire: " + ex.Message);
                 Log.Error(ex, "Error when acquiring lock.");
                 return false;
             }
