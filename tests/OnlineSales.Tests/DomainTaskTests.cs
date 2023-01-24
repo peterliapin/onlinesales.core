@@ -93,11 +93,15 @@ public class DomainTaskTests : BaseTest
 
     private async Task TryToExecute()
     {
-        var executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
-        while (executeResponce.StatusCode != HttpStatusCode.OK)
+        var maxTries = 10;
+
+        HttpResponseMessage executeResponce = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        for (int i = 0; i < maxTries && executeResponce.StatusCode != HttpStatusCode.OK; ++i)
         {
             executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
         }
+
+        executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var content = await executeResponce.Content.ReadAsStringAsync();
         var taskStatus = JsonHelper.Deserialize<TaskExecutionDto>(content);

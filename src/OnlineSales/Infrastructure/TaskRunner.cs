@@ -89,6 +89,16 @@ namespace OnlineSales.Infrastructure
             }
         }
 
+        public void StartOrStopTask(ITask task, bool start)
+        {
+            if (!CheckPrimaryNode())
+            {
+                throw new NonPrimaryNodeException();
+            }
+
+            task.SetRunning(start);
+        }
+
         private bool CheckPrimaryNode()
         {
             var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(TaskRunnerNodeLockKey);

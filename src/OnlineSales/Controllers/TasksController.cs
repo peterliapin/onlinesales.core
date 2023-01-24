@@ -108,8 +108,9 @@ public class TasksController : ControllerBase
         }
         else
         {
-            result.First().SetRunning(start);
-            return CreateTaskDetailsDto(result.First());
+            var task = result.First();
+            taskRunner.StartOrStopTask(task, start);
+            return CreateTaskDetailsDto(task);
         }
     }
 
