@@ -23,9 +23,7 @@ public class DomainTaskTests : BaseTest
     [Fact]
     public async Task ExecuteTest()
     {
-        var responce = await GetTest<TaskDetailsDto>(tasksUrl + "/stop/" + taskName);
-        responce.Should().NotBeNull();
-        responce!.IsRunning.Should().BeFalse();
+        await TryToStop();
 
         var validDomain = new TestDomain()
         {
@@ -89,6 +87,24 @@ public class DomainTaskTests : BaseTest
 
         filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
+    }
+
+    private async Task TryToStop()
+    {
+        var maxTries = 10;
+        HttpResponseMessage responce = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        for (int i = 0; i < maxTries && responce!.StatusCode != HttpStatusCode.OK; ++i)
+        {
+            responce = await GetRequest(tasksUrl + "/stop/" + taskName);
+        }
+
+        responce.StatusCode.Should().Be(HttpStatusCode.OK);
+        responce.Should().NotBeNull();
+
+        var content = await responce.Content.ReadAsStringAsync();
+        var task = JsonHelper.Deserialize<TaskDetailsDto>(content);
+
+        task!.IsRunning.Should().BeFalse();
     }
 
     private async Task TryToExecute()
