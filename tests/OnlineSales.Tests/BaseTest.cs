@@ -91,16 +91,6 @@ public class BaseTest : IDisposable
         }
     }
 
-    protected async Task<T?> GetTestRawContentSerialize<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
-        where T : class
-    {
-        var response = await GetTest(url, expectedCode, authToken);
-
-        var content = await response.Content.ReadAsStringAsync();
-
-        return JsonHelper.Deserialize<T>(content);
-    }
-
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Success")
     {        
         var response = await Request(HttpMethod.Post, url, payload, authToken);

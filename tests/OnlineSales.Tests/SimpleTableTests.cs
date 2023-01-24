@@ -8,6 +8,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
@@ -339,5 +340,15 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await PatchTest(testCreateItem.Item2, testUpdateItem!);
 
         return (testCreateItem, testUpdateItem);
+    }
+
+    private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    where TRet : class
+    {
+        var response = await GetTest(url, expectedCode, authToken);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        return JsonHelper.Deserialize<TRet>(content);
     }
 }
