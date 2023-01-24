@@ -16,7 +16,7 @@ namespace OnlineSales.Plugin.Sms.Controllers;
 [Route("api/messages")]
 public class MessagesController : Controller
 {
-    protected readonly DbContext dbContext;
+    protected readonly ApiDbContext dbContext;
     protected readonly ISmsService smsService;
     protected readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
 
@@ -61,6 +61,12 @@ public class MessagesController : Controller
             }
 
             await smsService.SendAsync(recipient, smsDetails.Message);
+
+            await dbContext.SmsLogs!.AddAsync(new Entities.SmsLog
+            {
+                Recipient = recipient,
+                Message = smsDetails.Message,
+            });
 
             return Ok();
         }
