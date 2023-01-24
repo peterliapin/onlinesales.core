@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Security.Cryptography;
+using System.Text;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
@@ -26,6 +27,41 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         this.contactService = contactService;
     }
 
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public override async Task<ActionResult<ContactDetailsDto>> GetOne(int id)
+    {
+        var returnedSingleItem = (await base.GetOne(id)).Result;
+
+        var singleItem = (ContactDetailsDto)((ObjectResult)returnedSingleItem!).Value!;
+
+        singleItem!.AvatarUrl = EmailToGravatarUrl(singleItem.Email);
+
+        return Ok(singleItem!);
+    }
+
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public override async Task<ActionResult<List<ContactDetailsDto>>> Get([FromQuery] IDictionary<string, string>? parameters)
+    {
+        var returnedItems = (await base.Get(parameters)).Result;
+
+        var items = (List<ContactDetailsDto>)((ObjectResult)returnedItems!).Value!;
+
+        items.ForEach(c =>
+        {
+            c.AvatarUrl = EmailToGravatarUrl(c.AvatarUrl);
+        });
+
+        return Ok(items);
+    }
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -38,6 +74,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         var savedContact = await contactService.AddContact(contact);
 
         var returnedValue = mapper.Map<ContactDetailsDto>(savedContact);
+
+        returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
 
         return CreatedAtAction(nameof(GetOne), new { id = savedContact.Id }, returnedValue);
     }
@@ -62,6 +100,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         var returnedValue = mapper.Map<ContactDetailsDto>(updatedContact);
 
+        returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
+
         return Ok(returnedValue);
     }
  
@@ -70,5 +110,19 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         var newItems = contactService.EnrichWithDomainId(importingRecords);
         
         return base.SaveBatchChangesAsync(newItems);
+    }
+
+    private static string EmailToGravatarUrl(string email)
+    {
+        byte[] encode = Encoding.ASCII.GetBytes(email);
+        byte[] hashenc = MD5.Create().ComputeHash(encode);
+        StringBuilder hash = new StringBuilder();
+
+        foreach (var b in hashenc)
+        {
+            hash.Append(b.ToString("x2"));
+        }
+
+        return "https://www.gravatar.com/avatar/" + hash + "?size=48&d=mp";
     }
 }

@@ -55,6 +55,8 @@ public class ContactDetailsDto : ContactCreateDto
 {
     public int Id { get; set; }
 
+    public string AvatarUrl { get; set; } = string.Empty;
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
