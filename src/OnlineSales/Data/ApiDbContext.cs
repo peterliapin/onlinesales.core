@@ -77,6 +77,8 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<EmailLog>? EmailLogs { get; set; }
 
+    public virtual DbSet<SmsLog>? SmsLogs { get; set; }    
+
     public virtual DbSet<IpDetails>? IpDetails { get; set; }
 
     public virtual DbSet<ChangeLog>? ChangeLogs { get; set; }
