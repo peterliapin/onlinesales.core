@@ -226,15 +226,10 @@ public class Program
 
         if (migrateOnStart)
         {
-            LockManager lockManager;
             using (var scope = app.Services.CreateScope())
             {
-                lockManager = scope.ServiceProvider.GetRequiredService<LockManager>();
-            }
-
-            using (lockManager!.GetWaitLock("MigrationWaitLock"))
-            {
-                using (var scope = app.Services.CreateScope())
+                var lockManager = scope.ServiceProvider.GetRequiredService<LockManager>();
+                using (lockManager!.GetWaitLock("MigrationWaitLock"))
                 {
                     var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
                     context.Database.Migrate();
