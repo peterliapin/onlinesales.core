@@ -5,6 +5,7 @@
 using AutoMapper;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Configuration;
 

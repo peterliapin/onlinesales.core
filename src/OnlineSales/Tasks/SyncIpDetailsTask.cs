@@ -17,8 +17,8 @@ public class SyncIpDetailsTask : ChangeLogTask
     private readonly ChangeLogTaskConfig? taskConfig = new ChangeLogTaskConfig();
     private readonly IpDetailsService ipDetailsService;
 
-    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, IpDetailsService ipDetailsService)
-        : base(dbContext, pluginDbContexts)
+    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, IpDetailsService ipDetailsService, TaskStatusService taskStatusService)
+        : base(dbContext, pluginDbContexts, taskStatusService)
     {
         var config = configuration.GetSection("Tasks:SyncIpDetailsTask") !.Get<ChangeLogTaskConfig>();
         if (config is not null)
