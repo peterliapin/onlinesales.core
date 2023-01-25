@@ -22,6 +22,10 @@ namespace OnlineSales.Interfaces
         /// </summary>
         public int RetryInterval { get; }
 
+        public bool IsRunning { get; }
+
+        public void SetRunning(bool running);
+
         Task<bool> Execute(TaskExecutionLog currentJob);
     }
 }

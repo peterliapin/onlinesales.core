@@ -11,92 +11,42 @@ namespace OnlineSales.Infrastructure;
 
 public class LockManager
 {
-    private static LockManager? instance;
+    private readonly ApiDbContext dbContext;
 
-    private LockManager()
+    public LockManager(ApiDbContext dbContext)
     {
+        this.dbContext = dbContext;
     }
 
-    public static LockManager? GetInstanceWithNoWaitLock(string lockKey)
+    public PostgresDistributedLockHandle? GetNoWaitLock(string lockKey)
     {
-        if (instance == null)
+        try
         {
-            if (CanGetLock(lockKey))
-            {
-                instance = new LockManager();
-            }
-            else
-            {
-                return null;
-            }
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+
+            // pg_try_advisory_lock - Get the lock or skip if not available.
+            return secondaryLock.TryAcquire();
         }
-
-        return instance;
-    }
-
-    public static PostgresDistributedLockHandle? GetNoWaitLock(string lockKey)
-    {
-        using (var dbContext = new ApiDbContext())
+        catch (Exception ex)
         {
-            try
-            {
-                var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
-
-                // pg_try_advisory_lock - Get the lock or skip if not available.
-                return secondaryLock.TryAcquire();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error when acquiring lock.");
-                return null;
-            }
+            Log.Error(ex, "Error when acquiring lock.");
+            return null;
         }
     }
 
-    public static PostgresDistributedLockHandle? GetWaitLock(string lockKey)
+    public PostgresDistributedLockHandle? GetWaitLock(string lockKey)
     {
-        using (var dbContext = new ApiDbContext())
+        try
         {
-            try
-            {
-                var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
 
-                // pg_advisory_lock - Get or Wait for lock.
-                return secondaryLock.Acquire();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error when acquiring lock.");
-                return null;
-            }
+            // pg_advisory_lock - Get or Wait for lock.
+            return secondaryLock.Acquire();
         }
-    }
-
-    private static bool CanGetLock(string lockKey)
-    {
-        using (var dbContext = new ApiDbContext())
+        catch (Exception ex)
         {
-            try
-            {
-                var taskLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
-
-                // pg_try_advisory_lock - Get the lock or skip if not available.
-                var handle = taskLock.TryAcquire();
-
-                if (handle is null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error when acquiring lock.");
-                return false;
-            }
+            Log.Error(ex, "Error when acquiring lock.");
+            return null;
         }
     }
 }

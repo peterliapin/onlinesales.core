@@ -29,6 +29,16 @@ public class ErrorsController : Controller
 
                 break;
 
+            case TaskNotFoundException taskNotFoundException:
+
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status404NotFound);
+
+                problemDetails.Extensions["taskName"] = taskNotFoundException.TaskName;
+
+                break;
+
             case EntityNotFoundException entityNotFoundError:
 
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(

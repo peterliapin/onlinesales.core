@@ -12,6 +12,7 @@ using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Services;
 
 namespace OnlineSales.Tasks
 {
@@ -21,8 +22,8 @@ namespace OnlineSales.Tasks
         private readonly ElasticClient elasticClient;
         private readonly string prefix = string.Empty;
 
-        public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, ElasticClient elasticClient)
-            : base(dbContext, pluginDbContexts)
+        public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, ElasticClient elasticClient, TaskStatusService taskStatusService)
+            : base(dbContext, pluginDbContexts, taskStatusService)
         {
             var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<ChangeLogTaskConfig>();
             if (config is not null)
