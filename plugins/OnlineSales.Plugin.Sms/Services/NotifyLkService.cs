@@ -46,5 +46,10 @@ namespace OnlineSales.Plugin.Sms.Services
                 throw new NotifyLkException(responseContent);
             }
         }
+
+        public string GetSender(string recipient)
+        {
+            return notifyLkConfig.SenderId;
+        }
     }
 }
