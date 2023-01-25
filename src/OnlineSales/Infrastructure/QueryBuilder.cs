@@ -249,28 +249,40 @@ namespace OnlineSales.Infrastructure
 
             dynamic parsedValue;
             // Value cast
-            if (DateTime.TryParseExact(cmd.Value, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && propertyType.PropertyType == typeof(DateTime))
+            if (DateTime.TryParseExact(cmd.Value, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && (propertyType.PropertyType == typeof(DateTime) || propertyType.PropertyType == typeof(DateTime?)))
             {
                 parsedValue = date;
             }
-            else if (decimal.TryParse(cmd.Value, out var decimalValue) && propertyType.PropertyType == typeof(decimal))
+            else if (decimal.TryParse(cmd.Value, out var decimalValue) && (propertyType.PropertyType == typeof(decimal) || propertyType.PropertyType == typeof(decimal?)))
             {
                 parsedValue = decimalValue;
             }
-            else if (double.TryParse(cmd.Value, out var doubleValue) && propertyType.PropertyType == typeof(double))
+            else if (double.TryParse(cmd.Value, out var doubleValue) && (propertyType.PropertyType == typeof(double) || propertyType.PropertyType == typeof(double?)))
             {
                 parsedValue = doubleValue;
             }
-            else if (int.TryParse(cmd.Value, out int intValue) && propertyType.PropertyType == typeof(int))
+            else if (int.TryParse(cmd.Value, out int intValue) && (propertyType.PropertyType == typeof(int) || propertyType.PropertyType == typeof(int?)))
             {
                 parsedValue = intValue;
             }
-            else
+            else if (bool.TryParse(cmd.Value, out bool boolValue) && (propertyType.PropertyType == typeof(bool) || propertyType.PropertyType == typeof(bool?)))
+            {
+                parsedValue = boolValue;
+            }
+            else if (propertyType.PropertyType.IsEnum && !int.TryParse(cmd.Value, out _) && Enum.TryParse(propertyType.PropertyType, cmd.Value, true, out var enumValue))
+            {
+                parsedValue = enumValue;
+            }
+            else if (propertyType.PropertyType == typeof(string))
             {
                 parsedValue = cmd.Value;
             }
+            else
+            {
+                throw new QueryException(cmd.Source, "Property type and provided type value do not match");
+            }
 
-            var valueParameterExpression = Expression.Constant(parsedValue);
+            var valueParameterExpression = Expression.Constant(parsedValue, propertyType.PropertyType);
             var parameterPropertyExpression = Expression.Property(expressionParameter, propertyName);
 
             var rawOperand = cmd.Props.ElementAtOrDefault(1 + orOperandShift);
