@@ -80,9 +80,7 @@ public class MessagesController : Controller
 
             smsLog.Status = SmsLog.SmsStatus.NotSent;
 
-            return Problem(
-                statusCode: StatusCodes.Status500InternalServerError,
-                title: ex.Message);
+            throw;
         }
         finally
         {
