@@ -72,7 +72,8 @@ public class MessagesController : Controller
 
             await smsService.SendAsync(recipient, smsDetails.Message);
 
-            await dbContext.SmsLogs!.AddAsync(smsLog);
+            dbContext.SmsLogs!.Add(smsLog);
+            await dbContext.SaveChangesAsync();
 
             return Ok();
         }
@@ -82,7 +83,8 @@ public class MessagesController : Controller
 
             smsLog.Status = SmsLog.SmsStatus.NotSent;
 
-            await dbContext.SmsLogs!.AddAsync(smsLog);
+            dbContext.SmsLogs!.Add(smsLog);
+            await dbContext.SaveChangesAsync();
 
             return Problem(
                 statusCode: StatusCodes.Status500InternalServerError,
