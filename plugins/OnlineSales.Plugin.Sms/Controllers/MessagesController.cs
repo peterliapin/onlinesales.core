@@ -74,11 +74,15 @@ public class MessagesController : Controller
 
             return Ok();
         }
-        catch
+        catch (Exception ex)
         {
+            Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
+
             smsLog.Status = SmsLog.SmsStatus.NotSent;
 
-            throw new FailedToSendSmsException(smsDetails);
+            return Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: ex.Message);
         }
         finally
         {
