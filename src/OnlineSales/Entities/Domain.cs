@@ -16,10 +16,13 @@ namespace OnlineSales.Entities;
 public class Domain : BaseEntityWithIdAndDates
 {
     [Required]
+    [Searchable]
     public string Name { get; set; } = string.Empty;
 
+    [Searchable]
     public string? Title { get; set; }
 
+    [Searchable]
     public string? Description { get; set; }
 
     public string? Url { get; set; }
