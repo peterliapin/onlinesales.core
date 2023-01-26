@@ -44,6 +44,7 @@ public class Contact : BaseEntity
     [Required]
     public int DomainId { get; set; }
 
+    [DeleteBehavior(DeleteBehavior.Restrict)]
     [JsonIgnore]
     [ForeignKey("DomainId")]
     public virtual Domain? Domain { get; set; }

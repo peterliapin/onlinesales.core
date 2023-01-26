@@ -5,10 +5,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("account")]
+[SupportsChangeLog]
 public class Account : BaseEntity
 {
     public string Name { get; set; } = string.Empty;

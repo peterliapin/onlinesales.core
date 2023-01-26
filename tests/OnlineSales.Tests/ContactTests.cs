@@ -66,6 +66,21 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         contact3.LastName.Should().Be("Siri_Tom");
     }
 
+    [Fact]
+    public async Task ParentDeletionRestrictWithChildren()
+    {
+        int contactId = 0;
+
+        var testCreateItem = await CreateItem();
+
+        contactId = Convert.ToInt32(testCreateItem.Item2.Split("/").Last());
+
+        var dbContext = App.GetDbContext();
+        var dbDomainId = dbContext!.Contacts!.Where(contactsDb => contactsDb.Id == contactId).Select(contact => contact.DomainId).FirstOrDefault();
+
+        await DeleteTest($"/api/domains/{dbDomainId}", HttpStatusCode.UnprocessableEntity);
+    }
+
     protected override ContactUpdateDto UpdateItem(TestContact to)
     {
         var from = new ContactUpdateDto();

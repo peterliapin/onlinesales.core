@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using Nest;
 
 namespace OnlineSales.DTOs;
 
@@ -23,9 +24,9 @@ public class AccountCreateDto
     public double? Revenue { get; set; }
 
     [Required]
-    public int DomainId { get; set; }
+    public int? DomainId { get; set; }
 
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string?[] Tags { get; set; } = Array.Empty<string>();
 
     public Dictionary<string, string>? SocialMedia { get; set; }
 }
@@ -46,7 +47,9 @@ public class AccountUpdateDto
 
     public int? DomainId { get; set; }
 
-    public string[] Tags { get; set; } = Array.Empty<string>();
+#pragma warning disable SA1011
+    public string[]? Tags { get; set; }
+#pragma warning restore SA1011
 
     public Dictionary<string, string>? SocialMedia { get; set; }
 }
@@ -87,7 +90,7 @@ public class AccountImportDto
     public int? DomainId { get; set; }
 
     [Optional]
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string?[] Tags { get; set; } = Array.Empty<string>();
 
     [Optional]
     public Dictionary<string, string>? SocialMedia { get; set; }
