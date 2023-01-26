@@ -89,6 +89,8 @@ public class ApiDbContext : DbContext
 
     public virtual DbSet<Domain>? Domains { get; set; }
 
+    public virtual DbSet<Account>? Accounts { get; set; }
+
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         int result = 0;
