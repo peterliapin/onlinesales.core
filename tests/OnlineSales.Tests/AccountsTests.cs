@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Linq;
 using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -14,6 +13,26 @@ namespace OnlineSales.Tests
         public AccountsTests()
             : base("/api/account")
         {
+        }
+
+        public override async Task CascadeDeleteTest()
+        {
+            var fkItem = await CreateFKItem();
+
+            var fkItemId = fkItem.Item1;
+
+            int numberOfItems = 3;
+
+            string[] itemsUrls = new string[numberOfItems];
+
+            for (var i = 0; i < numberOfItems; ++i)
+            {
+                var testItem = await CreateItem(i.ToString(), fkItemId);
+
+                itemsUrls[i] = testItem.Item2;
+            }
+
+            await DeleteTest(fkItem.Item2, HttpStatusCode.UnprocessableEntity);
         }
 
         protected override async Task<(int, string)> CreateFKItem()

@@ -2,15 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("account")]
 [SupportsChangeLog]
+[Index(nameof(Name), IsUnique = true)]
 public class Account : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
@@ -25,15 +26,15 @@ public class Account : BaseEntity
 
     public double? Revenue { get; set; }
 
-    [Required]
-    public int DomainId { get; set; }
+    public int? DomainId { get; set; }
 
     [JsonIgnore]
+    [DeleteBehavior(DeleteBehavior.Restrict)]
     [ForeignKey("DomainId")]
     public virtual Domain? Domain { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string[]? Tags { get; set; }
 
     [Column(TypeName = "jsonb")]
     public Dictionary<string, string>? SocialMedia { get; set; }
