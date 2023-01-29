@@ -25,7 +25,7 @@ public class SmsPlugin : IPlugin
             Configuration = pluginConfig;
         }
 
+        services.AddScoped<PluginDbContextBase, SmsDbContext>();
         services.AddSingleton<ISmsService, SmsService>();
-        services.AddScoped<SmsDbContext, SmsDbContext>();
     }
 }

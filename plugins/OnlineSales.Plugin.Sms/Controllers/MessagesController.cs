@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OnlineSales.Data;
 using OnlineSales.Exceptions;
 using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.DTOs;
@@ -16,13 +17,13 @@ namespace OnlineSales.Plugin.Sms.Controllers;
 [Route("api/messages")]
 public class MessagesController : Controller
 {
-    protected readonly SmsDbContext dbContext;
-    protected readonly ISmsService smsService;
-    protected readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
+    private readonly ISmsService smsService;
+    private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
+    private readonly SmsDbContext? dbContext;
 
-    public MessagesController(SmsDbContext dbContext, ISmsService smsService)
+    public MessagesController(IEnumerable<PluginDbContextBase> dbContexts, ISmsService smsService)
     {
-        this.dbContext = dbContext;
+        this.dbContext = dbContexts.First(c => c.GetType() == typeof(SmsDbContext)) as SmsDbContext;
         this.smsService = smsService;
     }
 
@@ -84,8 +85,11 @@ public class MessagesController : Controller
         }
         finally
         {
-            dbContext.SmsLogs!.Add(smsLog);
-            await dbContext.SaveChangesAsync();
+            if (dbContext != null)
+            {
+                dbContext.SmsLogs!.Add(smsLog);
+                await dbContext.SaveChangesAsync();
+            }
         }
     }
 }
