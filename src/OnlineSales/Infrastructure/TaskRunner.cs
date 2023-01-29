@@ -29,8 +29,10 @@ namespace OnlineSales.Infrastructure
             if (isPrimaryNode == null)
             {
                 #pragma warning disable S3010
-                isPrimaryNode = CheckPrimaryNode(); 
+                isPrimaryNode = CheckPrimaryNode();
             }
+
+            Log.Information("This node: " + (isPrimaryNode! == true ? "is primary" : "isn't primary"));
         }
 
         public async Task Execute(IJobExecutionContext context)
