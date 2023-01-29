@@ -52,6 +52,13 @@ public class EmailVerificationApiConfig
     public string ApiKey { get; set; } = string.Empty;
 }
 
+public class AccountDetailsApiConfig
+{
+    public string Url { get; set; } = string.Empty;
+
+    public string ApiKey { get; set; } = string.Empty;
+}
+
 public class ApiSettingsConfig
 {
     public int MaxListSize { get; set; }

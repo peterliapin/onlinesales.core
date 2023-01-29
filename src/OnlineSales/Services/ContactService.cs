@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using AutoMapper;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -11,32 +12,42 @@ namespace OnlineSales.Services
     public class ContactService : IContactService
     {
         private readonly ApiDbContext apiDbContext;
+        private readonly IDomainService domainService;
+        private readonly IAccountExternalService accountExternalService;
+        private readonly IEmailVerifyService emailVerifyService;
 
-        public ContactService(ApiDbContext apiDbContext)
+        public ContactService(ApiDbContext apiDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
         {
             this.apiDbContext = apiDbContext;
+            this.domainService = domainService;
+            this.accountExternalService = accountExternalService;
+            this.emailVerifyService = emailVerifyService;
         }
 
         public async Task<Contact> AddContact(Contact contact)
         {
-            var returnedValue = EnrichWithDomainId(contact);
+            var domainReturnedValue = EnrichWithDomainId(contact);
 
-            await apiDbContext.Contacts!.AddAsync(returnedValue);
+            var accountReturnedValue = await EnrichWithAccountId(domainReturnedValue);
+
+            await apiDbContext.Contacts!.AddAsync(accountReturnedValue);
 
             await apiDbContext.SaveChangesAsync();
 
-            return returnedValue!;
+            return accountReturnedValue!;
         }
 
         public async Task<Contact> UpdateContact(Contact contact)
         {
-            var returnedValue = EnrichWithDomainId(contact);
+            var domainReturnedValue = EnrichWithDomainId(contact);
 
-            apiDbContext.Contacts!.Update(returnedValue);
+            var accountReturnedValue = await EnrichWithAccountId(domainReturnedValue);
+
+            apiDbContext.Contacts!.Update(accountReturnedValue);
 
             await apiDbContext.SaveChangesAsync();
 
-            return returnedValue;
+            return accountReturnedValue;
         }
 
         public Contact EnrichWithDomainId(Contact contact)
@@ -48,6 +59,7 @@ namespace OnlineSales.Services
             if (domainsQueryResult != null)
             {
                 contact.DomainId = domainsQueryResult.Id;
+                contact.Domain = domainsQueryResult;
             }
             else
             {
@@ -66,13 +78,14 @@ namespace OnlineSales.Services
             var domainsQueryResult = (from contactWithDomain in contactsWithDomain
                                       join domain in apiDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
                                       from domain in domainTemp.DefaultIfEmpty()
-                                      select new { EnteredContact = contactWithDomain.Contact, DomainName = contactWithDomain.DomainName, DomainId = domain?.Id ?? 0 }).ToList();
+                                      select new { EnteredContact = contactWithDomain.Contact, DomainName = contactWithDomain.DomainName, DbDomain = domain, DomainId = domain?.Id ?? 0 }).ToList();
 
             foreach (var domainItem in domainsQueryResult)
             {
                 if (domainItem.DomainId != 0)
                 {
                     domainItem.EnteredContact.DomainId = domainItem.DomainId;
+                    domainItem.EnteredContact.Domain = domainItem.DbDomain;
                 }
                 else
                 {
@@ -101,6 +114,121 @@ namespace OnlineSales.Services
         public string GetDomainFromEmail(string email)
         {
             return email.Split("@").Last().ToString();
+        }
+
+        public async Task<Contact> EnrichWithAccountId(Contact contact)
+        {
+            Domain domain = contact.Domain!;
+
+            if (domain!.AccountId.HasValue && domain!.AccountId != 0)
+            {
+                contact.AccountId = domain!.AccountId;
+                return contact;
+            }
+            else
+            {
+                if ((domain.Free == null && domain.Disposable == null) || (domain.Free != true && domain.Disposable != true))
+                {
+                    var newContact = (await DomainVerifyAndCreateAccount(contact)).contact!;
+
+                    return newContact;
+                }
+                else
+                {
+                    return contact;
+                }
+            }
+        }
+
+        public List<Contact> EnrichWithAccountId(List<Contact> contacts)
+        {
+            Dictionary<string, Account> newAccounts = new Dictionary<string, Account>();
+            List<Contact> updatedContact = new List<Contact>();
+
+            var domainsWithAccounts = (from contact in contacts where contact.Domain!.AccountId.HasValue && contact.Domain!.AccountId != 0 select contact).ToList();
+
+            foreach (var domainWithAccount in domainsWithAccounts)
+            {
+                domainWithAccount.AccountId = domainWithAccount.Domain!.AccountId;
+                domainWithAccount.Account = domainWithAccount.Domain!.Account;
+
+                updatedContact.Add(domainWithAccount);
+            }
+
+            foreach (var contact in contacts.Where(contacts => !updatedContact.Any(updatedContact => updatedContact.Email == contacts.Email)))
+            {
+                Domain domain = contact.Domain!;
+
+                if ((domain.Free == null && domain.Disposable == null) || (domain.Free != true && domain.Disposable != true))
+                {
+                    var newContact = DomainVerifyAndCreateAccount(contact).Result !;
+
+                    if (newContact.newAccount)
+                    {
+                        var existingAccount = newAccounts.FirstOrDefault(account => account.Key == newContact.contact.Account!.Name);
+
+                        if (existingAccount.Key != default)
+                        {
+                            contact.Account = existingAccount.Value;
+                            contact.Domain!.Account = existingAccount.Value;
+                        }
+                        else
+                        {
+                            contact.Account = newContact.contact.Account;
+                            contact.Domain!.Account = newContact.contact.Account;
+                            newAccounts.Add(newContact.contact.Account!.Name, newContact.contact.Account);
+                        }
+                    }
+                }
+
+                updatedContact.Add(contact);
+            }
+
+            return updatedContact;
+        }
+
+        public async Task<(bool newAccount, Contact contact)> DomainVerifyAndCreateAccount(Contact contact)
+        {
+            bool newAccount = false;
+            Domain domain = contact.Domain!;
+
+            if (domain.Free == null && domain.Disposable == null)
+            {
+                await domainService.Verify(domain);
+                await emailVerifyService.VerifyEmail(contact.Email, domain); 
+            }
+
+            var extAccountInfo = await accountExternalService.GetAccountDetails(domain.Name) !;
+
+            var existingDbRecords = (from accounts in apiDbContext.Accounts where accounts.Name == extAccountInfo.Name select accounts).FirstOrDefault();
+
+            if (existingDbRecords == null)
+            {
+                contact.Account = new Account()
+                {
+                    Name = extAccountInfo.Name!,
+                    City = extAccountInfo.City,
+                    CountryCode = extAccountInfo.CountryCode,
+                    Revenue = extAccountInfo.Revenue,
+                    EmployeesRange = extAccountInfo.EmployeesRange,
+                    SocialMedia = extAccountInfo.SocialMedia,
+                    StateCode = extAccountInfo.StateCode,
+                    Tags = extAccountInfo.Tags,
+                    Data = extAccountInfo.Data,
+                };
+
+                contact.Domain!.Account = contact.Account;
+                contact.Domain.AccountSynced = extAccountInfo.AccountSynced;
+
+                newAccount = true;
+            }
+            else
+            {
+                contact.Account = existingDbRecords;
+                contact.Domain!.Account = contact.Account;
+            }
+
+            return (newAccount, contact);
         }
     }
 }

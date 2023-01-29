@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
 
@@ -20,18 +19,11 @@ public class Account : BaseEntity
 
     public string? StateCode { get; set; }
 
-    public string? Country { get; set; } 
+    public string? CountryCode { get; set; } 
 
-    public string? EmployeesRate { get; set; } 
+    public string? EmployeesRange { get; set; } 
 
     public double? Revenue { get; set; }
-
-    public int? DomainId { get; set; }
-
-    [JsonIgnore]
-    [DeleteBehavior(DeleteBehavior.Restrict)]
-    [ForeignKey("DomainId")]
-    public virtual Domain? Domain { get; set; }
 
     [Column(TypeName = "jsonb")]
     public string[]? Tags { get; set; }

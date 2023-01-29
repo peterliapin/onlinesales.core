@@ -108,8 +108,10 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     protected override Task SaveBatchChangesAsync(List<Contact> importingRecords)
     {
         var newItems = contactService.EnrichWithDomainId(importingRecords);
+
+        var newAitemsWithAccounts = contactService.EnrichWithAccountId(newItems);
         
-        return base.SaveBatchChangesAsync(newItems);
+        return base.SaveBatchChangesAsync(newAitemsWithAccounts);
     }
 
     private static string EmailToGravatarUrl(string email)

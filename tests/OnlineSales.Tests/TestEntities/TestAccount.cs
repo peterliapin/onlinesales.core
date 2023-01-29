@@ -8,12 +8,11 @@ namespace OnlineSales.Tests.TestEntities
 {
     public class TestAccount : AccountCreateDto
     {
-        public TestAccount(string uid = "", int domainId = 0)
+        public TestAccount(string uid = "")
         {
             Name = $"Wave Access {uid}";
-            DomainId = domainId;
-            EmployeesRate = "55";
-            Country = "LK";
+            EmployeesRange = "55";
+            CountryCode = "LK";
             SocialMedia = new Dictionary<string, string>()
             {
                 { "Facebook", "https://fb.com/waveaccess" },

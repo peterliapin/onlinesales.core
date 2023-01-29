@@ -48,4 +48,11 @@ public class Contact : BaseEntity
     [JsonIgnore]
     [ForeignKey("DomainId")]
     public virtual Domain? Domain { get; set; }
+
+    public int? AccountId { get; set; }
+
+    [DeleteBehavior(DeleteBehavior.Restrict)]
+    [JsonIgnore]
+    [ForeignKey("AccountId")]
+    public virtual Account? Account { get; set; }
 }
