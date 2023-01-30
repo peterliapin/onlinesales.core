@@ -18,13 +18,11 @@ namespace OnlineSales.Infrastructure
 
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
-        private readonly LockManager lockManager;
 
-        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext, LockManager lockManager)
+        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.tasks = tasks;
-            this.lockManager = lockManager;
 
             if (isPrimaryNode == null)
             {
@@ -47,7 +45,7 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var task in tasks.Where(t => t.IsRunning))
                 {
-                    var taskLock = lockManager.GetNoWaitLock(task.Name);
+                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !);
 
                     if (taskLock is null)
                     {
@@ -81,7 +79,7 @@ namespace OnlineSales.Infrastructure
                 throw new NonPrimaryNodeException();
             }
 
-            var taskLock = lockManager.GetNoWaitLock(task.Name);
+            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !);
 
             if (taskLock is null)
             {
@@ -112,7 +110,7 @@ namespace OnlineSales.Infrastructure
 
         private bool CheckPrimaryNode()
         {
-            return lockManager.GetNoWaitLock(TaskRunnerNodeLockKey) != null;
+            return LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString() !) != null;
         }
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
