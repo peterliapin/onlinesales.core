@@ -14,13 +14,13 @@ namespace OnlineSales.Tasks;
 
 public class SyncIpDetailsTask : ChangeLogTask
 {
-    private readonly TaskConfig? taskConfig = new TaskConfig();
+    private readonly ChangeLogTaskConfig? taskConfig = new ChangeLogTaskConfig();
     private readonly IpDetailsService ipDetailsService;
 
-    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, IpDetailsService ipDetailsService)
-        : base(dbContext, pluginDbContexts)
+    public SyncIpDetailsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, IpDetailsService ipDetailsService, TaskStatusService taskStatusService)
+        : base(dbContext, pluginDbContexts, taskStatusService)
     {
-        var config = configuration.GetSection("Tasks:SyncIpDetailsTask") !.Get<TaskConfig>();
+        var config = configuration.GetSection("Tasks:SyncIpDetailsTask") !.Get<ChangeLogTaskConfig>();
         if (config is not null)
         {
             taskConfig = config;
@@ -28,6 +28,8 @@ public class SyncIpDetailsTask : ChangeLogTask
 
         this.ipDetailsService = ipDetailsService;
     }
+
+    public override int ChangeLogBatchSize => taskConfig!.BatchSize;
 
     public override string CronSchedule => taskConfig!.CronSchedule;
 
@@ -78,7 +80,7 @@ public class SyncIpDetailsTask : ChangeLogTask
 
     protected override bool IsTypeSupported(Type type)
     {
-        return typeof(IHasCreatedByIpAndUserAgent).IsAssignableFrom(type) || typeof(IHasUpdatedByIpAndUserAgent).IsAssignableFrom(type);
+        return typeof(IHasCreatedBy).IsAssignableFrom(type) || typeof(IHasUpdatedBy).IsAssignableFrom(type);
     }
 
     private List<string> GetDistinctIps(List<ChangeLog> changeLogs)

@@ -45,6 +45,13 @@ public class ImagesConfig
     public string? CacheTime { get; set; }
 }
 
+public class EmailVerificationApiConfig
+{
+    public string Url { get; set; } = string.Empty;
+
+    public string ApiKey { get; set; } = string.Empty;
+}
+
 public class ApiSettingsConfig
 {
     public int MaxListSize { get; set; }
@@ -66,6 +73,11 @@ public class TaskConfig
     public int RetryCount { get; set; }
 
     public int RetryInterval { get; set; }
+}
+
+public class ChangeLogTaskConfig : TaskConfig
+{
+    public int BatchSize { get; set; }
 }
 
 public class CacheProfileSettings

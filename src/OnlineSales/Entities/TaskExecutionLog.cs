@@ -23,7 +23,7 @@ public class TaskExecutionLog : BaseEntityWithId
 
     public TaskExecutionStatus Status { get; set; }
 
-    public int RetryCount { get; set; }
+    public int? RetryCount { get; set; }
 
     public string? Comment { get; set; }
 }

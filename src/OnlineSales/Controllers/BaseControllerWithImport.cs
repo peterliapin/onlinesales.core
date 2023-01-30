@@ -94,7 +94,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         return mapper.Map<List<T>>(records);
     }
 
-    private async Task SaveBatchChangesAsync(List<T> importingRecords)
+    protected virtual async Task SaveBatchChangesAsync(List<T> importingRecords)
     {
         int position = 0;
 

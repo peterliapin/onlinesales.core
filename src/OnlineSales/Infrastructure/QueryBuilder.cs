@@ -14,33 +14,18 @@ namespace OnlineSales.Infrastructure
     public static class QueryBuilder<T>
         where T : BaseEntityWithId
     {
-        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString, out bool selectStatementAvailable, out bool validCmds)
-        {
-            var cmds = Parse(queryString);
-            validCmds = cmds.Any();
-            query = AppendWhereExpression(query, cmds);
-            query = AppendSkipExpression(query, cmds);
-            query = AppendOrderExpression(query, cmds);
-            query = AppendLimitExpression(query, cmds);
-
-            if (queryString.Count() != cmds.Count())
-            {
-                validCmds = false;
-            }
-
-            selectStatementAvailable = IsSelectCommandExists(cmds);
-            return query;
-        }
-
-        public static IQueryable<T> ReadIntoQuery(IQueryable<T> query, string[] queryString)
+        public static async Task<(IQueryable<T>, bool, bool, int)> ReadIntoQuery(IQueryable<T> query, string[] queryString, int maxLimitSize)
         {
             var cmds = Parse(queryString);
             query = AppendWhereExpression(query, cmds);
-            query = AppendSkipExpression(query, cmds);
-            query = AppendLimitExpression(query, cmds);
             query = AppendOrderExpression(query, cmds);
 
-            return query;
+            var recordsCount = await query.CountAsync();
+
+            query = AppendSkipExpression(query, cmds);
+            query = AppendLimitExpression(query, cmds, maxLimitSize);
+
+            return (query, IsSelectCommandExists(cmds), cmds.Any(), recordsCount);
         }
 
         public static bool IsSelectCommandExists(QueryCommand[] commands)
@@ -124,18 +109,21 @@ namespace OnlineSales.Infrastructure
         private static QueryCommand[] Parse(string[] query)
         {
             var processedCommands = new List<QueryCommand>();
+            var errorList = new List<QueryException>();
             foreach (var cmd in query)
             {
                 var match = Regex.Match(cmd, "filter(\\[(?'property'.*?)\\])+?=(?'value'.*)");
                 if (!match.Success)
                 {
+                    errorList.Add(new QueryException(cmd, "Failed to parse command"));
                     continue;
                 }
 
                 var type = match.Groups["property"].Captures[0].Value.ToLowerInvariant();
                 if (type == null || string.IsNullOrWhiteSpace(type) || !QueryCommand.FilterMappings.ContainsKey(type))
                 {
-                    continue; // broken command
+                    errorList.Add(new QueryException(cmd, $"Failed to parse command. Operator '{type}' not found. Available operators: {QueryCommand.AvailableCommandString}"));
+                    continue;
                 }
 
                 var qcmd = new QueryCommand()
@@ -148,6 +136,11 @@ namespace OnlineSales.Infrastructure
                 processedCommands.Add(qcmd);
             }
 
+            if (errorList.Any())
+            {
+                throw new QueryException(errorList);
+            }
+
             return processedCommands.ToArray();
         }
 
@@ -156,12 +149,15 @@ namespace OnlineSales.Infrastructure
             BinaryExpression? whereExpression = null;
             BinaryExpression? orExpression = null;
             var expressionParameter = Expression.Parameter(typeof(T));
+            var errorList = new List<QueryException>();
 
             // Executing received commands
             foreach (var cmd in commands.Where(c => c.Type == FilterType.Where).ToArray())
             {
-                if (TryProcessWhereOperand(expressionParameter, cmd, out var outExpr, out var oExpr))
+                try
                 {
+                    ProcessWhereOperand(expressionParameter, cmd, out var outExpr, out var oExpr);
+
                     if (oExpr)
                     {
                         if (orExpression == null)
@@ -182,6 +178,16 @@ namespace OnlineSales.Infrastructure
 
                     whereExpression = Expression.And(whereExpression, outExpr!);
                 }
+                catch (QueryException ex)
+                {
+                    errorList.Add(ex);
+                    continue;
+                }
+            }
+
+            if (errorList.Any())
+            {
+                throw new QueryException(errorList);
             }
 
             if (orExpression != null)
@@ -199,7 +205,7 @@ namespace OnlineSales.Infrastructure
             return query;
         }
 
-        private static bool TryProcessWhereOperand(ParameterExpression expressionParameter, QueryCommand cmd, out BinaryExpression? expression, out bool orExpression)
+        private static void ProcessWhereOperand(ParameterExpression expressionParameter, QueryCommand cmd, out BinaryExpression? expression, out bool orExpression)
         {
             BinaryExpression? outputExpression = null;
             orExpression = false;
@@ -212,7 +218,7 @@ namespace OnlineSales.Infrastructure
             if (fProp == null || string.IsNullOrWhiteSpace(fProp))
             {
                 expression = null;
-                return false; // Broken command
+                throw new QueryException(cmd.Source, "Property field not found");
             }
 
             if (fProp == "or")
@@ -229,7 +235,7 @@ namespace OnlineSales.Infrastructure
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
             {
                 expression = null;
-                return false; // Broken command
+                throw new QueryException(cmd.Source, "Property field not found");
             }
 
             var propertyType = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
@@ -238,69 +244,101 @@ namespace OnlineSales.Infrastructure
             if (propertyType == null)
             {
                 expression = null;
-                return false; // Broken command
+                throw new QueryException(cmd.Source, $"No such property '{propertyName}'");
             }
 
             dynamic parsedValue;
             // Value cast
-            if (DateTime.TryParseExact(cmd.Value, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && propertyType.PropertyType == typeof(DateTime))
+            if (DateTime.TryParseExact(cmd.Value, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && (propertyType.PropertyType == typeof(DateTime) || propertyType.PropertyType == typeof(DateTime?)))
             {
                 parsedValue = date;
             }
-            else if (decimal.TryParse(cmd.Value, out var decimalValue) && propertyType.PropertyType == typeof(decimal))
+            else if (decimal.TryParse(cmd.Value, out var decimalValue) && (propertyType.PropertyType == typeof(decimal) || propertyType.PropertyType == typeof(decimal?)))
             {
                 parsedValue = decimalValue;
             }
-            else if (double.TryParse(cmd.Value, out var doubleValue) && propertyType.PropertyType == typeof(double))
+            else if (double.TryParse(cmd.Value, out var doubleValue) && (propertyType.PropertyType == typeof(double) || propertyType.PropertyType == typeof(double?)))
             {
                 parsedValue = doubleValue;
             }
-            else if (int.TryParse(cmd.Value, out int intValue) && propertyType.PropertyType == typeof(int))
+            else if (int.TryParse(cmd.Value, out int intValue) && (propertyType.PropertyType == typeof(int) || propertyType.PropertyType == typeof(int?)))
             {
                 parsedValue = intValue;
             }
-            else
+            else if (bool.TryParse(cmd.Value, out bool boolValue) && (propertyType.PropertyType == typeof(bool) || propertyType.PropertyType == typeof(bool?)))
+            {
+                parsedValue = boolValue;
+            }
+            else if (propertyType.PropertyType.IsEnum && !int.TryParse(cmd.Value, out _) && Enum.TryParse(propertyType.PropertyType, cmd.Value, true, out var enumValue))
+            {
+                parsedValue = enumValue;
+            }
+            else if (propertyType.PropertyType == typeof(string))
             {
                 parsedValue = cmd.Value;
             }
+            else
+            {
+                throw new QueryException(cmd.Source, "Property type and provided type value do not match");
+            }
 
-            var valueParameterExpression = Expression.Constant(parsedValue);
+            var valueParameterExpression = Expression.Constant(parsedValue, propertyType.PropertyType);
             var parameterPropertyExpression = Expression.Property(expressionParameter, propertyName);
 
-            var operand = QueryCommand.OperandMappings.FirstOrDefault(m => m.Key == cmd.Props.ElementAtOrDefault(1 + orOperandShift)).Value;
-            switch (operand)
+            var rawOperand = cmd.Props.ElementAtOrDefault(1 + orOperandShift);
+            if (rawOperand == null)
             {
-                case WOperand.Equal:
-                    outputExpression = Expression.Equal(parameterPropertyExpression, valueParameterExpression);
-                    break;
-                case WOperand.GreaterThan:
-                    outputExpression = Expression.GreaterThan(parameterPropertyExpression, valueParameterExpression);
-                    break;
-                case WOperand.GreaterThanOrEquals:
-                    outputExpression = Expression.GreaterThanOrEqual(parameterPropertyExpression, valueParameterExpression);
-                    break;
-                case WOperand.LessThan:
-                    outputExpression = Expression.LessThan(parameterPropertyExpression, valueParameterExpression);
-                    break;
-                case WOperand.LessThanOrEquals:
-                    outputExpression = Expression.LessThanOrEqual(parameterPropertyExpression, valueParameterExpression);
-                    break;
-                case WOperand.NotEqual:
-                    outputExpression = Expression.NotEqual(parameterPropertyExpression, valueParameterExpression);
-                    break;
-                default:
-                    expression = null;
-                    return false; // Broken command
+                rawOperand = "eq";
+            }
+
+            if (string.IsNullOrEmpty(rawOperand))
+            {
+                throw new QueryException(cmd.Source, "Empty operand");
+            }
+
+            if (!QueryCommand.OperandMappings.ContainsKey(rawOperand))
+            {
+                throw new QueryException(cmd.Source, $"No such operand '{rawOperand}'");
+            }
+
+            var operand = QueryCommand.OperandMappings.FirstOrDefault(m => m.Key == cmd.Props.ElementAtOrDefault(1 + orOperandShift)).Value;
+            try
+            {
+                switch (operand)
+                {
+                    case WOperand.Equal:
+                        outputExpression = Expression.Equal(parameterPropertyExpression, valueParameterExpression);
+                        break;
+                    case WOperand.GreaterThan:
+                        outputExpression = Expression.GreaterThan(parameterPropertyExpression, valueParameterExpression);
+                        break;
+                    case WOperand.GreaterThanOrEquals:
+                        outputExpression = Expression.GreaterThanOrEqual(parameterPropertyExpression, valueParameterExpression);
+                        break;
+                    case WOperand.LessThan:
+                        outputExpression = Expression.LessThan(parameterPropertyExpression, valueParameterExpression);
+                        break;
+                    case WOperand.LessThanOrEquals:
+                        outputExpression = Expression.LessThanOrEqual(parameterPropertyExpression, valueParameterExpression);
+                        break;
+                    case WOperand.NotEqual:
+                        outputExpression = Expression.NotEqual(parameterPropertyExpression, valueParameterExpression);
+                        break;
+                    default:
+                        throw new QueryException(cmd.Source, $"No such operand '{operand}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new QueryException(cmd.Source, ex.Message);
             }
 
             if (outputExpression == null)
             {
-                expression = null;
-                return false; // Broken command
+                throw new QueryException(cmd.Source, "Failed to construct expression");
             }
 
             expression = outputExpression;
-            return true;
         }
 
         private static IOrderedQueryable<T> AppendOrderExpression(IQueryable<T> query, QueryCommand[] commands)
@@ -317,7 +355,7 @@ namespace OnlineSales.Infrastructure
                 {
                     if (c.Props.ElementAtOrDefault(0) == null || string.IsNullOrEmpty(c.Props[0]))
                     {
-                        throw new QueryException($"Failed to parse order command. Check syntax ( {c.Source} )");
+                        throw new QueryException(c.Source, "Failed to parse. Check syntax.");
                     }
                 });
                 orderCommands = orderCommands.OrderBy(c => c.Props[0]).ToArray();
@@ -349,7 +387,7 @@ namespace OnlineSales.Infrastructure
                         };
                         break;
                     default:
-                        throw new QueryException($"Failed to parse order command. Check syntax ( {orderCmd.Source} )");
+                        throw new QueryException(orderCmd.Source, "Failed to parse. Check syntax.");
                 }
 
                 if (typeProperties.Any(p => p.Name.ToLowerInvariant() == propertyName))
@@ -366,7 +404,7 @@ namespace OnlineSales.Infrastructure
                 }
                 else
                 {
-                    throw new QueryException($"Failed to parse order command. No such property '{propertyName}' Check syntax ( {orderCmd.Source} )");
+                    throw new QueryException(orderCmd.Source, $"No such property '{propertyName}'");
                 }
             }
 
@@ -376,23 +414,48 @@ namespace OnlineSales.Infrastructure
         private static IQueryable<T> AppendSkipExpression(IQueryable<T> query, QueryCommand[] commands)
         {
             var skipCommand = commands.FirstOrDefault(c => c.Type == FilterType.Skip);
-            if (skipCommand != null && int.TryParse(skipCommand.Value, out var skipCount))
+            if (skipCommand == null)
             {
-                query = query.Skip(skipCount);
+                return query;
             }
 
-            return query;
+            if (!int.TryParse(skipCommand.Value, out var skipCount))
+            {
+                throw new QueryException(skipCommand.Source, $"Failed to parse number '{skipCommand.Value}'");
+            }
+
+            if (skipCount < 0)
+            {
+                throw new QueryException(skipCommand.Source, $"Invalid skip size");
+            }
+
+            return query.Skip(skipCount);
         }
 
-        private static IQueryable<T> AppendLimitExpression(IQueryable<T> query, QueryCommand[] commands)
+        private static IQueryable<T> AppendLimitExpression(IQueryable<T> query, QueryCommand[] commands, int maxLimitSize)
         {
             var limitCommand = commands.FirstOrDefault(c => c.Type == FilterType.Limit);
-            if (limitCommand != null && int.TryParse(limitCommand.Value, out var limitCount))
+            if (limitCommand == null)
             {
-                query = query.Take(limitCount);
+                return query.Take(maxLimitSize);
             }
 
-            return query;
+            if (!int.TryParse(limitCommand.Value, out var limitCount))
+            {
+                throw new QueryException(limitCommand.Source, $"Failed to parse number '{limitCommand.Value}'");
+            }
+
+            if (limitCount <= 0)
+            {
+                throw new QueryException(limitCommand.Source, $"Invalid limit size. (Maximum {maxLimitSize}");
+            }
+
+            if (limitCount > maxLimitSize)
+            {
+                throw new QueryException(limitCommand.Source, $"Max limit size exceeded. (Maximum {maxLimitSize}");
+            }
+
+            return query.Take(limitCount);
         }
     }
 }

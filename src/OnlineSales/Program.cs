@@ -56,10 +56,16 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
+        builder.Services.AddSingleton<IDomainService, DomainService>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
+        builder.Services.AddTransient<IContactService, ContactService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
+        builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
+        builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
+        builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
+        builder.Services.AddTransient<LockManager, LockManager>();
 
         ConfigureCacheProfiles(builder);
 
@@ -74,6 +80,7 @@ public class Program
         ConfigureTasks(builder);
         ConfigureApiSettings(builder);
         ConfigureImportSizeLimit(builder);
+        ConfigureEmailVerification(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -209,7 +216,7 @@ public class Program
         {
             AutoRegisterTemplate = true,
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
+            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",            
         };
     }
 
@@ -219,7 +226,13 @@ public class Program
 
         if (migrateOnStart)
         {
-            using (LockManager.GetWaitLock("MigrationWaitLock"))
+            LockManager lockManager;
+            using (var scope = app.Services.CreateScope())
+            {
+                lockManager = scope.ServiceProvider.GetRequiredService<LockManager>();
+            }
+
+            using (lockManager!.GetWaitLock("MigrationWaitLock"))
             {
                 using (var scope = app.Services.CreateScope())
                 {
@@ -307,6 +320,18 @@ public class Program
         builder.Services.Configure<ImagesConfig>(imageUploadConfig);
     }
 
+    private static void ConfigureEmailVerification(WebApplicationBuilder builder)
+    {
+        var emailVerificationConfig = builder.Configuration.GetSection("EmailVerificationApi");
+
+        if (emailVerificationConfig == null)
+        {
+            throw new MissingConfigurationException("Email Verification Api configuration is mandatory.");
+        }
+
+        builder.Services.Configure<EmailVerificationApiConfig>(emailVerificationConfig);
+    }
+
     private static void ConfigureApiSettings(WebApplicationBuilder builder)
     {
         var apiSettingsConfig = builder.Configuration.GetSection("ApiSettings");
@@ -343,17 +368,26 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        builder.Services.AddQuartz(q =>
+        var taskRunnerEnabled = builder.Configuration.GetValue<bool>("TaskRunner:Enable") !;
+
+        if (taskRunnerEnabled)
         {
-            q.UseMicrosoftDependencyInjectionJobFactory();
+            var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
 
-            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+            builder.Services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
 
-            q.AddTrigger(opts =>
-                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !));
-        });
+                q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 
-        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+                q.AddTrigger(opts =>
+                    opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(taskRunnerSchedule));
+            });
+
+            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+        }
+
+        builder.Services.AddTransient<TaskRunner>();
     }
 
     private static void ConfigureCacheProfiles(WebApplicationBuilder builder)
@@ -392,6 +426,7 @@ public class Program
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, SyncEsTask>();
+        builder.Services.AddScoped<ITask, DomainVerificationTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

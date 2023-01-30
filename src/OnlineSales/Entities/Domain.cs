@@ -5,10 +5,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("domain")]
+[SupportsChangeLog]
+[SupportsElasticSearch]
 [Index(nameof(Name), IsUnique = true)]
 public class Domain : BaseEntityWithIdAndDates
 {
@@ -30,9 +33,20 @@ public class Domain : BaseEntityWithIdAndDates
     public bool? CatchAll { get; set; }
 
     [Column(TypeName = "jsonb")]
-    public string? DnsRecords { get; set; }
+    public List<DnsRecord>? DnsRecords { get; set; }
 
     public bool? DnsCheck { get; set; }
 }
 
+public class DnsRecord
+{
+    public string DomainName { get; set; } = string.Empty;
 
+    public string RecordClass { get; set; } = string.Empty;
+
+    public string RecordType { get; set; } = string.Empty;
+
+    public int TimeToLive { get; set; }
+
+    public string Value { get; set; } = string.Empty;
+}

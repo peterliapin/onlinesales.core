@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -65,6 +64,7 @@ public class TestApplication : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             services.AddScoped<IEmailService, TestEmailService>();
+            services.AddScoped<IEmailValidationExternalService, TestEmailValidationExternalService>();
 
             services.AddAuthentication(defaultScheme: "TestScheme")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(

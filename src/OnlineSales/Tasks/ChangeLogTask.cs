@@ -9,10 +9,11 @@ using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
 
-public abstract class ChangeLogTask : ITask
+public abstract class ChangeLogTask : BaseTask
 {    
     protected readonly ApiDbContext dbContext;
 
@@ -20,7 +21,8 @@ public abstract class ChangeLogTask : ITask
 
     private readonly HashSet<Type> loggedTypes;
 
-    protected ChangeLogTask(ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts)
+    protected ChangeLogTask(ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
+        : base(taskStatusService)
     {
         this.dbContext = dbContext;
         this.pluginDbContexts = pluginDbContexts;
@@ -31,25 +33,11 @@ public abstract class ChangeLogTask : ITask
             var lt = GetTypes(pt);
             this.loggedTypes.UnionWith(lt);
         }
-    }
+    }    
 
-    public virtual int ChangeLogBatchSize { get; set; } = 50;
+    public abstract int ChangeLogBatchSize { get; }
 
-    public string Name
-    {
-        get
-        {
-            return this.GetType().Name;
-        }
-    }
-
-    public abstract string CronSchedule { get; }
-
-    public abstract int RetryCount { get; }
-
-    public abstract int RetryInterval { get; }
-
-    public Task<bool> Execute(TaskExecutionLog currentJob)
+    public override Task<bool> Execute(TaskExecutionLog currentJob)
     {
         foreach (var typeName in loggedTypes.Select(type => type.Name))
         {

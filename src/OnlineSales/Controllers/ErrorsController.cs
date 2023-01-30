@@ -29,6 +29,16 @@ public class ErrorsController : Controller
 
                 break;
 
+            case TaskNotFoundException taskNotFoundException:
+
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status404NotFound);
+
+                problemDetails.Extensions["taskName"] = taskNotFoundException.TaskName;
+
+                break;
+
             case EntityNotFoundException entityNotFoundError:
 
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(
@@ -38,6 +48,15 @@ public class ErrorsController : Controller
                 problemDetails.Extensions["entityType"] = entityNotFoundError.EntityType;
                 problemDetails.Extensions["entityUid"] = entityNotFoundError.EntityUid;
 
+                break;
+            case QueryException queryException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                HttpContext,
+                StatusCodes.Status400BadRequest);
+                queryException.FailedCommands.ForEach(cmd =>
+                {
+                    problemDetails.Extensions[cmd.Key] = cmd.Value;
+                });
                 break;
 
             case DbUpdateException dbUpdateException:

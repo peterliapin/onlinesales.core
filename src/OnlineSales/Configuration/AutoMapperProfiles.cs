@@ -5,6 +5,7 @@
 using AutoMapper;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Configuration;
 
@@ -15,6 +16,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<bool?, bool>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<int?, int>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<decimal?, decimal>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<List<DnsRecord>?, List<DnsRecord>>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()
@@ -73,6 +75,8 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<ContactImportDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<ContactCreateWithDomainDto, Contact>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();
         CreateMap<EmailGroupUpdateDto, EmailGroup>()
@@ -102,6 +106,10 @@ public class AutoMapperProfiles : Profile
         CreateMap<DomainUpdateDto, Domain>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Domain, DomainDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DomainImportDto, Domain>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Domain, EmailVerifyDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 

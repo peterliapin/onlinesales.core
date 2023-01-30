@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Configuration;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
@@ -89,14 +91,15 @@ public class ApiDbContext : DbContext
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        Dictionary<EntityEntry, ChangeLog> changes = new ();
+        int result = 0;
+        var changes = new Dictionary<EntityEntry, ChangeLog>();
 
         var entries = ChangeTracker
-       .Entries()
-       .Where(e => (e.Entity is BaseEntityWithId) && (
-               e.State == EntityState.Added
-               || e.State == EntityState.Modified
-               || e.State == EntityState.Deleted));
+           .Entries()
+           .Where(e => e.Entity is BaseEntityWithId && (
+                   e.State == EntityState.Added
+                   || e.State == EntityState.Modified
+                   || e.State == EntityState.Deleted));
 
         if (entries.Any())
         {
@@ -111,7 +114,7 @@ public class ApiDbContext : DbContext
                         createdAtEntity.CreatedAt = createdAtEntity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(createdAtEntity.CreatedAt);
                     }
 
-                    var createdByEntity = entityEntry.Entity as IHasCreatedByIpAndUserAgent;
+                    var createdByEntity = entityEntry.Entity as IHasCreatedBy;
 
                     if (createdByEntity is not null)
                     {
@@ -129,7 +132,7 @@ public class ApiDbContext : DbContext
                         updatedAtEntity.UpdatedAt = IsImportRequest && updatedAtEntity.UpdatedAt is not null ? GetDateWithKind(updatedAtEntity.UpdatedAt.Value) : DateTime.UtcNow;
                     }
 
-                    var updatedByEntity = entityEntry.Entity as IHasUpdatedByIpAndUserAgent;
+                    var updatedByEntity = entityEntry.Entity as IHasUpdatedBy;
 
                     if (updatedByEntity is not null)
                     {
@@ -138,16 +141,25 @@ public class ApiDbContext : DbContext
                     }
                 }
 
-                // save entity state as it is before SaveChanges call
-                changes[entityEntry] = new ChangeLog
-                {
-                    ObjectType = entityEntry.Entity.GetType().Name,
-                    EntityState = entityEntry.State,
-                    CreatedAt = DateTime.UtcNow,
-                };
-            }
+                var entityType = entityEntry.Entity.GetType();
 
-            await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+                if (entityType!.GetCustomAttributes<SupportsChangeLogAttribute>().Any())
+                {
+                    // save entity state as it is before SaveChanges call
+                    changes[entityEntry] = new ChangeLog
+                    {
+                        ObjectType = entityEntry.Entity.GetType().Name,
+                        EntityState = entityEntry.State,
+                        CreatedAt = DateTime.UtcNow,
+                    };
+                }
+            }
+        }
+
+        if (changes.Count > 0)
+        {
+            // save original records and obtain ids (to preserve ids in change_log)
+            result = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
 
             foreach (var change in changes)
             {
@@ -157,9 +169,9 @@ public class ApiDbContext : DbContext
             }
 
             ChangeLogs!.AddRange(changes.Values);
-        } 
+        }
 
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        return result + await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

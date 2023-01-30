@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
 
@@ -39,4 +40,11 @@ public class Contact : BaseEntity
     public int? Timezone { get; set; }
 
     public string? Language { get; set; }
+
+    [Required]
+    public int DomainId { get; set; }
+
+    [JsonIgnore]
+    [ForeignKey("DomainId")]
+    public virtual Domain? Domain { get; set; }
 }

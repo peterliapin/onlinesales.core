@@ -3,15 +3,18 @@
 // </copyright>
 
 using System.Text.Json;
+using System.Web;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
 public abstract class SimpleTableTests<T, TC, TU> : BaseTest
-    where T : BaseEntity
+    where T : BaseEntityWithId
     where TC : class
     where TU : new()
 {
@@ -164,7 +167,129 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     {
         GenerateBulkRecords(dataCount);
 
-        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.UnprocessableEntity);
+        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.BadRequest);
+    }
+
+    [Theory]
+    [InlineData("filtercadabra", HttpStatusCode.BadRequest)]
+    [InlineData("filter", HttpStatusCode.BadRequest)]
+    [InlineData("filter[]", HttpStatusCode.BadRequest)]
+    [InlineData("filter[]=", HttpStatusCode.BadRequest)]
+    [InlineData("filter[]=0", HttpStatusCode.BadRequest)]
+    [InlineData("filter[][]=3", HttpStatusCode.BadRequest)]
+    [InlineData("filter[][][]=4", HttpStatusCode.BadRequest)]
+    [InlineData("filter[notexists]=5", HttpStatusCode.BadRequest)]
+    [InlineData("filter[where][notexists]=6", HttpStatusCode.BadRequest)]
+    [InlineData("filter[where][][]=7", HttpStatusCode.BadRequest)]
+    [InlineData("filter[where][id][]=8", HttpStatusCode.BadRequest)]
+    [InlineData("filter[where][id][notexists]=9", HttpStatusCode.BadRequest)]
+    [InlineData("filter[^7@5\\nwhere][id^7@5\\n][|^7@5\\n]=^7@5\\n", HttpStatusCode.BadRequest)]
+    [InlineData("filter[where][id]=^7@5\\n", HttpStatusCode.BadRequest)]
+    [InlineData("filter[][id]=^7@5\\n", HttpStatusCode.BadRequest)]
+    [InlineData("filter[where][id][eq]=^7@5\\n", HttpStatusCode.BadRequest)]
+    [InlineData("filter[limit]=abc", HttpStatusCode.BadRequest)]
+    [InlineData("filter[skip]=abc", HttpStatusCode.BadRequest)]
+    [InlineData("filter[order]=5555incorrectfield777", HttpStatusCode.BadRequest)]
+    public async Task InvalidQueryParameter(string filter, HttpStatusCode code)
+    {
+        await GetTest($"{this.itemsUrl}?{filter}", code);
+    }
+
+    [Theory]
+    [InlineData("filter[where][id]=9", HttpStatusCode.OK)]
+    [InlineData("filter[where][id][eq]=9", HttpStatusCode.OK)]
+    [InlineData("filter[order]=id", HttpStatusCode.OK)]
+    [InlineData("filter[skip]=5", HttpStatusCode.OK)]
+    [InlineData("filter[limit]=5", HttpStatusCode.OK)]
+    public async Task ValidQueryParameter(string filter, HttpStatusCode code)
+    {
+        await GetTest($"{this.itemsUrl}?{filter}", code);
+    }
+
+    [Fact]
+    public async Task ValidWherePropertyType()
+    {
+        var query = string.Empty;
+        var typeProperties = typeof(T).GetProperties();
+        foreach (var property in typeProperties)
+        {
+            if (!property.PropertyType.IsValueType || (Nullable.GetUnderlyingType(property.PropertyType) != null))
+            {
+                continue;
+            }
+
+            object? defValue;
+            if (property.PropertyType == typeof(string))
+            {
+                defValue = "abc";
+            }
+            else if (property.PropertyType == typeof(DateTime))
+            {
+                defValue = DateTime.MinValue.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+            }
+            else
+            {
+                defValue = Activator.CreateInstance(property.PropertyType);
+            }
+
+            query += HttpUtility.UrlEncode($"filter[where][{property.Name}][eq]={defValue}") + "&";
+        }
+
+        query = query.Substring(0, query.Length - 1); // Remove latest '&'
+        await GetTest($"{this.itemsUrl}?{query}", HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task InvalidWherePropertyType()
+    {
+        var baseTypesList = new Type[]
+        {
+            typeof(string),
+            typeof(DateTime),
+            typeof(int),
+        };
+        var query = string.Empty;
+        var typeProperties = typeof(T).GetProperties();
+        foreach (var property in typeProperties)
+        {
+            if (!property.PropertyType.IsValueType
+                || (Nullable.GetUnderlyingType(property.PropertyType) != null)
+                || property.PropertyType == typeof(decimal) // Default value for decimal, double, float, long serializes as 0 so skip them
+                || property.PropertyType == typeof(double)
+                || property.PropertyType == typeof(float)
+                || property.PropertyType == typeof(long))
+            {
+                continue;
+            }
+
+            query += baseTypesList.Where(t => t != property.PropertyType).Select(type =>
+            {
+                object? defValue;
+                if (type == typeof(string))
+                {
+                    defValue = "abc";
+                }
+                else if (type == typeof(DateTime))
+                {
+                    defValue = DateTime.MinValue.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+                }
+                else
+                {
+                    defValue = Activator.CreateInstance(type);
+                }
+
+                return HttpUtility.UrlEncode($"filter[where][{property.Name}][eq]={defValue}") + "&";
+            }).Aggregate(string.Empty, (acc, value) => acc + value);
+        }
+
+        query = query.Substring(0, query.Length - 1); // Remove latest '&'
+        var queryCmds = query.Split('&').Select(s => HttpUtility.UrlDecode(s)).ToList();
+        var queryCmdsCount = queryCmds.Count;
+
+        var result = await GetTestRawContentSerialize<ProblemDetails>($"{this.itemsUrl}?{query}", HttpStatusCode.BadRequest);
+        result.Should().NotBeNull();
+        var resultDiff = queryCmds.Except(result!.Extensions.Keys).Aggregate(string.Empty, (acc, value) => $"{acc} \n {value}");
+        result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount, resultDiff);
     }
 
     protected virtual async Task<(TC, string)> CreateItem()
@@ -215,5 +340,15 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         await PatchTest(testCreateItem.Item2, testUpdateItem!);
 
         return (testCreateItem, testUpdateItem);
+    }
+
+    private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    where TRet : class
+    {
+        var response = await GetTest(url, expectedCode, authToken);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        return JsonHelper.Deserialize<TRet>(content);
     }
 }

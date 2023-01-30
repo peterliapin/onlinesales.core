@@ -12,58 +12,105 @@ namespace OnlineSales.Infrastructure
 {
     public class TaskRunner : IJob
     {
-        private readonly string lockKey = "TaskRunnerPrimaryNodeLock";
-        private readonly string secondaryLockKey = "TaskRunnerExecutionSecondaryLock";
+        private const string TaskRunnerNodeLockKey = "TaskRunnerPrimaryNodeLock";
+
+        private static bool? isPrimaryNode;
+
         private readonly IEnumerable<ITask> tasks;
         private readonly ApiDbContext dbContext;
+        private readonly LockManager lockManager;
 
-        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext)
+        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext, LockManager lockManager)
         {
             this.dbContext = dbContext;
             this.tasks = tasks;
+            this.lockManager = lockManager;
+
+            if (isPrimaryNode == null)
+            {
+                #pragma warning disable S3010
+                isPrimaryNode = CheckPrimaryNode(); 
+            }
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             try
             {
-                var nodeLockInstance = LockManager.GetInstanceWithNoWaitLock(lockKey);
-
-                if (nodeLockInstance is null)
+                if (isPrimaryNode! == false)
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
-                }
+                }                    
 
-                var taskLock = LockManager.GetNoWaitLock(secondaryLockKey);
-
-                if (taskLock is null)
+                foreach (var task in tasks.Where(t => t.IsRunning))
                 {
-                    Log.Error($"This task is already executed.");
-                    return;
-                }
+                    var taskLock = lockManager.GetNoWaitLock(task.Name);
 
-                using (taskLock)
-                {
-                    foreach (var task in tasks)
+                    if (taskLock is null)
+                    {
+                        Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
+                        continue;
+                    }
+
+                    using (taskLock)
                     {
                         var currentJob = await AddOrGetPendingTaskExecutionLog(task);
 
-                        if (!IsRightTimeToExecute(currentJob, task))
+                        if (IsRightTimeToExecute(currentJob, task))
                         {
-                            return;
+                            var isCompleted = await task.Execute(currentJob);
+
+                            await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
                         }
-
-                        var isCompleted = await task.Execute(currentJob);
-
-                        await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
-                    } 
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "Error executing task runner");
             }
+        }             
+
+        public async Task<bool> ExecuteTask(ITask task)
+        {
+            if (isPrimaryNode! == false)
+            {
+                throw new NonPrimaryNodeException();
+            }
+
+            var taskLock = lockManager.GetNoWaitLock(task.Name);
+
+            if (taskLock is null)
+            {
+                throw new TaskNotCompletedException();
+            }
+
+            using (taskLock)
+            {
+                var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+
+                var isCompleted = await task.Execute(currentJob);
+
+                await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+
+                return isCompleted;
+            }
+        }
+
+        public void StartOrStopTask(ITask task, bool start)
+        {
+            if (isPrimaryNode! == false)
+            {
+                throw new NonPrimaryNodeException();
+            }
+
+            task.SetRunning(start);
+        }
+
+        private bool CheckPrimaryNode()
+        {
+            return lockManager.GetNoWaitLock(TaskRunnerNodeLockKey) != null;
         }
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
@@ -81,7 +128,7 @@ namespace OnlineSales.Infrastructure
                 TaskName = task.Name,
                 ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
                 Status = TaskExecutionStatus.Pending,
-                RetryCount = -1,
+                RetryCount = null,
             };
 
             await dbContext.TaskExecutionLogs!.AddAsync(pendingTask);
@@ -106,12 +153,12 @@ namespace OnlineSales.Infrastructure
 
         private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)
         {
-            if (job.RetryCount == task.RetryCount)
+            if (job.RetryCount >= task.RetryCount)
             {
                 return false;
             }
 
-            if (job.RetryCount > -1)
+            if (job.RetryCount > 0)
             {
                 return job.ActualExecutionTime.AddMinutes(task.RetryInterval) <= DateTime.UtcNow;
             }

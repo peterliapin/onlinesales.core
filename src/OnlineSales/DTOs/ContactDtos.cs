@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -39,6 +40,11 @@ public class ContactCreateDto : BaseContactDto
     public string Email { get; set; } = string.Empty;
 }
 
+public class ContactCreateWithDomainDto : ContactCreateDto
+{
+    public Domain? Domain { get; set; }
+}
+
 public class ContactUpdateDto : BaseContactDto
 {
     [EmailAddress]
@@ -48,6 +54,8 @@ public class ContactUpdateDto : BaseContactDto
 public class ContactDetailsDto : ContactCreateDto
 {
     public int Id { get; set; }
+
+    public string AvatarUrl { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
 
