@@ -11,20 +11,13 @@ namespace OnlineSales.Infrastructure;
 
 public class LockManager
 {
-    private readonly ApiDbContext dbContext;
-
-    public LockManager(ApiDbContext dbContext)
-    {
-        this.dbContext = dbContext;
-    }
-
-    public PostgresDistributedLockHandle? GetNoWaitLock(string lockKey)
+    public static PostgresDistributedLockHandle? GetNoWaitLock(string lockKey, string connectionString)
     {
         Log.Information("GetNoWaitLock: " + lockKey);
 
         try
         {
-            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), connectionString);
 
             // pg_try_advisory_lock - Get the lock or skip if not available.
             return secondaryLock.TryAcquire();
@@ -36,13 +29,13 @@ public class LockManager
         }
     }
 
-    public PostgresDistributedLockHandle? GetWaitLock(string lockKey)
+    public static PostgresDistributedLockHandle? GetWaitLock(string lockKey, string connectionString)
     {
         Log.Information("GetWaitLock: " + lockKey);
 
         try
         {
-            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), connectionString);
 
             // pg_advisory_lock - Get or Wait for lock.
             return secondaryLock.Acquire();

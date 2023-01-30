@@ -65,7 +65,6 @@ public class Program
         builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
         builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
-        builder.Services.AddTransient<LockManager, LockManager>();
 
         ConfigureCacheProfiles(builder);
 
@@ -226,17 +225,11 @@ public class Program
 
         if (migrateOnStart)
         {
-            LockManager lockManager;
             using (var scope = app.Services.CreateScope())
             {
-                lockManager = scope.ServiceProvider.GetRequiredService<LockManager>();
-            }
-
-            using (lockManager!.GetWaitLock("MigrationWaitLock"))
-            {
-                using (var scope = app.Services.CreateScope())
+                var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+                using (LockManager.GetWaitLock("MigrationWaitLock", context.Database.GetConnectionString() !))
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
                     context.Database.Migrate();
 
                     var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
