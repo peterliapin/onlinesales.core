@@ -29,7 +29,7 @@ public class LockManager
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error when acquiring lock.");
+            LogError(ex, lockKey);
             return null;
         }
     }
@@ -45,8 +45,13 @@ public class LockManager
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error when acquiring lock.");
+            LogError(ex, lockKey);
             return null;
         }
+    }
+
+    private static void LogError(Exception ex, string lockKey)
+    {
+        Log.Error(ex, "Error when acquiring lock:" + lockKey);
     }
 }
