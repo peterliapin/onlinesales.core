@@ -6,10 +6,14 @@ using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
+using Quartz.Xml.JobSchedulingData20;
 
 namespace OnlineSales.Controllers;
 
@@ -35,12 +39,14 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult> Import([FromBody] List<TI> records)
     {
-        var importingRecords = GetMappedRecords(records);
+        // var importingRecords = GetMappedRecords(records);
 
         using (var transaction = dbContext.Database.BeginTransaction())
         {
             try
             {
+                var importingRecords = GetMappedRecords(records);
+
                 dbContext.IsImportRequest = true;
 
                 await SaveBatchChangesAsync(importingRecords);
@@ -61,6 +67,30 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
     protected virtual List<T> GetMappedRecords(List<TI> records)
     {
+        var surrogateForeignKeyProperty = typeof(TI).GetProperties().FirstOrDefault(p => p.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).Length > 0);
+
+        if (surrogateForeignKeyProperty is not null)
+        {
+            var customAttribute = (SurrogateForeignKeyAttribute)surrogateForeignKeyProperty!.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).First();
+
+            var foreignKeyEntityType = customAttribute.RelatedType;
+            var sourceForeignKey = customAttribute.SourceForeignKey;
+            // var uniqueIndexOfForeignKeyEntity = customAttribute.RelatedTypeUniqeIndex;
+
+            var recordsWithoutFk = records.Where(r => IsEmpty(r.GetType().GetProperty(sourceForeignKey) !.GetValue(r))).ToList();
+            if (recordsWithoutFk.Count > 0)
+            {
+                // var filterValues = recordsWithoutFk.Select(r => r.GetType().GetProperty(surrogateForeignKeyProperty.Name) !.GetValue(r)).ToList();
+
+                var parentDbSet = dbContext.SetDbEntity(foreignKeyEntityType);
+
+                if (parentDbSet is not null)
+                {
+                    // todo
+                }
+            }
+        }
+
         return mapper.Map<List<T>>(records);
     }
 
@@ -77,6 +107,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             // Find existing items by indexes and updated batch accordingly.
             UpdateExistingItemsAndBatchItemsByIndexes(batch, existingItems);
+
+            UpdateParentReferences(batch);
 
             foreach (var item in batch)
             {
@@ -96,6 +128,57 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         }
     }
 
+    private void UpdateParentReferences(List<T> batch)
+    {
+        var foreignKeys = dbContext.GetForeignKeys(typeof(T));
+
+        foreach (var fk in foreignKeys)
+        {
+            // Get records where foreign key is not set.
+            var batchWithoutFks = batch.Where(b => IsEmpty(b!.GetType() !.GetProperty(fk.Properties.First().Name) !.GetValue(b))).ToList();
+
+            if (batchWithoutFks is not null)
+            {
+                // Get the parent entity type.
+                var parentEntity = fk.PrincipalEntityType;
+
+                // Get parent's unique indexes.
+                var parentProperties = parentEntity!.GetProperties().Where(p => p.IsUniqueIndex());
+
+                // If child (batchWithoutFks) has the parent unique index.
+                foreach (var property in parentProperties.Select(p => p.Name).Where(property => batchWithoutFks.All(b => b.GetType().GetProperty(property) != null)))
+                {
+                    var filterValues = batchWithoutFks.Select(b => b.GetType().GetProperty(property) !.GetValue(b)).ToList();
+
+                    var exp = BuildExpressionForPropertyFilter<T>(filterValues, property, parentEntity.GetType());
+
+                    var parentRecords = dbSet.Where(exp).AsNoTracking().ToList();
+
+                    foreach (var parentRecord in parentRecords)
+                    {
+                        // TODO
+                    }
+                }
+            }
+        }
+    }
+
+    private bool IsEmpty(object? value)
+    {
+        if (value is null)
+        {
+            return true;
+        }
+        else if (value is string str)
+        {
+            return string.IsNullOrEmpty(str);
+        }
+        else
+        {
+            return Convert.ToDouble(value) == 0;
+        }
+    }
+
     private void UpdateExistingItemsAndBatchItemsByIndexes(List<T> batch, List<T> existingItems)
     {
         var entityType = dbContext.Model.FindEntityType(typeof(T));
@@ -111,7 +194,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                 var filterValues = batch.Where(b => b.Id == 0).Select(b => b.GetType().GetProperty(filterProperty) !.GetValue(b)).ToList();
 
-                var exp = BuildExpressionForPropertyFilter(filterValues, filterProperty, typeof(T));
+                var exp = BuildExpressionForPropertyFilter<T>(filterValues, filterProperty, typeof(T));
 
                 // Filter dbSet<T> from unique index property and its values to find existing records.
                 var filteredData = dbSet.Where(exp).AsNoTracking().ToList();
@@ -123,7 +206,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         }
     }
 
-    private Expression<Func<T, bool>> BuildExpressionForPropertyFilter(List<object?> filterValues, string filterProperty, Type targetListType)
+    private Expression<Func<TA, bool>> BuildExpressionForPropertyFilter<TA>(List<object?> filterValues, string filterProperty, Type targetListType)
     {
         var parameter = Expression.Parameter(targetListType, "t");
 
@@ -133,7 +216,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         var filterExpression = Expression.Call(Expression.Constant(filterValues), containsMethod!, property);
 
-        return Expression.Lambda<Func<T, bool>>(filterExpression, parameter);
+        return Expression.Lambda<Func<TA, bool>>(filterExpression, parameter);
     }
 
     private void UpdateBatchItemId(List<T> batch, List<T> existingItems, string filterProperty)

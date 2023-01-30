@@ -4,6 +4,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
+using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -38,10 +40,27 @@ public class CommentDetailsDto : CommentCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class CommentImportDto : CommentCreateDto
+public class CommentImportDto
 {
     [Optional]
     public int? Id { get; set; }
+
+    public string AuthorName { get; set; } = string.Empty;
+
+    [EmailAddress]
+    public string AuthorEmail { get; set; } = string.Empty;
+
+    [Required]
+    public string Content { get; set; } = string.Empty;
+
+    [Optional]
+    public int? PostId { get; set; }
+
+    [Optional]
+    [SurrogateForeignKey(typeof(Post), "Slug", "PostId")]
+    public string? PostSlug { get; set; }
+
+    public int? ParentId { get; set; }
 
     [Optional]
     public DateTime? CreatedAt { get; set; }
