@@ -20,6 +20,8 @@ public class LockManager
 
     public PostgresDistributedLockHandle? GetNoWaitLock(string lockKey)
     {
+        Log.Information("GetNoWaitLock: " + lockKey);
+
         try
         {
             var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
@@ -36,6 +38,8 @@ public class LockManager
 
     public PostgresDistributedLockHandle? GetWaitLock(string lockKey)
     {
+        Log.Information("GetWaitLock: " + lockKey);
+
         try
         {
             var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
