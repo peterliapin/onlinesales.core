@@ -80,13 +80,14 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 var customAttribute = (SurrogateForeignKeyAttribute)surrogateForeignKeyProperty!.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).First();
 
                 var foreignKeyEntityType = customAttribute.RelatedType;
-                var sourceForeignKey = customAttribute.SourceForeignKey;
                 var foreignKeyEntityUniqueIndex = customAttribute.RelatedTypeUniqeIndex;
+                var sourceForeignKey = customAttribute.SourceForeignKey;
 
-                // Get the records which are not having a foreign key
+                // Get the records which do not have a value for foreign key
                 var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceForeignKey))).ToList();
                 if (recordsWithoutFk.Count > 0)
                 {
+                    // Get list of surrogate foreign key values.
                     var uniqueKeyValues = recordsWithoutFk.Select(r => GetValueByPropertyName(r, surrogateForeignKeyProperty.Name)).ToList();
 
                     if (uniqueKeyValues.Count > 0)
@@ -101,6 +102,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                             {
                                 foreach (var record in recordsWithoutFk)
                                 {
+                                    // Find the parent using surrogate fk and update the main fk with parent id.
                                     var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex).ToString() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name).ToString());
                                     record.GetType() !.GetProperty(sourceForeignKey) !.SetValue(record, Convert.ToInt32(matchingParent.Select(i => GetValueByPropertyName(i, "Id")).First()));
                                 }
