@@ -6,14 +6,12 @@ using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using Quartz.Xml.JobSchedulingData20;
 
 namespace OnlineSales.Controllers;
 
@@ -39,14 +37,12 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult> Import([FromBody] List<TI> records)
     {
-        // var importingRecords = GetMappedRecords(records);
+        var importingRecords = GetMappedRecords(records);
 
         using (var transaction = dbContext.Database.BeginTransaction())
         {
             try
             {
-                var importingRecords = GetMappedRecords(records);
-
                 dbContext.IsImportRequest = true;
 
                 await SaveBatchChangesAsync(importingRecords);
@@ -67,33 +63,67 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
     protected virtual List<T> GetMappedRecords(List<TI> records)
     {
-        var surrogateForeignKeyProperty = typeof(TI).GetProperties().FirstOrDefault(p => p.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).Length > 0);
-
-        if (surrogateForeignKeyProperty is not null)
-        {
-            var customAttribute = (SurrogateForeignKeyAttribute)surrogateForeignKeyProperty!.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).First();
-
-            var foreignKeyEntityType = customAttribute.RelatedType;
-            var sourceForeignKey = customAttribute.SourceForeignKey;
-            // var uniqueIndexOfForeignKeyEntity = customAttribute.RelatedTypeUniqeIndex;
-
-            var recordsWithoutFk = records.Where(r => IsEmpty(r.GetType().GetProperty(sourceForeignKey) !.GetValue(r))).ToList();
-            if (recordsWithoutFk.Count > 0)
-            {
-                // var filterValues = recordsWithoutFk.Select(r => r.GetType().GetProperty(surrogateForeignKeyProperty.Name) !.GetValue(r)).ToList();
-
-                var parentDbSet = dbContext.SetDbEntity(foreignKeyEntityType);
-
-                if (parentDbSet is not null)
-                {
-                    // todo
-                }
-            }
-        }
+        UpdateParentByUniqueKey(records);
 
         return mapper.Map<List<T>>(records);
     }
 
+    protected virtual void UpdateParentByUniqueKey(List<TI> records)
+    {
+        try
+        {
+            // Check whether surrogate foreign key is available or not
+            var surrogateForeignKeyProperty = typeof(TI).GetProperties().FirstOrDefault(p => p.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).Length > 0);
+
+            if (surrogateForeignKeyProperty is not null)
+            {
+                var customAttribute = (SurrogateForeignKeyAttribute)surrogateForeignKeyProperty!.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).First();
+
+                var foreignKeyEntityType = customAttribute.RelatedType;
+                var sourceForeignKey = customAttribute.SourceForeignKey;
+                var foreignKeyEntityUniqueIndex = customAttribute.RelatedTypeUniqeIndex;
+
+                // Get the records which are not having a foreign key
+                var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceForeignKey))).ToList();
+                if (recordsWithoutFk.Count > 0)
+                {
+                    var uniqueKeyValues = recordsWithoutFk.Select(r => GetValueByPropertyName(r, surrogateForeignKeyProperty.Name)).ToList();
+
+                    if (uniqueKeyValues.Count > 0)
+                    {
+                        var parentDbSet = dbContext.SetDbEntity(foreignKeyEntityType).AsNoTracking().ToList();
+
+                        if (parentDbSet is not null)
+                        {
+                            var parentListByUniqueKey = parentDbSet.Where(r => uniqueKeyValues!.Contains(GetValueByPropertyName(r, foreignKeyEntityUniqueIndex)));
+
+                            if (parentListByUniqueKey is not null)
+                            {
+                                foreach (var record in recordsWithoutFk)
+                                {
+                                    var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex).ToString() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name).ToString());
+                                    record.GetType() !.GetProperty(sourceForeignKey) !.SetValue(record, Convert.ToInt32(matchingParent.Select(i => GetValueByPropertyName(i, "Id")).First()));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string message = "Either foreign key or a surrogate foreign key should be present in a importing record.";
+
+                        Log.Error(message);
+                        throw new InvalidImportFileException(message);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error while updating parent references.");
+            throw;
+        }
+    }
+    
     protected virtual async Task SaveBatchChangesAsync(List<T> importingRecords)
     {
         int position = 0;
@@ -107,8 +137,6 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             // Find existing items by indexes and updated batch accordingly.
             UpdateExistingItemsAndBatchItemsByIndexes(batch, existingItems);
-
-            UpdateParentReferences(batch);
 
             foreach (var item in batch)
             {
@@ -128,39 +156,9 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         }
     }
 
-    private void UpdateParentReferences(List<T> batch)
+    private object GetValueByPropertyName(object r, string name)
     {
-        var foreignKeys = dbContext.GetForeignKeys(typeof(T));
-
-        foreach (var fk in foreignKeys)
-        {
-            // Get records where foreign key is not set.
-            var batchWithoutFks = batch.Where(b => IsEmpty(b!.GetType() !.GetProperty(fk.Properties.First().Name) !.GetValue(b))).ToList();
-
-            if (batchWithoutFks is not null)
-            {
-                // Get the parent entity type.
-                var parentEntity = fk.PrincipalEntityType;
-
-                // Get parent's unique indexes.
-                var parentProperties = parentEntity!.GetProperties().Where(p => p.IsUniqueIndex());
-
-                // If child (batchWithoutFks) has the parent unique index.
-                foreach (var property in parentProperties.Select(p => p.Name).Where(property => batchWithoutFks.All(b => b.GetType().GetProperty(property) != null)))
-                {
-                    var filterValues = batchWithoutFks.Select(b => b.GetType().GetProperty(property) !.GetValue(b)).ToList();
-
-                    var exp = BuildExpressionForPropertyFilter<T>(filterValues, property, parentEntity.GetType());
-
-                    var parentRecords = dbSet.Where(exp).AsNoTracking().ToList();
-
-                    foreach (var parentRecord in parentRecords)
-                    {
-                        // TODO
-                    }
-                }
-            }
-        }
+        return r.GetType().GetProperty(name) !.GetValue(r) !;
     }
 
     private bool IsEmpty(object? value)

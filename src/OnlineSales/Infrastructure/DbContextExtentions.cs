@@ -29,6 +29,6 @@ public static class DbContextExtentions
 
     public static IQueryable<object> SetDbEntity(this DbContext context, Type t)
     {
-        return (IQueryable<object>)context!.GetType() !.GetMethod("SetDbEntity") !.MakeGenericMethod(t).Invoke(context!, null) !;
+        return (IQueryable<object>)context!.GetType() !.GetMethod("Set", Type.EmptyTypes) !.MakeGenericMethod(t).Invoke(context!, null) !;
     }
 }

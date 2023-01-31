@@ -4,6 +4,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
+using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -75,4 +77,8 @@ public class OrderImportDto : OrderCreateDto
 
     [Optional]
     public string? UpdatedByUserAgent { get; set; }
+
+    [Optional]
+    [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
+    public string? ContactEmail { get; set; }
 }

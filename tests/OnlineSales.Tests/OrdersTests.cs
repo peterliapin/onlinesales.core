@@ -231,6 +231,17 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         }
     }
 
+    [Fact]
+    public async Task ImportFileWithoutContactId()
+    {
+        await CreateFKItem();
+        await PostImportTest(itemsUrl, "ordersNoFK.csv");
+
+        var addedOrder = App.GetDbContext() !.Orders!.First(o => o.Id == 1);
+        addedOrder.Should().NotBeNull();
+        addedOrder.ContactId.Should().Be(1);
+    }
+
     protected override async Task<(TestOrder, string)> CreateItem(string uid, int fkId)
     {
         var testOrder = new TestOrder(uid, fkId);
