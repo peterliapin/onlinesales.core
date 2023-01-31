@@ -21,9 +21,9 @@ public class MessagesController : Controller
     private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
     private readonly SmsDbContext? dbContext;
 
-    public MessagesController(IEnumerable<PluginDbContextBase> dbContexts, ISmsService smsService)
+    public MessagesController(SmsDbContext dbContext, ISmsService smsService)
     {
-        this.dbContext = dbContexts.First(c => c.GetType() == typeof(SmsDbContext)) as SmsDbContext;
+        this.dbContext = dbContext;
         this.smsService = smsService;
     }
 
