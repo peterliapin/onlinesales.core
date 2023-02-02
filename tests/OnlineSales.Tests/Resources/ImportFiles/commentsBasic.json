@@ -7,7 +7,8 @@
     "authorEmail": "TestAuthor2@wa.com",
     "content": "TestContent2",
     "postId": 1,
-    "parentId": null
+    "parentId": null,
+    "key": "key1"
   },
   {
     "id": 1,
@@ -17,6 +18,7 @@
     "authorEmail": "TestAuthor1@wa.com",
     "content": "TestContent1",
     "postId": 1,
-    "parentId": null
+    "parentId": null,
+    "key": "key2"
   }
 ]

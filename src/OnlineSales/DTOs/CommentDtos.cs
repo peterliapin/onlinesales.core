@@ -62,6 +62,13 @@ public class CommentImportDto
 
     public int? ParentId { get; set; }
 
+    [Required]
+    public string? Key { get; set; }
+
+    [Optional]
+    [AlternateKey("Key", "ParentId")]
+    public string? ParentKey { get; set; }
+
     [Optional]
     public DateTime? CreatedAt { get; set; }
 

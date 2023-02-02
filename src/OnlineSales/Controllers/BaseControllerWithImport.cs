@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Linq.Expressions;
+using System.Reflection;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,12 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
     public int ImportBatchSize { get; set; } = 50;
 
+    public List<TI>? AlternateKeyRelationList { get; set; }
+
+    public AlternateKeyAttribute? AlternateKeyCustomAttribute { get; set; }
+
+    public PropertyInfo? AlternateKey { get; set; }
+
     [HttpPost]
     [Route("import")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -37,6 +44,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult> Import([FromBody] List<TI> records)
     {
+        AlternateKeyRelationList = GetRecordsWithAlternateKey(records);
+
         var importingRecords = GetMappedRecords(records);
 
         using (var transaction = dbContext.Database.BeginTransaction())
@@ -63,12 +72,16 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
     protected virtual List<T> GetMappedRecords(List<TI> records)
     {
-        UpdateParentByUniqueKey(records);
+        UpdateParentBySurrogateForeignKey(records);
 
         return mapper.Map<List<T>>(records);
     }
 
-    protected virtual void UpdateParentByUniqueKey(List<TI> records)
+    /// <summary>
+    /// When a foreign key value is not provided, an alternative foreign key is used to
+    /// to query the parent and retrieve the value of foreign key.
+    /// </summary>
+    protected virtual void UpdateParentBySurrogateForeignKey(List<TI> records)
     {
         try
         {
@@ -87,15 +100,17 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceForeignKey))).ToList();
                 if (recordsWithoutFk.Count > 0)
                 {
-                    // Get list of surrogate foreign key values.
+                    // Get list of surrogate foreign key values. (ex: list of postSlug in comments)
                     var uniqueKeyValues = recordsWithoutFk.Select(r => GetValueByPropertyName(r, surrogateForeignKeyProperty.Name)).ToList();
 
                     if (uniqueKeyValues.Count > 0)
                     {
+                        // Need to query the foreign key entity
                         var parentDbSet = dbContext.SetDbEntity(foreignKeyEntityType).AsNoTracking().ToList();
 
                         if (parentDbSet is not null)
                         {
+                            // Get the foreing key entities matching surrogate foreign key values (ex: Posts where slug equals to postslug in comments)
                             var parentListByUniqueKey = parentDbSet.Where(r => uniqueKeyValues!.Contains(GetValueByPropertyName(r, foreignKeyEntityUniqueIndex)));
 
                             if (parentListByUniqueKey is not null)
@@ -103,7 +118,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                                 foreach (var record in recordsWithoutFk)
                                 {
                                     // Find the parent using surrogate fk and update the main fk with parent id.
-                                    var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex).ToString() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name).ToString());
+                                    var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex) !.ToString() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name) !.ToString());
                                     record.GetType() !.GetProperty(sourceForeignKey) !.SetValue(record, Convert.ToInt32(matchingParent.Select(i => GetValueByPropertyName(i, "Id")).First()));
                                 }
                             }
@@ -125,7 +140,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             throw;
         }
     }
-    
+
     protected virtual async Task SaveBatchChangesAsync(List<T> importingRecords)
     {
         int position = 0;
@@ -154,13 +169,115 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             await dbContext.SaveChangesAsync();
 
+            await UpdateParentByAlternateKey(batch);
+
             position += ImportBatchSize;
         }
     }
 
-    private object GetValueByPropertyName(object r, string name)
+    /// <summary>
+    /// Find the import records which contain an alternate key to relate to its own parent
+    /// and do not contain a parent id at the import.
+    /// </summary>
+    private List<TI>? GetRecordsWithAlternateKey(List<TI> records)
     {
-        return r.GetType().GetProperty(name) !.GetValue(r) !;
+        List<TI> alternateKeyRelationList = new List<TI>();
+        // Check whether alternate key is available or not
+        AlternateKey = typeof(TI).GetProperties().FirstOrDefault(p => p.GetCustomAttributes(typeof(AlternateKeyAttribute), true).Length > 0);
+
+        if (AlternateKey is not null)
+        {
+            AlternateKeyCustomAttribute = (AlternateKeyAttribute)AlternateKey!.GetCustomAttributes(typeof(AlternateKeyAttribute), true).First();
+
+            var sourceParentIdProperty = AlternateKeyCustomAttribute.SourceParentIdProperty;
+
+            // Get the records which do not have a value for parent id (ex: ParentId of CommentImportDto is not provided)
+            var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceParentIdProperty) !)).ToList();
+            if (recordsWithoutFk.Count > 0)
+            {
+                foreach (var record in recordsWithoutFk)
+                {
+                    // Get the value of the alternate key (ex: value of 'ParentKey' of CommentImportDto)
+                    var keyValue = GetValueByPropertyName(record, AlternateKey.Name);
+
+                    // foreign key is not provided but parent key is provided.
+                    if (!IsEmpty(keyValue))
+                    {
+                        // Once all records are saved, this list should be reconsidered to update the parent id (ex: to update the ParentId of comment)
+                        alternateKeyRelationList.Add(record);
+                    }
+                }
+            }
+        }
+
+        return alternateKeyRelationList;
+    }
+
+    /// <summary>
+    /// Items which do not have a parent id but a parent key is provided at the import
+    /// will be updated with the parent id.
+    /// </summary>
+    private async Task UpdateParentByAlternateKey(List<T> batch)
+    {
+        if (AlternateKeyRelationList is null || AlternateKeyRelationList.Count == 0)
+        {
+            return;
+        }
+
+        var parentUniqueIndex = AlternateKeyCustomAttribute!.ParentUniqueIndex;
+        var sourceForeignKey = AlternateKeyCustomAttribute!.SourceParentIdProperty;
+
+        var entityList = dbSet.AsNoTracking().AsEnumerable();
+
+        // Batch items are already saved in the database hense it has the id.
+        foreach (var item in batch)
+        {
+            var sourceForeignKeyValue = GetValueByPropertyName(item, sourceForeignKey);
+
+            // If parent id is empty.
+            if (IsEmpty(sourceForeignKeyValue))
+            {
+                var key = GetValueByPropertyName(item, parentUniqueIndex) !;
+
+                // Find the corresponding importing (TI) record by Key.
+                var matchingImportingRecord = AlternateKeyRelationList.FirstOrDefault(a => GetValueByPropertyName(a, parentUniqueIndex) !.ToString() == key.ToString());
+                if (matchingImportingRecord is null)
+                {
+                    continue;
+                }
+
+                var alternateKeyOfMatchingImportRecord = GetValueByPropertyName(matchingImportingRecord, AlternateKey!.Name);
+                // Check whether alternate key (Parent Key) is provided.
+                if (alternateKeyOfMatchingImportRecord is not null)
+                {
+                    // Find the parent item (T) by alternate key.
+                    var parentItem = entityList.FirstOrDefault(b => GetValueByPropertyName(b, parentUniqueIndex) !.ToString() == alternateKeyOfMatchingImportRecord.ToString());
+                    if (parentItem is null)
+                    {
+                        var message = "No parent entity is available for given alternate key";
+                        Log.Error(message);
+                        throw new InvalidImportFileException(message);
+                    }
+
+                    // Update the current item (T) by parent item id.
+                    item.GetType().GetProperty(sourceForeignKey) !.SetValue(item, parentItem!.Id);
+                    dbSet.Update(item);
+                }
+            }
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private object? GetValueByPropertyName(object r, string name)
+    {
+        var property = r.GetType().GetProperty(name);
+        if (property is not null)
+        {
+            return property.GetValue(r) !; 
+        }
+
+        return null;
     }
 
     private bool IsEmpty(object? value)
