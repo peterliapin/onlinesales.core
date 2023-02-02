@@ -1,0 +1,2 @@
+id,contactId,refNo,exchangeRate,currency,contactEmail,createdAt,updatedAt,createdByIp,createdByUserAgent,updatedByIp,updatedByUserAgent,orderNumber,affiliateName,testOrder,data
+0,0,ref101,100,lkr,contact@test.net,,,,,,,,,0,null

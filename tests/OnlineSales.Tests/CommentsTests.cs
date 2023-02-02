@@ -109,6 +109,26 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         newComment!.CreatedByUserAgent.Should().Be("TestAgent2");
     }
 
+    [Fact]
+    public async Task ImportFileWithParentUniqueKeyTest()
+    {
+        await CreateFKItemsWithUid();
+        await PostImportTest(itemsUrl, "commentsNoFKHasUKey.csv");
+
+        var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        addedComment1.Should().NotBeNull();
+        addedComment1.PostId.Should().Be(1);
+
+        var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        addedComment2.Should().NotBeNull();
+        addedComment2.PostId.Should().Be(2);
+
+        await PostImportTest(itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
+        var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        updatedComment.Should().NotBeNull();
+        updatedComment.PostId.Should().Be(2);
+    }
+
     protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
         var testComment = new TestComment(uid, fkId);
@@ -136,5 +156,14 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var from = new CommentUpdateDto();
         to.Content = from.Content = to.Content + "Updated";
         return from;
+    }
+
+    private async Task CreateFKItemsWithUid()
+    {
+        var fkItemCreate1 = new TestPost("100");
+        var fkItemCreate2 = new TestPost("101");
+
+        await PostTest("/api/posts", fkItemCreate1);
+        await PostTest("/api/posts", fkItemCreate2);
     }
 }
