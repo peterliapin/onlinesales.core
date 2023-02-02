@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230126073650_AccountEntity")]
+    partial class AccountEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,9 +40,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("city");
 
-                    b.Property<string>("CountryCode")
+                    b.Property<string>("Country")
                         .HasColumnType("text")
-                        .HasColumnName("country_code");
+                        .HasColumnName("country");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -57,9 +60,13 @@ namespace OnlineSales.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("data");
 
-                    b.Property<string>("EmployeesRange")
+                    b.Property<int>("DomainId")
+                        .HasColumnType("integer")
+                        .HasColumnName("domain_id");
+
+                    b.Property<string>("EmployeesRate")
                         .HasColumnType("text")
-                        .HasColumnName("employees_range");
+                        .HasColumnName("employees_rate");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -79,6 +86,7 @@ namespace OnlineSales.Migrations
                         .HasColumnName("state_code");
 
                     b.Property<string[]>("Tags")
+                        .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("tags");
 
@@ -97,9 +105,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_account");
 
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_account_name");
+                    b.HasIndex("DomainId")
+                        .HasDatabaseName("ix_account_domain_id");
 
                     b.ToTable("account", (string)null);
                 });
@@ -225,11 +232,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("key");
-
                     b.Property<int?>("ParentId")
                         .HasColumnType("integer")
                         .HasColumnName("parent_id");
@@ -270,10 +272,6 @@ namespace OnlineSales.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_id");
 
                     b.Property<string>("Address1")
                         .HasColumnType("text")
@@ -355,9 +353,6 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_contact");
 
-                    b.HasIndex("AccountId")
-                        .HasDatabaseName("ix_contact_account_id");
-
                     b.HasIndex("DomainId")
                         .HasDatabaseName("ix_contact_domain_id");
 
@@ -434,14 +429,6 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_id");
-
-                    b.Property<bool>("AccountSynced")
-                        .HasColumnType("boolean")
-                        .HasColumnName("account_synced");
-
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
                         .HasColumnName("catch_all");
@@ -493,9 +480,6 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_domain");
-
-                    b.HasIndex("AccountId")
-                        .HasDatabaseName("ix_domain_account_id");
 
                     b.HasIndex("Name")
                         .IsUnique()
@@ -1283,6 +1267,18 @@ namespace OnlineSales.Migrations
                     b.ToTable("task_execution_log", (string)null);
                 });
 
+            modelBuilder.Entity("OnlineSales.Entities.Account", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Domain", "Domain")
+                        .WithMany()
+                        .HasForeignKey("DomainId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_account_domain_domain_id");
+
+                    b.Navigation("Domain");
+                });
+
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Comment", "Parent")
@@ -1304,20 +1300,12 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_contact_account_account_id");
-
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
                         .WithMany()
                         .HasForeignKey("DomainId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_contact_domain_domain_id");
-
-                    b.Navigation("Account");
 
                     b.Navigation("Domain");
                 });
@@ -1341,17 +1329,6 @@ namespace OnlineSales.Migrations
                     b.Navigation("Contact");
 
                     b.Navigation("Schedule");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_domain_account_account_id");
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>

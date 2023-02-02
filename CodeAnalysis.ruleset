@@ -17,5 +17,6 @@
     <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
     <Rule Id="S3881" Action="None" /> <!-- Fix this implementation of 'IDisposable' to conform to the dispose pattern -->
     <Rule Id="S3925" Action="None" /> <!-- Update this implementation of 'ISerializable' to conform to the recommended serialization pattern. -->
+    <Rule Id="SA1011" Action="None" /> <!-- This is not working properly with Arrays ClosingSquareBracketsMustBeSpacedCorrectly -->
   </Rules>
 </RuleSet>

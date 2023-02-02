@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
 
@@ -36,6 +37,15 @@ public class Domain : BaseEntityWithIdAndDates
     public List<DnsRecord>? DnsRecords { get; set; }
 
     public bool? DnsCheck { get; set; }
+
+    public int? AccountId { get; set; }
+
+    [DeleteBehavior(DeleteBehavior.Restrict)]
+    [JsonIgnore]
+    [ForeignKey("AccountId")]
+    public virtual Account? Account { get; set; }
+
+    public bool AccountSynced { get; set; } = false;
 }
 
 public class DnsRecord

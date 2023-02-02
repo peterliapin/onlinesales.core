@@ -13,5 +13,7 @@ namespace OnlineSales.Interfaces
         Task<Contact> UpdateContact(Contact contact);
 
         List<Contact> EnrichWithDomainId(List<Contact> contacts);
+
+        List<Contact> EnrichWithAccountId(List<Contact> contacts);
     }
 }

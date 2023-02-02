@@ -17,6 +17,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<int?, int>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<decimal?, decimal>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<List<DnsRecord>?, List<DnsRecord>>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<Dictionary<string, string>?, Dictionary<string, string>>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()
@@ -110,6 +112,16 @@ public class AutoMapperProfiles : Profile
         CreateMap<DomainImportDto, Domain>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Domain, EmailVerifyDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Account, AccountCreateDto>().ReverseMap();
+        CreateMap<Account, AccountUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<AccountUpdateDto, Account>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Account, AccountDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<AccountImportDto, Account>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 

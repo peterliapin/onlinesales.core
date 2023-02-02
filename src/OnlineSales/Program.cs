@@ -64,6 +64,7 @@ public class Program
         builder.Services.AddSingleton<ILockService, LockService>();
         builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
         builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
+        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
         builder.Services.AddTransient<LockManager, LockManager>();
 
@@ -81,6 +82,7 @@ public class Program
         ConfigureApiSettings(builder);
         ConfigureImportSizeLimit(builder);
         ConfigureEmailVerification(builder);
+        ConfigureAccountDetails(builder);
 
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddEndpointsApiExplorer();
@@ -330,6 +332,18 @@ public class Program
         }
 
         builder.Services.Configure<EmailVerificationApiConfig>(emailVerificationConfig);
+    }
+
+    private static void ConfigureAccountDetails(WebApplicationBuilder builder)
+    {
+        var accountDetailsApiConfig = builder.Configuration.GetSection("AccountDetailsApi");
+
+        if (accountDetailsApiConfig == null)
+        {
+            throw new MissingConfigurationException("Account Details Api configuration is mandatory.");
+        }
+
+        builder.Services.Configure<AccountDetailsApiConfig>(accountDetailsApiConfig);
     }
 
     private static void ConfigureApiSettings(WebApplicationBuilder builder)
