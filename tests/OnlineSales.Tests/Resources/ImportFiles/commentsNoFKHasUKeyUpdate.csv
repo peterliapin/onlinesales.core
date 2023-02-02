@@ -1,3 +1,3 @@
-id,createdAt,updatedAt,authorName,authorEmail,content,postId,postSlug,parentId,createdByIp,updatedByIp,createdByUserAgent,updatedByUserAgent
-1,2023-01-15T17:32:02.074179Z,,TestComment2,TestAuthor2@wa.com,TestContent2,,test-slug101,,192.168.1.2,,TestAgent2,
+id,createdAt,updatedAt,authorName,authorEmail,content,postId,postSlug,parentId,createdByIp,updatedByIp,createdByUserAgent,updatedByUserAgent,key
+1,2023-01-15T17:32:02.074179Z,,TestComment2,TestAuthor2@wa.com,TestContent2,,test-slug101,,192.168.1.2,,TestAgent2,,key1
 

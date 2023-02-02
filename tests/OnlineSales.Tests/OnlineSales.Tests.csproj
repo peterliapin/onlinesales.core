@@ -45,6 +45,8 @@
     <None Remove="Resources\ImportFiles\commentsFull.json" />
     <None Remove="Resources\ImportFiles\commentsNoFKHasUKey.csv" />
     <None Remove="Resources\ImportFiles\commentsNoFKHasUKeyUpdate.csv" />
+    <None Remove="Resources\ImportFiles\commentsWithOldParentKey.csv" />
+    <None Remove="Resources\ImportFiles\commentsWithParentKey.csv" />
     <None Remove="Resources\ImportFiles\contactBase.csv" />
     <None Remove="Resources\ImportFiles\contactsToUpdate.csv" />
     <None Remove="Resources\ImportFiles\contacts.json" />
@@ -66,6 +68,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsWithOldParentKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsWithParentKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\ImportFiles\ordersNoFK.csv">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

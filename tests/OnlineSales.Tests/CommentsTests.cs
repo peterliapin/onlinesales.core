@@ -129,6 +129,38 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         updatedComment.PostId.Should().Be(2);
     }
 
+    [Fact]
+    public async Task ImportFileWithParentKeysTest()
+    {
+        await CreateFKItemsWithUid();
+        await PostImportTest(itemsUrl, "commentsWithParentKey.csv");
+
+        var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        addedComment1.Should().NotBeNull();
+
+        var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        addedComment2.Should().NotBeNull();
+        addedComment2.ParentId.Should().Be(1);
+
+        var addedComment3 = App.GetDbContext() !.Comments!.First(c => c.Id == 3);
+        addedComment3.Should().NotBeNull();
+        addedComment3.ParentId.Should().Be(1);
+
+        await PostImportTest(itemsUrl, "commentsWithOldParentKey.csv");
+
+        var addedComment4 = App.GetDbContext() !.Comments!.First(c => c.Id == 4);
+        addedComment4.Should().NotBeNull();
+        addedComment4.ParentId.Should().Be(1);
+
+        var addedComment5 = App.GetDbContext() !.Comments!.First(c => c.Id == 5);
+        addedComment5.Should().NotBeNull();
+        addedComment5.ParentId.Should().Be(2);
+
+        var addedComment6 = App.GetDbContext() !.Comments!.First(c => c.Id == 6);
+        addedComment6.Should().NotBeNull();
+        addedComment6.ParentId.Should().Be(4);
+    }
+
     protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
         var testComment = new TestComment(uid, fkId);

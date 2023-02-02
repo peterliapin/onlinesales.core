@@ -44,4 +44,7 @@ public class Comment : BaseEntity
     [JsonIgnore]
     [ForeignKey("ParentId")]
     public virtual Comment? Parent { get; set; }
+
+    [Required]
+    public string Key { get; set; } = string.Empty;
 }
