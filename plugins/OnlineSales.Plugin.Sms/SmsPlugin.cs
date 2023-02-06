@@ -5,7 +5,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OnlineSales.Data;
 using OnlineSales.Plugin.Sms.Configuration;
+using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.Services;
 
 namespace OnlineSales.Plugin.Sms;
@@ -23,6 +25,8 @@ public class SmsPlugin : IPlugin
             Configuration = pluginConfig;
         }
 
+        services.AddScoped<PluginDbContextBase, SmsDbContext>();
+        services.AddScoped<SmsDbContext, SmsDbContext>();
         services.AddSingleton<ISmsService, SmsService>();
     }
 }

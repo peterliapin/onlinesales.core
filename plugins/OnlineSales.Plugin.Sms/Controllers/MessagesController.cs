@@ -4,10 +4,11 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Exceptions;
+using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.DTOs;
+using OnlineSales.Plugin.Sms.Entities;
 using PhoneNumbers;
 using Serilog;
 
@@ -16,11 +17,11 @@ namespace OnlineSales.Plugin.Sms.Controllers;
 [Route("api/messages")]
 public class MessagesController : Controller
 {
-    protected readonly DbContext dbContext;
-    protected readonly ISmsService smsService;
-    protected readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
+    private readonly ISmsService smsService;
+    private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
+    private readonly SmsDbContext? dbContext;
 
-    public MessagesController(ApiDbContext dbContext, ISmsService smsService)
+    public MessagesController(SmsDbContext dbContext, ISmsService smsService)
     {
         this.dbContext = dbContext;
         this.smsService = smsService;
@@ -35,6 +36,14 @@ public class MessagesController : Controller
         [FromBody] SmsDetailsDto smsDetails,
         [FromHeader(Name = "Authentication")] string accessToken)
     {
+        var smsLog = new Entities.SmsLog
+        {
+            Sender = string.Empty,
+            Recipient = smsDetails.Recipient,
+            Message = smsDetails.Message,
+            Status = Entities.SmsLog.SmsStatus.Sent,
+        };
+
         try
         {
             if (accessToken == null || accessToken.Replace("Bearer ", string.Empty) != SmsPlugin.Configuration.SmsAccessKey)
@@ -60,6 +69,8 @@ public class MessagesController : Controller
                 throw new InvalidModelStateException(ModelState);
             }
 
+            smsLog.Sender = smsService.GetSender(recipient);
+
             await smsService.SendAsync(recipient, smsDetails.Message);
 
             return Ok();
@@ -68,9 +79,17 @@ public class MessagesController : Controller
         {
             Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
 
-            return Problem(
-                statusCode: StatusCodes.Status500InternalServerError,
-                title: ex.Message);
+            smsLog.Status = SmsLog.SmsStatus.NotSent;
+
+            throw;
+        }
+        finally
+        {
+            if (dbContext != null)
+            {
+                dbContext.SmsLogs!.Add(smsLog);
+                await dbContext.SaveChangesAsync();
+            }
         }
     }
 }

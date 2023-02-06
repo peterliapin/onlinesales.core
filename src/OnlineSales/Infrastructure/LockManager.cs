@@ -11,42 +11,44 @@ namespace OnlineSales.Infrastructure;
 
 public class LockManager
 {
-    private readonly ApiDbContext dbContext;
-
-    public LockManager(ApiDbContext dbContext)
+    public static PostgresDistributedLockHandle? GetNoWaitLock(string lockKey, string connectionString)
     {
-        this.dbContext = dbContext;
-    }
+        Log.Information("GetNoWaitLock: " + lockKey);
 
-    public PostgresDistributedLockHandle? GetNoWaitLock(string lockKey)
-    {
         try
         {
-            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), connectionString);
 
             // pg_try_advisory_lock - Get the lock or skip if not available.
             return secondaryLock.TryAcquire();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error when acquiring lock.");
+            LogError(ex, lockKey);
             return null;
         }
     }
 
-    public PostgresDistributedLockHandle? GetWaitLock(string lockKey)
+    public static PostgresDistributedLockHandle? GetWaitLock(string lockKey, string connectionString)
     {
+        Log.Information("GetWaitLock: " + lockKey);
+
         try
         {
-            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), dbContext.Database.GetConnectionString() !);
+            var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), connectionString);
 
             // pg_advisory_lock - Get or Wait for lock.
             return secondaryLock.Acquire();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error when acquiring lock.");
+            LogError(ex, lockKey);
             return null;
         }
+    }
+
+    private static void LogError(Exception ex, string lockKey)
+    {
+        Log.Error(ex, "Error when acquiring lock:" + lockKey);
     }
 }
