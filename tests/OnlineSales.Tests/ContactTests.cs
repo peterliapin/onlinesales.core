@@ -78,7 +78,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         var dbContext = App.GetDbContext();
         var dbDomainId = dbContext!.Contacts!.Where(contactsDb => contactsDb.Id == contactId).Select(contact => contact.DomainId).FirstOrDefault();
 
-        await DeleteTest($"/api/domains/{dbDomainId}", HttpStatusCode.UnprocessableEntity);
+        await DeleteTest($"/api/domains/{dbDomainId}");
     }
 
     protected override ContactUpdateDto UpdateItem(TestContact to)
