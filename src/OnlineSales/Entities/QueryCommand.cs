@@ -11,7 +11,8 @@ namespace OnlineSales.Entities
         Order = 2,
         Skip = 3,
         Where = 4,
-        None = 5,
+        Search = 5,
+        None = 6,
     }
 
     public enum WOperand

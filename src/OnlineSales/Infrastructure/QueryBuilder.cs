@@ -7,6 +7,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
@@ -17,6 +19,7 @@ namespace OnlineSales.Infrastructure
         public static async Task<(IQueryable<T>, bool, bool, int)> ReadIntoQuery(IQueryable<T> query, string[] queryString, int maxLimitSize)
         {
             var cmds = Parse(queryString);
+            query = AppendSearchExpression(query, cmds);
             query = AppendWhereExpression(query, cmds);
             query = AppendOrderExpression(query, cmds);
 
@@ -110,30 +113,46 @@ namespace OnlineSales.Infrastructure
         {
             var processedCommands = new List<QueryCommand>();
             var errorList = new List<QueryException>();
+
             foreach (var cmd in query)
             {
-                var match = Regex.Match(cmd, "filter(\\[(?'property'.*?)\\])+?=(?'value'.*)");
-                if (!match.Success)
+                var match = Regex.Match(cmd, "query+?=(?'value'.*)");
+                if (match.Success)
                 {
-                    errorList.Add(new QueryException(cmd, "Failed to parse command"));
-                    continue;
+                    var qcmd = new QueryCommand()
+                    {
+                        Type = FilterType.Search,
+                        Props = new string[0],
+                        Value = match.Groups["value"].Captures[0].Value,
+                        Source = cmd,
+                    };
+                    processedCommands.Add(qcmd);
                 }
-
-                var type = match.Groups["property"].Captures[0].Value.ToLowerInvariant();
-                if (type == null || string.IsNullOrWhiteSpace(type) || !QueryCommand.FilterMappings.ContainsKey(type))
+                else
                 {
-                    errorList.Add(new QueryException(cmd, $"Failed to parse command. Operator '{type}' not found. Available operators: {QueryCommand.AvailableCommandString}"));
-                    continue;
+                    match = Regex.Match(cmd, "filter(\\[(?'property'.*?)\\])+?=(?'value'.*)");
+                    if (!match.Success)
+                    {
+                        errorList.Add(new QueryException(cmd, "Failed to parse command"));
+                        continue;
+                    }
+
+                    var type = match.Groups["property"].Captures[0].Value.ToLowerInvariant();
+                    if (type == null || string.IsNullOrWhiteSpace(type) || !QueryCommand.FilterMappings.ContainsKey(type))
+                    {
+                        errorList.Add(new QueryException(cmd, $"Failed to parse command. Operator '{type}' not found. Available operators: {QueryCommand.AvailableCommandString}"));
+                        continue;
+                    }
+
+                    var qcmd = new QueryCommand()
+                    {
+                        Type = QueryCommand.FilterMappings.First(m => m.Key == type).Value,
+                        Props = match.Groups["property"].Captures.Skip(1).Select(capture => capture.Value).ToArray(),
+                        Value = match.Groups["value"].Captures[0].Value,
+                        Source = cmd,
+                    };
+                    processedCommands.Add(qcmd);
                 }
-
-                var qcmd = new QueryCommand()
-                {
-                    Type = QueryCommand.FilterMappings.First(m => m.Key == type).Value,
-                    Props = match.Groups["property"].Captures.Skip(1).Select(capture => capture.Value).ToArray(),
-                    Value = match.Groups["value"].Captures[0].Value,
-                    Source = cmd,
-                };
-                processedCommands.Add(qcmd);
             }
 
             if (errorList.Any())
@@ -142,6 +161,50 @@ namespace OnlineSales.Infrastructure
             }
 
             return processedCommands.ToArray();
+        }
+
+        private static IQueryable<T> AppendSearchExpression(IQueryable<T> query, QueryCommand[] commands)
+        {
+            foreach (var cmdValue in commands.Where(c => c.Type == FilterType.Search && c.Value.Length > 0).Select(cmd => cmd.Value).ToArray())
+            {
+                var props = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false));
+
+                Expression orExpression = Expression.Constant(false);                
+                var paramExpr = Expression.Parameter(typeof(T), "entity");
+                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+
+                foreach (var prop in props)
+                {                    
+                    if (prop != null)
+                    {
+                        var n = prop.Name;
+                        var me = Expression.Property(paramExpr, n);
+                        Expression containsExpression;
+                        if (prop.PropertyType == typeof(string))
+                        {
+                            containsExpression = Expression.Call(me, containsMethod!, Expression.Constant(cmdValue));
+                        }
+                        else
+                        {
+                            var pt = prop.PropertyType;
+                            Console.WriteLine(pt);
+                            var toStringMethod = prop.PropertyType.GetMethod("ToString", new Type[0]);
+                            var ce = Expression.Call(me, toStringMethod!);
+                            containsExpression = Expression.Call(ce, containsMethod!, Expression.Constant(cmdValue));
+                        }
+
+                        orExpression = Expression.Or(orExpression, containsExpression);
+                    }
+                }
+
+                if (!ExpressionEqualityComparer.Instance.Equals(orExpression, Expression.Constant(false)))
+                {
+                    var predicate = Expression.Lambda<Func<T, bool>>(orExpression, paramExpr);
+                    query = query.Where(predicate);
+                }
+            }
+
+            return query;
         }
 
         private static IQueryable<T> AppendWhereExpression(IQueryable<T> query, QueryCommand[] commands)
