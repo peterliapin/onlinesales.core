@@ -48,14 +48,14 @@ public class TaskTests : BaseTest
 
         var responce = await GetTest<TaskDetailsDto>(tasksUrl + "/" + name);
         responce.Should().NotBeNull();
-        responce!.IsRunning.Should().BeTrue();
-
-        responce = await GetTest<TaskDetailsDto>(tasksUrl + "/stop/" + name);
-        responce.Should().NotBeNull();
         responce!.IsRunning.Should().BeFalse();
 
         responce = await GetTest<TaskDetailsDto>(tasksUrl + "/start/" + name);
         responce.Should().NotBeNull();
         responce!.IsRunning.Should().BeTrue();
+
+        responce = await GetTest<TaskDetailsDto>(tasksUrl + "/stop/" + name);
+        responce.Should().NotBeNull();
+        responce!.IsRunning.Should().BeFalse();
     }
 }

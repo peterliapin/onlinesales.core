@@ -7,6 +7,7 @@ using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -21,8 +22,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 {
     private readonly IContactService contactService;
 
-    public ContactsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IContactService contactService)
-        : base(dbContext, mapper, apiSettingsConfig)
+    public ContactsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IContactService contactService, EsDbContext esDbContext)
+        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
         this.contactService = contactService;
     }

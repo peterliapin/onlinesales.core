@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Globalization;
+using System.Reflection;
+
 namespace OnlineSales.Entities
 {
     public enum FilterType
@@ -21,9 +24,9 @@ namespace OnlineSales.Entities
         And = 1,
         Or = 2,
         GreaterThan = 3,
-        GreaterThanOrEquals = 4,
+        GreaterThanOrEqualTo = 4,
         LessThan = 5,
-        LessThanOrEquals = 6,
+        LessThanOrEqualTo = 6,
         NotEqual = 7,
     }
 
@@ -44,9 +47,9 @@ namespace OnlineSales.Entities
             { "and", WOperand.And },
             { "or", WOperand.Or },
             { "gt", WOperand.GreaterThan },
-            { "gte", WOperand.GreaterThanOrEquals },
+            { "gte", WOperand.GreaterThanOrEqualTo },
             { "lt", WOperand.LessThan },
-            { "lte", WOperand.LessThanOrEquals },
+            { "lte", WOperand.LessThanOrEqualTo },
             { "neq", WOperand.NotEqual },
         };
 
@@ -59,5 +62,24 @@ namespace OnlineSales.Entities
         public string Value { get; set; } = string.Empty;
 
         public string Source { get; set; } = string.Empty;
+
+        public System.Reflection.PropertyInfo ParseProperty<T>()
+        {
+            var propertyName = Props.ElementAtOrDefault(0);
+            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new QueryException(Source, "Property field not found");
+            }
+
+            var typeProperties = typeof(T).GetProperties();
+            var property = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
+
+            if (property == null)
+            {
+                throw new QueryException(Source, $"No such property '{propertyName}'");
+            }
+
+            return property;
+        }
     }
 }

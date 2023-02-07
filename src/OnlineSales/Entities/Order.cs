@@ -34,6 +34,7 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets a unique reference numbers across all orders.
     /// </summary>
+    [Searchable]
     [Required]
     public string RefNo { get; set; } = string.Empty;
 
@@ -68,7 +69,7 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets exchange rate to the payout currency.
     /// </summary>
-    [Searchable]
+    // [Searchable]
     public decimal ExchangeRate { get; set; }
 
     /// <summary>

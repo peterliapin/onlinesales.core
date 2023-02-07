@@ -7,10 +7,13 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace OnlineSales.Controllers
 {
@@ -24,13 +27,15 @@ namespace OnlineSales.Controllers
         protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
         private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
+        private readonly ElasticClient elasticClient;
 
-        public BaseController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        public BaseController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
             this.mapper = mapper;
             this.apiSettingsConfig = apiSettingsConfig;
+            this.elasticClient = esDbContext.ElasticClient;
         }
 
         // GET api/{entity}s/5
@@ -109,38 +114,13 @@ namespace OnlineSales.Controllers
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] IDictionary<string, string>? parameters)
         {
             int limit = apiSettingsConfig.Value.MaxListSize;
-            var query = this.dbSet!.AsQueryable<T>();
-
-            IList<T>? selectResult;
-
-            if (this.Request.QueryString.HasValue)
-            {
-                var queryCommands = this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray(); // Removing '?' character, split by '&'
-                (query, var selectExists, var anyValidCmds, var recordsCount) = await QueryBuilder<T>.ReadIntoQuery(query, queryCommands, apiSettingsConfig.Value.MaxListSize);
-                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, recordsCount.ToString());
-
-                if (!anyValidCmds && this.Request.QueryString.HasValue)
-                {
-                    return Ok(Array.Empty<T>());
-                }
-
-                if (selectExists)
-                {
-                    selectResult = await QueryBuilder<T>.ExecuteSelectExpression(query, queryCommands);
-                }
-                else
-                {
-                    selectResult = await query!.ToListAsync();
-                }
-            }
-            else
-            {
-                selectResult = await query.Take(limit).ToListAsync();
-                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, selectResult.Count.ToString());
-            }
-
-            var resultConverted = mapper.Map<List<TD>>(selectResult);
-            return Ok(resultConverted);
+            var queryCommands = this.Request.QueryString.HasValue ? this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray() : new string[0];
+            var parseData = new QueryParseData<T>(queryCommands, limit);
+            IQueryProvider<T> qp = typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() ? new ESQueryProvider<T>(elasticClient, parseData) : new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), mapper, parseData);
+            var result = await qp.GetResult();
+            var totalCount = result.Item2;
+            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, totalCount.ToString());
+            return Ok(mapper.Map<List<TD>>(result.Item1));
         }
 
         protected async Task<T> FindOrThrowNotFound(int id)

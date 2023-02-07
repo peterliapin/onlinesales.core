@@ -13,7 +13,7 @@ public class TestOrder : OrderCreateDto
     {
         RefNo = $"1000{uid}";
         Currency = "USD";
-        ExchangeRate = 2;
+        ExchangeRate = 1.234M;
         ContactId = contactId;
     }
 }
