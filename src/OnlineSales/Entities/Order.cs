@@ -68,11 +68,13 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets exchange rate to the payout currency.
     /// </summary>
+    [Searchable]
     public decimal ExchangeRate { get; set; }
 
     /// <summary>
     /// Gets or sets affiliate Name.
     /// </summary>
+    [Searchable]
     public string? AffiliateName { get; set; }
 
     /// <summary>

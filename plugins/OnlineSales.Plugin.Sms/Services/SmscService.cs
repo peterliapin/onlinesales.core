@@ -44,4 +44,9 @@ public class SmscService : ISmsService
             throw new SmscException($"Failed to send message to {recipient} ( {jsonResponseObject!["error"]} )");
         }
     }
+
+    public string GetSender(string recipient)
+    {
+        return smscConfig.SenderId;
+    }
 }

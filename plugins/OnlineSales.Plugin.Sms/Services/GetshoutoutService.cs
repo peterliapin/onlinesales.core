@@ -56,4 +56,9 @@ public class GetshoutoutService : ISmsService
             throw new GetshoutoutException(responseContent);
         }
     }
+
+    public string GetSender(string recipient)
+    {
+        return getshoutoutConfig.SenderId;
+    }
 }

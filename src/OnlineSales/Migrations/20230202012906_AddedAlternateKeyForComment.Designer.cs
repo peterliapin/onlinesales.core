@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -12,10 +13,12 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Migrations
 {
-    [DbContext(typeof(PgDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ApiDbContext))]
+    [Migration("20230202012906_AddedAlternateKeyForComment")]
+    partial class AddedAlternateKeyForComment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,86 +26,6 @@ namespace OnlineSales.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("OnlineSales.Entities.Account", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("City")
-                        .HasColumnType("text")
-                        .HasColumnName("city");
-
-                    b.Property<string>("CountryCode")
-                        .HasColumnType("text")
-                        .HasColumnName("country_code");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<string>("Data")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("data");
-
-                    b.Property<string>("EmployeesRange")
-                        .HasColumnType("text")
-                        .HasColumnName("employees_range");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<double?>("Revenue")
-                        .HasColumnType("double precision")
-                        .HasColumnName("revenue");
-
-                    b.Property<Dictionary<string, string>>("SocialMedia")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("social_media");
-
-                    b.Property<string>("StateCode")
-                        .HasColumnType("text")
-                        .HasColumnName("state_code");
-
-                    b.Property<string[]>("Tags")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("tags");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_account");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasDatabaseName("ix_account_name");
-
-                    b.ToTable("account", (string)null);
-                });
 
             modelBuilder.Entity("OnlineSales.Entities.ChangeLog", b =>
                 {
@@ -271,10 +194,6 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_id");
-
                     b.Property<string>("Address1")
                         .HasColumnType("text")
                         .HasColumnName("address1");
@@ -355,9 +274,6 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_contact");
 
-                    b.HasIndex("AccountId")
-                        .HasDatabaseName("ix_contact_account_id");
-
                     b.HasIndex("DomainId")
                         .HasDatabaseName("ix_contact_domain_id");
 
@@ -434,14 +350,6 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_id");
-
-                    b.Property<bool>("AccountSynced")
-                        .HasColumnType("boolean")
-                        .HasColumnName("account_synced");
-
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
                         .HasColumnName("catch_all");
@@ -493,9 +401,6 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_domain");
-
-                    b.HasIndex("AccountId")
-                        .HasDatabaseName("ix_domain_account_id");
 
                     b.HasIndex("Name")
                         .IsUnique()
@@ -1304,20 +1209,12 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_contact_account_account_id");
-
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
                         .WithMany()
                         .HasForeignKey("DomainId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_contact_domain_domain_id");
-
-                    b.Navigation("Account");
 
                     b.Navigation("Domain");
                 });
@@ -1341,17 +1238,6 @@ namespace OnlineSales.Migrations
                     b.Navigation("Contact");
 
                     b.Navigation("Schedule");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_domain_account_account_id");
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>

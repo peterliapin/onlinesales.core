@@ -3,6 +3,7 @@
 // </copyright>
 
 using FluentAssertions;
+using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
@@ -13,6 +14,38 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     public OrdersTests()
         : base("/api/orders")
     {
+    }
+
+    [Fact]
+    public async Task GetWithSearchTest()
+    {
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var bulkEntitiesList = new List<Order>();
+
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", null, fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "AffiliateName", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.ExchangeRate = 123.456M, fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+
+        App.PopulateBulkData(bulkEntitiesList);
+                
+        var result = await GetTest<List<Order>>(itemsUrl + "?query=filiateNa");
+        result!.Count.Should().Be(1);
+        result[0].AffiliateName.Should().Be("AffiliateName");
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=3.4");
+        result!.Count.Should().Be(1);
+        result[0].ExchangeRate.Should().Be(123.456M);
+        
+        result = await GetTest<List<Order>>(itemsUrl + "?query=");
+        result!.Count.Should().Be(3);
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=SomeSearchString");
+        result!.Count.Should().Be(0);
     }
 
     [Fact]
@@ -229,6 +262,17 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
                 updatedOrder.CurrencyTotal.Should().Be(order.CurrencyTotal);
             }
         }
+    }
+
+    [Fact]
+    public async Task ImportFileWithoutContactId()
+    {
+        await CreateFKItem();
+        await PostImportTest(itemsUrl, "ordersNoFK.csv");
+
+        var addedOrder = App.GetDbContext() !.Orders!.First(o => o.Id == 1);
+        addedOrder.Should().NotBeNull();
+        addedOrder.ContactId.Should().Be(1);
     }
 
     protected override async Task<(TestOrder, string)> CreateItem(string uid, int fkId)

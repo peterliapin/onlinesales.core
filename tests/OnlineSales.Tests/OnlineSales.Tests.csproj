@@ -43,6 +43,10 @@
     <None Remove="Resources\ImportFiles\commentsBasic.json" />
     <None Remove="Resources\ImportFiles\commentsFull.csv" />
     <None Remove="Resources\ImportFiles\commentsFull.json" />
+    <None Remove="Resources\ImportFiles\commentsNoFKHasUKey.csv" />
+    <None Remove="Resources\ImportFiles\commentsNoFKHasUKeyUpdate.csv" />
+    <None Remove="Resources\ImportFiles\commentsWithOldParentKey.csv" />
+    <None Remove="Resources\ImportFiles\commentsWithParentKey.csv" />
     <None Remove="Resources\ImportFiles\contactBase.csv" />
     <None Remove="Resources\ImportFiles\contactsToUpdate.csv" />
     <None Remove="Resources\ImportFiles\contacts.json" />
@@ -50,6 +54,7 @@
     <None Remove="Resources\ImportFiles\orderItems.json" />
     <None Remove="Resources\ImportFiles\orderItemsNoRef.csv" />
     <None Remove="Resources\ImportFiles\orderItemsNoRef.json" />
+    <None Remove="Resources\ImportFiles\ordersNoFK.csv" />
     <None Remove="Resources\wavepoint.png" />
     <None Remove="Resources\wavepointModified.png" />
   </ItemGroup>
@@ -63,6 +68,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsWithOldParentKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsWithParentKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\ordersNoFK.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsNoFKHasUKeyUpdate.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\commentsNoFKHasUKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\ImportFiles\contactsToUpdate.csv">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

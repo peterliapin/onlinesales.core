@@ -1,0 +1,3 @@
+﻿# Consider all cs files in a folder as generated code
+[*.cs]
+generated_code = true;

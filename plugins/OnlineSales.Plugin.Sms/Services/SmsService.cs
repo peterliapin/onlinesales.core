@@ -29,6 +29,25 @@ public class SmsService : ISmsService
 
     public Task SendAsync(string recipient, string message)
     {
+        var smsService = GetSmsService(recipient);
+
+        if (smsService == null)
+        {
+            throw new UnknownCountryCodeException();
+        }
+
+        return smsService.SendAsync(recipient, message);
+    }
+
+    public string GetSender(string recipient)
+    {
+        var smsService = GetSmsService(recipient);
+
+        return smsService != null ? smsService.GetSender(recipient) : string.Empty;
+    }
+
+    private ISmsService? GetSmsService(string recipient)
+    {
         var phoneNumber = phoneNumberUtil.Parse(recipient, string.Empty);
 
         ISmsService? smsService;
@@ -42,12 +61,7 @@ public class SmsService : ISmsService
             // nothing here
         }
 
-        if (smsService == null)
-        {
-            throw new UnknownCountryCodeException();
-        }
-
-        return smsService.SendAsync(recipient, message);
+        return smsService;
     }
 
     private void InitGateways()

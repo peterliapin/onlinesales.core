@@ -109,6 +109,58 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         newComment!.CreatedByUserAgent.Should().Be("TestAgent2");
     }
 
+    [Fact]
+    public async Task ImportFileWithParentUniqueKeyTest()
+    {
+        await CreateFKItemsWithUid();
+        await PostImportTest(itemsUrl, "commentsNoFKHasUKey.csv");
+
+        var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        addedComment1.Should().NotBeNull();
+        addedComment1.PostId.Should().Be(1);
+
+        var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        addedComment2.Should().NotBeNull();
+        addedComment2.PostId.Should().Be(2);
+
+        await PostImportTest(itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
+        var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        updatedComment.Should().NotBeNull();
+        updatedComment.PostId.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task ImportFileWithParentKeysTest()
+    {
+        await CreateFKItemsWithUid();
+        await PostImportTest(itemsUrl, "commentsWithParentKey.csv");
+
+        var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        addedComment1.Should().NotBeNull();
+
+        var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        addedComment2.Should().NotBeNull();
+        addedComment2.ParentId.Should().Be(1);
+
+        var addedComment3 = App.GetDbContext() !.Comments!.First(c => c.Id == 3);
+        addedComment3.Should().NotBeNull();
+        addedComment3.ParentId.Should().Be(1);
+
+        await PostImportTest(itemsUrl, "commentsWithOldParentKey.csv");
+
+        var addedComment4 = App.GetDbContext() !.Comments!.First(c => c.Id == 4);
+        addedComment4.Should().NotBeNull();
+        addedComment4.ParentId.Should().Be(1);
+
+        var addedComment5 = App.GetDbContext() !.Comments!.First(c => c.Id == 5);
+        addedComment5.Should().NotBeNull();
+        addedComment5.ParentId.Should().Be(2);
+
+        var addedComment6 = App.GetDbContext() !.Comments!.First(c => c.Id == 6);
+        addedComment6.Should().NotBeNull();
+        addedComment6.ParentId.Should().Be(4);
+    }
+
     protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
         var testComment = new TestComment(uid, fkId);
@@ -136,5 +188,14 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var from = new CommentUpdateDto();
         to.Content = from.Content = to.Content + "Updated";
         return from;
+    }
+
+    private async Task CreateFKItemsWithUid()
+    {
+        var fkItemCreate1 = new TestPost("100");
+        var fkItemCreate2 = new TestPost("101");
+
+        await PostTest("/api/posts", fkItemCreate1);
+        await PostTest("/api/posts", fkItemCreate2);
     }
 }

@@ -23,7 +23,7 @@ public class DomainTaskTests : BaseTest
     [Fact]
     public async Task ExecuteTest()
     {
-        await TryToStop();
+        await Stop();
 
         var validDomain = new TestDomain()
         {
@@ -65,7 +65,7 @@ public class DomainTaskTests : BaseTest
         var filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
 
-        await TryToExecute();
+        await Execute();
 
         validDomainAdded = await GetTest<Domain>(validDomainLocation);
         validDomainAdded.Should().NotBeNull();
@@ -89,14 +89,9 @@ public class DomainTaskTests : BaseTest
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
     }
 
-    private async Task TryToStop()
+    private async Task Stop()
     {
-        var maxTries = 10;
-        HttpResponseMessage responce = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-        for (int i = 0; i < maxTries && responce!.StatusCode != HttpStatusCode.OK; ++i)
-        {
-            responce = await GetRequest(tasksUrl + "/stop/" + taskName);
-        }
+        HttpResponseMessage responce = await GetRequest(tasksUrl + "/stop/" + taskName);
 
         responce.StatusCode.Should().Be(HttpStatusCode.OK);
         responce.Should().NotBeNull();
@@ -107,15 +102,9 @@ public class DomainTaskTests : BaseTest
         task!.IsRunning.Should().BeFalse();
     }
 
-    private async Task TryToExecute()
+    private async Task Execute()
     {
-        var maxTries = 10;
-
-        HttpResponseMessage executeResponce = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-        for (int i = 0; i < maxTries && executeResponce.StatusCode != HttpStatusCode.OK; ++i)
-        {
-            executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
-        }
+        HttpResponseMessage executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
 
         executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
 
