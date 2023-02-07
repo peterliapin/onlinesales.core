@@ -17,7 +17,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto, EmailGroupDetailsDto>
 {
-    public EmailGroupsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public EmailGroupsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
     : base(dbContext, mapper, apiSettingsConfig)
     {
     }

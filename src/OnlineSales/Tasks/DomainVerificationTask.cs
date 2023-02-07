@@ -12,13 +12,13 @@ namespace OnlineSales.Tasks;
 
 public class DomainVerificationTask : BaseTask
 {
-    protected readonly ApiDbContext dbContext;
+    protected readonly PgDbContext dbContext;
 
     private readonly ChangeLogTaskConfig taskConfig = new ChangeLogTaskConfig();
 
     private readonly IDomainService domainService;
 
-    public DomainVerificationTask(ApiDbContext dbContext, IConfiguration configuration, IDomainService domainService, TaskStatusService taskStatusService)
+    public DomainVerificationTask(PgDbContext dbContext, IConfiguration configuration, IDomainService domainService, TaskStatusService taskStatusService)
         : base(taskStatusService)
     {
         this.dbContext = dbContext;

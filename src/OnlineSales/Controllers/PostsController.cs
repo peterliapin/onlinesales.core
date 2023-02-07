@@ -17,7 +17,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class PostsController : BaseControllerWithImport<Post, PostCreateDto, PostUpdateDto, PostDetailsDto, PostImportDto>
 {
-    public PostsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public PostsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         : base(dbContext, mapper, apiSettingsConfig)
     {
     }

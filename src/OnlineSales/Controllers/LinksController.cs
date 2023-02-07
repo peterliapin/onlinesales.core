@@ -19,7 +19,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto, LinkDetailsDto>
 {
-    public LinksController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public LinksController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         : base(dbContext, mapper, apiSettingsConfig)
     {
     }

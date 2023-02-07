@@ -13,7 +13,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Migrations
 {
-    [DbContext(typeof(ApiDbContext))]
+    [DbContext(typeof(PgDbContext))]
     [Migration("20230120184442_MakeRetryCountNullable")]
     partial class MakeRetryCountNullable
     {

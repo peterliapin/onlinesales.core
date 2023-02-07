@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nest;
+using OnlineSales.Data;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
@@ -13,11 +14,11 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class LogsController : Controller
 {
-    protected readonly ElasticClient elasticClient;
+    protected readonly EsDbContext esDbContext;
 
-    public LogsController(ElasticClient client)
+    public LogsController(EsDbContext esDbContext)
     {
-        elasticClient = client;
+        this.esDbContext = esDbContext;
     }
 
     // GET api/logs/
@@ -28,7 +29,7 @@ public class LogsController : Controller
     public virtual async Task<ActionResult<List<LogRecord>>> GetAll()
     {
         var logRecords = (
-                await elasticClient.SearchAsync<LogRecord>(
+                await esDbContext.ElasticClient.SearchAsync<LogRecord>(
                     s => s.Size(20).Skip(10)))
             .Documents.ToList();
 

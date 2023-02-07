@@ -70,6 +70,8 @@
     <Folder Include="Formatters\" />
     <Folder Include="Formatters\Csv\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Elastic\" />
+    <Folder Include="Elastic\Migrations\" />
   </ItemGroup>
   
   <ItemGroup>

@@ -16,7 +16,7 @@ public class VstoDbContext : PluginDbContextBase
     {
     }
 
-    public VstoDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+    public VstoDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
     }

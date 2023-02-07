@@ -17,11 +17,11 @@ namespace OnlineSales.Controllers
     [Route("api/[controller]")]
     public class ImagesController : ControllerBase
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext pgDbContext;
 
-        public ImagesController(ApiDbContext apiDbContext)
+        public ImagesController(PgDbContext pgDbContext)
         {
-            this.apiDbContext = apiDbContext;
+            this.pgDbContext = pgDbContext;
         }
 
         [HttpPost]
@@ -49,7 +49,7 @@ namespace OnlineSales.Controllers
             var imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
 
-            var scopeAndFileExists = from i in apiDbContext!.Images!
+            var scopeAndFileExists = from i in pgDbContext!.Images!
                                         where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
                                         select i;
             if (scopeAndFileExists.Any())
@@ -58,7 +58,7 @@ namespace OnlineSales.Controllers
                 uploadedImage!.Data = imageInBytes;
                 uploadedImage!.Size = incomingFileSize;
 
-                apiDbContext.Images!.Update(uploadedImage);
+                pgDbContext.Images!.Update(uploadedImage);
             }
             else
             {
@@ -72,10 +72,10 @@ namespace OnlineSales.Controllers
                     Extension = incomingFileExtension,
                 };
 
-                await apiDbContext.Images!.AddAsync(uploadedImage);
+                await pgDbContext.Images!.AddAsync(uploadedImage);
             }
 
-            await apiDbContext.SaveChangesAsync();
+            await pgDbContext.SaveChangesAsync();
 
             Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
             Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
@@ -96,7 +96,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            var uploadedImageData = await (from upi in apiDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            var uploadedImageData = await (from upi in pgDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
