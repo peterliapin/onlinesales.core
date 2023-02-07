@@ -64,7 +64,7 @@ OnlineSale is a light-weight, extendable headless CMS written in .NET 7. It is u
 
 OnlineSales platform integrates with two databases initially.
 1. PostgreSQL
-2. Elasticsearch
+2. Elastic
 
 * Docker containers should be created to run database services for development and testing environments.
 
@@ -78,7 +78,7 @@ OnlineSales platform integrates with two databases initially.
 
 4. Run `docker compose up` command.
 
-5. Open docker desktop and verify Postgres and Elasticsearch containers are up and running.
+5. Open docker desktop and verify Postgres and Elastic containers are up and running.
 
 #### Setting up docker containers for development environment
 
@@ -90,7 +90,7 @@ OnlineSales platform integrates with two databases initially.
 
 4. Run `docker compose up` command.
 
-5. Open docker desktop and verify Postgres and Elasticsearch containers are up and running.
+5. Open docker desktop and verify Postgres and Elastic containers are up and running.
 
 <a id="secrets-management"></a>
 ### Secrets management

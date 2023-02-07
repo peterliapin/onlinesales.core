@@ -15,13 +15,13 @@ namespace OnlineSales.Controllers
     [ApiController]
     public class EmailController : ControllerBase
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext dbContext;
         private readonly IEmailVerifyService emailVerifyService;
         private readonly IMapper mapper;
 
-        public EmailController(ApiDbContext apiDbContext, IEmailVerifyService emailVerifyService, IMapper mapper)
+        public EmailController(PgDbContext pgContext, IEmailVerifyService emailVerifyService, IMapper mapper)
         {
-            this.apiDbContext = apiDbContext;
+            this.dbContext = pgContext;
             this.emailVerifyService = emailVerifyService;
             this.mapper = mapper;
         }

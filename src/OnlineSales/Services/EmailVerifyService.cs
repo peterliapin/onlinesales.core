@@ -11,13 +11,13 @@ namespace OnlineSales.Services
 {
     public class EmailVerifyService : IEmailVerifyService
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext pgContext;
         private readonly IDomainService domainService;
         private readonly IEmailValidationExternalService emailValidationExternalService;
 
-        public EmailVerifyService(ApiDbContext apiDbContext, IDomainService domainService, IEmailValidationExternalService emailValidationExternalService)
+        public EmailVerifyService(PgDbContext apiDbContext, IDomainService domainService, IEmailValidationExternalService emailValidationExternalService)
         {
-            this.apiDbContext = apiDbContext;
+            this.pgContext = apiDbContext;
             this.domainService = domainService;
             this.emailValidationExternalService = emailValidationExternalService;
         }
@@ -42,12 +42,12 @@ namespace OnlineSales.Services
 
                 if (!domainExistance.hasDomain)
                 {
-                    apiDbContext.Add(newDomain);
+                    pgContext.Add(newDomain);
                 }
 
                 await domainService.Verify(newDomain!);
                 await VerifyEmail(email, newDomain);
-                await apiDbContext.SaveChangesAsync();
+                await pgContext.SaveChangesAsync();
 
                 return newDomain;
             }
@@ -57,7 +57,7 @@ namespace OnlineSales.Services
         {
             bool hasDomain = false;
 
-            var domainData = await (from dbDomain in apiDbContext.Domains where dbDomain.Name == domain select dbDomain).FirstOrDefaultAsync();
+            var domainData = await (from dbDomain in pgContext.Domains where dbDomain.Name == domain select dbDomain).FirstOrDefaultAsync();
 
             if (domainData != null)
             {

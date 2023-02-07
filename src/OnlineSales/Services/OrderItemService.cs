@@ -10,9 +10,9 @@ namespace OnlineSales.Services
 {
     public class OrderItemService : IOrderItemService
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext apiDbContext;
 
-        public OrderItemService(ApiDbContext apiDbContext)
+        public OrderItemService(PgDbContext apiDbContext)
         {
             this.apiDbContext = apiDbContext;
         }

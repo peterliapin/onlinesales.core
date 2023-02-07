@@ -20,7 +20,7 @@ public class MessagesController : Controller
     protected readonly ISmsService smsService;
     protected readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
 
-    public MessagesController(ApiDbContext dbContext, ISmsService smsService)
+    public MessagesController(PgDbContext dbContext, ISmsService smsService)
     {
         this.dbContext = dbContext;
         this.smsService = smsService;

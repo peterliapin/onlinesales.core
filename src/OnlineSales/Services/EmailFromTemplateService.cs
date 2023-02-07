@@ -16,9 +16,9 @@ namespace OnlineSales.Services
         private const string DefaultLanguage = "en";
 
         private readonly IEmailWithLogService emailWithLogService;
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext apiDbContext;
 
-        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, ApiDbContext apiDbContext)
+        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext apiDbContext)
         {
             this.emailWithLogService = emailWithLogService;
             this.apiDbContext = apiDbContext;

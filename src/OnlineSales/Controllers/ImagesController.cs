@@ -17,9 +17,9 @@ namespace OnlineSales.Controllers
     [Route("api/[controller]")]
     public class ImagesController : ControllerBase
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext apiDbContext;
 
-        public ImagesController(ApiDbContext apiDbContext)
+        public ImagesController(PgDbContext apiDbContext)
         {
             this.apiDbContext = apiDbContext;
         }

@@ -72,8 +72,10 @@ public class Program
 
         ConfigureConventions(builder);
         ConfigureControllers(builder);
-        ConfigurePostgres(builder);
-        ConfigureElasticSearch(builder);
+
+        builder.Services.AddDbContext<PgDbContext>();
+        builder.Services.AddSingleton<EsDbContext>();
+
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureIpDetailsResolver(builder);
@@ -193,7 +195,7 @@ public class Program
 
     private static void ConfigureLogs(WebApplicationBuilder builder)
     {
-        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticsearchConfig>();
+        var elasticConfig = builder.Configuration.GetSection("Elastic").Get<ElasticConfig>();
 
         if (elasticConfig == null)
         {
@@ -210,7 +212,7 @@ public class Program
         builder.Host.UseSerilog();
     }
 
-    private static ElasticsearchSinkOptions ConfigureELK(ElasticsearchConfig elasticConfig)
+    private static ElasticsearchSinkOptions ConfigureELK(ElasticConfig elasticConfig)
     {
         var uri = new Uri(elasticConfig.Url);
 
@@ -238,8 +240,11 @@ public class Program
             {
                 using (var scope = app.Services.CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-                    context.Database.Migrate();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<PgDbContext>();
+                    dbContext.Database.Migrate();
+
+                    var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
+                    esDbContext.Migrate();
 
                     var pluginContexts = scope.ServiceProvider.GetServices<PluginDbContextBase>();
 
@@ -247,6 +252,8 @@ public class Program
                     {
                         pluginContext.Database.Migrate();
                     }
+
+                    // var elasticClient = scope.ServiceProvider.GetRequiredService<ElasticClient>();
                 }
             }
         }
@@ -279,23 +286,6 @@ public class Program
             controllersBuilder = controllersBuilder.AddApplicationPart(plugin.GetType().Assembly).AddControllersAsServices();
             plugin.ConfigureServices(builder.Services, builder.Configuration);
         }
-    }
-
-    private static void ConfigurePostgres(WebApplicationBuilder builder)
-    {
-        builder.Services.AddDbContext<ApiDbContext>();
-    }
-
-    private static void ConfigureElasticSearch(WebApplicationBuilder builder)
-    {
-        var elasticConfig = builder.Configuration.GetSection("ElasticSearch").Get<ElasticsearchConfig>();
-
-        if (elasticConfig == null)
-        {
-            throw new MissingConfigurationException("ElasticSearch configuration is mandatory.");
-        }
-
-        builder.Services.AddElasticsearch(elasticConfig);
     }
 
     private static void ConfigureIpDetailsResolver(WebApplicationBuilder builder)
@@ -431,16 +421,15 @@ public class Program
     private static void ConfigureEmailServices(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IEmailWithLogService, EmailWithLogService>();
-
         builder.Services.AddScoped<IEmailFromTemplateService, EmailFromTemplateService>();
     }
 
     private static void ConfigureTasks(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
-        builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, SyncEsTask>();
+        builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, DomainVerificationTask>();
+        builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();                       
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

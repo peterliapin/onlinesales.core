@@ -7,14 +7,14 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
 
-public abstract class PluginDbContextBase : ApiDbContext
+public abstract class PluginDbContextBase : PgDbContext
 {
     protected PluginDbContextBase()
         : base()
     {
     }
 
-    protected PluginDbContextBase(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+    protected PluginDbContextBase(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
     }
@@ -48,7 +48,7 @@ public abstract class PluginDbContextBase : ApiDbContext
         {
             var items = modelBuilder.Model.GetEntityTypes();
 
-            foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(ApiDbContext).Assembly))
+            foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(PgDbContext).Assembly))
             {
                 item.SetIsTableExcludedFromMigrations(true);
             }

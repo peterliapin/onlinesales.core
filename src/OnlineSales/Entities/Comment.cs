@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
@@ -17,10 +18,11 @@ public enum CommentStatus
 }
 
 [Table("comment")]
-[SupportsElasticSearch]
+[SupportsElastic]
 [SupportsChangeLog]
 public class Comment : BaseEntity
 {
+    [Required]
     public string AuthorName { get; set; } = string.Empty;
 
     [EmailAddress]
@@ -29,18 +31,19 @@ public class Comment : BaseEntity
     [Required]
     public string Content { get; set; } = string.Empty;
 
-    [JsonIgnore]
     public CommentStatus Approved { get; set; } = CommentStatus.NotApproved;
 
     [Required]
     public int PostId { get; set; }
 
-    [JsonIgnore]
+    [Ignore]
+    [JsonIgnore]    
     [ForeignKey("PostId")]
     public virtual Post? Post { get; set; }
 
     public int? ParentId { get; set; }
 
+    [Ignore]
     [JsonIgnore]
     [ForeignKey("ParentId")]
     public virtual Comment? Parent { get; set; }

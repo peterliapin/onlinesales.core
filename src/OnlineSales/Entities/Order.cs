@@ -11,9 +11,9 @@ using OnlineSales.DataAnnotations;
 namespace OnlineSales.Entities;
 
 [Table("order")]
-[Index(nameof(RefNo), IsUnique = true)]
-[SupportsElasticSearch]
+[SupportsElastic]
 [SupportsChangeLog]
+[Index(nameof(RefNo), IsUnique = true)]
 public class Order : BaseEntity
 {
     /// <summary>

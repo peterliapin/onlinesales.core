@@ -28,7 +28,7 @@ public class TestApplication : WebApplicationFactory<Program>
     {
         using (var scope = Services.CreateScope())
         {
-            var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+            var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
             dataContaxt.Database.EnsureDeleted();
             dataContaxt.Database.Migrate();
         }
@@ -38,16 +38,16 @@ public class TestApplication : WebApplicationFactory<Program>
     {
         using (var scope = Services.CreateScope())
         {
-            var dataContaxt = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+            var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
             dataContaxt.AddRange(bulkItems);
             dataContaxt.SaveChanges();
         }
     }
 
-    public ApiDbContext? GetDbContext()
+    public PgDbContext? GetDbContext()
     {
         var scope = Services.CreateScope();
-        var dataContext = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+        var dataContext = scope.ServiceProvider.GetRequiredService<PgDbContext>();
         return dataContext;
     }
 

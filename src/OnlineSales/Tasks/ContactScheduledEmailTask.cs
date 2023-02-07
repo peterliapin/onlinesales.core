@@ -14,11 +14,11 @@ namespace OnlineSales.Tasks;
 
 public class ContactScheduledEmailTask : BaseTask
 {
-    private readonly ApiDbContext dbContext;
+    private readonly PgDbContext dbContext;
     private readonly IEmailFromTemplateService emailFromTemplateService;
     private readonly TaskConfig? taskConfig = new TaskConfig();
 
-    public ContactScheduledEmailTask(ApiDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration, TaskStatusService taskStatusService)
+    public ContactScheduledEmailTask(PgDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration, TaskStatusService taskStatusService)
         : base(taskStatusService)
     {
         this.dbContext = dbContext;

@@ -4,16 +4,15 @@
 
 using Medallion.Threading.Postgres;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using OnlineSales.Data;
 
 namespace OnlineSales.Infrastructure;
 
 public class LockManager
 {
-    private readonly ApiDbContext dbContext;
+    private readonly PgDbContext dbContext;
 
-    public LockManager(ApiDbContext dbContext)
+    public LockManager(PgDbContext dbContext)
     {
         this.dbContext = dbContext;
     }

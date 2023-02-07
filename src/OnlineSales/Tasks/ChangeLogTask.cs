@@ -2,26 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System;
 using System.Reflection;
-using Microsoft.AspNetCore.Components.Web;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
-using OnlineSales.Interfaces;
 using OnlineSales.Services;
 
 namespace OnlineSales.Tasks;
 
 public abstract class ChangeLogTask : BaseTask
 {    
-    protected readonly ApiDbContext dbContext;
+    protected readonly PgDbContext dbContext;
 
     protected readonly IEnumerable<PluginDbContextBase> pluginDbContexts;
 
     private readonly HashSet<Type> loggedTypes;
 
-    protected ChangeLogTask(ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
+    protected ChangeLogTask(PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
         : base(taskStatusService)
     {
         this.dbContext = dbContext;
@@ -75,7 +72,7 @@ public abstract class ChangeLogTask : BaseTask
 
     internal abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
 
-    protected HashSet<Type> GetTypes(ApiDbContext context)
+    protected HashSet<Type> GetTypes(PgDbContext context)
     {
         var res = new HashSet<Type>();
 

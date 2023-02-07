@@ -22,7 +22,7 @@ public class PostgresConfig : BaseServiceConfig
     public string ConnectionString => $"User ID={UserName};Password={Password};Server={Server};Port={Port};Database={Database};Pooling=true;";
 }
 
-public class ElasticsearchConfig : BaseServiceConfig
+public class ElasticConfig : BaseServiceConfig
 {
     public bool UseHttps { get; set; } = false;
 
@@ -100,7 +100,7 @@ public class AppSettings
 {
     public PostgresConfig Postgres { get; set; } = new PostgresConfig();
 
-    public ElasticsearchConfig ElasticSearch { get; set; } = new ElasticsearchConfig();
+    public ElasticConfig Elastic { get; set; } = new ElasticConfig();
 
     public SmtpServerConfig SmtpServer { get; set; } = new SmtpServerConfig();
 }

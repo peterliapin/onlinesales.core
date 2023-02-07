@@ -13,9 +13,9 @@ namespace OnlineSales.Services
     public class EmailWithLogService : IEmailWithLogService
     {
         private readonly IEmailService emailService;
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext apiDbContext;
 
-        public EmailWithLogService(IEmailService emailService, ApiDbContext apiDbContext)
+        public EmailWithLogService(IEmailService emailService, PgDbContext apiDbContext)
         {
             this.emailService = emailService;
             this.apiDbContext = apiDbContext;

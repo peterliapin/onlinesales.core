@@ -12,7 +12,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Migrations
 {
-    [DbContext(typeof(ApiDbContext))]
+    [DbContext(typeof(PgDbContext))]
     partial class ApiDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

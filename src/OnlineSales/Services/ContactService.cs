@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using AutoMapper;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -11,12 +10,12 @@ namespace OnlineSales.Services
 {
     public class ContactService : IContactService
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext apiDbContext;
         private readonly IDomainService domainService;
         private readonly IAccountExternalService accountExternalService;
-        private readonly IEmailVerifyService emailVerifyService;
+        private readonly IEmailVerifyService emailVerifyService;        
 
-        public ContactService(ApiDbContext apiDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
+        public ContactService(PgDbContext apiDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
         {
             this.apiDbContext = apiDbContext;
             this.domainService = domainService;

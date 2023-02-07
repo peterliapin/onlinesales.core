@@ -17,10 +17,11 @@ namespace OnlineSales.Infrastructure
         private static bool? isPrimaryNode;
 
         private readonly IEnumerable<ITask> tasks;
-        private readonly ApiDbContext dbContext;
-        private readonly LockManager lockManager;
+        private readonly PgDbContext dbContext;        
+        
+        private readonly LockManager lockManager;        
 
-        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext, LockManager lockManager)
+        public TaskRunner(IEnumerable<ITask> tasks, PgDbContext dbContext, LockManager lockManager)
         {
             this.dbContext = dbContext;
             this.tasks = tasks;

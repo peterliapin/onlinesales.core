@@ -6,14 +6,15 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("contact")]
-[Index(nameof(Email), IsUnique = true)]
-[SupportsElasticSearch]
+[SupportsElastic]
 [SupportsChangeLog]
+[Index(nameof(Email), IsUnique = true)]
 public class Contact : BaseEntity
 {
     public string? LastName { get; set; }
@@ -44,9 +45,10 @@ public class Contact : BaseEntity
     [Required]
     public int DomainId { get; set; }
 
-    [DeleteBehavior(DeleteBehavior.Restrict)]
+    [Ignore]
     [JsonIgnore]
     [ForeignKey("DomainId")]
+    [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Domain? Domain { get; set; }
 
     public int? AccountId { get; set; }

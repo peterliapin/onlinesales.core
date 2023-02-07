@@ -21,7 +21,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 {
     private readonly IContactService contactService;
 
-    public ContactsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IContactService contactService)
+    public ContactsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IContactService contactService)
         : base(dbContext, mapper, apiSettingsConfig)
     {
         this.contactService = contactService;

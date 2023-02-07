@@ -1,8 +1,8 @@
 ﻿version: '3.4'
 
 services:
-  elasticsearch-test:
-    container_name: elasticsearch-test
+  elastic-test:
+    container_name: elastic-test
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
     ports:
       - 19200:9200

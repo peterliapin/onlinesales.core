@@ -21,11 +21,11 @@ namespace OnlineSales.Controllers
         where TD : class
     {
         protected readonly DbSet<T> dbSet;
-        protected readonly ApiDbContext dbContext;
+        protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
         private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
 
-        public BaseController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        public BaseController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {
             this.dbContext = dbContext;
             this.dbSet = dbContext.Set<T>();
