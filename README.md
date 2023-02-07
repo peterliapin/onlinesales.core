@@ -236,7 +236,7 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
 <a id="plugin-migrations"></a>
 ### Plugin-level migrations
 
-To extend the core project's database context, use the `PluginDbContextBase` abstract database context class that comes under `OnlineSales.Data` namespace, which inherited from the `ApiDbContext` class which is the main database context of the core project.
+To extend the core project's database context, use the `PluginDbContextBase` abstract database context class that comes under `OnlineSales.Data` namespace, which inherited from the `PgDbContext` class which is the main database context of the core project.
 * Create new models which are specific to the plugin requirement.
 
 * Create a new class inherited from `PluginDbContextBase` class and add `DbSet` type properties which map to database tables, for the newly created entities.

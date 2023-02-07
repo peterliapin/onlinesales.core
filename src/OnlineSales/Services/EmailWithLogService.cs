@@ -13,12 +13,12 @@ namespace OnlineSales.Services
     public class EmailWithLogService : IEmailWithLogService
     {
         private readonly IEmailService emailService;
-        private readonly PgDbContext apiDbContext;
+        private readonly PgDbContext pgDbContext;
 
-        public EmailWithLogService(IEmailService emailService, PgDbContext apiDbContext)
+        public EmailWithLogService(IEmailService emailService, PgDbContext pgDbContext)
         {
             this.emailService = emailService;
-            this.apiDbContext = apiDbContext;
+            this.pgDbContext = pgDbContext;
         }
 
         public async Task SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments, int templateId = 0)
@@ -100,8 +100,8 @@ namespace OnlineSales.Services
                 log.Status = status ? EmailStatus.Sent : EmailStatus.NotSent;
                 log.CreatedAt = DateTime.UtcNow;
 
-                await apiDbContext.EmailLogs!.AddAsync(log);
-                await apiDbContext.SaveChangesAsync();
+                await pgDbContext.EmailLogs!.AddAsync(log);
+                await pgDbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -111,7 +111,7 @@ namespace OnlineSales.Services
 
         private async Task<string> GetContactEmailById(int contactId)
         {
-            var contact = await apiDbContext.Contacts!.FirstOrDefaultAsync(x => x.Id == contactId);
+            var contact = await pgDbContext.Contacts!.FirstOrDefaultAsync(x => x.Id == contactId);
 
             return contact!.Email;
         }

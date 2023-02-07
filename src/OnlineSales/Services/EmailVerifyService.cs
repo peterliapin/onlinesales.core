@@ -15,9 +15,9 @@ namespace OnlineSales.Services
         private readonly IDomainService domainService;
         private readonly IEmailValidationExternalService emailValidationExternalService;
 
-        public EmailVerifyService(PgDbContext apiDbContext, IDomainService domainService, IEmailValidationExternalService emailValidationExternalService)
+        public EmailVerifyService(PgDbContext pgDbContext, IDomainService domainService, IEmailValidationExternalService emailValidationExternalService)
         {
-            this.pgContext = apiDbContext;
+            this.pgContext = pgDbContext;
             this.domainService = domainService;
             this.emailValidationExternalService = emailValidationExternalService;
         }

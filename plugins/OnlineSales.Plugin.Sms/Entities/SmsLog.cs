@@ -10,7 +10,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Plugin.Sms.Entities;
 
 [Table("sms_log")]
-[SupportsElasticSearch]
+[SupportsElastic]
 [SupportsChangeLog]
 
 public class SmsLog : BaseCreateByEntity

@@ -21,13 +21,13 @@ public class PgDbContext : DbContext
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PgDbContext"/> class.
-    /// Constructor with no parameters and manual configuration building is required for the case when you would like to use ApiDbContext as a base class for a new context (let's say in a plugin).
+    /// Constructor with no parameters and manual configuration building is required for the case when you would like to use PgDbContext as a base class for a new context (let's say in a plugin).
     /// </summary>
     public PgDbContext()
     {
         try
         {
-            Console.WriteLine("Initializing ApiDbContext...");
+            Console.WriteLine("Initializing PgDbContext...");
 
             this.configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", false)
@@ -35,11 +35,11 @@ public class PgDbContext : DbContext
                 .AddUserSecrets(typeof(Program).Assembly)
                 .Build();
 
-            Console.WriteLine("ApiDbContext initialized");
+            Console.WriteLine("PgDbContext initialized");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to create ApiDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
+            Console.WriteLine("Failed to create PgDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
             throw;
         }
     }
@@ -180,7 +180,7 @@ public class PgDbContext : DbContext
     {
         try
         {
-            Console.WriteLine("Configuring ApiDbContext...");
+            Console.WriteLine("Configuring PgDbContext...");
 
             var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
 
@@ -194,11 +194,11 @@ public class PgDbContext : DbContext
                 b => b.MigrationsHistoryTable("_migrations"))
             .UseSnakeCaseNamingConvention();
 
-            Console.WriteLine("ApiDbContext successfully configured");
+            Console.WriteLine("PgDbContext successfully configured");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to configure ApiDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
+            Console.WriteLine("Failed to configure PgDbContext. Error: {0}, Stack Trace: {1}", ex.Message, ex.StackTrace);
             throw;
         }
     }

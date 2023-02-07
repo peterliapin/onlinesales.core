@@ -16,7 +16,7 @@ public class SmsDbContext : PluginDbContextBase
     {
     }
 
-    public SmsDbContext(DbContextOptions<ApiDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+    public SmsDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
     }
