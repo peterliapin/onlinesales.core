@@ -13,10 +13,10 @@ namespace OnlineSales.Entities
         NotSent = 0,
         Sent = 1,
     }
-
+    
+    [SupportsElastic]
+    [SupportsChangeLog]    
     [Table("email_log")]
-    [SupportsElasticSearch]
-    [SupportsChangeLog]
     public class EmailLog : BaseEntity
     {
         /// <summary>

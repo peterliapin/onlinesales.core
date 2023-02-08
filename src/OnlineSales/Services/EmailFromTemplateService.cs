@@ -16,12 +16,12 @@ namespace OnlineSales.Services
         private const string DefaultLanguage = "en";
 
         private readonly IEmailWithLogService emailWithLogService;
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext pgDbContext;
 
-        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, ApiDbContext apiDbContext)
+        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext pgDbContext)
         {
             this.emailWithLogService = emailWithLogService;
-            this.apiDbContext = apiDbContext;
+            this.pgDbContext = pgDbContext;
         }
 
         public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments)
@@ -44,23 +44,23 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(language));
+            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(language));
 
             return template!;
         }
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, int contactId)
         {
-            var contactLanguage = apiDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId) !.Language;
+            var contactLanguage = pgDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId) !.Language;
 
-            var template = await apiDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(contactLanguage));
+            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(contactLanguage));
 
             return template!;
         }
 
         private string GetSupportedLanguage(string? language)
         {
-            var supportedLanguages = apiDbContext.EmailTemplates!.Select(e => e.Language).Distinct().ToArray();
+            var supportedLanguages = pgDbContext.EmailTemplates!.Select(e => e.Language).Distinct().ToArray();
 
             if (supportedLanguages.Contains(language, StringComparer.OrdinalIgnoreCase))
             {

@@ -17,7 +17,7 @@ namespace OnlineSales.Controllers
     [Route("api/[controller]")]
     public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto, OrderImportDto>
     {
-        public OrdersController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        public OrdersController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
             : base(dbContext, mapper, apiSettingsConfig)
         {
         }

@@ -17,7 +17,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailTemplateDetailsDto>
 {
-    public EmailTemplatesController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public EmailTemplatesController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
     : base(dbContext, mapper, apiSettingsConfig)
     {
     }

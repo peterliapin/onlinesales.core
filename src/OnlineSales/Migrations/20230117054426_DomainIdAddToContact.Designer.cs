@@ -11,7 +11,7 @@ using OnlineSales.Data;
 
 namespace OnlineSales.Migrations
 {
-    [DbContext(typeof(ApiDbContext))]
+    [DbContext(typeof(PgDbContext))]
     [Migration("20230117054426_DomainIdAddToContact")]
     partial class DomainIdAddToContact
     {

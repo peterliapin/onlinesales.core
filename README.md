@@ -64,7 +64,7 @@ OnlineSale is a light-weight, extendable headless CMS written in .NET 7. It is u
 
 OnlineSales platform integrates with two databases initially.
 1. PostgreSQL
-2. Elasticsearch
+2. Elastic
 
 * Docker containers should be created to run database services for development and testing environments.
 
@@ -78,7 +78,7 @@ OnlineSales platform integrates with two databases initially.
 
 4. Run `docker compose up` command.
 
-5. Open docker desktop and verify Postgres and Elasticsearch containers are up and running.
+5. Open docker desktop and verify Postgres and Elastic containers are up and running.
 
 #### Setting up docker containers for development environment
 
@@ -90,7 +90,7 @@ OnlineSales platform integrates with two databases initially.
 
 4. Run `docker compose up` command.
 
-5. Open docker desktop and verify Postgres and Elasticsearch containers are up and running.
+5. Open docker desktop and verify Postgres and Elastic containers are up and running.
 
 <a id="secrets-management"></a>
 ### Secrets management
@@ -236,7 +236,7 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
 <a id="plugin-migrations"></a>
 ### Plugin-level migrations
 
-To extend the core project's database context, use the `PluginDbContextBase` abstract database context class that comes under `OnlineSales.Data` namespace, which inherited from the `ApiDbContext` class which is the main database context of the core project.
+To extend the core project's database context, use the `PluginDbContextBase` abstract database context class that comes under `OnlineSales.Data` namespace, which inherited from the `PgDbContext` class which is the main database context of the core project.
 * Create new models which are specific to the plugin requirement.
 
 * Create a new class inherited from `PluginDbContextBase` class and add `DbSet` type properties which map to database tables, for the newly created entities.

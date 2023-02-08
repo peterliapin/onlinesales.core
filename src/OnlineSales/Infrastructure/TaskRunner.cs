@@ -17,9 +17,9 @@ namespace OnlineSales.Infrastructure
         private static bool? isPrimaryNode;
 
         private readonly IEnumerable<ITask> tasks;
-        private readonly ApiDbContext dbContext;
-
-        public TaskRunner(IEnumerable<ITask> tasks, ApiDbContext dbContext)
+        private readonly PgDbContext dbContext;        
+        
+        public TaskRunner(IEnumerable<ITask> tasks, PgDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.tasks = tasks;

@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using Elasticsearch.Net;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
@@ -19,10 +18,10 @@ namespace OnlineSales.Tasks
     public class SyncEsTask : ChangeLogTask
     {
         private readonly ChangeLogTaskConfig? taskConfig = new ChangeLogTaskConfig();
-        private readonly ElasticClient elasticClient;
+        private readonly EsDbContext esDbContext;
         private readonly string prefix = string.Empty;
 
-        public SyncEsTask(IConfiguration configuration, ApiDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, ElasticClient elasticClient, TaskStatusService taskStatusService)
+        public SyncEsTask(IConfiguration configuration, PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, EsDbContext esDbContext, TaskStatusService taskStatusService)
             : base(dbContext, pluginDbContexts, taskStatusService)
         {
             var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<ChangeLogTaskConfig>();
@@ -31,14 +30,14 @@ namespace OnlineSales.Tasks
                 taskConfig = config;
             }
 
-            var elasticPrefix = configuration.GetSection("Elasticsearch:IndexPrefix").Get<string>();
+            var elasticPrefix = configuration.GetSection("Elastic:IndexPrefix").Get<string>();
 
             if (!string.IsNullOrEmpty(elasticPrefix))
             {
                 prefix = elasticPrefix + "-";
             }
 
-            this.elasticClient = elasticClient;
+            this.esDbContext = esDbContext;
         }
 
         public override int ChangeLogBatchSize => taskConfig!.BatchSize;
@@ -71,14 +70,14 @@ namespace OnlineSales.Tasks
                 }
             }
 
-            var bulkResponse = elasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString());
+            var bulkResponse = esDbContext.ElasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString());
 
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
         }
 
         protected override bool IsTypeSupported(Type type)
         {
-            return type.GetCustomAttribute<SupportsElasticSearchAttribute>() != null;
+            return type.GetCustomAttribute<SupportsElasticAttribute>() != null;
         }
     }
 }

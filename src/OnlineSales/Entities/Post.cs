@@ -5,14 +5,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("post")]
-[Index(nameof(Slug), IsUnique = true)]
-[SupportsElasticSearch]
+[SupportsElastic]
 [SupportsChangeLog]
+[Index(nameof(Slug), IsUnique = true)]
 public class Post : BaseEntity
 {
     [Required]
@@ -46,5 +47,6 @@ public class Post : BaseEntity
 
     public bool AllowComments { get; set; } = false;
 
+    [Ignore]
     public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
 }

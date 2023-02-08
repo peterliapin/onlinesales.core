@@ -23,7 +23,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     where TD : class
     where TI : class
 {
-    public BaseControllerWithImport(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+    public BaseControllerWithImport(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
         : base(dbContext, mapper, apiSettingsConfig)
     {
     }

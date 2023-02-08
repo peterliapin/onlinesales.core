@@ -1,13 +1,13 @@
 version: '3.4'
 
 services:
-  elasticsearch:
-    container_name: elasticsearch
+  elastic:
+    container_name: elastic
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
     ports:
       - 9200:9200
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - elastic-data:/usr/share/elasticsearch/data
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
@@ -19,9 +19,9 @@ services:
     ports:
       - 5601:5601
     depends_on:
-      - elasticsearch
+      - elastic
     environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTIC_URL=http://elastic:9200
 
   postgres:
     container_name: postgres
@@ -38,5 +38,5 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
 volumes:
-  elasticsearch-data:
   postgres-data:
+  elastic-data:  

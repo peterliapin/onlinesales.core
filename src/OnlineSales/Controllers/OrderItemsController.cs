@@ -21,7 +21,7 @@ namespace OnlineSales.Controllers
     {
         private readonly IOrderItemService orderItemService;
 
-        public OrderItemsController(ApiDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        public OrderItemsController(PgDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, IOptions<ApiSettingsConfig> apiSettingsConfig)
             : base(dbContext, mapper, apiSettingsConfig)
         {
             this.orderItemService = orderItemService;

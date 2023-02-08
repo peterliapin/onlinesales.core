@@ -20,7 +20,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 {
     private readonly IDomainService domainService;
 
-    public DomainsController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService)
+    public DomainsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService)
         : base(dbContext, mapper, apiSettingsConfig)
     {
         this.domainService = domainService;

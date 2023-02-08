@@ -16,7 +16,7 @@ namespace OnlineSales.Controllers
     [ApiController]
     public class AccountController : BaseControllerWithImport<Account, AccountCreateDto, AccountUpdateDto, AccountDetailsDto, AccountImportDto>
     {
-        public AccountController(ApiDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
+        public AccountController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig)
             : base(dbContext, mapper, apiSettingsConfig)
         {
         }

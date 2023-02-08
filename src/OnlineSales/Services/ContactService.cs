@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using AutoMapper;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -11,14 +10,14 @@ namespace OnlineSales.Services
 {
     public class ContactService : IContactService
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext pgDbContext;
         private readonly IDomainService domainService;
         private readonly IAccountExternalService accountExternalService;
-        private readonly IEmailVerifyService emailVerifyService;
+        private readonly IEmailVerifyService emailVerifyService;        
 
-        public ContactService(ApiDbContext apiDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
+        public ContactService(PgDbContext pgDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
         {
-            this.apiDbContext = apiDbContext;
+            this.pgDbContext = pgDbContext;
             this.domainService = domainService;
             this.accountExternalService = accountExternalService;
             this.emailVerifyService = emailVerifyService;
@@ -30,9 +29,9 @@ namespace OnlineSales.Services
 
             var accountReturnedValue = await EnrichWithAccountId(domainReturnedValue);
 
-            await apiDbContext.Contacts!.AddAsync(accountReturnedValue);
+            await pgDbContext.Contacts!.AddAsync(accountReturnedValue);
 
-            await apiDbContext.SaveChangesAsync();
+            await pgDbContext.SaveChangesAsync();
 
             return accountReturnedValue!;
         }
@@ -43,9 +42,9 @@ namespace OnlineSales.Services
 
             var accountReturnedValue = await EnrichWithAccountId(domainReturnedValue);
 
-            apiDbContext.Contacts!.Update(accountReturnedValue);
+            pgDbContext.Contacts!.Update(accountReturnedValue);
 
-            await apiDbContext.SaveChangesAsync();
+            await pgDbContext.SaveChangesAsync();
 
             return accountReturnedValue;
         }
@@ -54,7 +53,7 @@ namespace OnlineSales.Services
         {
             var domainName = GetDomainFromEmail(contact.Email);
 
-            var domainsQueryResult = apiDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefault();
+            var domainsQueryResult = pgDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefault();
 
             if (domainsQueryResult != null)
             {
@@ -76,7 +75,7 @@ namespace OnlineSales.Services
             var contactsWithDomain = from contact in contacts select new { Contact = contact, DomainName = GetDomainFromEmail(contact.Email) };
 
             var domainsQueryResult = (from contactWithDomain in contactsWithDomain
-                                      join domain in apiDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
+                                      join domain in pgDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
                                       from domain in domainTemp.DefaultIfEmpty()
                                       select new { EnteredContact = contactWithDomain.Contact, DomainName = contactWithDomain.DomainName, DbDomain = domain, DomainId = domain?.Id ?? 0 }).ToList();
 
@@ -96,7 +95,7 @@ namespace OnlineSales.Services
                     if (!existingDomain.Any())
                     {
                         newDomains.Add(domain.Name, domain);
-                        apiDbContext.Add(domain);
+                        pgDbContext.Add(domain);
                         domainItem.EnteredContact.Domain = domain;
                     }
                     else
@@ -200,7 +199,7 @@ namespace OnlineSales.Services
 
             var extAccountInfo = await accountExternalService.GetAccountDetails(domain.Name) !;
 
-            var existingDbRecords = (from accounts in apiDbContext.Accounts where accounts.Name == extAccountInfo.Name select accounts).FirstOrDefault();
+            var existingDbRecords = (from accounts in pgDbContext.Accounts where accounts.Name == extAccountInfo.Name select accounts).FirstOrDefault();
 
             if (existingDbRecords == null)
             {

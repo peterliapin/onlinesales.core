@@ -6,13 +6,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
 [Table("domain")]
 [SupportsChangeLog]
-[SupportsElasticSearch]
+[SupportsElastic]
 [Index(nameof(Name), IsUnique = true)]
 public class Domain : BaseEntityWithIdAndDates
 {
@@ -36,16 +37,17 @@ public class Domain : BaseEntityWithIdAndDates
 
     public bool? CatchAll { get; set; }
 
+    [Nested]
     [Column(TypeName = "jsonb")]
     public List<DnsRecord>? DnsRecords { get; set; }
 
     public bool? DnsCheck { get; set; }
 
     public int? AccountId { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.Restrict)]
+    
     [JsonIgnore]
     [ForeignKey("AccountId")]
+    [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
 
     public bool AccountSynced { get; set; } = false;

@@ -10,11 +10,11 @@ namespace OnlineSales.Services
 {
     public class OrderItemService : IOrderItemService
     {
-        private readonly ApiDbContext apiDbContext;
+        private readonly PgDbContext pgDbContext;
 
-        public OrderItemService(ApiDbContext apiDbContext)
+        public OrderItemService(PgDbContext pgDbContext)
         {
-            this.apiDbContext = apiDbContext;
+            this.pgDbContext = pgDbContext;
         }
 
         public async Task<int> AddOrderItem(Order order, OrderItem orderItem)
@@ -22,9 +22,9 @@ namespace OnlineSales.Services
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, order.ExchangeRate);
 
-            using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
+            using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
             {
-                await apiDbContext.AddAsync(orderItem);
+                await pgDbContext.AddAsync(orderItem);
 
                 var totals = CalculateTotalsForOrder(orderItem);
 
@@ -32,8 +32,8 @@ namespace OnlineSales.Services
                 order.Total = totals.total;
                 order.Quantity = totals.quantity;
 
-                apiDbContext.Update(order);
-                await apiDbContext.SaveChangesAsync();
+                pgDbContext.Update(order);
+                await pgDbContext.SaveChangesAsync();
 
                 await transaction.CommitAsync();
             }
@@ -43,9 +43,9 @@ namespace OnlineSales.Services
 
         public async Task DeleteOrderItem(Order order, OrderItem orderItem)
         {
-            using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
+            using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
             {
-                apiDbContext.Remove(orderItem);
+                pgDbContext.Remove(orderItem);
 
                 orderItem.CurrencyTotal = 0;
                 orderItem.Total = 0;
@@ -56,8 +56,8 @@ namespace OnlineSales.Services
                 order.CurrencyTotal = totals.currencyTotal;
                 order.Total = totals.total;
 
-                apiDbContext.Update(order);
-                await apiDbContext.SaveChangesAsync();
+                pgDbContext.Update(order);
+                await pgDbContext.SaveChangesAsync();
 
                 await transaction.CommitAsync();
             }
@@ -68,9 +68,9 @@ namespace OnlineSales.Services
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, order!.ExchangeRate);
 
-            using (var transaction = await apiDbContext!.Database.BeginTransactionAsync())
+            using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
             {
-                apiDbContext.Update(orderItem);
+                pgDbContext.Update(orderItem);
 
                 var totals = CalculateTotalsForOrder(orderItem, orderItem.Id);
 
@@ -78,8 +78,8 @@ namespace OnlineSales.Services
                 order.Total = totals.total;
                 order.Quantity = totals.quantity;
 
-                apiDbContext.Update(order);
-                await apiDbContext.SaveChangesAsync();
+                pgDbContext.Update(order);
+                await pgDbContext.SaveChangesAsync();
 
                 await transaction.CommitAsync();
             }
@@ -104,8 +104,8 @@ namespace OnlineSales.Services
             int quantity = 0;
             
             var orderItems = patchId == 0
-                ? (from ordItem in apiDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId select ordItem).ToList()
-                : (from ordItem in apiDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId && ordItem.Id != patchId select ordItem).ToList();
+                ? (from ordItem in pgDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId select ordItem).ToList()
+                : (from ordItem in pgDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId && ordItem.Id != patchId select ordItem).ToList();
 
             currencyTotal = orderItems.Sum(t => t.CurrencyTotal);
             total = orderItems.Sum(t => t.Total);
