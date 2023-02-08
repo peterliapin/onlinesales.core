@@ -19,7 +19,9 @@ public class Account : BaseEntity
 
     public string? StateCode { get; set; }
 
-    public string? CountryCode { get; set; } 
+    public string? CountryCode { get; set; }
+
+    public string? SiteUrl { get; set; }
 
     public string? EmployeesRange { get; set; } 
 
@@ -33,4 +35,6 @@ public class Account : BaseEntity
 
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
+
+    public string? Source { get; set; }
 }
