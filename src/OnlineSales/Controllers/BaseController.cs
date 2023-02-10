@@ -135,8 +135,9 @@ namespace OnlineSales.Controllers
             }
             else
             {
+                var recordsCount = await query.CountAsync();
                 selectResult = await query.Take(limit).ToListAsync();
-                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, selectResult.Count.ToString());
+                this.Response.Headers.Add(ResponseHeaderNames.TotalCount, recordsCount.ToString());
             }
 
             var resultConverted = mapper.Map<List<TD>>(selectResult);

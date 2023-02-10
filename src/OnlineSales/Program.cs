@@ -442,11 +442,13 @@ public class Program
 
         builder.Services.AddCors(options =>
         {
+            var exposedHeadersList = typeof(ResponseHeaderNames).GetProperties().Select(f => (string)f.GetValue(null) !).ToArray();
             options.AddDefaultPolicy(policy =>
             {
                 policy
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .AllowAnyHeader()
+                    .WithExposedHeaders(exposedHeadersList);
                 if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
                 {
                     policy.AllowAnyOrigin();

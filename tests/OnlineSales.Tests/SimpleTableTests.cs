@@ -292,6 +292,34 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount, resultDiff);
     }
 
+    [Fact]
+    public async Task CheckCountHeaderWithoutQuery()
+    {
+        const int recordsCount = 5;
+        GenerateBulkRecords(recordsCount);
+
+        var response = await GetTest(this.itemsUrl);
+        response.Should().NotBeNull();
+
+        var result = response.Headers.FirstOrDefault(h => h.Key == "x-total-count");
+        result.Should().NotBeNull();
+        Assert.True(int.Parse(result.Value.First()) == recordsCount);
+    }
+
+    [Fact]
+    public async Task CheckCountHeaderWithQuery()
+    {
+        const int recordsCount = 5;
+        GenerateBulkRecords(recordsCount);
+
+        var response = await GetTest($"{this.itemsUrl}?filter[skip]=0");
+        response.Should().NotBeNull();
+
+        var result = response.Headers.FirstOrDefault(h => h.Key == "x-total-count");
+        result.Should().NotBeNull();
+        Assert.True(int.Parse(result.Value.First()) == recordsCount);
+    }
+
     protected virtual async Task<(TC, string)> CreateItem()
     {
         var testCreateItem = TestData.Generate<TC>();
