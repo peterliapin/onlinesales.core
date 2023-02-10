@@ -104,14 +104,12 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         return Ok(returnedValue);
     }
- 
+
     protected override Task SaveBatchChangesAsync(List<Contact> importingRecords)
     {
         var newItems = contactService.EnrichWithDomainId(importingRecords);
 
-        var newAitemsWithAccounts = contactService.EnrichWithAccountId(newItems);
-        
-        return base.SaveBatchChangesAsync(newAitemsWithAccounts);
+        return base.SaveBatchChangesAsync(newItems);
     }
 
     private static string EmailToGravatarUrl(string email)

@@ -108,7 +108,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                         // Need to query the foreign key entity
                         var parentDbSet = dbContext.SetDbEntity(foreignKeyEntityType).AsNoTracking().ToList();
 
-                        if (parentDbSet is not null)
+                        if (parentDbSet.Count > 0)
                         {
                             // Get the foreing key entities matching surrogate foreign key values (ex: Posts where slug equals to postslug in comments)
                             var parentListByUniqueKey = parentDbSet.Where(r => uniqueKeyValues!.Contains(GetValueByPropertyName(r, foreignKeyEntityUniqueIndex)));
@@ -118,7 +118,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                                 foreach (var record in recordsWithoutFk)
                                 {
                                     // Find the parent using surrogate fk and update the main fk with parent id.
-                                    var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex) !.ToString() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name) !.ToString());
+                                    var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex) !.ToString() !.ToLower() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name) !.ToString() !.ToLower());
+
                                     record.GetType() !.GetProperty(sourceForeignKey) !.SetValue(record, Convert.ToInt32(matchingParent.Select(i => GetValueByPropertyName(i, "Id")).First()));
                                 }
                             }
@@ -169,10 +170,18 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             await dbContext.SaveChangesAsync();
 
-            await UpdateParentByAlternateKey(batch);
+            await BatchWiseSecondaryUpdate(batch);
 
             position += ImportBatchSize;
         }
+    }
+
+    /// <summary>
+    /// Any batch wise operation using new Ids after a batch is saved.
+    /// </summary>
+    protected virtual async Task BatchWiseSecondaryUpdate(List<T> batch)
+    {
+        await UpdateParentByAlternateKey(batch);
     }
 
     /// <summary>
@@ -251,7 +260,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 if (alternateKeyOfMatchingImportRecord is not null)
                 {
                     // Find the parent item (T) by alternate key.
-                    var parentItem = entityList.FirstOrDefault(b => GetValueByPropertyName(b, parentUniqueIndex) !.ToString() == alternateKeyOfMatchingImportRecord.ToString());
+                    var parentItem = entityList.FirstOrDefault(b => GetValueByPropertyName(b, parentUniqueIndex) !.ToString() !.ToLower() == alternateKeyOfMatchingImportRecord.ToString() !.ToLower());
                     if (parentItem is null)
                     {
                         var message = "No parent entity is available for given alternate key";
@@ -268,7 +277,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         await dbContext.SaveChangesAsync();
     }
-
+   
     private object? GetValueByPropertyName(object r, string name)
     {
         var property = r.GetType().GetProperty(name);
