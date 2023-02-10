@@ -34,6 +34,7 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets a unique reference numbers across all orders.
     /// </summary>
+    [Searchable]
     [Required]
     public string RefNo { get; set; } = string.Empty;
 
@@ -45,24 +46,28 @@ public class Order : BaseEntity
     /// <summary>
     /// Gets or sets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and commissions (how much will be paid out to vendor).
     /// </summary>
+    [Searchable]
     [Required]
     public decimal Total { get; set; } = 0;
 
     /// <summary>
     /// Gets or sets the currency ISO code for the payment - ISO 4217. Example: "USD".
     /// </summary>
+    [Searchable]
     [Required]
     public string Currency { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets total amount in the payment currency without TAXes, discounts and comissions.
     /// </summary>
+    [Searchable]
     [Required]
     public decimal CurrencyTotal { get; set; } = 0;
 
     /// <summary>
     /// Gets or sets total amount of all items in the current order.
     /// </summary>
+    [Searchable]
     public int Quantity { get; set; }
 
     /// <summary>

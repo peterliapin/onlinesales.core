@@ -5,6 +5,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -19,8 +20,8 @@ namespace OnlineSales.Controllers
     {
         private readonly IDomainService domainService;
 
-        public AccountController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService)
-            : base(dbContext, mapper, apiSettingsConfig)
+        public AccountController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService, EsDbContext esDbContext)
+            : base(dbContext, mapper, apiSettingsConfig, esDbContext)
         {
             this.domainService = domainService;
         }

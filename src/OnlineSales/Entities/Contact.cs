@@ -17,17 +17,22 @@ namespace OnlineSales.Entities;
 [Index(nameof(Email), IsUnique = true)]
 public class Contact : BaseEntity
 {
+    [Searchable]
     public string? LastName { get; set; }
 
+    [Searchable]
     public string? FirstName { get; set; }
 
+    [Searchable]
     [Required]
     public string Email { get; set; } = string.Empty;
 
     public string? CompanyName { get; set; }
 
+    [Searchable]
     public string? Address1 { get; set; }
 
+    [Searchable]
     public string? Address2 { get; set; }
 
     public string? State { get; set; }
@@ -36,10 +41,12 @@ public class Contact : BaseEntity
 
     public string? Location { get; set; }
 
+    [Searchable]
     public string? Phone { get; set; }
 
     public int? Timezone { get; set; }
 
+    [Searchable]
     public string? Language { get; set; }
 
     [Required]

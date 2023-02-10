@@ -8,6 +8,8 @@ using System.Text;
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Nest;
+using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 
@@ -30,6 +32,8 @@ public class BaseTest : IDisposable
 
         mapper = App.GetMapper();
         App.CleanDatabase();
+
+        StopElasticSearch().Wait();
     }
 
     public virtual void Dispose()
@@ -42,6 +46,30 @@ public class BaseTest : IDisposable
         var payloadString = JsonHelper.Serialize(payload);
 
         return new StringContent(payloadString, Encoding.UTF8, "application/json");
+    }
+
+    protected async Task SyncElasticSearch(string url, int numberOfItems)
+    {
+        var taskExecuteResponce = await GetRequest("/api/tasks/execute/SyncEsTask");
+        taskExecuteResponce.Should().NotBeNull();
+        taskExecuteResponce.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await taskExecuteResponce.Content.ReadAsStringAsync();
+        var task = JsonHelper.Deserialize<TaskExecutionDto>(content);
+        task!.Completed.Should().BeTrue();
+
+        var count = 0;
+        while (count != numberOfItems)
+        {
+            var res = await GetTest<List<Order>>(url);
+            count = res!.Count;
+        }
+    }
+
+    protected async Task StopElasticSearch()
+    {
+        var taskExecuteResponce = await GetRequest("/api/tasks/stop/SyncEsTask");
+        taskExecuteResponce.Should().NotBeNull();
+        taskExecuteResponce.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     protected Task<HttpResponseMessage> GetRequest(string url, string authToken = "Success")

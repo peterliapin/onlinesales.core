@@ -22,12 +22,15 @@ public enum CommentStatus
 [SupportsChangeLog]
 public class Comment : BaseEntity
 {
+    [Searchable]
     [Required]
     public string AuthorName { get; set; } = string.Empty;
 
+    [Searchable]
     [EmailAddress]
     public string AuthorEmail { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Content { get; set; } = string.Empty;
 

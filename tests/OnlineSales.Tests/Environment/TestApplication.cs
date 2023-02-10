@@ -6,10 +6,13 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
+using OnlineSales.Tasks;
 using OnlineSales.Tests.TestServices;
 
 namespace OnlineSales.Tests.Environment;
@@ -31,6 +34,9 @@ public class TestApplication : WebApplicationFactory<Program>
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
             dataContaxt.Database.EnsureDeleted();
             dataContaxt.Database.Migrate();
+
+            var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
+            esDbContext.ElasticClient.Indices.Delete("*");
         }
     }
 
@@ -40,7 +46,7 @@ public class TestApplication : WebApplicationFactory<Program>
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
             dataContaxt.AddRange(bulkItems);
-            dataContaxt.SaveChanges();
+            dataContaxt.SaveChangesAsync().Wait();
         }
     }
 

@@ -26,21 +26,23 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", null, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
-        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "AffiliateName", fkId);
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Affiliate Name", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.ExchangeRate = 123.456M, fkId);
-        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));     
 
         App.PopulateBulkData(bulkEntitiesList);
-                
-        var result = await GetTest<List<Order>>(itemsUrl + "?query=filiateNa");
-        result!.Count.Should().Be(1);
-        result[0].AffiliateName.Should().Be("AffiliateName");
 
-        result = await GetTest<List<Order>>(itemsUrl + "?query=3.4");
+        await SyncElasticSearch(itemsUrl, 3);
+                
+        var result = await GetTest<List<Order>>(itemsUrl + "?query=Affiliate");
+        result!.Count.Should().Be(1);
+        result[0].AffiliateName.Should().Be("Affiliate Name");
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=123.456");
         result!.Count.Should().Be(1);
         result[0].ExchangeRate.Should().Be(123.456M);
-        
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=");
         result!.Count.Should().Be(3);
 
@@ -54,6 +56,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         int limit = 5;
         GenerateBulkRecords(limit);
 
+        await SyncElasticSearch(itemsUrl, limit);
+
         var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[limit]={0}", limit));
 
         result.Should().NotBeNull();
@@ -65,6 +69,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         int numberOfItems = 10;
         GenerateBulkRecords(numberOfItems);
+
+        await SyncElasticSearch(itemsUrl, numberOfItems);
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20ASC");
 
@@ -101,6 +107,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         GenerateBulkRecords(numberOfItems, populateAttributes);
 
+        await SyncElasticSearch(itemsUrl, numberOfItems);
+
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC");
 
         result.Should().NotBeNull();
@@ -121,6 +129,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         int numberOfItems = 30;
         GenerateBulkRecords(numberOfItems);
+
+        await SyncElasticSearch(itemsUrl, numberOfItems);
 
         async Task GetAndCheck(int skipItemsNumber)
         {
@@ -154,7 +164,13 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         GenerateBulkRecords(numberOfItems, populateAttributes);
 
-        var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
+        await SyncElasticSearch(itemsUrl, numberOfItems);
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(4);
+
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(1);
         result[0].Id.Should().Be(numberOfItems / 2);
@@ -162,7 +178,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][neq]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems - 1);
-                
+
         result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][gte]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(1 + (numberOfItems / 2));
@@ -170,10 +186,6 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems / 2);
-
-        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
-        result.Should().NotBeNull();
-        result!.Count.Should().Be(4);        
     }
 
     [Fact]
@@ -192,6 +204,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         const int pageSize = 10;
 
         GenerateBulkRecords(numberOfItems);
+
+        await SyncElasticSearch(itemsUrl, numberOfItems);
 
         async Task GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
         {

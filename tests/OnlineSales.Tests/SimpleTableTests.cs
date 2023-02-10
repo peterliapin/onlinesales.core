@@ -128,7 +128,8 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         if (createTestItem)
         {
             await CreateItem();
-        }
+            await SyncElasticSearch(itemsUrl, 1);
+        }       
 
         var response = await GetTest($"{this.itemsUrl}?{filter}");
         response.Should().NotBeNull();
@@ -142,9 +143,9 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Theory]
-    [InlineData("", 150, 70)]
-    [InlineData("filter[skip]=0", 150, 70)]
-    [InlineData("filter[limit]=10&filter[skip]=0", 150, 70)]
+    [InlineData("", 150, 100)]
+    [InlineData("filter[skip]=0", 150, 100)]
+    [InlineData("filter[limit]=10&filter[skip]=0", 150, 100)]
     public async Task LimitLists(string filter, int dataCount, int limitPerRequest)
     {
         GenerateBulkRecords(dataCount);
@@ -311,8 +312,11 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
     {
-        const int numberOfItems = 10;
+        const int numberOfItems = 10;               
+
         GenerateBulkRecords(numberOfItems);
+
+        await SyncElasticSearch(itemsUrl, numberOfItems);
 
         var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 
