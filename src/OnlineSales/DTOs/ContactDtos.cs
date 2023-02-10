@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
@@ -84,4 +85,14 @@ public class ContactImportDto : ContactCreateDto
 
     [Optional]
     public string? UpdatedByUserAgent { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
+
+    [Optional]
+    public int? AccountId { get; set; }
+
+    [Optional]
+    [SurrogateForeignKey(typeof(Account), "Name", "AccountId")]
+    public string? AccountName { get; set; }
 }

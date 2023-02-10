@@ -40,6 +40,29 @@ namespace OnlineSales.Interfaces
             }
         }
 
+        public string GetDomainNameByUrl(string url)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(url))
+                {
+                    return string.Empty;
+                }
+
+                Uri uri = new Uri(url);
+                string domain = uri.Host;
+                string[] parts = domain.Split('.');
+                string domainWithoutSubdomains = parts[parts.Length - 2] + "." + parts[parts.Length - 1];
+
+                return domainWithoutSubdomains;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message);
+                return string.Empty;
+            }
+        }
+
         private async Task VerifyHttp(Domain domain)
         {
             domain.HttpCheck = false;

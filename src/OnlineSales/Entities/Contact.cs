@@ -57,4 +57,6 @@ public class Contact : BaseEntity
     [JsonIgnore]
     [ForeignKey("AccountId")]
     public virtual Account? Account { get; set; }
+
+    public string? Source { get; set; }
 }

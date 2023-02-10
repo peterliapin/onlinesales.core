@@ -10,5 +10,7 @@ namespace OnlineSales.Interfaces
     public interface IDomainService
     {
         public Task Verify(Domain domain);
+
+        public string GetDomainNameByUrl(string url);
     }
 }

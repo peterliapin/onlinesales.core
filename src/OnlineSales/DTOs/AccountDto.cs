@@ -18,6 +18,9 @@ public class AccountCreateDto
 
     public string? CountryCode { get; set; }
 
+    [Optional]
+    public string? SiteUrl { get; set; }
+
     public string? EmployeesRange { get; set; }
 
     public double? Revenue { get; set; }
@@ -25,6 +28,9 @@ public class AccountCreateDto
     public string[]? Tags { get; set; }
 
     public Dictionary<string, string>? SocialMedia { get; set; }
+
+    [Optional]
+    public string? Data { get; set; }
 }
 
 public class AccountDetailsInfo
@@ -96,6 +102,9 @@ public class AccountImportDto
     public string? CountryCode { get; set; }
 
     [Optional]
+    public string? SiteUrl { get; set; }
+
+    [Optional]
     public string? EmployeesRange { get; set; }
 
     [Optional]
@@ -106,6 +115,12 @@ public class AccountImportDto
 
     [Optional]
     public Dictionary<string, string>? SocialMedia { get; set; }
+
+    [Optional]
+    public string? Data { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 
     [Optional]
     public DateTime? CreatedAt { get; set; }
