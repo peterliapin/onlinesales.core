@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Data;
 using Quartz.Util;
+using Serilog;
 
 namespace OnlineSales.Plugin.Vsto;
 
@@ -18,7 +19,7 @@ public class VstoLocalLinksWatcher : IDisposable
 
     private readonly IServiceCollection services;
 
-    private readonly FileSystemWatcher exeWatcher;
+    private readonly FileSystemWatcher? exeWatcher;
 
     private readonly Dictionary<string, ExeDirectory> exeDirs = new Dictionary<string, ExeDirectory>();
 
@@ -29,20 +30,30 @@ public class VstoLocalLinksWatcher : IDisposable
         VstoRequestPath = vstoRequestPath;
         Init();
 
-        exeWatcher = new FileSystemWatcher(vstoLocalPath);
-        exeWatcher.NotifyFilter = NotifyFilters.FileName;
-        exeWatcher.IncludeSubdirectories = true;
-        exeWatcher.Filter = "*.exe";
-        exeWatcher.Created += HandleChanged;
-        exeWatcher.Deleted += HandleChanged;
-        exeWatcher.Renamed += HandleRenamed;
+        if (Directory.Exists(vstoLocalPath))
+        {
+            exeWatcher = new FileSystemWatcher(vstoLocalPath);
+            exeWatcher.NotifyFilter = NotifyFilters.FileName;
+            exeWatcher.IncludeSubdirectories = true;
+            exeWatcher.Filter = "*.exe";
+            exeWatcher.Created += HandleChanged;
+            exeWatcher.Deleted += HandleChanged;
+            exeWatcher.Renamed += HandleRenamed;
 
-        exeWatcher.EnableRaisingEvents = true;
+            exeWatcher.EnableRaisingEvents = true;
+        }
+        else
+        {
+            Log.Warning($"The folder references by VstoLocalPath setting does not exist: {vstoLocalPath}");
+        }
     }
 
     public void Dispose()
     {
-        exeWatcher.Dispose();
+        if (exeWatcher != null)
+        {
+            exeWatcher.Dispose();
+        }        
     }
 
     private void HandleRenamed(object sender, RenamedEventArgs e)
