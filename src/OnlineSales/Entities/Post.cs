@@ -16,12 +16,15 @@ namespace OnlineSales.Entities;
 [Index(nameof(Slug), IsUnique = true)]
 public class Post : BaseEntity
 {
+    [Searchable]
     [Required]
     public string Title { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Description { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Content { get; set; } = string.Empty;
 
@@ -35,14 +38,18 @@ public class Post : BaseEntity
     [Required]
     public string Template { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Author { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Language { get; set; } = string.Empty;
 
+    [Searchable]
     public string Categories { get; set; } = string.Empty;
 
+    [Searchable]
     public string Tags { get; set; } = string.Empty;
 
     public bool AllowComments { get; set; } = false;

@@ -34,21 +34,25 @@ namespace OnlineSales.Entities
         /// </summary>
         public int? TemplateId { get; set; }
 
+        [Searchable]
         [Required]
         public string Subject { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the email address of the email recipient.
         /// </summary>
+        [Searchable]
         [Required]
         public string Recipient { get; set; } = string.Empty;
 
+        [Searchable]
         [Required]
         public string FromEmail { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the email body.
         /// </summary>
+        [Searchable]
         [Required]
         public string Body { get; set; } = string.Empty;
 

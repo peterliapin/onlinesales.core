@@ -34,10 +34,14 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         App.PopulateBulkData(bulkEntitiesList);
 
         await SyncElasticSearch(itemsUrl, 3);
-
-        var result = await GetTest<List<Order>>(itemsUrl + "?query=Affiliate 10002");
+                
+        var result = await GetTest<List<Order>>(itemsUrl + "?query=Affiliate");
         result!.Count.Should().Be(1);
         result[0].AffiliateName.Should().Be("Affiliate Name");
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=123.456");
+        result!.Count.Should().Be(1);
+        result[0].ExchangeRate.Should().Be(123.456M);
 
         result = await GetTest<List<Order>>(itemsUrl + "?query=");
         result!.Count.Should().Be(3);

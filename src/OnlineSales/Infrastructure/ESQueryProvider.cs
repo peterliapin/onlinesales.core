@@ -96,7 +96,7 @@ namespace OnlineSales.Infrastructure
                 }
 
                 sr.Source = new SourceFilter { Includes = fields.ToArray(), };
-            }            
+            }
 
             var res = await elasticClient.SearchAsync<T>(sr);
             return (res.Documents.ToList(), count);
@@ -205,6 +205,7 @@ namespace OnlineSales.Infrastructure
                 {
                     Query = string.Join(" ", parseData.SearchData),
                     Fields = searchableProperties,
+                    Lenient = true,
                     Operator = Operator.Or,
                 };
 

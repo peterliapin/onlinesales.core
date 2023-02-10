@@ -21,12 +21,15 @@ public class SmsLog : BaseCreateByEntity
         Sent = 1,
     }
 
+    [Searchable]
     [Required]
     public string Sender { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Recipient { get; set; } = string.Empty;
 
+    [Searchable]
     [Required]
     public string Message { get; set; } = string.Empty;
 
