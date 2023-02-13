@@ -15,7 +15,7 @@ namespace OnlineSales.Data;
 
 public class PgDbContext : DbContext
 {
-    protected readonly IConfiguration configuration;
+    public readonly IConfiguration Configuration;
 
     private readonly IHttpContextHelper? httpContextHelper;
 
@@ -29,7 +29,7 @@ public class PgDbContext : DbContext
         {
             Console.WriteLine("Initializing PgDbContext...");
 
-            this.configuration = new ConfigurationBuilder()
+            this.Configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", false)
                 .AddEnvironmentVariables()
                 .AddUserSecrets(typeof(Program).Assembly)
@@ -47,7 +47,7 @@ public class PgDbContext : DbContext
     public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options)
     {
-        this.configuration = configuration;
+        this.Configuration = configuration;
         this.httpContextHelper = httpContextHelper;
     }
 
@@ -182,7 +182,7 @@ public class PgDbContext : DbContext
         {
             Console.WriteLine("Configuring PgDbContext...");
 
-            var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
+            var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
 
             if (postgresConfig == null)
             {

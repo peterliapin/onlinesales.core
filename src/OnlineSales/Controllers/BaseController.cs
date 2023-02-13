@@ -116,7 +116,17 @@ namespace OnlineSales.Controllers
             int limit = apiSettingsConfig.Value.MaxListSize;
             var queryCommands = this.Request.QueryString.HasValue ? this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray() : new string[0];
             var parseData = new QueryParseData<T>(queryCommands, limit);
-            IQueryProvider<T> qp = typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() ? new ESQueryProvider<T>(elasticClient, parseData) : new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), mapper, parseData);
+            IQueryProvider<T> qp;
+            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any())
+            {
+                var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
+                qp = new ESQueryProvider<T>(elasticClient, parseData, indexPrefix!);
+            }
+            else
+            {
+                qp = new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), mapper, parseData);
+            }
+
             var result = await qp.GetResult();
             var totalCount = result.Item2;
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, totalCount.ToString());
