@@ -20,9 +20,9 @@ namespace OnlineSales.Infrastructure
         private readonly string indexName;
         private readonly PropertyInfo[] searchableProperties;
 
-        public ESQueryProvider(ElasticClient elasticClient, QueryParseData<T> parseData)
+        public ESQueryProvider(ElasticClient elasticClient, QueryParseData<T> parseData, string indexPrefix)
         {
-            indexName = "onlinesales-" + typeof(T).Name.ToLower();
+            indexName = indexPrefix + "-" + typeof(T).Name.ToLower();
             this.elasticClient = elasticClient;
             this.parseData = parseData;
             searchableProperties = CreateSearchableFields();
