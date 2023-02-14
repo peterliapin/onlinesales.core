@@ -23,6 +23,10 @@
       "SenderId": "$SMSGATEWAYS__NOTIFYLK__SENDERID",
       "ApiKey": "$SMSGATEWAYS__NOTIFYLK__APIKEY",
       "UserId": "$SMSGATEWAYS__NOTIFYLK__USERID"
+    },
+    "Twilio": {
+      "AccountSid": "$SMSGATEWAYS__TWILIO__ACCOUNTSID",
+      "AuthToken": "$SMSGATEWAYS__TWILIO__AUTHTOKEN"
     }
   },
   "SmsCountryGateways": [

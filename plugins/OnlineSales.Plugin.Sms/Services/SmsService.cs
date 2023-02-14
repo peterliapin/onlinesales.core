@@ -86,6 +86,9 @@ public class SmsService : ISmsService
                 case "AmazonSns":
                     gatewayService = new AmazonSnsGatewayService(pluginSettings.SmsGateways.AmazonSns);
                     break;
+                case "Twilio":
+                    gatewayService = new TwilioService(pluginSettings.SmsGateways.Twilio);
+                    break;
             }
 
             if (gatewayService != null)
