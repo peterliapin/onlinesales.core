@@ -30,15 +30,14 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public string GetSender(string recipient)
         {
-            throw new NotImplementedException();
+            return TwilioClient.GetRestClient().AccountSid;
         }
 
         public async Task SendAsync(string recipient, string message)
         {
             if (!availablePhoneNumbers.Any())
             {
-                Log.Error("No available phonenumbers to send message from. Check account dashboard.");
-                return;
+                throw new TwilioException("No available phonenumbers to send message from. Check account dashboard.");
             }
 
             var options = new CreateMessageOptions(new PhoneNumber(recipient))
