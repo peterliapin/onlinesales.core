@@ -13,7 +13,6 @@ using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace OnlineSales.Controllers
 {

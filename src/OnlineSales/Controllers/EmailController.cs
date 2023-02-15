@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -11,8 +12,8 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
-    [ApiController]
     public class EmailController : ControllerBase
     {
         private readonly PgDbContext dbContext;
