@@ -19,6 +19,8 @@ public class GatewaysConfig
 
     public SmscConfig Smsc { get; set; } = new SmscConfig();
 
+    public SmscConfig SmscKz { get; set; } = new SmscConfig();
+
     public GetshoutoutConfig Getshoutout { get; set; } = new GetshoutoutConfig();
 
     public NotifyLkConfig NotifyLk { get; set; } = new NotifyLkConfig();
