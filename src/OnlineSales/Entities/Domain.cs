@@ -51,6 +51,8 @@ public class Domain : BaseEntityWithIdAndDates
     public virtual Account? Account { get; set; }
 
     public bool AccountSynced { get; set; } = false;
+
+    public string Source { get; set; } = string.Empty;
 }
 
 public class DnsRecord

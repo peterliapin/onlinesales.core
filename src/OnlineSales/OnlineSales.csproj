@@ -45,7 +45,7 @@
     <PackageReference Include="Serilog.Sinks.Elasticsearch" Version="9.0.0" />
     <PackageReference Include="Elasticsearch.Net" Version="7.17.5" />
     <PackageReference Include="NEST" Version="7.17.5" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

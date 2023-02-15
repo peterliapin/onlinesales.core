@@ -72,13 +72,13 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     {
         var contact = mapper.Map<Contact>(value);
 
-        var savedContact = await contactService.AddContact(contact);
+        await contactService.SaveContact(contact);
 
-        var returnedValue = mapper.Map<ContactDetailsDto>(savedContact);
+        var returnedValue = mapper.Map<ContactDetailsDto>(contact);
 
         returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
 
-        return CreatedAtAction(nameof(GetOne), new { id = savedContact.Id }, returnedValue);
+        return CreatedAtAction(nameof(GetOne), new { id = contact.Id }, returnedValue);
     }
 
     [HttpPatch("{id}")]
@@ -97,20 +97,20 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         mapper.Map(value, existingContact);
 
-        var updatedContact = await contactService.UpdateContact(existingContact);
+        await contactService.SaveContact(existingContact);
 
-        var returnedValue = mapper.Map<ContactDetailsDto>(updatedContact);
+        var returnedValue = mapper.Map<ContactDetailsDto>(existingContact);
 
         returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
 
         return Ok(returnedValue);
     }
 
-    protected override Task SaveBatchChangesAsync(List<Contact> importingRecords)
+    protected override async Task SaveBatchChangesAsync(List<Contact> contacts)
     {
-        var newItems = contactService.EnrichWithDomainId(importingRecords);
+        await contactService.EnrichWithDomainId(contacts);
 
-        return base.SaveBatchChangesAsync(newItems);
+        await base.SaveBatchChangesAsync(contacts);
     }
 
     private static string EmailToGravatarUrl(string email)

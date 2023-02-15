@@ -8,12 +8,10 @@ namespace OnlineSales.Interfaces
 {
     public interface IContactService
     {
-        Task<Contact> AddContact(Contact contact);
+        Task SaveContact(Contact contact);
 
-        Task<Contact> UpdateContact(Contact contact);
+        Task EnrichWithDomainId(List<Contact> contacts);
 
-        List<Contact> EnrichWithDomainId(List<Contact> contacts);
-
-        List<Contact> EnrichWithAccountId(List<Contact> contacts);
+        Task EnrichWithAccountId(List<Contact> contacts);
     }
 }

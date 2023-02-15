@@ -23,33 +23,25 @@ namespace OnlineSales.Services
             this.emailVerifyService = emailVerifyService;
         }
 
-        public async Task<Contact> AddContact(Contact contact)
+        public async Task SaveContact(Contact contact)
         {
-            var domainReturnedValue = EnrichWithDomainId(contact);
+            EnrichWithDomainId(contact);
 
-            var accountReturnedValue = await EnrichWithAccountId(domainReturnedValue);
+            await EnrichWithAccountId(contact);
 
-            await pgDbContext.Contacts!.AddAsync(accountReturnedValue);
+            if (contact.Id > 0)
+            {
+                pgDbContext.Contacts!.Update(contact);
+            }
+            else
+            {
+                await pgDbContext.Contacts!.AddAsync(contact);
+            }
 
             await pgDbContext.SaveChangesAsync();
-
-            return accountReturnedValue!;
         }
 
-        public async Task<Contact> UpdateContact(Contact contact)
-        {
-            var domainReturnedValue = EnrichWithDomainId(contact);
-
-            var accountReturnedValue = await EnrichWithAccountId(domainReturnedValue);
-
-            pgDbContext.Contacts!.Update(accountReturnedValue);
-
-            await pgDbContext.SaveChangesAsync();
-
-            return accountReturnedValue;
-        }
-
-        public Contact EnrichWithDomainId(Contact contact)
+        public void EnrichWithDomainId(Contact contact)
         {
             var domainName = GetDomainFromEmail(contact.Email);
 
@@ -64,50 +56,61 @@ namespace OnlineSales.Services
             {
                 contact.Domain = new Domain() { Name = domainName };
             }
-
-            return contact;
         }
 
-        public List<Contact> EnrichWithDomainId(List<Contact> contacts)
+        public async Task EnrichWithDomainId(List<Contact> contacts)
         {
-            Dictionary<string, Domain> newDomains = new Dictionary<string, Domain>();
+            var newDomains = new Dictionary<string, Domain>();
 
-            var contactsWithDomain = from contact in contacts select new { Contact = contact, DomainName = GetDomainFromEmail(contact.Email) };
+            var contactsWithDomain = from contact in contacts
+                                     select new
+                                     {
+                                         Contact = contact,
+                                         DomainName = GetDomainFromEmail(contact.Email),
+                                     };
 
-            var domainsQueryResult = (from contactWithDomain in contactsWithDomain
+            var contactsWithDomainInfo = (from contactWithDomain in contactsWithDomain
                                       join domain in pgDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
                                       from domain in domainTemp.DefaultIfEmpty()
-                                      select new { EnteredContact = contactWithDomain.Contact, DomainName = contactWithDomain.DomainName, DbDomain = domain, DomainId = domain?.Id ?? 0 }).ToList();
+                                      select new
+                                      {
+                                          Contact = contactWithDomain.Contact,
+                                          DomainName = contactWithDomain.DomainName,
+                                          Domain = domain,
+                                          DomainId = domain?.Id ?? 0,
+                                      }).ToList();
 
-            foreach (var domainItem in domainsQueryResult)
+            foreach (var contactWithDomainInfo in contactsWithDomainInfo)
             {
-                if (domainItem.DomainId != 0)
+                if (contactWithDomainInfo.DomainId != 0)
                 {
-                    domainItem.EnteredContact.DomainId = domainItem.DomainId;
-                    domainItem.EnteredContact.Domain = domainItem.DbDomain;
+                    contactWithDomainInfo.Contact.DomainId = contactWithDomainInfo.DomainId;
+                    contactWithDomainInfo.Contact.Domain = contactWithDomainInfo.Domain;
                 }
                 else
-                {
-                    var domain = new Domain() { Name = domainItem.DomainName };
+                {                   
+                    var existingDomain = from newDomain in newDomains
+                                         where newDomain.Key == contactWithDomainInfo.DomainName
+                                         select newDomain;
 
-                    var existingDomain = from domainDictionary in newDomains where domainDictionary.Key == domain.Name select domainDictionary;
-
-                    if (!existingDomain.Any())
+                    if (existingDomain.Any() is false)
                     {
+                        var domain = new Domain()
+                        {
+                            Name = contactWithDomainInfo.DomainName,
+                            Source = contactWithDomainInfo.Contact.Email,
+                        };
+
                         newDomains.Add(domain.Name, domain);
-                        pgDbContext.Add(domain);
-                        domainItem.EnteredContact.Domain = domain;
+                        await pgDbContext.AddAsync(domain);
+                        contactWithDomainInfo.Contact.Domain = domain;
                     }
                     else
                     {
-                        domainItem.EnteredContact.Domain = existingDomain.FirstOrDefault().Value;
+                        contactWithDomainInfo.Contact.Domain = existingDomain.FirstOrDefault().Value;
                     }
                 }
             }
-
-            var transformedContacts = (from dq in domainsQueryResult select dq.EnteredContact).ToList();
-
-            return transformedContacts;
         }
 
         public string GetDomainFromEmail(string email)
@@ -115,34 +118,27 @@ namespace OnlineSales.Services
             return email.Split("@").Last().ToString();
         }
 
-        public async Task<Contact> EnrichWithAccountId(Contact contact)
+        public async Task EnrichWithAccountId(Contact contact)
         {
             Domain domain = contact.Domain!;
 
             if (domain!.AccountId.HasValue && domain!.AccountId != 0)
             {
                 contact.AccountId = domain!.AccountId;
-                return contact;
             }
             else
             {
                 if ((domain.Free == null && domain.Disposable == null) || (domain.Free != true && domain.Disposable != true))
                 {
-                    var newContact = (await DomainVerifyAndCreateAccount(contact)).contact!;
-
-                    return newContact;
-                }
-                else
-                {
-                    return contact;
+                    await DomainVerifyAndCreateAccount(contact);
                 }
             }
         }
 
-        public List<Contact> EnrichWithAccountId(List<Contact> contacts)
+        public async Task EnrichWithAccountId(List<Contact> contacts)
         {
-            Dictionary<string, Account> newAccounts = new Dictionary<string, Account>();
-            List<Contact> updatedContact = new List<Contact>();
+            var newAccounts = new Dictionary<string, Account>();
+            var updatedContact = new List<Contact>();
 
             var domainsWithAccounts = (from contact in contacts where contact.Domain!.AccountId.HasValue && contact.Domain!.AccountId != 0 select contact).ToList();
 
@@ -160,11 +156,11 @@ namespace OnlineSales.Services
 
                 if ((domain.Free == null && domain.Disposable == null) || (domain.Free != true && domain.Disposable != true))
                 {
-                    var newContact = DomainVerifyAndCreateAccount(contact).Result !;
+                    var newAccount = await DomainVerifyAndCreateAccount(contact);
 
-                    if (newContact.newAccount)
+                    if (newAccount)
                     {
-                        var existingAccount = newAccounts.FirstOrDefault(account => account.Key == newContact.contact.Account!.Name);
+                        var existingAccount = newAccounts.FirstOrDefault(account => account.Key == contact.Account!.Name);
 
                         if (existingAccount.Key != default)
                         {
@@ -173,20 +169,17 @@ namespace OnlineSales.Services
                         }
                         else
                         {
-                            contact.Account = newContact.contact.Account;
-                            contact.Domain!.Account = newContact.contact.Account;
-                            newAccounts.Add(newContact.contact.Account!.Name, newContact.contact.Account);
+                            contact.Domain!.Account = contact.Account;
+                            newAccounts.Add(contact.Account!.Name, contact.Account);
                         }
                     }
                 }
 
                 updatedContact.Add(contact);
             }
-
-            return updatedContact;
         }
 
-        public async Task<(bool newAccount, Contact contact)> DomainVerifyAndCreateAccount(Contact contact)
+        public async Task<bool> DomainVerifyAndCreateAccount(Contact contact)
         {
             bool newAccount = false;
             Domain domain = contact.Domain!;
@@ -227,7 +220,7 @@ namespace OnlineSales.Services
                 contact.Domain!.Account = contact.Account;
             }
 
-            return (newAccount, contact);
+            return newAccount;
         }
     }
 }

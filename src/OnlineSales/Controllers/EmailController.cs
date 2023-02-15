@@ -34,7 +34,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Verify([EmailAddress]string email)
         {
-            var resultedDomainData = await emailVerifyService.Validate(email);
+            var resultedDomainData = await emailVerifyService.VerifyDomain(email);
 
             var resultConverted = mapper.Map<EmailVerifyDetailsDto>(resultedDomainData);
 

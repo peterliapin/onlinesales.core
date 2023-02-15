@@ -22,57 +22,40 @@ namespace OnlineSales.Services
             this.emailValidationExternalService = emailValidationExternalService;
         }
 
-        public async Task<Domain> Validate(string email)
+        public async Task<Domain> VerifyDomain(string email)
         {
-            var splittedEmail = email.Split("@");
-            var domain = splittedEmail.Last().ToString();
+            var domainName = email.Split("@").Last();
             
-            var domainExistance = await GetDomainData(domain);
+            var domain = await (from d in pgContext.Domains
+                                where d.Name == domainName
+                                select d).FirstOrDefaultAsync();
 
-            if (domainExistance.DomainData != null)
+            if (domain != null && domain.DnsCheck is true)
             {
-                return domainExistance.DomainData;
+                return domain;
             }
             else
             {
-                Domain newDomain = new Domain()
+                if (domain is null)
                 {
-                    Name = domain,
-                };
+                    domain = new Domain()
+                    {
+                        Name = domainName,
+                        Source = email,
+                    };
 
-                if (!domainExistance.hasDomain)
-                {
-                    pgContext.Add(newDomain);
+                    pgContext.Add(domain);
                 }
 
-                await domainService.Verify(newDomain!);
-                await VerifyEmail(email, newDomain);
+                await domainService.Verify(domain!);
+                await VerifyEmail(email, domain);
                 await pgContext.SaveChangesAsync();
 
-                return newDomain;
+                return domain;
             }
         }
 
-        public async Task<(bool hasDomain, Domain? DomainData)> GetDomainData(string domain)
-        {
-            bool hasDomain = false;
-
-            var domainData = await (from dbDomain in pgContext.Domains where dbDomain.Name == domain select dbDomain).FirstOrDefaultAsync();
-
-            if (domainData != null)
-            {
-                hasDomain = true;
-            }
-
-            if (domainData != null && domainData!.Free != null && domainData!.Disposable != null && domainData!.DnsRecords != null)
-            {
-                return (hasDomain, domainData);
-            }
-
-            return (hasDomain, null);
-        }
-
-        public async Task VerifyEmail(string email, Domain domainRecord)
+        public async Task VerifyEmail(string email, Domain domain)
         {
             bool freeCheck = false;
             bool disposableCheck = false;
@@ -85,9 +68,9 @@ namespace OnlineSales.Services
                 throw new KeyNotFoundException("Some values are not found for email validation");
             }
 
-            domainRecord.Free = freeCheck;
-            domainRecord.Disposable = disposableCheck;
-            domainRecord.CatchAll = catchAllCheck;
+            domain.Free = freeCheck;
+            domain.Disposable = disposableCheck;
+            domain.CatchAll = catchAllCheck;
         }
     }
 }
