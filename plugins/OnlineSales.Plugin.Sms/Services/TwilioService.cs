@@ -19,30 +19,30 @@ namespace OnlineSales.Plugin.Sms.Services
     public class TwilioService : ISmsService
     {
         private readonly TwilioConfig twilioConfig;
-        private readonly Twilio.Base.ResourceSet<IncomingPhoneNumberResource> availablePhoneNumbers;
 
         public TwilioService(TwilioConfig twilioCfg)
         {
             this.twilioConfig = twilioCfg;
-            TwilioClient.Init(twilioCfg.AccountSid, twilioCfg.AuthToken);
-            availablePhoneNumbers = IncomingPhoneNumberResource.Read();
+            try
+            {
+                TwilioClient.Init(twilioCfg.AccountSid, twilioCfg.AuthToken);
+            }
+            catch (ApiException e)
+            {
+                Log.Error("Failed to init twillio client {0}", e.Message);
+            }
         }
 
         public string GetSender(string recipient)
         {
-            return availablePhoneNumbers.First()?.PhoneNumber.ToString() ?? string.Empty;
+            return twilioConfig.SenderId;
         }
 
         public async Task SendAsync(string recipient, string message)
         {
-            if (!availablePhoneNumbers.Any())
-            {
-                throw new TwilioException("No available phonenumbers to send message from. Check account dashboard.");
-            }
-
             var options = new CreateMessageOptions(new PhoneNumber(recipient))
             {
-                From = availablePhoneNumbers.First().PhoneNumber,
+                From = new PhoneNumber(twilioConfig.SenderId),
                 Body = message,
             };
 
