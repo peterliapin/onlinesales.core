@@ -27,8 +27,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.4" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.5" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.9" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.6" />
     <!-- Insert additional references above this line -->
   </ItemGroup>
 

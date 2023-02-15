@@ -8,7 +8,6 @@ using System.Text;
 using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;

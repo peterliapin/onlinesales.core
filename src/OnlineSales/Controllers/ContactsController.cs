@@ -57,7 +57,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         items.ForEach(c =>
         {
-            c.AvatarUrl = EmailToGravatarUrl(c.AvatarUrl);
+            c.AvatarUrl = EmailToGravatarUrl(c.Email);
         });
 
         return Ok(items);
@@ -115,15 +115,9 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
     private static string EmailToGravatarUrl(string email)
     {
-        byte[] encode = Encoding.ASCII.GetBytes(email);
-        byte[] hashenc = MD5.Create().ComputeHash(encode);
-        StringBuilder hash = new StringBuilder();
+        byte[] emailBytes = Encoding.ASCII.GetBytes(email);
+        byte[] emailHashCode = MD5.Create().ComputeHash(emailBytes);        
 
-        foreach (var b in hashenc)
-        {
-            hash.Append(b.ToString("x2"));
-        }
-
-        return "https://www.gravatar.com/avatar/" + hash + "?size=48&d=mp";
+        return "https://www.gravatar.com/avatar/" + Convert.ToHexString(emailHashCode).ToLower() + "?size=48&d=mp";
     }
 }
