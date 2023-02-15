@@ -5,9 +5,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;

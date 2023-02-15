@@ -5,9 +5,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -16,7 +16,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class ContactsController : BaseControllerWithImport<Contact, ContactCreateDto, ContactUpdateDto, ContactDetailsDto, ContactImportDto>
 {
@@ -57,7 +57,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         items.ForEach(c =>
         {
-            c.AvatarUrl = EmailToGravatarUrl(c.AvatarUrl);
+            c.AvatarUrl = EmailToGravatarUrl(c.Email);
         });
 
         return Ok(items);
@@ -115,15 +115,9 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
     private static string EmailToGravatarUrl(string email)
     {
-        byte[] encode = Encoding.ASCII.GetBytes(email);
-        byte[] hashenc = MD5.Create().ComputeHash(encode);
-        StringBuilder hash = new StringBuilder();
+        byte[] emailBytes = Encoding.ASCII.GetBytes(email);
+        byte[] emailHashCode = MD5.Create().ComputeHash(emailBytes);        
 
-        foreach (var b in hashenc)
-        {
-            hash.Append(b.ToString("x2"));
-        }
-
-        return "https://www.gravatar.com/avatar/" + hash + "?size=48&d=mp";
+        return "https://www.gravatar.com/avatar/" + Convert.ToHexString(emailHashCode).ToLower() + "?size=48&d=mp";
     }
 }
