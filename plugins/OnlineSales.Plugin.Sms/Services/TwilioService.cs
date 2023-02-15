@@ -30,7 +30,7 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public string GetSender(string recipient)
         {
-            return TwilioClient.GetRestClient().AccountSid;
+            return availablePhoneNumbers.First()?.PhoneNumber.ToString() ?? string.Empty;
         }
 
         public async Task SendAsync(string recipient, string message)

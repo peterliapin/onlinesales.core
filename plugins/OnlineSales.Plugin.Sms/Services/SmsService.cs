@@ -77,6 +77,9 @@ public class SmsService : ISmsService
                 case "Smsc":
                     gatewayService = new SmscService(pluginSettings.SmsGateways.Smsc);
                     break;
+                case "SmscKz":
+                    gatewayService = new SmscService(pluginSettings.SmsGateways.Smsc);
+                    break;
                 case "NotifyLk":
                     gatewayService = new NotifyLkService(pluginSettings.SmsGateways.NotifyLk);
                     break;

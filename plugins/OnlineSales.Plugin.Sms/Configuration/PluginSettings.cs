@@ -88,7 +88,7 @@ public class SmscConfig
 }
 
 /// <summary>
-/// API Documentation: https://www.twilio.com/docs/sms/quickstart/csharp-dotnet-core
+/// API Documentation: https://www.twilio.com/docs/sms/quickstart/csharp-dotnet-core.
 /// </summary>
 public class TwilioConfig
 {

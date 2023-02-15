@@ -13,6 +13,12 @@
       "Login": "$SMSGATEWAYS__SMSC__LOGIN",
       "Password": "$SMSGATEWAYS__SMSC__PASSWORD"
     },
+    "SmscKz": {
+      "ApiUrl": "https://smsc.kz/sys/send.php",
+      "SenderId": "$SMSGATEWAYS__SMSC__SENDERID",
+      "Login": "$SMSGATEWAYS__SMSC__LOGIN",
+      "Password": "$SMSGATEWAYS__SMSC__PASSWORD"
+    },
     "Getshoutout": {
       "ApiUrl": "https://api.getshoutout.com",
       "SenderId": "$SMSGATEWAYS__GETSHOUTOUT__SENDERID",
