@@ -7,35 +7,34 @@ using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Interfaces;
 
-namespace OnlineSales.Controllers
+namespace OnlineSales.Controllers;
+
+[Route("api/[controller]")]
+public class VersionController : ControllerBase
 {
-    [Route("api/[controller]")]
-    public class VersionController : ControllerBase
+    private readonly IHttpContextHelper? httpContextHelper;
+
+    public VersionController(IHttpContextHelper? httpContextHelper)
     {
-        private readonly IHttpContextHelper? httpContextHelper;
+        this.httpContextHelper = httpContextHelper;
+    }
 
-        public VersionController(IHttpContextHelper? httpContextHelper)
-        {
-            this.httpContextHelper = httpContextHelper;
-        }
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public ActionResult Get()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
 
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult Get()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-
-            return Ok(
-                new
-                {
-                    Version = fileVersionInfo.ProductVersion!,
-                    IP = httpContextHelper!.IpAddress,
-                    IPv4 = httpContextHelper!.IpAddressV4,
-                    IPv6 = httpContextHelper!.IpAddressV6,
-                    Headers = HttpContext.Request.Headers,
-                });
-        }
+        return Ok(
+            new
+            {
+                Version = fileVersionInfo.ProductVersion!,
+                IP = httpContextHelper!.IpAddress,
+                IPv4 = httpContextHelper!.IpAddressV4,
+                IPv6 = httpContextHelper!.IpAddressV6,
+                Headers = HttpContext.Request.Headers,
+            });
     }
 }

@@ -5,9 +5,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -16,7 +16,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("api/[controller]")]
 public class ContactsController : BaseControllerWithImport<Contact, ContactCreateDto, ContactUpdateDto, ContactDetailsDto, ContactImportDto>
 {
