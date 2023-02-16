@@ -13,6 +13,12 @@
       "Login": "$SMSGATEWAYS__SMSC__LOGIN",
       "Password": "$SMSGATEWAYS__SMSC__PASSWORD"
     },
+    "SmscKz": {
+      "ApiUrl": "https://smsc.kz/sys/send.php",
+      "SenderId": "$SMSGATEWAYS__SMSC__SENDERID",
+      "Login": "$SMSGATEWAYS__SMSC__LOGIN",
+      "Password": "$SMSGATEWAYS__SMSC__PASSWORD"
+    },
     "Getshoutout": {
       "ApiUrl": "https://api.getshoutout.com",
       "SenderId": "$SMSGATEWAYS__GETSHOUTOUT__SENDERID",
@@ -23,6 +29,10 @@
       "SenderId": "$SMSGATEWAYS__NOTIFYLK__SENDERID",
       "ApiKey": "$SMSGATEWAYS__NOTIFYLK__APIKEY",
       "UserId": "$SMSGATEWAYS__NOTIFYLK__USERID"
+    },
+    "Twilio": {
+      "AccountSid": "$SMSGATEWAYS__TWILIO__ACCOUNTSID",
+      "AuthToken": "$SMSGATEWAYS__TWILIO__AUTHTOKEN"
     }
   },
   "SmsCountryGateways": [

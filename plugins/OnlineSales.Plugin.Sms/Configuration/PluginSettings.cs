@@ -19,9 +19,13 @@ public class GatewaysConfig
 
     public SmscConfig Smsc { get; set; } = new SmscConfig();
 
+    public SmscConfig SmscKz { get; set; } = new SmscConfig();
+
     public GetshoutoutConfig Getshoutout { get; set; } = new GetshoutoutConfig();
 
     public NotifyLkConfig NotifyLk { get; set; } = new NotifyLkConfig();
+
+    public TwilioConfig Twilio { get; set; } = new TwilioConfig();
 }
 
 public class CountryGatewayConfig
@@ -83,4 +87,16 @@ public class SmscConfig
     public string Login { get; set; } = string.Empty;
 
     public string Password { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// API Documentation: https://www.twilio.com/docs/sms/quickstart/csharp-dotnet-core.
+/// </summary>
+public class TwilioConfig
+{
+    public string AccountSid { get; set; } = string.Empty;
+
+    public string AuthToken { get; set; } = string.Empty;
+
+    public string SenderId { get; set; } = string.Empty;
 }

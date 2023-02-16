@@ -77,6 +77,9 @@ public class SmsService : ISmsService
                 case "Smsc":
                     gatewayService = new SmscService(pluginSettings.SmsGateways.Smsc);
                     break;
+                case "SmscKz":
+                    gatewayService = new SmscService(pluginSettings.SmsGateways.SmscKz);
+                    break;
                 case "NotifyLk":
                     gatewayService = new NotifyLkService(pluginSettings.SmsGateways.NotifyLk);
                     break;
@@ -85,6 +88,9 @@ public class SmsService : ISmsService
                     break;
                 case "AmazonSns":
                     gatewayService = new AmazonSnsGatewayService(pluginSettings.SmsGateways.AmazonSns);
+                    break;
+                case "Twilio":
+                    gatewayService = new TwilioService(pluginSettings.SmsGateways.Twilio);
                     break;
             }
 
