@@ -36,11 +36,18 @@ public class SmtpServerConfig : BaseServiceConfig
     public bool UseTLS { get; set; } = false;
 }
 
+public class ExtensionConfig
+{
+    public string Extension { get; set; } = string.Empty;
+
+    public string MaxSize { get; set; } = string.Empty;
+}
+
 public class ImagesConfig
 {
     public string[] Extensions { get; set; } = Array.Empty<string>();
 
-    public string? MaxSize { get; set; }
+    public ExtensionConfig[] MaxSize { get; set; } = Array.Empty<ExtensionConfig>();
 
     public string? CacheTime { get; set; }
 }

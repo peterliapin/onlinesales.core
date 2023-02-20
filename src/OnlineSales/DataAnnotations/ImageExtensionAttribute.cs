@@ -5,19 +5,53 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
-using OnlineSales.DataAnnotations.Base;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.DataAnnotations
 {
-    public class ImageExtensionAttribute : BaseFileExtensionAttribute
+    public class ImageExtensionAttribute : ValidationAttribute
     {
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
-            var listOfExt = configuration.Value.Extensions;
+            var configuration = (IOptions<ImagesConfig>?)validationContext!.GetService(typeof(IOptions<ImagesConfig>));
+            if (configuration == null)
+            {
+                throw new MissingConfigurationException("Failed to resolve IOptions<ImagesConfig> object.");
+            }
 
-            this.ListOfExt = listOfExt;
-            return base.IsValid(value, validationContext);
+            var file = value as IFormFile;
+
+            if (file == null)
+            {
+                return ValidationResult.Success!;
+            }
+
+            var fileExtension = Path.GetExtension(file.FileName);
+            if (!configuration.Value.Extensions.Contains(fileExtension))
+            {
+                return new ValidationResult("Invalid file extension.");
+            }
+
+            var fileLength = file.Length;
+
+            var fileLengthSizeInfo = configuration.Value.MaxSize.FirstOrDefault(info => info.Extension == fileExtension);
+            if (fileLengthSizeInfo == null)
+            {
+                fileLengthSizeInfo = configuration.Value.MaxSize.FirstOrDefault(info => info.Extension == "default");
+                if (fileLengthSizeInfo == null)
+                {
+                    throw new MissingConfigurationException("Failed to resolve default value for upload media.");
+                }
+            }
+
+            var fileLengthAllowedSize = StringHelper.GetSizeInBytesFromString(fileLengthSizeInfo.MaxSize);
+
+            if (fileLength > fileLengthAllowedSize)
+            {
+                return new ValidationResult($"Invalid file length. Expected {fileLengthAllowedSize} for '{fileExtension}'. Got {fileLength}.");
+            }
+
+            return ValidationResult.Success!;
         }
     }
 }
