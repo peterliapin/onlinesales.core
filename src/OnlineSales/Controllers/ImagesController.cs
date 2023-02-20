@@ -1,4 +1,4 @@
-﻿// <copyright file="MediaController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="ImagesController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -15,11 +15,11 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class MediaController : ControllerBase
+    public class ImagesController : ControllerBase
     {
         private readonly PgDbContext pgDbContext;
 
-        public MediaController(PgDbContext pgDbContext)
+        public ImagesController(PgDbContext pgDbContext)
         {
             this.pgDbContext = pgDbContext;
         }
