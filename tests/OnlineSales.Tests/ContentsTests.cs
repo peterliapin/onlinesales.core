@@ -1,4 +1,4 @@
-﻿// <copyright file="PostsTests.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="ContentsTests.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -7,10 +7,10 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 
-public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
+public class ContentsTests : SimpleTableTests<Content, TestContent, ContentUpdateDto>
 {
-    public PostsTests()
-        : base("/api/posts")
+    public ContentsTests()
+        : base("/api/contents")
     {
     }
 
@@ -26,9 +26,9 @@ public class PostsTests : SimpleTableTests<Post, TestPost, PostUpdateDto>
         await CreateAndGetItemWithAuthentification("Anonymous");
     }
 
-    protected override PostUpdateDto UpdateItem(TestPost to)
+    protected override ContentUpdateDto UpdateItem(TestContent to)
     {
-        var from = new PostUpdateDto();
+        var from = new ContentUpdateDto();
         to.Template = from.Template = to.Template + "Updated";
         return from;
     }

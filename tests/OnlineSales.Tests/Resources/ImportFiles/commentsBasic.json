@@ -5,8 +5,8 @@
     "updatedAt": null,
     "authorName": "TestComment2",
     "authorEmail": "TestAuthor2@wa.com",
-    "content": "TestContent2",
-    "postId": 1,
+    "body": "TestContent2",
+    "contentId": 1,
     "parentId": null,
     "key": "key1"
   },
@@ -16,8 +16,8 @@
     "updatedAt": "2023-01-15T17:32:02.074179Z",
     "authorName": "TestComment1",
     "authorEmail": "TestAuthor1@wa.com",
-    "content": "TestContent1",
-    "postId": 1,
+    "body": "TestContent1",
+    "contentId": 1,
     "parentId": null,
     "key": "key2"
   }

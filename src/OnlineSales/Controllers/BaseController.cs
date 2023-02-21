@@ -70,7 +70,7 @@ namespace OnlineSales.Controllers
             return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, resultsToClient);
         }
 
-        // PUT api/posts/5
+        // PUT api/{entity}s/5
         [HttpPatch("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -88,7 +88,7 @@ namespace OnlineSales.Controllers
             return Ok(resultsToClient);
         }
 
-        // DELETE api/posts/5
+        // DELETE api/{entity}s/5
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

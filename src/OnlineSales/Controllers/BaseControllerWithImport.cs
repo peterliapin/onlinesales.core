@@ -100,7 +100,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceForeignKey))).ToList();
                 if (recordsWithoutFk.Count > 0)
                 {
-                    // Get list of surrogate foreign key values. (ex: list of postSlug in comments)
+                    // Get list of surrogate foreign key values. (ex: list of contentSlug in comments)
                     var uniqueKeyValues = recordsWithoutFk.Select(r => GetValueByPropertyName(r, surrogateForeignKeyProperty.Name)).ToList();
 
                     if (uniqueKeyValues.Count > 0)
@@ -110,7 +110,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                         if (parentDbSet.Count > 0)
                         {
-                            // Get the foreing key entities matching surrogate foreign key values (ex: Posts where slug equals to postslug in comments)
+                            // Get the foreing key entities matching surrogate foreign key values (ex: Contents where slug equals to contentSlug in comments)
                             var parentListByUniqueKey = parentDbSet.Where(r => uniqueKeyValues!.Contains(GetValueByPropertyName(r, foreignKeyEntityUniqueIndex)));
 
                             if (parentListByUniqueKey is not null)
@@ -277,13 +277,13 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         await dbContext.SaveChangesAsync();
     }
-   
+
     private object? GetValueByPropertyName(object r, string name)
     {
         var property = r.GetType().GetProperty(name);
         if (property is not null)
         {
-            return property.GetValue(r) !; 
+            return property.GetValue(r) !;
         }
 
         return null;

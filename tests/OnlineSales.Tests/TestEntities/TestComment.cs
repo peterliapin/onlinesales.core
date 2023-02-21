@@ -8,11 +8,11 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestComment : CommentCreateDto
 {
-    public TestComment(string uid = "", int postId = 0)
+    public TestComment(string uid = "", int contentId = 0)
     {
         AuthorName = $"Test Author{uid}";
         AuthorEmail = $"author{uid}@test.email";
-        Content = $"Test Comment{uid}";
-        PostId = postId;
+        Body = $"Test Comment{uid}";
+        ContentId = contentId;
     }
 }

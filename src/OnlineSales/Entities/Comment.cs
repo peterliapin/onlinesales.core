@@ -32,17 +32,17 @@ public class Comment : BaseEntity
 
     [Searchable]
     [Required]
-    public string Content { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
 
     public CommentStatus Approved { get; set; } = CommentStatus.NotApproved;
 
     [Required]
-    public int PostId { get; set; }
+    public int ContentId { get; set; }
 
     [Ignore]
-    [JsonIgnore]    
-    [ForeignKey("PostId")]
-    public virtual Post? Post { get; set; }
+    [JsonIgnore]
+    [ForeignKey("ContentId")]
+    public virtual Content? Content { get; set; }
 
     public int? ParentId { get; set; }
 

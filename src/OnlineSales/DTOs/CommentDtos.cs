@@ -17,10 +17,10 @@ public class CommentCreateDto
     public string AuthorEmail { get; set; } = string.Empty;
 
     [Required]
-    public string Content { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
 
     [Required]
-    public int PostId { get; set; }
+    public int ContentId { get; set; }
 
     public int? ParentId { get; set; }
 }
@@ -28,7 +28,7 @@ public class CommentCreateDto
 public class CommentUpdateDto
 {
     [Required]
-    public string Content { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
 }
 
 public class CommentDetailsDto : CommentCreateDto
@@ -51,14 +51,14 @@ public class CommentImportDto
     public string AuthorEmail { get; set; } = string.Empty;
 
     [Required]
-    public string Content { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
 
     [Optional]
-    public int? PostId { get; set; }
+    public int? ContentId { get; set; }
 
     [Optional]
-    [SurrogateForeignKey(typeof(Post), "Slug", "PostId")]
-    public string? PostSlug { get; set; }
+    [SurrogateForeignKey(typeof(Content), "Slug", "ContentId")]
+    public string? ContentSlug { get; set; }
 
     public int? ParentId { get; set; }
 
