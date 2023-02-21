@@ -272,7 +272,7 @@ public class Program
             throw new MissingConfigurationException("Image Upload configuration is mandatory.");
         }
 
-        builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+        builder.Services.Configure<MediaConfig>(imageUploadConfig);
     }
 
     private static void ConfigureEmailVerification(WebApplicationBuilder builder)

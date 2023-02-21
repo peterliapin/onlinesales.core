@@ -1,4 +1,4 @@
-﻿// <copyright file="ImageExtensionAttribute.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="MediaExtensionAttribute.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -9,11 +9,11 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.DataAnnotations
 {
-    public class ImageExtensionAttribute : ValidationAttribute
+    public class MediaExtensionAttribute : ValidationAttribute
     {
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            var configuration = (IOptions<ImagesConfig>?)validationContext!.GetService(typeof(IOptions<ImagesConfig>));
+            var configuration = (IOptions<MediaConfig>?)validationContext!.GetService(typeof(IOptions<MediaConfig>));
             if (configuration == null)
             {
                 throw new MissingConfigurationException("Failed to resolve IOptions<ImagesConfig> object.");

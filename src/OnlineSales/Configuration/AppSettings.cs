@@ -43,7 +43,7 @@ public class ExtensionConfig
     public string MaxSize { get; set; } = string.Empty;
 }
 
-public class ImagesConfig
+public class MediaConfig
 {
     public string[] Extensions { get; set; } = Array.Empty<string>();
 

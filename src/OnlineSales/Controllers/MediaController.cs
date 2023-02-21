@@ -1,4 +1,4 @@
-﻿// <copyright file="ImagesController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="MediaController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -15,11 +15,11 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class ImagesController : ControllerBase
+    public class MediaController : ControllerBase
     {
         private readonly PgDbContext pgDbContext;
 
-        public ImagesController(PgDbContext pgDbContext)
+        public MediaController(PgDbContext pgDbContext)
         {
             this.pgDbContext = pgDbContext;
         }
@@ -49,7 +49,7 @@ namespace OnlineSales.Controllers
             var imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
 
-            var scopeAndFileExists = from i in pgDbContext!.Images!
+            var scopeAndFileExists = from i in pgDbContext!.Media!
                                         where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
                                         select i;
             if (scopeAndFileExists.Any())
@@ -58,11 +58,11 @@ namespace OnlineSales.Controllers
                 uploadedImage!.Data = imageInBytes;
                 uploadedImage!.Size = incomingFileSize;
 
-                pgDbContext.Images!.Update(uploadedImage);
+                pgDbContext.Media!.Update(uploadedImage);
             }
             else
             {
-                Image uploadedImage = new ()
+                Media uploadedMedia = new ()
                 {
                     Name = incomingFileName,
                     Size = incomingFileSize,
@@ -72,7 +72,7 @@ namespace OnlineSales.Controllers
                     Extension = incomingFileExtension,
                 };
 
-                await pgDbContext.Images!.AddAsync(uploadedImage);
+                await pgDbContext.Media!.AddAsync(uploadedMedia);
             }
 
             await pgDbContext.SaveChangesAsync();
@@ -96,11 +96,11 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            var uploadedImageData = await (from upi in pgDbContext!.Images! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            var uploadedImageData = await (from upi in pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
-                throw new EntityNotFoundException(nameof(Image), $"{scopeUid}/{fileName}");
+                throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}");
             }
 
             return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);

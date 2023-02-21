@@ -34,7 +34,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="TestEntities\" />
     <Folder Include="Environment\" />
   </ItemGroup>
   <ItemGroup>

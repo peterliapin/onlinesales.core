@@ -65,7 +65,7 @@ public class PgDbContext : DbContext
 
     public virtual DbSet<TaskExecutionLog>? TaskExecutionLogs { get; set; }
 
-    public virtual DbSet<Image>? Images { get; set; }
+    public virtual DbSet<Media>? Media { get; set; }
 
     public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
 
