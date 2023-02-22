@@ -130,44 +130,12 @@ public class Program
 
         app.MapControllers();
 
-        SetImageUploadSizeLimit(app, builder);
-
         app.UseSpa(spa =>
         {
             // works out of the box, no configuration required
         });
 
         app.Run();
-    }
-
-    private static void SetImageUploadSizeLimit(WebApplication app, WebApplicationBuilder builder)
-    {
-        var maxUploadSizeConfig = builder.Configuration.GetValue<string>("Images:MaxSize");
-
-        if (string.IsNullOrEmpty(maxUploadSizeConfig))
-        {
-            throw new MissingConfigurationException("Image upload size is mandatory.");
-        }
-
-        long? maxUploadSize = StringHelper.GetSizeInBytesFromString(maxUploadSizeConfig);
-
-        if (maxUploadSize is null)
-        {
-            throw new MissingConfigurationException("Image upload size is invalid.");
-        }
-
-        app.UseWhen(
-            context => context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/images"),
-            appBuilder => appBuilder.Use(async (c, next) =>
-            {
-                var feature = c.Features.Get<IHttpMaxRequestBodySizeFeature>();
-                if (feature is not null)
-                {
-                    feature.MaxRequestBodySize = maxUploadSize; 
-                }
-
-                await next();
-            }));
     }
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
@@ -297,14 +265,14 @@ public class Program
 
     private static void ConfigureImageUpload(WebApplicationBuilder builder)
     {
-        var imageUploadConfig = builder.Configuration.GetSection("Images");
+        var imageUploadConfig = builder.Configuration.GetSection("Media");
 
         if (imageUploadConfig == null)
         {
             throw new MissingConfigurationException("Image Upload configuration is mandatory.");
         }
 
-        builder.Services.Configure<ImagesConfig>(imageUploadConfig);
+        builder.Services.Configure<MediaConfig>(imageUploadConfig);
     }
 
     private static void ConfigureEmailVerification(WebApplicationBuilder builder)

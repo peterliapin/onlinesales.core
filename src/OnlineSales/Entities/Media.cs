@@ -1,4 +1,4 @@
-﻿// <copyright file="Image.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="Media.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -8,8 +8,8 @@ using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
 {
-    [Table("image")]
-    public class Image : BaseEntity
+    [Table("media")]
+    public class Media : BaseEntity
     {
         [Required]
         public string ScopeUid { get; set; } = string.Empty;

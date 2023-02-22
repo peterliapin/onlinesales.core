@@ -10,7 +10,7 @@ namespace OnlineSales.DTOs
     public class ImageCreateDto
     {
         [Required]
-        [ImageExtension]
+        [MediaExtension]
         public IFormFile? Image { get; set; }
 
         [Required]
