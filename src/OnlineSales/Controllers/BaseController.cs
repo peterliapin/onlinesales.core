@@ -113,7 +113,7 @@ namespace OnlineSales.Controllers
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
             int limit = apiSettingsConfig.Value.MaxListSize;
-            var queryCommands = this.Request.QueryString.HasValue ? this.Request.QueryString.ToString().Substring(1).Split('&').Select(s => HttpUtility.UrlDecode(s)).ToArray() : new string[0];
+            var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
             var parseData = new QueryParseData<T>(queryCommands, limit);
             IQueryProvider<T> qp;
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any())
@@ -129,6 +129,7 @@ namespace OnlineSales.Controllers
             var result = await qp.GetResult();
             var totalCount = result.Item2;
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, totalCount.ToString());
+            this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
             return Ok(mapper.Map<List<TD>>(result.Item1));
         }
 
