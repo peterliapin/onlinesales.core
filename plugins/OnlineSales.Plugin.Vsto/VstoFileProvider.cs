@@ -2,14 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Data;
-using OnlineSales.Plugin.Vsto.Entities;
 
 namespace OnlineSales.Plugin.Vsto;
 

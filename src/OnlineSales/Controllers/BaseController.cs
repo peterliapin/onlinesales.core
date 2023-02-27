@@ -123,7 +123,7 @@ namespace OnlineSales.Controllers
             }
             else
             {
-                qp = new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), mapper, parseData);
+                qp = new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), parseData);
             }
 
             var result = await qp.GetResult();

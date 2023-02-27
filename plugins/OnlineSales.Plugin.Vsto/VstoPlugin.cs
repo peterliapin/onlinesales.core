@@ -11,7 +11,7 @@ using OnlineSales.Plugin.Vsto.Data;
 
 namespace OnlineSales.Plugin.Vsto;
 
-public class VstoPlugin : IPlugin, IPluginApplication
+public class VstoPlugin : IPlugin, IPluginApplication, IDisposable
 {
     private IServiceCollection? services;
 
@@ -53,5 +53,13 @@ public class VstoPlugin : IPlugin, IPluginApplication
         });
 
         localLinksWatcher = new VstoLocalLinksWatcher(VstoLocalPath, Configuration.Vsto.RequestPath, services!);
+    }
+
+    public void Dispose()
+    {
+        if (localLinksWatcher != null)
+        {
+            localLinksWatcher.Dispose();
+        }
     }
 }

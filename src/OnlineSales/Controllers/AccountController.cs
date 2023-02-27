@@ -33,9 +33,9 @@ public class AccountController : BaseControllerWithImport<Account, AccountCreate
         return base.BatchWiseSecondaryUpdate(batch);
     }
 
-    private void AddNewDomainsByAccounts(List<Account> batch)
+    private void AddNewDomainsByAccounts(List<Account> accounts)
     {
-        var importingDomains = batch.Where(a => !string.IsNullOrEmpty(a.SiteUrl)).Select(a => domainService.GetDomainNameByUrl(a.SiteUrl!));
+        var importingDomains = accounts.Where(a => !string.IsNullOrEmpty(a.SiteUrl)).Select(a => domainService.GetDomainNameByUrl(a.SiteUrl!));
 
         var uniqueDomains = importingDomains.GroupBy(d => d).Select(g => g.First()).ToList();
 
@@ -50,7 +50,7 @@ public class AccountController : BaseControllerWithImport<Account, AccountCreate
                     var newDomain = new Domain()
                     {
                         Name = domain,
-                        AccountId = batch.Where(b => domainService.GetDomainNameByUrl(b.SiteUrl!) == domain).Select(b => b.Id).First(),
+                        AccountId = accounts.Where(b => domainService.GetDomainNameByUrl(b.SiteUrl!) == domain).Select(b => b.Id).First(),
                         CreatedAt = DateTime.UtcNow,
                     };
 

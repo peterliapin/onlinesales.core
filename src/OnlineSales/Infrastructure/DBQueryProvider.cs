@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Linq.Expressions;
-using System.Reflection;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -15,13 +14,11 @@ namespace OnlineSales.Infrastructure
     public class DBQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        private readonly IMapper mapper;        
         private readonly QueryParseData<T> parseData;
         private IQueryable<T> query;
 
-        public DBQueryProvider(IQueryable<T> query, IMapper mapper, QueryParseData<T> parseData)
+        public DBQueryProvider(IQueryable<T> query, QueryParseData<T> parseData)
         {
-            this.mapper = mapper;
             this.query = query;
             this.parseData = parseData;
         }
