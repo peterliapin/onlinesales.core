@@ -53,7 +53,7 @@ public class PgDbContext : DbContext
 
     public bool IsImportRequest { get; set; }
 
-    public virtual DbSet<Content>? Contents { get; set; }
+    public virtual DbSet<Content>? Content { get; set; }
 
     public virtual DbSet<Comment>? Comments { get; set; }
 

@@ -110,7 +110,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                         if (parentDbSet.Count > 0)
                         {
-                            // Get the foreing key entities matching surrogate foreign key values (ex: Contents where slug equals to contentSlug in comments)
+                            // Get the foreign key entities matching surrogate foreign key values (ex: Content where slug equals to contentSlug in comments)
                             var parentListByUniqueKey = parentDbSet.Where(r => uniqueKeyValues!.Contains(GetValueByPropertyName(r, foreignKeyEntityUniqueIndex)));
 
                             if (parentListByUniqueKey is not null)

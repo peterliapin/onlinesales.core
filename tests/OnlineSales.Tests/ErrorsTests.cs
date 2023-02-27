@@ -16,7 +16,7 @@ public class ErrorsTests : BaseTest
     {
         var testContent = new TestContent();
 
-        var response = await Request(HttpMethod.Post, "/api/contents", testContent, "Fail");
+        var response = await Request(HttpMethod.Post, "/api/content", testContent, "Fail");
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
@@ -30,7 +30,7 @@ public class ErrorsTests : BaseTest
     {
         var contentUpdateDto = new ContentUpdateDto();
 
-        var response = await Request(HttpMethod.Post, "/api/contents", contentUpdateDto);
+        var response = await Request(HttpMethod.Post, "/api/content", contentUpdateDto);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 

@@ -176,7 +176,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     {
         var fkItemCreate = new TestContent();
 
-        var fkUrl = await PostTest("/api/contents", fkItemCreate);
+        var fkUrl = await PostTest("/api/content", fkItemCreate);
 
         var fkItem = await GetTest<Content>(fkUrl);
 
@@ -197,7 +197,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var fkItemCreate1 = new TestContent("100");
         var fkItemCreate2 = new TestContent("101");
 
-        await PostTest("/api/contents", fkItemCreate1);
-        await PostTest("/api/contents", fkItemCreate2);
+        await PostTest("/api/content", fkItemCreate1);
+        await PostTest("/api/content", fkItemCreate2);
     }
 }
