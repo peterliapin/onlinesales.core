@@ -13,7 +13,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "WebApiAuthorization")]
     [Route("api/[controller]")]
     public class MediaController : ControllerBase
     {

@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,12 +28,12 @@ public class AzureADPlugin : IPlugin, IPluginApplication
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("AuthPolicy", policy =>
-                policy.RequireAuthenticatedUser());
+            options.AddPolicy("ProxyAuth", policy =>
+                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("ProxyAuthentication"));
         });
 
         services.AddReverseProxy().LoadFromConfig(proxyConfig);
-        services.AddMicrosoftIdentityWebAppAuthentication(configuration, "AzureAd");
+        services.AddMicrosoftIdentityWebAppAuthentication(configuration, "AzureAd", cookieScheme: "ProxyAuthentication");
 
         services.AddRazorPages().AddMvcOptions(options =>
         {
@@ -46,7 +47,7 @@ public class AzureADPlugin : IPlugin, IPluginApplication
     public void ConfigureApplication(IApplicationBuilder application)
     {
         var app = (WebApplication)application;
-        app.MapRazorPages();
         app.MapReverseProxy();
+        app.MapRazorPages();
     }
 }

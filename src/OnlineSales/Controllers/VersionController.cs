@@ -4,11 +4,13 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
+[Authorize(AuthenticationSchemes = "WebApiAuthorization")]
 [Route("api/[controller]")]
 public class VersionController : ControllerBase
 {
@@ -22,6 +24,7 @@ public class VersionController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [AllowAnonymous]
     public ActionResult Get()
     {
         var assembly = Assembly.GetExecutingAssembly();

@@ -26,7 +26,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
             var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, "TestScheme");
+            var ticket = new AuthenticationTicket(principal, "WebApiAuthorization");
 
             result = AuthenticateResult.Success(ticket);            
         }

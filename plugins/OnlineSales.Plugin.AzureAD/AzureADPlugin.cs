@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
@@ -18,8 +19,8 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
     {
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
+        services.AddAuthentication("WebApiAuthorization")
+                    .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true, jwtBearerScheme: "WebApiAuthorization");
 
         services.AddAuthorization(options =>
         {
@@ -29,6 +30,10 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
                     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
                     administratorsGroupId ?? Guid.NewGuid().ToString());
             });
+        });
+        services.Configure<CookiePolicyOptions>(options =>
+        {
+            options.Secure = CookieSecurePolicy.Always;
         });
     }
     
@@ -63,6 +68,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
+        application.UseCookiePolicy();
         application.UseAuthentication();
         application.UseAuthorization();
     }

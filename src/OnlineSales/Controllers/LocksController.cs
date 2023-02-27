@@ -8,7 +8,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(AuthenticationSchemes = "WebApiAuthorization")]
 [Route("api/[controller]")]
 public class LocksController : ControllerBase
 {
