@@ -13,4 +13,6 @@ public static class ResponseHeaderNames
     /// Gets header name for total count of records.
     /// </summary>
     public static string TotalCount => "x-total-count";
+
+    public static string AccessControlExposeHeader => "Access-Control-Expose-Headers";
 }
