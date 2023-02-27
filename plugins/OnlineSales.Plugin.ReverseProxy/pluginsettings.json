@@ -1,0 +1,22 @@
+{
+  "YARPSettings": {
+    "Routes": {
+      "route1": {
+        "ClusterId": "cluster1",
+        "AuthorizationPolicy": "AuthPolicy",
+        "Match": {
+          "Path": "kibana"
+        }
+      }
+    },
+    "Clusters": {
+      "cluster1": {
+        "Destinations": {
+          "cluster1/destination1": {
+            "Address": "https://google.com/"
+          }
+        }
+      }
+    }
+  }
+}
