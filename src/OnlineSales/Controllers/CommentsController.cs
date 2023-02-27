@@ -27,9 +27,9 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] IDictionary<string, string>? parameters)
+    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string query)
     {
-        return base.Get(parameters);
+        return base.Get(query);
     }
 
     // GET api/{entity}s/5
