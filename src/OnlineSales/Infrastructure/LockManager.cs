@@ -3,8 +3,6 @@
 // </copyright>
 
 using Medallion.Threading.Postgres;
-using Microsoft.EntityFrameworkCore;
-using OnlineSales.Data;
 
 namespace OnlineSales.Infrastructure;
 

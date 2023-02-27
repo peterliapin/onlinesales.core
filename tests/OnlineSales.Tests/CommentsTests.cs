@@ -32,7 +32,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     public override async Task UpdateItemNotFoundTest()
     {
         var comment = new CommentUpdateDto();
-        comment.Content = "Content";
+        comment.Body = "Content";
         await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
@@ -69,13 +69,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var updatedComment = await GetTest<Comment>($"{itemsUrl}/1");
         updatedComment.Should().NotBeNull();
 
-        updatedComment!.PostId.Should().Be(1);
+        updatedComment!.ContentId.Should().Be(1);
         updatedComment!.AuthorName.Should().Be("TestComment1");
 
         var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
-        newComment!.PostId.Should().Be(1);
+        newComment!.ContentId.Should().Be(1);
         newComment!.AuthorName.Should().Be("TestComment2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
     }
@@ -91,7 +91,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
 
-        updatedComment!.PostId.Should().Be(1);
+        updatedComment!.ContentId.Should().Be(1);
         updatedComment!.AuthorName.Should().Be("TestComment1");
         updatedComment!.UpdatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         updatedComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
@@ -103,7 +103,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var newComment = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
         newComment.Should().NotBeNull();
 
-        newComment!.PostId.Should().Be(1);
+        newComment!.ContentId.Should().Be(1);
         newComment!.AuthorName.Should().Be("TestComment2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         newComment!.UpdatedAt.Should().BeNull();
@@ -119,16 +119,16 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
         var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
         addedComment1.Should().NotBeNull();
-        addedComment1.PostId.Should().Be(1);
+        addedComment1.ContentId.Should().Be(1);
 
         var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
         addedComment2.Should().NotBeNull();
-        addedComment2.PostId.Should().Be(2);
+        addedComment2.ContentId.Should().Be(2);
 
         await PostImportTest(itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
         var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
-        updatedComment.PostId.Should().Be(2);
+        updatedComment.ContentId.Should().Be(2);
     }
 
     [Fact]
@@ -174,11 +174,11 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
     protected override async Task<(int, string)> CreateFKItem()
     {
-        var fkItemCreate = new TestPost();
+        var fkItemCreate = new TestContent();
 
-        var fkUrl = await PostTest("/api/posts", fkItemCreate);
+        var fkUrl = await PostTest("/api/content", fkItemCreate);
 
-        var fkItem = await GetTest<Post>(fkUrl);
+        var fkItem = await GetTest<Content>(fkUrl);
 
         fkItem.Should().NotBeNull();
 
@@ -188,16 +188,16 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     protected override CommentUpdateDto UpdateItem(TestComment to)
     {
         var from = new CommentUpdateDto();
-        to.Content = from.Content = to.Content + "Updated";
+        to.Body = from.Body = to.Body + "Updated";
         return from;
     }
 
     private async Task CreateFKItemsWithUid()
     {
-        var fkItemCreate1 = new TestPost("100");
-        var fkItemCreate2 = new TestPost("101");
+        var fkItemCreate1 = new TestContent("100");
+        var fkItemCreate2 = new TestContent("101");
 
-        await PostTest("/api/posts", fkItemCreate1);
-        await PostTest("/api/posts", fkItemCreate2);
+        await PostTest("/api/content", fkItemCreate1);
+        await PostTest("/api/content", fkItemCreate2);
     }
 }

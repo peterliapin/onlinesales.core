@@ -1,4 +1,4 @@
-id,createdAt,updatedAt,authorName,authorEmail,content,postId,parentId,postSlug,key,parentKey
+id,createdAt,updatedAt,authorName,authorEmail,body,contentId,parentId,contentSlug,key,parentKey
 0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment4,TestAuthor4@wa.com,TestContent4,1,,,key4,key1
 0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment5,TestAuthor5@wa.com,TestContent5,1,,,key5,key2
 0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment6,TestAuthor6@wa.com,TestContent6,1,,,key6,key4
