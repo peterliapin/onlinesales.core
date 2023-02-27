@@ -27,7 +27,7 @@ public class ContentCreateDto
     public string Slug { get; set; } = string.Empty;
 
     [Required]
-    public string Template { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
 
     [Required]
     public string Author { get; set; } = string.Empty;
@@ -61,7 +61,7 @@ public class ContentUpdateDto
     public string? Slug { get; set; }
 
     [NonEmptyString]
-    public string? Template { get; set; }
+    public string? Type { get; set; }
 
     public string? Author { get; set; }
 

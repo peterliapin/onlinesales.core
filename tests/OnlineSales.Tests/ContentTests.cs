@@ -29,7 +29,7 @@ public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdate
     protected override ContentUpdateDto UpdateItem(TestContent to)
     {
         var from = new ContentUpdateDto();
-        to.Template = from.Template = to.Template + "Updated";
+        to.Type = from.Type = to.Type + "Updated";
         return from;
     }
 }

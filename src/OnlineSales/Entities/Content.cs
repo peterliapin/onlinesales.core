@@ -36,7 +36,7 @@ public class Content : BaseEntity
     public string Slug { get; set; } = string.Empty;
 
     [Required]
-    public string Template { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
 
     [Searchable]
     [Required]
