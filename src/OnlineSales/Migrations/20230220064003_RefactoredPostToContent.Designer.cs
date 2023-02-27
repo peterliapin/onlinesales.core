@@ -885,74 +885,6 @@ namespace OnlineSales.Migrations
                     b.ToTable("email_template", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Image", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<byte[]>("Data")
-                        .IsRequired()
-                        .HasColumnType("bytea")
-                        .HasColumnName("data");
-
-                    b.Property<string>("Extension")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("extension");
-
-                    b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("mime_type");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("ScopeUid")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("scope_uid");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint")
-                        .HasColumnName("size");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_image");
-
-                    b.ToTable("image", (string)null);
-                });
-
             modelBuilder.Entity("OnlineSales.Entities.IpDetails", b =>
                 {
                     b.Property<string>("Ip")
@@ -1089,6 +1021,74 @@ namespace OnlineSales.Migrations
                         .HasDatabaseName("ix_link_log_link_id");
 
                     b.ToTable("link_log", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Media", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("data");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("extension");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mime_type");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ScopeUid")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope_uid");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_media");
+
+                    b.ToTable("media", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
