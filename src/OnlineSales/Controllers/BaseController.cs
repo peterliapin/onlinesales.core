@@ -110,7 +110,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string query)
+        public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
             int limit = apiSettingsConfig.Value.MaxListSize;
             var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];

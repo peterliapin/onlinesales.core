@@ -49,7 +49,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override async Task<ActionResult<List<ContactDetailsDto>>> Get([FromQuery] string query)
+    public override async Task<ActionResult<List<ContactDetailsDto>>> Get([FromQuery] string? query)
     {
         var returnedItems = (await base.Get(query)).Result;
 
