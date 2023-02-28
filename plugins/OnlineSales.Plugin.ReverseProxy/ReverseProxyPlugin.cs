@@ -16,7 +16,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Plugin.ReverseProxy;
 
-public class AzureADPlugin : IPlugin, IPluginApplication
+public class ReverseProxyPlugin : IPlugin, IPluginApplication
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
