@@ -29,11 +29,11 @@ public class AzureADPlugin : IPlugin, IPluginApplication
         services.AddAuthorization(options =>
         {
             options.AddPolicy("ProxyAuth", policy =>
-                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("ProxyAuthentication"));
+                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("OpenIdConnect"));
         });
 
         services.AddReverseProxy().LoadFromConfig(proxyConfig);
-        services.AddMicrosoftIdentityWebAppAuthentication(configuration, "AzureAd", cookieScheme: "ProxyAuthentication");
+        services.AddMicrosoftIdentityWebAppAuthentication(configuration, "AzureAd");
 
         services.AddRazorPages().AddMvcOptions(options =>
         {
