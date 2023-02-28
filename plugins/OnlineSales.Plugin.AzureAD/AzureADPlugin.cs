@@ -3,11 +3,14 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -21,6 +24,16 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 
         services.AddAuthentication("WebApiAuthorization")
                     .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true, jwtBearerScheme: "WebApiAuthorization");
+        services.AddAuthentication("WebAppAuthentication")
+                    .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: "WebAppAuthorization");
+
+        services.AddRazorPages().AddMvcOptions(options =>
+        {
+            var policy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+            options.Filters.Add(new AuthorizeFilter(policy));
+        }).AddMicrosoftIdentityUI();
 
         services.AddAuthorization(options =>
         {
@@ -68,8 +81,10 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
-        application.UseCookiePolicy();
-        application.UseAuthentication();
-        application.UseAuthorization();
+        var app = (WebApplication)application;
+        app.UseCookiePolicy();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapRazorPages();
     }
 }

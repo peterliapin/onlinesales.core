@@ -2,15 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
 using OnlineSales.Exceptions;
 using OnlineSales.Interfaces;
 
@@ -29,25 +23,15 @@ public class ReverseProxyPlugin : IPlugin, IPluginApplication
         services.AddAuthorization(options =>
         {
             options.AddPolicy("ProxyAuth", policy =>
-                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("OpenIdConnect"));
+                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("WebAppAuthorization"));
         });
 
         services.AddReverseProxy().LoadFromConfig(proxyConfig);
-        services.AddMicrosoftIdentityWebAppAuthentication(configuration, "AzureAd");
-
-        services.AddRazorPages().AddMvcOptions(options =>
-        {
-            var policy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
-            options.Filters.Add(new AuthorizeFilter(policy));
-        }).AddMicrosoftIdentityUI();
     }
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
         var app = (WebApplication)application;
         app.MapReverseProxy();
-        app.MapRazorPages();
     }
 }
