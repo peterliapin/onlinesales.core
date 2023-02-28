@@ -4,6 +4,7 @@
 
 using System.Web;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -16,6 +17,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers
 {
+    [Authorize(AuthenticationSchemes = "WebApiAuthorization")]
     public class BaseController<T, TC, TU, TD> : ControllerBase
         where T : BaseEntityWithId, new()
         where TC : class

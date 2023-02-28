@@ -73,9 +73,9 @@ public class TestApplication : WebApplicationFactory<Program>
             services.AddScoped<IEmailValidationExternalService, TestEmailValidationExternalService>();
             services.AddScoped<IAccountExternalService, TestAccountExternalService>();
 
-            services.AddAuthentication(defaultScheme: "TestScheme")
+            services.AddAuthentication(defaultScheme: "WebApiAuthorization")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
-                    "TestScheme", options => { });
+                    "WebApiAuthorization", options => { });
         });
 
         return base.CreateHost(builder);
