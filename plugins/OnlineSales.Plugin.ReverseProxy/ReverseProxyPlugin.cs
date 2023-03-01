@@ -23,7 +23,7 @@ public class ReverseProxyPlugin : IPlugin, IPluginApplication
         services.AddAuthorization(options =>
         {
             options.AddPolicy("ProxyAuth", policy =>
-                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("WebAppAuthorization"));
+                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("EntryAuthorization")); // First try to authenticate with bearer ( if provided ). Then with OpenID. Required for <iframe> integration.
         });
 
         services.AddReverseProxy().LoadFromConfig(proxyConfig);
