@@ -23,7 +23,7 @@ public class ReverseProxyPlugin : IPlugin, IPluginApplication
         services.AddAuthorization(options =>
         {
             options.AddPolicy("ProxyAuth", policy =>
-                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("WebAppAuthorization"));
+                policy.RequireAuthenticatedUser().AddAuthenticationSchemes("ApiAppAuthorization"));
         });
 
         services.AddReverseProxy().LoadFromConfig(proxyConfig);

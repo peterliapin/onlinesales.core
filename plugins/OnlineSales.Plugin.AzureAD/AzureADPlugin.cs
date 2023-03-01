@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +18,15 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Plugin.AzureAD;
 
+public class JwtBearerEventsHandler : JwtBearerEvents
+{
+    public override async Task TokenValidated(TokenValidatedContext context)
+    {
+        await context.HttpContext.SignInAsync("Cookies", context.Principal!);
+        await base.TokenValidated(context);
+    }
+}
+
 public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
@@ -23,7 +34,46 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
         services.AddAuthentication("WebApiAuthorization")
-                    .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true, jwtBearerScheme: "WebApiAuthorization");
+                    .AddPolicyScheme("ApiAppAuthorization", "ApiAppAuthorization", opts =>
+                    {
+                        opts.ForwardDefaultSelector = ctx =>
+                        {
+                            var authorizationFromCookie = ctx.Request.Cookies[".AspNetCore.Cookies"];
+                            if (!string.IsNullOrEmpty(authorizationFromCookie))
+                            {
+                                return "Cookies";
+                            }
+
+                            var authorizationFromQuery = ctx.Request.Query["authorization"].FirstOrDefault();
+                            if (!string.IsNullOrEmpty(authorizationFromQuery))
+                            {
+                                ctx.Request.Headers.Authorization = $"Bearer {authorizationFromQuery}";
+                            }
+
+                            var authorization = ctx.Request.Headers.Authorization.FirstOrDefault();
+                            if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
+                            {
+                                var token = authorization.Substring("Bearer ".Length).Trim();
+                                var jwtHandler = new JwtSecurityTokenHandler();
+
+                                return jwtHandler.CanReadToken(token) ? "WebApiAuthorization" : "WebAppAuthorization";
+                            }
+
+                            return "WebAppAuthorization";
+                        };
+                    })
+                    .AddMicrosoftIdentityWebApi(
+                        jwtOptions =>
+                        {
+                            jwtOptions.Events = new JwtBearerEventsHandler();
+                        }, identityOptions =>
+                        {
+                            identityOptions.Instance = configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
+                            identityOptions.TenantId = configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
+                            identityOptions.Domain = configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
+                            identityOptions.ClientId = configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
+                            identityOptions.ClientSecret = configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
+                        }, jwtBearerScheme: "WebApiAuthorization");
         services.AddAuthentication("WebAppAuthentication")
                     .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: "WebAppAuthorization");
 
@@ -46,10 +96,11 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
         });
         services.Configure<CookiePolicyOptions>(options =>
         {
+            options.MinimumSameSitePolicy = SameSiteMode.Strict;
             options.Secure = CookieSecurePolicy.Always;
         });
     }
-    
+
     public void ConfigureSwagger(SwaggerGenOptions options, OpenApiInfo settings)
     {
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
