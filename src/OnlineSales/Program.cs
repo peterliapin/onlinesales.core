@@ -413,6 +413,7 @@ public class Program
             {
                 policy
                     .AllowAnyMethod()
+                    .AllowCredentials()
                     .AllowAnyHeader();
                 if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
                 {
