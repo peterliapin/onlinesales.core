@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineSales.Controllers;
 
-[Authorize(AuthenticationSchemes = "WebApiAuthorization")]
+[Authorize]
 [Route("api/[controller]")]
 public class StatisticsController : Controller
 {

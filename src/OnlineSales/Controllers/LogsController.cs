@@ -10,7 +10,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
-[Authorize(AuthenticationSchemes = "WebApiAuthorization")]
+[Authorize]
 [Route("api/[controller]")]
 public class LogsController : Controller
 {
