@@ -56,7 +56,12 @@ namespace OnlineSales.Infrastructure
                     match = Regex.Match(cmd, "filter(\\[(?'property'.*?)\\])+?=(?'value'.*)");
                     if (!match.Success)
                     {
-                        errorList.Add(new QueryException(cmd, "Failed to parse command"));
+                        match = Regex.Match(cmd, "downloadCsv+?=(?'value'.*)");
+                        if (!match.Success)
+                        {
+                            errorList.Add(new QueryException(cmd, "Failed to parse command"));
+                        }
+
                         continue;
                     }
 

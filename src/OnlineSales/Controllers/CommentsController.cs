@@ -27,9 +27,9 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string? query)
+    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string? query, bool downloadCsv = false)
     {
-        return base.Get(query);
+        return base.Get(query, downloadCsv);
     }
 
     // GET api/{entity}s/5

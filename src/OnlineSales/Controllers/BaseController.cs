@@ -110,7 +110,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
+        public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query, bool downloadCsv = false)
         {
             int limit = apiSettingsConfig.Value.MaxListSize;
             var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
@@ -130,6 +130,13 @@ namespace OnlineSales.Controllers
             var totalCount = result.Item2;
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, totalCount.ToString());
             this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+
+            if (downloadCsv)
+            {
+                this.Response.Headers.Add(ResponseHeaderNames.ContentType, "text/csv");
+                this.Response.Headers.Add(ResponseHeaderNames.ContentDisposition, "attachment;filename=data.csv");
+            }
+           
             return Ok(mapper.Map<List<TD>>(result.Item1));
         }
 

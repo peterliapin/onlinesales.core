@@ -15,4 +15,8 @@ public static class ResponseHeaderNames
     public static string TotalCount => "x-total-count";
 
     public static string AccessControlExposeHeader => "Access-Control-Expose-Headers";
+
+    public static string ContentDisposition => "Content-Disposition";
+
+    public static string ContentType => "Content-Type";
 }
