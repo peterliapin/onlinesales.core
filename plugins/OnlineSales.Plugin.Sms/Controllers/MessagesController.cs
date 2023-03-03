@@ -4,7 +4,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using OnlineSales.Data;
 using OnlineSales.Exceptions;
 using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.DTOs;

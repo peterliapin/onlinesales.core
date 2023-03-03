@@ -41,17 +41,14 @@ public class LockService : ILockService
         }
         else
         {
-            return new PostgresLockHolder(postgresDistributedLock);
+            return new PostgresLockHolder();
         }
     }
 }
 
 public class PostgresLockHolder : ILockHolder
 {
-    private readonly PostgresDistributedLockHandle lockHandle;
-
-    public PostgresLockHolder(PostgresDistributedLockHandle lockHolder)
+    public PostgresLockHolder()
     {
-        this.lockHandle = lockHolder;
     }
 }

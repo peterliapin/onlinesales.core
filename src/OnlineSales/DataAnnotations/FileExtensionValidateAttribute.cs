@@ -23,7 +23,7 @@ namespace OnlineSales.DataAnnotations
 
             if (type.Equals("Image"))
             {
-                var configuration = (IOptions<ImagesConfig>)validationContext!.GetService(typeof(IOptions<ImagesConfig>)) !;
+                var configuration = (IOptions<MediaConfig>)validationContext!.GetService(typeof(IOptions<MediaConfig>)) !;
                 listOfExt = configuration.Value.Extensions;
             }
             else
