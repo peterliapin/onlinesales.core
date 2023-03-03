@@ -33,7 +33,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
     {
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
-        services.AddAuthentication("WebApiAuthorization")
+        services.AddAuthentication("ApiAppAuthorization")
                     .AddPolicyScheme("ApiAppAuthorization", "ApiAppAuthorization", opts =>
                     {
                         opts.ForwardDefaultSelector = ctx =>
@@ -74,7 +74,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
                             identityOptions.ClientId = configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
                             identityOptions.ClientSecret = configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
                         }, jwtBearerScheme: "WebApiAuthorization");
-        services.AddAuthentication("WebAppAuthentication")
+        services.AddAuthentication()
                     .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: "WebAppAuthorization");
 
         services.AddRazorPages().AddMvcOptions(options =>
@@ -96,7 +96,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
         });
         services.Configure<CookiePolicyOptions>(options =>
         {
-            options.MinimumSameSitePolicy = SameSiteMode.Strict;
+            options.MinimumSameSitePolicy = SameSiteMode.None;
             options.Secure = CookieSecurePolicy.Always;
         });
     }
