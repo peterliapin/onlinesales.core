@@ -3,6 +3,7 @@
 // </copyright>
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Plugin.AzureAD.Entities;
 using OnlineSales.Plugin.AzureAD.Exceptions;
@@ -17,12 +18,19 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task Login(string redirectUrl)
     {
         await HttpContext.ChallengeAsync("WebAppAuthorization", new AuthenticationProperties() { RedirectUri = redirectUrl });
     }
 
     [HttpGet("logout")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status302Found)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task Logout(string redirectUrl)
     {
         await HttpContext.SignOutAsync("Cookies", new AuthenticationProperties() { RedirectUri = redirectUrl });
@@ -30,7 +38,10 @@ public class AuthController : ControllerBase
 
     [HttpGet("Profile")]
     [Authorize]
-    public ActionResult Profile()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public ActionResult<User> Profile()
     {
         if (HttpContext.User.Identity == null)
         {
