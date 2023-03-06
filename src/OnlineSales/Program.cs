@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -415,6 +416,12 @@ public class Program
                     .AllowAnyMethod()
                     .AllowCredentials()
                     .AllowAnyHeader();
+                if (builder.Environment.IsDevelopment())
+                {
+                    policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
+                    return;
+                }
+
                 if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
                 {
                     policy.AllowAnyOrigin();
