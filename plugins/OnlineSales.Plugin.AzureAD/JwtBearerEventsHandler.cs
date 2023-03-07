@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿// <copyright file="JwtBearerEventsHandler.cs" company="WavePoint Co. Ltd.">
+// Licensed under the MIT license. See LICENSE file in the samples root for full license information.
+// </copyright>
+
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace OnlineSales.Plugin.AzureAD;
