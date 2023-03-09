@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using OnlineSales.Plugin.AzureAD.Exceptions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Plugin.AzureAD;
@@ -28,7 +29,10 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
                     opts.RequireClaim(
                         "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
                         administratorsGroupId);
+                    return;
                 }
+
+                throw new MissingAdminGroupException("AzureAd:GroupsMapping:Administrators field is required.");
             });
         });
         services.Configure<CookiePolicyOptions>(options =>
