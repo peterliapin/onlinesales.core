@@ -23,9 +23,12 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
         {
             options.AddPolicy("Administrators", opts =>
             {
-                opts.RequireClaim(
-                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-                    administratorsGroupId ?? Guid.NewGuid().ToString());
+                if (!string.IsNullOrEmpty(administratorsGroupId))
+                {
+                    opts.RequireClaim(
+                        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+                        administratorsGroupId);
+                }
             });
         });
         services.Configure<CookiePolicyOptions>(options =>
