@@ -24,15 +24,14 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
         {
             options.AddPolicy("Administrators", opts =>
             {
-                if (!string.IsNullOrEmpty(administratorsGroupId))
+                if (string.IsNullOrEmpty(administratorsGroupId) || !Guid.TryParse(administratorsGroupId, out _))
                 {
-                    opts.RequireClaim(
-                        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-                        administratorsGroupId);
-                    return;
+                    throw new MissingAdminGroupException("AzureAd:GroupsMapping:Administrators field is required.");
                 }
 
-                throw new MissingAdminGroupException("AzureAd:GroupsMapping:Administrators field is required.");
+                opts.RequireClaim(
+                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+                    administratorsGroupId);
             });
         });
         services.Configure<CookiePolicyOptions>(options =>
