@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -13,9 +14,11 @@ namespace OnlineSales.Plugin.AzureAD
 {
     public static class Authentication
     {
+        // Selects between App/Api schemes. Look into line 23.  if cookies available authorize using them if not - try to use API, if bearer not avaiable try to perform APP authentication 
         private static string defaultAuthScheme = "ApiAppAuthentication";
         private static string appAuthScheme = "WebAppAuthentication";
         private static string apiAuthScheme = "WebApiAuthentication";
+        private static string cookieName = "auth_ticket";
 
         public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
         {
@@ -24,10 +27,10 @@ namespace OnlineSales.Plugin.AzureAD
              {
                  opts.ForwardDefaultSelector = ctx =>
                  {
-                     var authorizationFromCookie = ctx.Request.Cookies[".AspNetCore.Cookies"];
+                     var authorizationFromCookie = ctx.Request.Cookies[cookieName];
                      if (!string.IsNullOrEmpty(authorizationFromCookie))
                      {
-                         return "Cookies";
+                         return CookieAuthenticationDefaults.AuthenticationScheme;
                      }
 
                      var authorizationFromQuery = ctx.Request.Query["authorization"].FirstOrDefault();
@@ -62,6 +65,10 @@ namespace OnlineSales.Plugin.AzureAD
                  }, jwtBearerScheme: apiAuthScheme);
             services.AddAuthentication()
                         .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: appAuthScheme);
+            services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                options.Cookie.Name = cookieName;
+            });
 
             services.AddRazorPages().AddMvcOptions(options =>
             {
