@@ -418,7 +418,7 @@ public class Program
                     .AllowAnyHeader();
                 if (builder.Environment.IsDevelopment())
                 {
-                    policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost");
+                    policy.SetIsOriginAllowed(origin => true);
                     return;
                 }
 
