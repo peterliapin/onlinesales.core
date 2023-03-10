@@ -21,7 +21,9 @@ services:
     depends_on:
       - elastic
     environment:
-      ELASTICSEARCH_HOSTS: '["http://elastic:9200"]'
+      - SERVER_REWRITEBASEPATH=true
+      - SERVER_BASEPATH=/kibana
+      - ELASTICSEARCH_HOSTS=http://elastic:9200
 
   postgres:
     container_name: postgres

@@ -15,15 +15,15 @@ namespace OnlineSales.Plugin.AzureAD
     public static class Authentication
     {
         // Selects between App/Api schemes. Look into line 23.  if cookies available authorize using them if not - try to use API, if bearer not avaiable try to perform APP authentication 
-        private static string defaultAuthScheme = "ApiAppAuthentication";
-        private static string appAuthScheme = "WebAppAuthentication";
-        private static string apiAuthScheme = "WebApiAuthentication";
+        public const string DefaultAuthScheme = "ApiAppAuthentication";
+        public const string AppAuthScheme = "WebAppAuthentication";
+        public const string ApiAuthScheme = "WebApiAuthentication";
         private static string cookieName = "auth_ticket";
 
         public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(defaultAuthScheme)
-             .AddPolicyScheme(defaultAuthScheme, defaultAuthScheme, opts =>
+            services.AddAuthentication(DefaultAuthScheme)
+             .AddPolicyScheme(DefaultAuthScheme, DefaultAuthScheme, opts =>
              {
                  opts.ForwardDefaultSelector = ctx =>
                  {
@@ -45,10 +45,10 @@ namespace OnlineSales.Plugin.AzureAD
                          var token = authorization.Substring("Bearer ".Length).Trim();
                          var jwtHandler = new JwtSecurityTokenHandler();
 
-                         return jwtHandler.CanReadToken(token) ? apiAuthScheme : appAuthScheme;
+                         return jwtHandler.CanReadToken(token) ? ApiAuthScheme : AppAuthScheme;
                      }
 
-                     return appAuthScheme;
+                     return AppAuthScheme;
                  };
              })
              .AddMicrosoftIdentityWebApi(
@@ -62,9 +62,9 @@ namespace OnlineSales.Plugin.AzureAD
                      identityOptions.Domain = configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
                      identityOptions.ClientId = configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
                      identityOptions.ClientSecret = configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
-                 }, jwtBearerScheme: apiAuthScheme);
+                 }, jwtBearerScheme: ApiAuthScheme);
             services.AddAuthentication()
-                        .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: appAuthScheme);
+                        .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: AppAuthScheme);
             services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
                 options.Cookie.Name = cookieName;

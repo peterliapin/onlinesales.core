@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task Login(string redirectUrl)
     {
-        await HttpContext.ChallengeAsync("WebAppAuthorization", new AuthenticationProperties() { RedirectUri = redirectUrl });
+        await HttpContext.ChallengeAsync(Authentication.AppAuthScheme, new AuthenticationProperties() { RedirectUri = redirectUrl });
     }
 
     [HttpGet("logout")]

@@ -10,7 +10,6 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
 [Route("api/[controller]")]
 public class VersionController : ControllerBase
 {
