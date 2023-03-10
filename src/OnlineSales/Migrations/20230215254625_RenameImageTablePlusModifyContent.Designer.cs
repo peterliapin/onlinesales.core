@@ -14,7 +14,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    [Migration("20230220054625_RenameImageTablePlusModifyContent")]
+    [Migration("20230215254625_RenameImageTablePlusModifyContent")]
     partial class RenameImageTablePlusModifyContent
     {
         /// <inheritdoc />

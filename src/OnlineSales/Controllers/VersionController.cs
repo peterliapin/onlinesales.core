@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Interfaces;
 
@@ -22,6 +23,7 @@ public class VersionController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [AllowAnonymous]
     public ActionResult Get()
     {
         var assembly = Assembly.GetExecutingAssembly();
