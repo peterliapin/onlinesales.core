@@ -47,7 +47,7 @@ public class BaseTest : IDisposable
         return new StringContent(payloadString, Encoding.UTF8, "application/json");
     }
 
-    protected async Task SyncElasticSearch(string url, int numberOfItems)
+    protected async Task SyncElasticSearch()
     {
         var taskExecuteResponce = await GetRequest("/api/tasks/execute/SyncEsTask");
         taskExecuteResponce.Should().NotBeNull();
@@ -55,13 +55,6 @@ public class BaseTest : IDisposable
         var content = await taskExecuteResponce.Content.ReadAsStringAsync();
         var task = JsonHelper.Deserialize<TaskExecutionDto>(content);
         task!.Completed.Should().BeTrue();
-
-        var count = 0;
-        while (count != numberOfItems)
-        {
-            var res = await GetTest<List<Order>>(url);
-            count = res!.Count;
-        }
     }
 
     protected async Task StopElasticSearch()

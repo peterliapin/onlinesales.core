@@ -128,7 +128,6 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         if (createTestItem)
         {
             await CreateItem();
-            await SyncElasticSearch(itemsUrl, 1);
         }       
 
         var response = await GetTest($"{this.itemsUrl}?{filter}");
@@ -315,8 +314,6 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         const int numberOfItems = 10;               
 
         GenerateBulkRecords(numberOfItems);
-
-        await SyncElasticSearch(itemsUrl, numberOfItems);
 
         var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 

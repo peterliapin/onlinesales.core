@@ -70,7 +70,10 @@ namespace OnlineSales.Tasks
                 }
             }
 
-            var bulkResponse = esDbContext.ElasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString());
+            var bulkRequestParameters = new BulkRequestParameters();
+            bulkRequestParameters.Refresh = Refresh.WaitFor;
+
+            var bulkResponse = esDbContext.ElasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString(), bulkRequestParameters);
 
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
         }

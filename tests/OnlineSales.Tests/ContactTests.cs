@@ -41,7 +41,6 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     public async Task ImportFileUpdateByIndexTest()
     {
         await PostImportTest(itemsUrl, "contactBase.csv");
-        await SyncElasticSearch(itemsUrl, 4);
         var allContactsResponse = await GetTest(itemsUrl);
         allContactsResponse.Should().NotBeNull();
 

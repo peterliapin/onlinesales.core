@@ -47,8 +47,6 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
-        await SyncElasticSearch(itemsUrl, 2);
-
         var allCommentsResponse = await GetTest(itemsUrl);
         allCommentsResponse.Should().NotBeNull();
 
