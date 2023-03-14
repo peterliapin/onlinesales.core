@@ -11,7 +11,7 @@ namespace OnlineSales.Tests
     public class AccountsTests : SimpleTableTests<Account, TestAccount, AccountUpdateDto> 
     {
         public AccountsTests()
-            : base("/api/account")
+            : base("/api/accounts")
         {
         }
 
