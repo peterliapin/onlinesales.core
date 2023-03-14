@@ -108,29 +108,32 @@ namespace OnlineSales.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
             int limit = apiSettingsConfig.Value.MaxListSize;
-            var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
-            var parseData = new QueryParseData<T>(queryCommands, limit);
-            IQueryProvider<T> qp;
-            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && parseData.SearchData.Count > 0)
-            {
-                var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                qp = new ESQueryProvider<T>(elasticClient, parseData, indexPrefix!);
-            }
-            else
-            {
-                qp = new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), parseData);
-            }
+
+            var qp = BuildQueryProvider(limit);
 
             var result = await qp.GetResult();
-            var totalCount = result.Item2;
-            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, totalCount.ToString());
+            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
             this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
-            return Ok(mapper.Map<List<TD>>(result.Item1));
+            return Ok(mapper.Map<List<TD>>(result.Records));
+        }
+
+        [HttpGet("export")]
+        [Produces("text/csv")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
+        {
+            var qp = BuildQueryProvider(int.MaxValue);
+
+            var result = await qp.GetResult();
+            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
+            this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+
+            return Ok(mapper.Map<List<TD>>(result.Records));
         }
 
         protected async Task<T> FindOrThrowNotFound(int id)
@@ -145,6 +148,22 @@ namespace OnlineSales.Controllers
             }
 
             return existingEntity;
+        }
+
+        private IQueryProvider<T> BuildQueryProvider(int maxLimitSize)
+        {
+            var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
+            var parseData = new QueryParseData<T>(queryCommands, maxLimitSize);
+
+            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && parseData.SearchData.Count > 0)
+            {
+                var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
+                return new ESQueryProvider<T>(elasticClient, parseData, indexPrefix!);
+            }
+            else
+            {
+                return new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), parseData);
+            }
         }
     }
 }

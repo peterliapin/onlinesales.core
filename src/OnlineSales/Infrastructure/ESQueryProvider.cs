@@ -28,7 +28,7 @@ namespace OnlineSales.Infrastructure
             searchableProperties = CreateSearchableFields();
         }
 
-        public async Task<(IList<T>?, long)> GetResult()
+        public async Task<QueryResult<T>> GetResult()
         {
             AddWhereCommands();
             AddSearchCommands();
@@ -99,7 +99,7 @@ namespace OnlineSales.Infrastructure
             }
 
             var res = await elasticClient.SearchAsync<T>(sr);
-            return (res.Documents.ToList(), count);
+            return new QueryResult<T>(res.Documents.ToList(), count);
         }
 
         private long Count()
