@@ -335,24 +335,19 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        var taskRunnerEnabled = builder.Configuration.GetValue<bool>("TaskRunner:Enable") !;
+        var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
 
-        if (taskRunnerEnabled)
+        builder.Services.AddQuartz(q =>
         {
-            var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
+            q.UseMicrosoftDependencyInjectionJobFactory();
 
-            builder.Services.AddQuartz(q =>
-            {
-                q.UseMicrosoftDependencyInjectionJobFactory();
+            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 
-                q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+            q.AddTrigger(opts =>
+                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(taskRunnerSchedule));
+        });
 
-                q.AddTrigger(opts =>
-                    opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(taskRunnerSchedule));
-            });
-
-            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-        }
+        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
         builder.Services.AddTransient<TaskRunner>();
     }
