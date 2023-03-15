@@ -27,9 +27,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.15" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.6" />
-    <PackageReference Include="Twilio" Version="6.2.4" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.26" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.7" />
+    <PackageReference Include="Twilio" Version="6.2.5" />
     <!-- Insert additional references above this line -->
   </ItemGroup>
 
