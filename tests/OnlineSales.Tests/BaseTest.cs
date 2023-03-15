@@ -31,8 +31,6 @@ public class BaseTest : IDisposable
 
         mapper = App.GetMapper();
         App.CleanDatabase();
-
-        StopElasticSearch().Wait();
     }
 
     public virtual void Dispose()
@@ -55,13 +53,6 @@ public class BaseTest : IDisposable
         var content = await taskExecuteResponce.Content.ReadAsStringAsync();
         var task = JsonHelper.Deserialize<TaskExecutionDto>(content);
         task!.Completed.Should().BeTrue();
-    }
-
-    protected async Task StopElasticSearch()
-    {
-        var taskExecuteResponce = await GetRequest("/api/tasks/stop/SyncEsTask");
-        taskExecuteResponce.Should().NotBeNull();
-        taskExecuteResponce.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     protected Task<HttpResponseMessage> GetRequest(string url, string authToken = "Success")

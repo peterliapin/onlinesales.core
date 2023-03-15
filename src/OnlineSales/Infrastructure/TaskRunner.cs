@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+using Medallion.Threading.Postgres;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -14,30 +16,37 @@ namespace OnlineSales.Infrastructure
     {
         private const string TaskRunnerNodeLockKey = "TaskRunnerPrimaryNodeLock";
 
-        private static bool? isPrimaryNode;
+        private static (PostgresDistributedLockHandle?, PrimaryNodeStatus) primaryNodeStatus = (null, PrimaryNodeStatus.Unknown);
 
         private readonly IEnumerable<ITask> tasks;
-        private readonly PgDbContext dbContext;        
-        
+        private readonly PgDbContext dbContext;
+
         public TaskRunner(IEnumerable<ITask> tasks, PgDbContext dbContext)
         {
             this.dbContext = dbContext;
             this.tasks = tasks;
 
-            if (isPrimaryNode == null)
+            if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
             {
                 #pragma warning disable S3010
-                isPrimaryNode = CheckPrimaryNode();
+                primaryNodeStatus = GetPrimaryStatus();
             }
 
-            Log.Information("This node: " + (isPrimaryNode! == true ? "is primary" : "isn't primary"));
+            Log.Information("This node: " + (IsPrimaryNode() ? "is primary" : "isn't primary"));
+        }
+
+        private enum PrimaryNodeStatus
+        {
+            Primary,
+            NonPrimary,
+            Unknown,
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             try
             {
-                if (isPrimaryNode! == false)
+                if (!IsPrimaryNode())
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
@@ -45,7 +54,7 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var task in tasks.Where(t => t.IsRunning))
                 {
-                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !);
+                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !).Item1;
 
                     if (taskLock is null)
                     {
@@ -74,12 +83,12 @@ namespace OnlineSales.Infrastructure
 
         public async Task<bool> ExecuteTask(ITask task)
         {
-            if (isPrimaryNode! == false)
+            if (!IsPrimaryNode())
             {
                 throw new NonPrimaryNodeException();
             }
 
-            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !);
+            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !).Item1;
 
             if (taskLock is null)
             {
@@ -100,7 +109,7 @@ namespace OnlineSales.Infrastructure
 
         public void StartOrStopTask(ITask task, bool start)
         {
-            if (isPrimaryNode! == false)
+            if (!IsPrimaryNode())
             {
                 throw new NonPrimaryNodeException();
             }
@@ -108,9 +117,22 @@ namespace OnlineSales.Infrastructure
             task.SetRunning(start);
         }
 
-        private bool CheckPrimaryNode()
+        private static bool IsPrimaryNode()
         {
-            return LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString() !) != null;
+            return primaryNodeStatus.Item2 == PrimaryNodeStatus.Primary;
+        }
+
+        private (PostgresDistributedLockHandle?, PrimaryNodeStatus) GetPrimaryStatus()
+        {
+            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString() !);
+            if (primaryNodeLockData.Item2)
+            {
+                return (primaryNodeLockData.Item1, (primaryNodeLockData.Item1 != null) ? PrimaryNodeStatus.Primary : PrimaryNodeStatus.NonPrimary);
+            }
+            else
+            {
+                return (null, PrimaryNodeStatus.Unknown);
+            }
         }
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)

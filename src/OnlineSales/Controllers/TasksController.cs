@@ -16,13 +16,10 @@ public class TasksController : ControllerBase
 {
     private readonly IEnumerable<ITask> tasks;
 
-    private readonly bool isTaskRunnerEnabled;
-
     private readonly TaskRunner taskRunner;
 
     public TasksController(IEnumerable<ITask> tasks, TaskRunner taskRunner, IConfiguration configuration)
     {
-        isTaskRunnerEnabled = configuration.GetValue<bool>("TaskRunner:Enable");
         this.taskRunner = taskRunner;
         this.tasks = tasks;
     }
@@ -97,8 +94,6 @@ public class TasksController : ControllerBase
 
     private TaskDetailsDto StartOrStop(string name, bool start)
     {
-        CheckTaskRunnerEnabed();
-
         var result = tasks.Where(t => t.Name == name);
 
         if (!result.Any())
@@ -123,14 +118,6 @@ public class TasksController : ControllerBase
             RetryInterval = task.RetryInterval,
             IsRunning = task.IsRunning,
         };
-    }
-
-    private void CheckTaskRunnerEnabed()
-    {
-        if (!isTaskRunnerEnabled)
-        {
-            throw new TaskRunnerDisabledException();
-        }
     }
 }
 

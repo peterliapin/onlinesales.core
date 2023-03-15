@@ -23,24 +23,27 @@ namespace OnlineSales.Infrastructure
             this.parseData = parseData;
         }
 
-        public async Task<(IList<T>?, long)> GetResult()
+        public async Task<QueryResult<T>> GetResult()
         {
             AddWhereCommands();
             AddSearchCommands();
 
-            var count = query.Count();
+            var totalCount = query.Count();
+            IList<T>? records;
 
             AddOrderCommands();
             AddSkipCommand();
             AddLimitCommand();
             if (parseData.SelectData.IsSelect)
             {
-                return (await GetSelectResult(), count);
+                records = await GetSelectResult();
             }
             else
             {
-                return (await query.ToListAsync(), count);
+                records = await query.ToListAsync();
             }
+
+            return new QueryResult<T>(records, totalCount);
         }
 
         private void AddOrderCommands()
