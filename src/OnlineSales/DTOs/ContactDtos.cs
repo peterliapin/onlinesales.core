@@ -11,26 +11,31 @@ namespace OnlineSales.DTOs;
 
 public abstract class BaseContactDto
 {
+    [Optional]
     public string? LastName { get; set; }
 
+    [Optional]
     public string? FirstName { get; set; }
 
-    public string? CompanyName { get; set; }
-
+    [Optional]
     public string? Address1 { get; set; }
 
+    [Optional]
     public string? Address2 { get; set; }
 
+    [Optional]
     public string? State { get; set; }
 
+    [Optional]
     public string? Zip { get; set; }
 
-    public string? Location { get; set; }
-
+    [Optional]
     public string? Phone { get; set; }
 
+    [Optional]
     public int? Timezone { get; set; }
 
+    [Optional]
     public string? Language { get; set; }
 }
 
@@ -39,11 +44,6 @@ public class ContactCreateDto : BaseContactDto
     [Required]
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
-}
-
-public class ContactCreateWithDomainDto : ContactCreateDto
-{
-    public Domain? Domain { get; set; }
 }
 
 public class ContactUpdateDto : BaseContactDto
@@ -61,6 +61,8 @@ public class ContactDetailsDto : ContactCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public int DomainId { get; set; }
 }
 
 public class ContactImportDto : ContactCreateDto
@@ -91,6 +93,9 @@ public class ContactImportDto : ContactCreateDto
 
     [Optional]
     public int? AccountId { get; set; }
+
+    [Optional]
+    public int DomainId { get; set; }
 
     [Optional]
     [SurrogateForeignKey(typeof(Account), "Name", "AccountId")]

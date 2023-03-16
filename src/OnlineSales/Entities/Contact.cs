@@ -27,8 +27,6 @@ public class Contact : BaseEntity
     [Required]
     public string Email { get; set; } = string.Empty;
 
-    public string? CompanyName { get; set; }
-
     [Searchable]
     public string? Address1 { get; set; }
 
@@ -38,8 +36,6 @@ public class Contact : BaseEntity
     public string? State { get; set; }
 
     public string? Zip { get; set; }
-
-    public string? Location { get; set; }
 
     [Searchable]
     public string? Phone { get; set; }

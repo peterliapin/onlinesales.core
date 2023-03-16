@@ -11,23 +11,22 @@ namespace OnlineSales.Services
     public class ContactService : IContactService
     {
         private readonly PgDbContext pgDbContext;
-        private readonly IDomainService domainService;
-        private readonly IAccountExternalService accountExternalService;
-        private readonly IEmailVerifyService emailVerifyService;        
+        // private readonly IDomainService domainService;
+        // private readonly IAccountExternalService accountExternalService;
+        // private readonly IEmailVerifyService emailVerifyService;        
 
         public ContactService(PgDbContext pgDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
         {
             this.pgDbContext = pgDbContext;
-            this.domainService = domainService;
-            this.accountExternalService = accountExternalService;
-            this.emailVerifyService = emailVerifyService;
+            // this.domainService = domainService;
+            // this.accountExternalService = accountExternalService;
+            // this.emailVerifyService = emailVerifyService;
         }
 
-        public async Task SaveContact(Contact contact)
+        public async Task SaveAsync(Contact contact)
         {
             EnrichWithDomainId(contact);
-
-            await EnrichWithAccountId(contact);
+            EnrichWithAccountId(contact);
 
             if (contact.Id > 0)
             {
@@ -58,7 +57,7 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task EnrichWithDomainId(List<Contact> contacts)
+        public async Task EnrichWithDomainIdAsync(List<Contact> contacts)
         {
             var newDomains = new Dictionary<string, Domain>();
 
@@ -118,27 +117,32 @@ namespace OnlineSales.Services
             return email.Split("@").Last().ToString();
         }
 
-        public async Task EnrichWithAccountId(Contact contact)
+        public void EnrichWithAccountId(Contact contact)
         {
-            Domain domain = contact.Domain!;
+            if (!contact.AccountId.HasValue)
+            {
+                Domain domain = contact.Domain!;
 
-            if (domain!.AccountId.HasValue && domain!.AccountId != 0)
-            {
-                contact.AccountId = domain!.AccountId;
-            }
-            else
-            {
-                if ((domain.Free == null && domain.Disposable == null) || (domain.Free != true && domain.Disposable != true))
+                if (domain!.AccountId.HasValue && domain!.AccountId != 0)
                 {
-                    await DomainVerifyAndCreateAccount(contact);
+                    contact.AccountId = domain!.AccountId;
                 }
+
+                // Peter Liapin: 
+                // else
+                // {
+                //     if ((domain.Free == null && domain.Disposable == null) || (domain.Free == false && domain.Disposable == false))
+                //     {
+                //         await DomainVerifyAndCreateAccount(contact);
+                //     }
+                // }
             }
         }
 
-        public async Task EnrichWithAccountId(List<Contact> contacts)
+        public void EnrichWithAccountId(List<Contact> contacts)
         {
-            var newAccounts = new Dictionary<string, Account>();
-            var updatedContact = new List<Contact>();
+            // var newAccounts = new Dictionary<string, Account>();
+            // var updatedContact = new List<Contact>();
 
             var domainsWithAccounts = (from contact in contacts where contact.Domain!.AccountId.HasValue && contact.Domain!.AccountId != 0 select contact).ToList();
 
@@ -147,10 +151,10 @@ namespace OnlineSales.Services
                 domainWithAccount.AccountId = domainWithAccount.Domain!.AccountId;
                 domainWithAccount.Account = domainWithAccount.Domain!.Account;
 
-                updatedContact.Add(domainWithAccount);
+                // updatedContact.Add(domainWithAccount);
             }
 
-            foreach (var contact in contacts.Where(contacts => !updatedContact.Any(updatedContact => updatedContact.Email == contacts.Email)))
+            /* foreach (var contact in contacts.Where(contacts => !updatedContact.Any(updatedContact => updatedContact.Email == contacts.Email)))
             {
                 Domain domain = contact.Domain!;
 
@@ -176,51 +180,44 @@ namespace OnlineSales.Services
                 }
 
                 updatedContact.Add(contact);
-            }
+            } */
         }
 
-        public async Task<bool> DomainVerifyAndCreateAccount(Contact contact)
-        {
-            bool newAccount = false;
-            Domain domain = contact.Domain!;
-
-            if (domain.Free == null && domain.Disposable == null)
-            {
-                await domainService.Verify(domain);
-                await emailVerifyService.VerifyEmail(contact.Email, domain); 
-            }
-
-            var extAccountInfo = await accountExternalService.GetAccountDetails(domain.Name) !;
-
-            var existingDbRecords = (from accounts in pgDbContext.Accounts where accounts.Name == extAccountInfo.Name select accounts).FirstOrDefault();
-
-            if (existingDbRecords == null)
-            {
-                contact.Account = new Account()
-                {
-                    Name = extAccountInfo.Name!,
-                    City = extAccountInfo.City,
-                    CountryCode = extAccountInfo.CountryCode,
-                    Revenue = extAccountInfo.Revenue,
-                    EmployeesRange = extAccountInfo.EmployeesRange,
-                    SocialMedia = extAccountInfo.SocialMedia,
-                    StateCode = extAccountInfo.StateCode,
-                    Tags = extAccountInfo.Tags,
-                    Data = extAccountInfo.Data,
-                };
-
-                contact.Domain!.Account = contact.Account;
-                contact.Domain.AccountSynced = extAccountInfo.AccountSynced;
-
-                newAccount = true;
-            }
-            else
-            {
-                contact.Account = existingDbRecords;
-                contact.Domain!.Account = contact.Account;
-            }
-
-            return newAccount;
-        }
+        // public async Task<bool> DomainVerifyAndCreateAccount(Contact contact)
+        // {
+        //     bool newAccount = false;
+        //     Domain domain = contact.Domain!;
+        //     if (domain.Free == null && domain.Disposable == null)
+        //     {
+        //         await domainService.Verify(domain);
+        //         await emailVerifyService.VerifyEmail(contact.Email, domain); 
+        //     }
+        //     var extAccountInfo = await accountExternalService.GetAccountDetails(domain.Name) !;
+        //     var existingDbRecords = (from accounts in pgDbContext.Accounts where accounts.Name == extAccountInfo.Name select accounts).FirstOrDefault();
+        //     if (existingDbRecords == null)
+        //     {
+        //         contact.Account = new Account()
+        //         {
+        //             Name = extAccountInfo.Name!,
+        //             City = extAccountInfo.City,
+        //             CountryCode = extAccountInfo.CountryCode,
+        //             Revenue = extAccountInfo.Revenue,
+        //             EmployeesRange = extAccountInfo.EmployeesRange,
+        //             SocialMedia = extAccountInfo.SocialMedia,
+        //             StateCode = extAccountInfo.StateCode,
+        //             Tags = extAccountInfo.Tags,
+        //             Data = extAccountInfo.Data,
+        //         };
+        //         contact.Domain!.Account = contact.Account;
+        //         contact.Domain.AccountSynced = extAccountInfo.AccountSynced;
+        //         newAccount = true;
+        //     }
+        //     else
+        //     {
+        //         contact.Account = existingDbRecords;
+        //         contact.Domain!.Account = contact.Account;
+        //     }
+        //     return newAccount;
+        // }
     }
 }

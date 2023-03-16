@@ -82,7 +82,7 @@
 
   <!--This ItemGroup is required to support migration generation with the "dotnet ef migrations add" command-->
   <ItemGroup Condition="'$(Configuration)'=='Migration'">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -6,7 +6,7 @@ using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestContact : ContactCreateWithDomainDto
+public class TestContact : ContactCreateDto
 {
     public TestContact(string uid = "")
     {
