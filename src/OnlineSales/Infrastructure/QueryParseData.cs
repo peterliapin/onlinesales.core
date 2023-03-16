@@ -363,7 +363,10 @@ namespace OnlineSales.Infrastructure
                 var rawOperation = cmd.Props.ElementAtOrDefault(indexOffset + 1);
                 Property = ParseProperty(propertyName, cmd);
                 Operation = ParseOperation(rawOperation, cmd);
-                ParseValue();
+                if (Operation != WOperand.Like && Operation != WOperand.NLike)
+                {
+                    ParseValue();
+                }
             }
 
             public object ParseValue()

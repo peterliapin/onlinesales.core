@@ -155,7 +155,7 @@ namespace OnlineSales.Controllers
             var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
             var parseData = new QueryParseData<T>(queryCommands, maxLimitSize);
 
-            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && parseData.SearchData.Count > 0)
+            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && (parseData.SearchData.Count > 0 || parseData.WhereData.Count > 0))
             {
                 var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
                 return new ESQueryProvider<T>(elasticClient, parseData, indexPrefix!);
