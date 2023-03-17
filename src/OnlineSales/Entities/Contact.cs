@@ -61,5 +61,12 @@ public class Contact : BaseEntity
     [ForeignKey("AccountId")]
     public virtual Account? Account { get; set; }
 
+    public int? UnsubscribeId { get; set; }
+
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    [JsonIgnore]
+    [ForeignKey("UnsubscribeId")]
+    public virtual Unsubscribe? Unsubscribe { get; set; }
+
     public string? Source { get; set; }
 }

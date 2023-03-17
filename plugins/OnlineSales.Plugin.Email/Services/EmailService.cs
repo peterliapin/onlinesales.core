@@ -82,7 +82,7 @@ public class EmailService : IEmailService
             message.To.Add(MailboxAddress.Parse(receipent));
         }
 
-        BodyBuilder emailBody = new ()
+        var emailBody = new BodyBuilder()
         {
             HtmlBody = body,
         };

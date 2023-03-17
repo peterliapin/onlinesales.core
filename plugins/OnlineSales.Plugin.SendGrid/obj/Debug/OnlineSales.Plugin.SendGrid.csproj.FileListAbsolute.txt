@@ -1,0 +1,16 @@
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/src/OnlineSales/bin/Debug/net7.0/plugins/OnlineSales.Plugin.SendGrid/pluginsettings.json
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/src/OnlineSales/bin/Debug/net7.0/plugins/OnlineSales.Plugin.SendGrid/OnlineSales.Plugin.SendGrid.deps.json
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/src/OnlineSales/bin/Debug/net7.0/plugins/OnlineSales.Plugin.SendGrid/OnlineSales.Plugin.SendGrid.runtimeconfig.json
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/src/OnlineSales/bin/Debug/net7.0/plugins/OnlineSales.Plugin.SendGrid/OnlineSales.Plugin.SendGrid.dll
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/src/OnlineSales/bin/Debug/net7.0/plugins/OnlineSales.Plugin.SendGrid/OnlineSales.Plugin.SendGrid.pdb
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.csproj.AssemblyReference.cache
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.GeneratedMSBuildEditorConfig.editorconfig
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.AssemblyInfoInputs.cache
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.AssemblyInfo.cs
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.csproj.CoreCompileInputs.cache
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.csproj.CopyComplete
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.dll
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/refint/OnlineSales.Plugin.SendGrid.dll
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.pdb
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/OnlineSales.Plugin.SendGrid.genruntimeconfig.cache
+/Users/peterliapin/Projects/OnlineSales/onlinesales.core/plugins/OnlineSales.Plugin.SendGrid/obj/Debug/ref/OnlineSales.Plugin.SendGrid.dll

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -181,6 +182,31 @@ namespace OnlineSales.Services
 
                 updatedContact.Add(contact);
             } */
+        }
+
+        public async Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip)
+        {
+            var contact = (from u in pgDbContext.Contacts
+                            where u.Email == email
+                            select u).FirstOrDefault();
+
+            if (contact != null)
+            {
+                var unsubscribe = new Unsubscribe
+                {
+                    ContactId = contact.Id,
+                    Reason = reason,
+                    CreatedByIp = ip,
+                    Source = source,
+                    CreatedAt = createdAt,
+                };                
+
+                await pgDbContext.Unsubscribes !.AddAsync(unsubscribe);
+
+                contact.Unsubscribe = unsubscribe;
+            }
+
+            await pgDbContext.SaveChangesAsync();
         }
 
         // public async Task<bool> DomainVerifyAndCreateAccount(Contact contact)

@@ -91,6 +91,8 @@ public class PgDbContext : DbContext
 
     public virtual DbSet<Account>? Accounts { get; set; }
 
+    public virtual DbSet<Unsubscribe>? Unsubscribes { get; set; }
+
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         int result = 0;

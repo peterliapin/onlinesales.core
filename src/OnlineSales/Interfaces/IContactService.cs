@@ -13,5 +13,7 @@ namespace OnlineSales.Interfaces
         Task EnrichWithDomainIdAsync(List<Contact> contacts);
 
         void EnrichWithAccountId(List<Contact> contacts);
+
+        Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip);
     }
 }
