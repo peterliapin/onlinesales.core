@@ -27,20 +27,20 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         var bulkEntitiesList = new List<Order>();
 
-        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "1 Test", fkId);
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "1 Test q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
-        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test 2 z", fkId);
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test 2 z q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
-        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test 3", fkId);
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test 3 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
-        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te1st 3", fkId);
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te1st 4 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
         App.PopulateBulkData(bulkEntitiesList);
 
         await SyncElasticSearch();
 
-        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][like]=.*est");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][like]=.*est&query=q");
         result!.Count.Should().Be(3);
     }
 
