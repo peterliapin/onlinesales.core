@@ -98,12 +98,13 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         var populateAttributes = (TestOrder order) =>
         {            
             order.AffiliateName = (index / 2).ToString();
-            index++;
+            order.Currency = "Test";
+            index++;            
         };
 
         GenerateBulkRecords(numberOfItems, populateAttributes);
 
-        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC&filter[where][Currency]=Test");
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
