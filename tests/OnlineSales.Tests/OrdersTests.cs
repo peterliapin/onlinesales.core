@@ -176,8 +176,6 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         GenerateBulkRecords(numberOfItems, populateAttributes);
 
-        await SyncElasticSearch();
-
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
         result.Should().NotBeNull();
         result!.Count.Should().Be(4);
