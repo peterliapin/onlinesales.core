@@ -3,7 +3,10 @@
 // </copyright>
 
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using AutoMapper;
+using AutoMapper.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using OnlineSales.DataAnnotations;
@@ -203,6 +206,62 @@ namespace OnlineSales.Infrastructure
             var parameterPropertyExpression = Expression.Property(expressionParameter, cmd.Property.Name);
 
             Expression outputExpression;
+
+            Expression? CreateCompareExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter, Expression value)
+            {
+                Expression? res = null;
+
+                Expression pEx = parameter;
+                Expression vEx = value;
+
+                if (cmd.Property.PropertyType == typeof(string))
+                {
+                    var compareMethod = cmd.Property.PropertyType.GetMethod("CompareTo", new[] { typeof(string) });
+                    pEx = Expression.Call(parameter, compareMethod!, value);
+                    vEx = Expression.Constant(0);
+                }
+
+                if (cmd.Operation == WOperand.GreaterThan)
+                {
+                    res = Expression.GreaterThan(pEx, vEx);
+                }
+                else if (cmd.Operation == WOperand.GreaterThanOrEqualTo)
+                {
+                    res = Expression.GreaterThanOrEqual(pEx, vEx);
+                }
+                else if (cmd.Operation == WOperand.LessThan)
+                {
+                    res = Expression.LessThan(pEx, vEx);
+                }
+                else if (cmd.Operation == WOperand.LessThanOrEqualTo)
+                {
+                    res = Expression.LessThanOrEqual(pEx, vEx);
+                }
+
+                return res;
+            }
+
+            Expression? CreateLikeExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter, Expression value)
+            {
+                Expression? res = null;
+                
+                var matchOperation = typeof(Regex).GetMethod("IsMatch", BindingFlags.Static | BindingFlags.Public, new[] { typeof(string), typeof(string), typeof(RegexOptions) });
+                var trueConstant = Expression.Constant(true);
+                var falseConstant = Expression.Constant(false);
+                var regexOptionExpression = Expression.Constant(RegexOptions.Compiled);
+
+                if (cmd.Operation == WOperand.Like)
+                {
+                    res = Expression.Equal(Expression.Call(matchOperation!, parameter, value, regexOptionExpression), trueConstant);
+                }
+                else if (cmd.Operation == WOperand.NLike)
+                {
+                    res = Expression.Equal(Expression.Call(matchOperation!, parameter, value, regexOptionExpression), falseConstant);
+                }
+
+                return res;
+            }
+
             try
             {
                 switch (cmd.Operation)
@@ -210,24 +269,22 @@ namespace OnlineSales.Infrastructure
                     case WOperand.Equal:
                         outputExpression = Expression.Equal(parameterPropertyExpression, valueParameterExpression);
                         break;
-                    case WOperand.GreaterThan:
-                        outputExpression = Expression.GreaterThan(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.GreaterThanOrEqualTo:
-                        outputExpression = Expression.GreaterThanOrEqual(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.LessThan:
-                        outputExpression = Expression.LessThan(parameterPropertyExpression, valueParameterExpression);
-                        break;
-                    case WOperand.LessThanOrEqualTo:
-                        outputExpression = Expression.LessThanOrEqual(parameterPropertyExpression, valueParameterExpression);
-                        break;
                     case WOperand.NotEqual:
                         outputExpression = Expression.NotEqual(parameterPropertyExpression, valueParameterExpression);
                         break;
+                    case WOperand.GreaterThan:
+                    case WOperand.GreaterThanOrEqualTo:
+                    case WOperand.LessThan:
+                    case WOperand.LessThanOrEqualTo:
+                        outputExpression = CreateCompareExpression(cmd, parameterPropertyExpression, valueParameterExpression) !;
+                        break;
+                    case WOperand.Like:
+                    case WOperand.NLike:
+                        outputExpression = CreateLikeExpression(cmd, parameterPropertyExpression, valueParameterExpression) !;
+                        break;
                     default:
                         throw new QueryException(cmd.Cmd.Source, $"No such operand '{cmd.Operation}'");
-                }
+                }                
             }
             catch (Exception ex)
             {
