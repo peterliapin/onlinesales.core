@@ -217,8 +217,6 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         GenerateBulkRecords(numberOfItems);
 
-        await SyncElasticSearch();
-
         async Task GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
         {
             var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
