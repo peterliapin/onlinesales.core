@@ -128,7 +128,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         if (createTestItem)
         {
             await CreateItem();
-        }       
+        }
 
         var response = await GetTest($"{this.itemsUrl}?{filter}");
         response.Should().NotBeNull();

@@ -28,6 +28,8 @@ namespace OnlineSales.Entities
         LessThan = 5,
         LessThanOrEqualTo = 6,
         NotEqual = 7,
+        Like = 8,
+        NLike = 9,
     }
 
     public class QueryCommand
@@ -51,6 +53,8 @@ namespace OnlineSales.Entities
             { "lt", WOperand.LessThan },
             { "lte", WOperand.LessThanOrEqualTo },
             { "neq", WOperand.NotEqual },
+            { "like", WOperand.Like },
+            { "nlike", WOperand.NLike },
         };
 
         public static string AvailableCommandString => FilterMappings.Keys.Aggregate(string.Empty, (acc, key) => $"{acc}{key}, ");
