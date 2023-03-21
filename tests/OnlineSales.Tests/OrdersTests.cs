@@ -2,14 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Reflection.Metadata;
-using System.Collections.Generic;
 using FluentAssertions;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
