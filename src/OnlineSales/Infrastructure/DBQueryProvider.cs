@@ -57,28 +57,32 @@ namespace OnlineSales.Infrastructure
             }
             else
             {
+                bool moreThanOne = false;
                 foreach (var orderCmd in parseData.OrderData)
                 {
                     var expressionParameter = Expression.Parameter(typeof(T));
                     var orderPropertyType = orderCmd.Property.PropertyType;
                     var orderPropertyExpression = Expression.Property(expressionParameter, orderCmd.Property.Name);
                     var orderDelegateType = typeof(Func<,>).MakeGenericType(typeof(T), orderPropertyType);
-                    dynamic orderLambda = Expression.Lambda(orderDelegateType, orderPropertyExpression, expressionParameter);
+                    var orderLambda = Expression.Lambda(orderDelegateType, orderPropertyExpression, expressionParameter);
                     var methodName = string.Empty;
+                    
                     if (orderCmd.Ascending)
                     {
-                        methodName = query is IOrderedQueryable<T> ? "ThenBy" : "OrderBy";
+                        methodName = moreThanOne ? "ThenBy" : "OrderBy";
                     }
                     else
                     {
-                        methodName = query is IOrderedQueryable<T> ? "ThenByDescending" : "OrderByDescending";
+                        methodName = moreThanOne ? "ThenByDescending" : "OrderByDescending";
                     }
+
+                    moreThanOne = true;
 
                     var orderMethod = typeof(Queryable).GetMethods().First(
                                                                         m => m.Name == methodName &&
                                                                         m.GetGenericArguments().Length == 2 &&
                                                                         m.GetParameters().Length == 2).MakeGenericMethod(typeof(T), orderPropertyType);
-                    query = (IOrderedQueryable<T>)orderMethod.Invoke(query, new object?[] { query, orderLambda }) !;
+                    query = (IOrderedQueryable<T>)orderMethod.Invoke(null, new object?[] { query, orderLambda }) !;
                 }
             }
         }
