@@ -22,7 +22,7 @@ namespace OnlineSales.Services
             this.emailValidationExternalService = emailValidationExternalService;
         }
 
-        public async Task<Domain> VerifyDomain(string email)
+        public async Task<Domain> Verify(string email)
         {
             var domainName = email.Split("@").Last();
             
@@ -48,14 +48,14 @@ namespace OnlineSales.Services
                 }
 
                 await domainService.Verify(domain!);
-                await VerifyEmail(email, domain);
+                await Verify(email, domain);
                 await pgContext.SaveChangesAsync();
 
                 return domain;
             }
         }
 
-        public async Task VerifyEmail(string email, Domain domain)
+        public async Task Verify(string email, Domain domain)
         {
             bool freeCheck = false;
             bool disposableCheck = false;

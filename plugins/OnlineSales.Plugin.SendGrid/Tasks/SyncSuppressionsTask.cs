@@ -65,8 +65,15 @@ public class SyncSuppressionsTask : BaseTask
         foreach (var spamReport in spamReports)
         {
             await contactService.Unsubscribe(spamReport.Email, "Reported As Spam", "SendGrid_spam_reports", spamReport.CreatedAt, spamReport.Ip);
-        }        
+        }
 
+        var unsubscribes = await GetLatestSuppressionsByType<SuppressionDto>("unsubscribes");
+
+        foreach (var unsubscribe in unsubscribes)
+        {
+            await contactService.Unsubscribe(unsubscribe.Email, "Unsubscribed", "SendGrid_unsubscribes", unsubscribe.CreatedAt, null);
+        }
+       
         return true;
     }
 

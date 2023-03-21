@@ -8,8 +8,8 @@ namespace OnlineSales.Interfaces
 {
     public interface IEmailVerifyService
     {
-        Task<Domain> VerifyDomain(string email);
+        Task<Domain> Verify(string email);
 
-        Task VerifyEmail(string email, Domain domain);
+        Task Verify(string email, Domain domain);
     }
 }
