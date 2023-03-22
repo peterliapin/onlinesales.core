@@ -48,12 +48,10 @@ namespace OnlineSales.Infrastructure
                 });
             }
 
-            var count = Count();
-
             var sr = new SearchRequest<T>(indexName);
 
             sr.Query = (orQueries.Count > 0) ? new BoolQuery { Should = orQueries.ToArray(), } : new MatchAllQuery();
-                       
+                        
             if (parseData.OrderData.Count > 0)
             {
                 var sortedConditions = new List<ISort>();
@@ -62,23 +60,8 @@ namespace OnlineSales.Infrastructure
                 {
                     var sortOrder = orderCmd.Ascending ? Nest.SortOrder.Ascending : Nest.SortOrder.Descending;
 
-                    if (orderCmd.Property.PropertyType == typeof(string))
-                    {
-                        var paramExpr = Expression.Parameter(typeof(T), "t");
-                        var propExpr = Expression.Property(paramExpr, orderCmd.Property.Name);
-                        var f = Expression.Lambda<Func<T, object>>(propExpr, paramExpr);
-
-                        if (orderCmd.Property.PropertyType == typeof(string))
-                        {
-                            f = f.AppendSuffix("keyword");
-                        }
-
-                        sortedConditions.Add(new FieldSort { Field = Infer.Field<T>(f), Order = sortOrder, });
-                    }
-                    else
-                    {
-                        sortedConditions.Add(new FieldSort { Field = new Field(orderCmd.Property), Order = sortOrder, });
-                    }                        
+                    var field = orderCmd.Property.PropertyType == typeof(string) ? new Field(GetElasticKeywordName(orderCmd.Property)) : new Field(orderCmd.Property);
+                    sortedConditions.Add(new FieldSort { Field = field, Order = sortOrder, UnmappedType = FieldType.Long });
                 }
 
                 sr.Sort = sortedConditions;
@@ -86,7 +69,7 @@ namespace OnlineSales.Infrastructure
 
             if (parseData.Skip >= 0)
             {
-                sr.From = parseData.Skip;
+                sr.From = parseData.Skip;   
             }
 
             if (parseData.Limit >= 0)
@@ -106,33 +89,23 @@ namespace OnlineSales.Infrastructure
             }
 
             var res = await elasticClient.SearchAsync<T>(sr);
-            return new QueryResult<T>(res.Documents.ToList(), count);
-        }
-
-        private long Count()
-        {
-            var countDescriptor = new CountDescriptor<T>();
-            countDescriptor.Index(indexName);
-
-            if (orQueries.Count > 0)
+            if (res.IsValid)
             {
-                countDescriptor = countDescriptor.Query(q => q.Bool(b => b.Should(orQueries.ToArray())));
+                return new QueryResult<T>(res.Documents.ToList(), res.Total);
             }
             else
             {
-                countDescriptor = countDescriptor.Query(q => q.MatchAll());
-            }            
+                throw res.OriginalException;
+            }
+        }
 
-            return elasticClient.Count(countDescriptor).Count;
+        private static string GetElasticKeywordName(PropertyInfo pi)
+        {
+            return char.ToLower(pi.Name[0]) + pi.Name.Substring(1) + ".keyword";
         }
 
         private void AddWhereCommands()
         {
-            string GetElasticKeywordName(PropertyInfo pi)
-            {
-                return char.ToLower(pi.Name[0]) + pi.Name.Substring(1) + ".keyword";
-            }
-
             QueryContainer CreateQueryComparison(QueryParseData<T>.WhereUnitData cmd)
             {
                 object value = cmd.ParseValue();
