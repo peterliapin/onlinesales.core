@@ -94,7 +94,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         async Task TestSkipAndLimit(int skip, int limit, int expextedSize)
         {
-            var response = await GetTest<List<Order>>(itemsUrl + $"?query=AffiliateName&filter[skip]={skip}&filter[limit]={limit}");
+            var response = await GetTestCSV<OrderImportDto>(itemsUrl + $"/export/?query=AffiliateName&filter[skip]={skip}&filter[limit]={limit}");
             response.Should().NotBeNull();
             response!.Count.Should().Be(expextedSize);
             for (int i = 0; i < response.Count; ++i)

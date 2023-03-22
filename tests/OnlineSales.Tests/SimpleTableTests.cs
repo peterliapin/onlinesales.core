@@ -142,9 +142,9 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Theory]
-    [InlineData("", 15100, 15000)]
-    [InlineData("filter[skip]=0", 15, 15000)]
-    [InlineData("filter[limit]=10&filter[skip]=0", 150, 15000)]
+    [InlineData("", 150, 100)]
+    [InlineData("filter[skip]=0", 150, 100)]
+    [InlineData("filter[limit]=10&filter[skip]=0", 150, 100)]
     public async Task LimitLists(string filter, int dataCount, int limitPerRequest)
     {
         GenerateBulkRecords(dataCount);
