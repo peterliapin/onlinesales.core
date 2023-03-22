@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Reflection.Metadata;
 using FluentAssertions;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
@@ -51,7 +48,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
-        
+
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", null, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         string testAN = "Nearly ten years had passed since the Dursleys had woken up to find their nephew on the front step" +
@@ -61,18 +58,70 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.ExchangeRate = 123.456M, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = testAN, fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         App.PopulateBulkData(bulkEntitiesList);
         await SyncElasticSearch();
-        var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully");
-        result!.Count.Should().Be(1);
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=Id");
+        result!.Count.Should().Be(2);
         result[0].AffiliateName.Should().Be(testAN);
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=ContactIp");
+        result!.Count.Should().Be(2);
+        result[0].AffiliateName.Should().Be(testAN);
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully");
+        result!.Count.Should().Be(2);
+        result[0].AffiliateName.Should().Be(testAN);
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=123.456");
         result!.Count.Should().Be(1);
         result[0].ExchangeRate.Should().Be(123.456M);
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=");
-        result!.Count.Should().Be(3);
+        result!.Count.Should().Be(4);
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=SomeSearchString");
         result!.Count.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetWithSearchWithBigLimitTest()
+    {
+        int entitiesNumber = 13000;
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>(entitiesNumber, to => to.AffiliateName = "AffiliateName", fkId);
+        var bulkEntitiesList = mapper.Map<List<Order>>(bulkList);
+
+        App.PopulateBulkData(bulkEntitiesList);
+
+        string totalCountHeader = string.Empty;
+        while (totalCountHeader != $"{entitiesNumber}")
+        {
+            await SyncElasticSearch();
+            var resp = await GetTest(itemsUrl + "?query=AffiliateName");
+            totalCountHeader = resp.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault() !;
+        }
+
+        async Task TestSkipAndLimit(int skip, int limit, int expextedSize)
+        {
+            var response = await GetTestCSV<OrderImportDto>(itemsUrl + $"/export/?query=AffiliateName&filter[skip]={skip}&filter[limit]={limit}");
+            response.Should().NotBeNull();
+            response!.Count.Should().Be(expextedSize);
+            for (int i = 0; i < response.Count; ++i)
+            {
+                response[i].Id.Should().Be(skip + 1 + i);
+            }
+        }
+
+        await TestSkipAndLimit(0, 14000, entitiesNumber);        
+        await TestSkipAndLimit(5000, 1000, 1000);
+        await TestSkipAndLimit(11000, 2000, 2000);
+        await TestSkipAndLimit(12000, 2000, 1000);
+        await TestSkipAndLimit(14000, 2000, 0);
     }
 
     [Fact]
