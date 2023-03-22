@@ -2,13 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Reflection.Metadata;
 using FluentAssertions;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
@@ -87,6 +84,44 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
 
         result = await GetTest<List<Order>>(itemsUrl + "?query=SomeSearchString");
         result!.Count.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetWithSearchWithBigLimitTest()
+    {
+        int entitiesNumber = 13000;
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>(entitiesNumber, to => to.AffiliateName = "AffiliateName", fkId);
+        var bulkEntitiesList = mapper.Map<List<Order>>(bulkList);
+
+        App.PopulateBulkData(bulkEntitiesList);
+
+        string totalCountHeader = string.Empty;
+        while (totalCountHeader != $"{entitiesNumber}")
+        {
+            await SyncElasticSearch();
+            var resp = await GetTest(itemsUrl + "?query=AffiliateName");
+            totalCountHeader = resp.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault() !;
+        }
+
+        async Task TestSkipAndLimit(int skip, int limit, int expextedSize)
+        {
+            var response = await GetTestCSV<OrderImportDto>(itemsUrl + $"/export/?query=AffiliateName&filter[skip]={skip}&filter[limit]={limit}");
+            response.Should().NotBeNull();
+            response!.Count.Should().Be(expextedSize);
+            for (int i = 0; i < response.Count; ++i)
+            {
+                response[i].Id.Should().Be(skip + 1 + i);
+            }
+        }
+
+        await TestSkipAndLimit(0, 14000, entitiesNumber);        
+        await TestSkipAndLimit(5000, 1000, 1000);
+        await TestSkipAndLimit(11000, 2000, 2000);
+        await TestSkipAndLimit(12000, 2000, 1000);
+        await TestSkipAndLimit(14000, 2000, 0);
     }
 
     [Fact]
