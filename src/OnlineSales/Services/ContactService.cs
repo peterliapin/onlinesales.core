@@ -230,7 +230,7 @@ namespace OnlineSales.Services
         //             Revenue = extAccountInfo.Revenue,
         //             EmployeesRange = extAccountInfo.EmployeesRange,
         //             SocialMedia = extAccountInfo.SocialMedia,
-        //             StateCode = extAccountInfo.StateCode,
+        //             State = extAccountInfo.StateCode,
         //             Tags = extAccountInfo.Tags,
         //             Data = extAccountInfo.Data,
         //         };

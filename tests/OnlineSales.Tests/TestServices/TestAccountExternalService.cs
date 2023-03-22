@@ -14,12 +14,12 @@ namespace OnlineSales.Tests.TestServices
             var account = new AccountDetailsInfo()
             {
                 AccountSynced = true,
-                City = "Colombo",
+                CityName = "Colombo",
                 CountryCode = "LK",
-                EmployeesRange = "2K - 5K",
-                Name = "Wave access Sri Lanka",
+                EmployeesRange = "500 - 1000",
+                Name = "WaveAccess SL",
                 Revenue = 90000000,
-                StateCode = "WP",
+                State = "WA",
                 SocialMedia = new Dictionary<string, string>()
                 {
                     { "Facebook", "https://fb.com/waveaccess" },

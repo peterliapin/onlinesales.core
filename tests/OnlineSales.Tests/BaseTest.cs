@@ -21,6 +21,11 @@ public class BaseTest : IDisposable
     protected readonly HttpClient client;
     protected readonly IMapper mapper;
 
+    static BaseTest()
+    {
+        AssertionOptions.AssertEquivalencyUsing(e => e.Using(new RelaxedEnumEquivalencyStep()));
+    }
+
     public BaseTest()
     {
         client = App.CreateClient(

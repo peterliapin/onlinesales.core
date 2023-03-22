@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
+using OnlineSales.Geography;
 
 namespace OnlineSales.DTOs;
 
@@ -16,6 +17,15 @@ public abstract class BaseContactDto
 
     [Optional]
     public string? FirstName { get; set; }
+
+    [Optional]
+    public string? ContinentCode { get; set; }
+
+    [Optional]
+    public string? CountryCode { get; set; }
+
+    [Optional]
+    public string? CityName { get; set; }
 
     [Optional]
     public string? Address1 { get; set; }
