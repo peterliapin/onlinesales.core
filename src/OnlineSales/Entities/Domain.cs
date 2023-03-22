@@ -43,14 +43,14 @@ public class Domain : BaseEntityWithIdAndDates
 
     public bool? DnsCheck { get; set; }
 
+    public bool? MxCheck { get; set; }
+
     public int? AccountId { get; set; }
     
     [JsonIgnore]
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
-
-    public bool AccountSynced { get; set; } = false;
 
     public string Source { get; set; } = string.Empty;
 }

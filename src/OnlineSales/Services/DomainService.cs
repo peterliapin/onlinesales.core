@@ -7,33 +7,49 @@ using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
 using OnlineSales.Entities;
+using OnlineSales.Services;
 
 namespace OnlineSales.Interfaces
 {
     public class DomainService : IDomainService
     {       
         private readonly LookupClient lookupClient;
+        // private readonly IMxVerifyService mxVerifyService;
 
-        public DomainService()
+        public DomainService(IMxVerifyService mxVerifyService)
         {
+            // this.mxVerifyService = mxVerifyService;
+
             lookupClient = new LookupClient(new LookupClientOptions
             {
                 UseCache = true,
-                Timeout = new TimeSpan(0, 0, 60),
+                Timeout = new TimeSpan(0, 0, 60),                
             });
         }
 
         public async Task Verify(Domain domain)
         {
-            await VerifyDns(domain);
+            if (domain.DnsCheck == null)
+            {
+                await VerifyDns(domain);
+            }            
 
             if (domain.DnsCheck is true)
             {
-                await VerifyHttp(domain);
+                if (domain.HttpCheck == null)
+                {
+                    await VerifyHttp(domain);
+                }
+
+                // if (domain.MxCheck == null)
+                // {
+                //     await VerifyMX(domain);
+                // }       
             }
             else
             {
                 domain.HttpCheck = false;
+                domain.MxCheck = false;
                 domain.Url = null;
                 domain.Title = null;
                 domain.Description = null;
@@ -97,6 +113,31 @@ namespace OnlineSales.Interfaces
                 }
             }
         }
+
+        /*
+        private async Task VerifyMX(Domain domain)
+        {
+            domain.MxCheck = false;
+
+            var mxRecords = await lookupClient.QueryAsync(domain.Name, QueryType.MX);
+
+            var orderedMxRecordValues = from r in mxRecords.AllRecords
+                                        where r is MxRecord
+                                        orderby ((MxRecord)r).Preference ascending
+                                        select ((MxRecord)r).Exchange.Value;
+
+            foreach (var mxRecordValue in orderedMxRecordValues)
+            {
+                var mxVerify = await mxVerifyService.Verify(mxRecordValue);
+
+                if (mxVerify)
+                {
+                    domain.MxCheck = true;
+                    break;
+                }
+            }
+        }
+        */
 
         private async Task VerifyDns(Domain domain)
         {

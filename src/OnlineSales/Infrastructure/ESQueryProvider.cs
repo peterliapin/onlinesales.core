@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Xml.Linq;
 using DnsClient;
 using Microsoft.AspNetCore.OData.Formatter.Wrapper;
@@ -94,23 +95,8 @@ namespace OnlineSales.Infrastructure
                 {
                     var sortOrder = orderCmd.Ascending ? Nest.SortOrder.Ascending : Nest.SortOrder.Descending;
 
-                    if (orderCmd.Property.PropertyType == typeof(string))
-                    {
-                        var paramExpr = Expression.Parameter(typeof(T), "t");
-                        var propExpr = Expression.Property(paramExpr, orderCmd.Property.Name);
-                        var f = Expression.Lambda<Func<T, object>>(propExpr, paramExpr);
-
-                        if (orderCmd.Property.PropertyType == typeof(string))
-                        {
-                            f = f.AppendSuffix("keyword");
-                        }
-
-                        sortedConditions.Add(new FieldSort { Field = Infer.Field<T>(f), Order = sortOrder, });
-                    }
-                    else
-                    {
-                        sortedConditions.Add(new FieldSort { Field = new Field(orderCmd.Property), Order = sortOrder, });
-                    }
+                    var field = orderCmd.Property.PropertyType == typeof(string) ? new Field(GetElasticKeywordName(orderCmd.Property)) : new Field(orderCmd.Property);
+                    sortedConditions.Add(new FieldSort { Field = field, Order = sortOrder, UnmappedType = FieldType.Long });
                 }
             }
             else
@@ -138,6 +124,7 @@ namespace OnlineSales.Infrastructure
             if ((parseData.Skip >= 0 || parseData.Limit >= 0) && (parseData.Skip + parseData.Limit <= maxResultWindow))
             {
                 var res = await elasticClient.SearchAsync<T>(sr);
+                CheckSearchRequestResult(res);
                 return new QueryResult<T>(res.Documents.ToList(), count);
             }
             else
@@ -154,6 +141,7 @@ namespace OnlineSales.Infrastructure
                     while (total <= parseData.Skip + parseData.Limit)
                     {
                         var res = await elasticClient.SearchAsync<T>(sr);
+                        CheckSearchRequestResult(res);
                         var ds = res.Documents.ToList();
                         var newTotal = total + ds.Count;
                         if (ds.Count == 0)
@@ -212,18 +200,26 @@ namespace OnlineSales.Infrastructure
             else
             {
                 countDescriptor = countDescriptor.Query(q => q.MatchAll());
-            }            
+            }
 
             return elasticClient.Count(countDescriptor).Count;
         }
 
+        private void CheckSearchRequestResult(ISearchResponse<T> sr)
+        {
+            if (!sr.IsValid)
+            {
+                throw sr.OriginalException;
+            }
+        }
+
+        private string GetElasticKeywordName(PropertyInfo pi)
+        {
+            return char.ToLower(pi.Name[0]) + pi.Name.Substring(1) + ".keyword";
+        }
+
         private void AddWhereCommands()
         {
-            string GetElasticKeywordName(PropertyInfo pi)
-            {
-                return char.ToLower(pi.Name[0]) + pi.Name.Substring(1) + ".keyword";
-            }
-
             QueryContainer CreateQueryComparison(QueryParseData<T>.WhereUnitData cmd)
             {
                 object value = cmd.ParseValue();

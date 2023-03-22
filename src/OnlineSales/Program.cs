@@ -56,7 +56,8 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
-        builder.Services.AddSingleton<IDomainService, DomainService>();
+        builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
+        builder.Services.AddSingleton<IDomainService, DomainService>();        
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
@@ -64,7 +65,7 @@ public class Program
         builder.Services.AddSingleton<ILockService, LockService>();
         builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
         builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
-        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();
+        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();        
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
 
         ConfigureCacheProfiles(builder);

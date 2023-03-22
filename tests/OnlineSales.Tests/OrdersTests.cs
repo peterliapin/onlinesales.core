@@ -48,7 +48,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
-        
+
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", null, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         string testAN = "Nearly ten years had passed since the Dursleys had woken up to find their nephew on the front step" +
@@ -58,16 +58,30 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.ExchangeRate = 123.456M, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = testAN, fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         App.PopulateBulkData(bulkEntitiesList);
         await SyncElasticSearch();
-        var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully");
-        result!.Count.Should().Be(1);
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=Id");
+        result!.Count.Should().Be(2);
         result[0].AffiliateName.Should().Be(testAN);
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=ContactIp");
+        result!.Count.Should().Be(2);
+        result[0].AffiliateName.Should().Be(testAN);
+
+        result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully");
+        result!.Count.Should().Be(2);
+        result[0].AffiliateName.Should().Be(testAN);
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=123.456");
         result!.Count.Should().Be(1);
         result[0].ExchangeRate.Should().Be(123.456M);
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=");
-        result!.Count.Should().Be(3);
+        result!.Count.Should().Be(4);
+
         result = await GetTest<List<Order>>(itemsUrl + "?query=SomeSearchString");
         result!.Count.Should().Be(0);
     }
