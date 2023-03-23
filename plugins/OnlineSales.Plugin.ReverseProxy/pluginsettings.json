@@ -7,6 +7,18 @@
         "Match": {
           "Path": "kibana/{**catch-all}"
         }
+      },
+      "Elastic": {
+        "ClusterId": "Elastic",
+        "AuthorizationPolicy": "ProxyAuth",
+        "Match": {
+          "Path": "elastic/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/elastic"
+          }
+        ]
       }
     },
     "Clusters": {
@@ -14,6 +26,13 @@
         "Destinations": {
           "Kibana": {
             "Address": "http://localhost:5601"
+          }
+        }
+      },
+      "Elastic": {
+        "Destinations": {
+          "Elastic": {
+            "Address": "http://localhost:9200"
           }
         }
       }
