@@ -1,6 +1,8 @@
 ﻿{
   "SendGridApi": {
-    "ApiKey": "$SENDGRIDAPI__AUTHKEY"
+    "PrimaryApiKey": "$SENDGRIDAPI__PRIMARYAPIKEY",
+    "SecondaryApiKeys": [
+    ]
   },
   "Tasks": {
     "SyncSuppressionsTask": {
