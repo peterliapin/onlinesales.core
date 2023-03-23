@@ -10,8 +10,8 @@ namespace OnlineSales.Tests.TestEntities
     {
         public TestAccount(string uid = "")
         {
-            Name = $"Wave Access {uid}";
-            EmployeesRange = "55";
+            Name = $"WaveAccess {uid}";
+            EmployeesRange = "500 - 1000";
             CountryCode = "LK";
             SocialMedia = new Dictionary<string, string>()
             {

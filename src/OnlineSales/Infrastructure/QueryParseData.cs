@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using AutoMapper.Internal;
+using Nest;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
@@ -159,6 +160,11 @@ namespace OnlineSales.Infrastructure
                 result.Add(new OrderCommandData(oc));
             }
 
+            if (result.Count == 0)
+            {
+                result.Add(new OrderCommandData("Id"));
+            }
+
             return result.ToImmutableList();
         }
 
@@ -277,11 +283,16 @@ namespace OnlineSales.Infrastructure
 
         public sealed class OrderCommandData
         {
+            public OrderCommandData(string propertyName)
+            {
+                Property = InitProperty(propertyName);
+                Ascending = true;
+            }
+
             public OrderCommandData(QueryCommand cmd)
             {
                 var valueProps = cmd.Value.Split(' ');
 
-                var typeProperties = typeof(T).GetProperties();
                 var propertyName = string.Empty;
                 Ascending = true;
 
@@ -301,19 +312,26 @@ namespace OnlineSales.Infrastructure
                         throw new QueryException(cmd.Source, "Failed to parse. Check syntax.");
                 }
 
-                var property = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
-
-                if (property == null)
-                {
-                    throw new QueryException(cmd.Source, $"No such property '{propertyName}'");
-                }
-
-                Property = property;
+                Property = InitProperty(propertyName);
             }
 
             public PropertyInfo Property { get; set; }
 
             public bool Ascending { get; set; }
+
+            private PropertyInfo InitProperty(string propertyName)
+            {
+                var typeProperties = typeof(T).GetProperties();
+
+                var property = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
+
+                if (property == null)
+                {
+                    throw new QueryException(string.Empty, $"No such property '{propertyName}'");
+                }
+
+                return property;
+            }
         }
 
         public sealed class WhereCommandData
@@ -363,7 +381,10 @@ namespace OnlineSales.Infrastructure
                 var rawOperation = cmd.Props.ElementAtOrDefault(indexOffset + 1);
                 Property = ParseProperty(propertyName, cmd);
                 Operation = ParseOperation(rawOperation, cmd);
-                ParseValue();
+                if (Operation != WOperand.Like && Operation != WOperand.NLike)
+                {
+                    ParseValue();
+                }
             }
 
             public object ParseValue()

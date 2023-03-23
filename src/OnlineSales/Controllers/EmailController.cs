@@ -16,13 +16,11 @@ namespace OnlineSales.Controllers
     [Route("api/[controller]")]
     public class EmailController : ControllerBase
     {
-        private readonly PgDbContext dbContext;
         private readonly IEmailVerifyService emailVerifyService;
         private readonly IMapper mapper;
 
-        public EmailController(PgDbContext pgContext, IEmailVerifyService emailVerifyService, IMapper mapper)
+        public EmailController(IEmailVerifyService emailVerifyService, IMapper mapper)
         {
-            this.dbContext = pgContext;
             this.emailVerifyService = emailVerifyService;
             this.mapper = mapper;
         }
@@ -34,7 +32,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Verify([EmailAddress]string email)
         {
-            var resultedDomainData = await emailVerifyService.VerifyDomain(email);
+            var resultedDomainData = await emailVerifyService.Verify(email);
 
             var resultConverted = mapper.Map<EmailVerifyDetailsDto>(resultedDomainData);
 

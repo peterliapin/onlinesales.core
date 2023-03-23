@@ -32,7 +32,7 @@ public class EmailService : IEmailService
 
     public async Task SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments)
     {
-        SmtpClient client = new ();
+        var client = new SmtpClient();
 
         try
         {
@@ -82,7 +82,7 @@ public class EmailService : IEmailService
             message.To.Add(MailboxAddress.Parse(receipent));
         }
 
-        BodyBuilder emailBody = new ()
+        var emailBody = new BodyBuilder()
         {
             HtmlBody = body,
         };

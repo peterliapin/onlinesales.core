@@ -64,9 +64,8 @@ public class CsvInputFormatter : InputFormatter
 
         using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
-            var utcTimeZone = TimeZoneInfo.Utc;
             csv.Context.TypeConverterCache.RemoveConverter<DateTime?>();
-            csv.Context.TypeConverterCache.AddConverter<DateTime?>(new NullableDateTimeToUtcConverter(typeof(DateTime?), csv.Context.TypeConverterCache, utcTimeZone));
+            csv.Context.TypeConverterCache.AddConverter<DateTime?>(new NullableDateTimeToUtcConverter(typeof(DateTime?), csv.Context.TypeConverterCache));
 
             csv.Context.RegisterCamelCaseClassMap(itemType!);
 
@@ -107,12 +106,9 @@ public class CsvInputFormatter : InputFormatter
 
 public class NullableDateTimeToUtcConverter : NullableConverter
 {
-    private readonly TimeZoneInfo timeZoneInfo;
-
-    public NullableDateTimeToUtcConverter(Type type, TypeConverterCache typeConverterFactory, TimeZoneInfo timeZoneInfo)
+    public NullableDateTimeToUtcConverter(Type type, TypeConverterCache typeConverterFactory)
         : base(type, typeConverterFactory)
     {
-        this.timeZoneInfo = timeZoneInfo;
     }
 
     public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)

@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.Geography;
 
 namespace OnlineSales.DTOs;
 
@@ -12,11 +13,16 @@ public class AccountCreateDto
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    public string? City { get; set; }
+    public string? State { get; set; }
 
-    public string? StateCode { get; set; }
+    [Optional]
+    public string? ContinentCode { get; set; }
 
+    [Optional]
     public string? CountryCode { get; set; }
+
+    [Optional]
+    public string? CityName { get; set; }
 
     [Optional]
     public string? SiteUrl { get; set; }
@@ -37,9 +43,9 @@ public class AccountDetailsInfo
 {
     public string? Name { get; set; }
 
-    public string? City { get; set; }
+    public string? CityName { get; set; }
 
-    public string? StateCode { get; set; }
+    public string? State { get; set; }
 
     public string? CountryCode { get; set; }
 

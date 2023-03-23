@@ -3,14 +3,12 @@
 // </copyright>
 
 using Medallion.Threading.Postgres;
-using Microsoft.EntityFrameworkCore;
-using OnlineSales.Data;
 
 namespace OnlineSales.Infrastructure;
 
 public class LockManager
 {
-    public static PostgresDistributedLockHandle? GetNoWaitLock(string lockKey, string connectionString)
+    public static (PostgresDistributedLockHandle?, bool) GetNoWaitLock(string lockKey, string connectionString)
     {
         Log.Information("GetNoWaitLock: " + lockKey);
 
@@ -19,12 +17,13 @@ public class LockManager
             var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(lockKey, true), connectionString);
 
             // pg_try_advisory_lock - Get the lock or skip if not available.
-            return secondaryLock.TryAcquire();
+            var res = secondaryLock.TryAcquire();
+            return (res, true);
         }
         catch (Exception ex)
         {
             LogError(ex, lockKey);
-            return null;
+            return (null, false);
         }
     }
 

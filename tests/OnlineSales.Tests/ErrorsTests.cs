@@ -14,9 +14,9 @@ public class ErrorsTests : BaseTest
     [Fact]
     public async Task Http401ErrorTest()
     {
-        var post = new TestPost();
+        var testContent = new TestContent();
 
-        var response = await Request(HttpMethod.Post, "/api/posts", post, "Fail");
+        var response = await Request(HttpMethod.Post, "/api/content", testContent, "Fail");
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
@@ -28,9 +28,9 @@ public class ErrorsTests : BaseTest
     [Fact]
     public async Task Http422ErrorTest()
     {
-        var post = new PostUpdateDto();
+        var contentUpdateDto = new ContentUpdateDto();
 
-        var response = await Request(HttpMethod.Post, "/api/posts", post);
+        var response = await Request(HttpMethod.Post, "/api/content", contentUpdateDto);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 

@@ -72,7 +72,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     {
         var contact = mapper.Map<Contact>(value);
 
-        await contactService.SaveContact(contact);
+        await contactService.SaveAsync(contact);
 
         var returnedValue = mapper.Map<ContactDetailsDto>(contact);
 
@@ -97,7 +97,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         mapper.Map(value, existingContact);
 
-        await contactService.SaveContact(existingContact);
+        await contactService.SaveAsync(existingContact);
 
         var returnedValue = mapper.Map<ContactDetailsDto>(existingContact);
 
@@ -108,7 +108,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
     protected override async Task SaveBatchChangesAsync(List<Contact> contacts)
     {
-        await contactService.EnrichWithDomainId(contacts);
+        await contactService.EnrichWithDomainIdAsync(contacts);
 
         await base.SaveBatchChangesAsync(contacts);
     }

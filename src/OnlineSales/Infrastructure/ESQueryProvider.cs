@@ -2,11 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Collections.Immutable;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Xml.Linq;
+using DnsClient;
+using Microsoft.AspNetCore.OData.Formatter.Wrapper;
 using Nest;
+using Newtonsoft.Json.Linq;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace OnlineSales.Infrastructure
 {    
@@ -18,17 +26,21 @@ namespace OnlineSales.Infrastructure
         private readonly List<QueryContainer> orQueries = new List<QueryContainer>();
         private readonly QueryParseData<T> parseData;
         private readonly string indexName;
-        private readonly PropertyInfo[] searchableProperties;
+        private readonly PropertyInfo[] searchableTextProperties;
+        private readonly PropertyInfo[] searchableNonTextProperties;
+        private readonly int maxResultWindow = 10000;
 
         public ESQueryProvider(ElasticClient elasticClient, QueryParseData<T> parseData, string indexPrefix)
         {
             indexName = indexPrefix + "-" + typeof(T).Name.ToLower();
             this.elasticClient = elasticClient;
             this.parseData = parseData;
-            searchableProperties = CreateSearchableFields();
+            searchableTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType == typeof(string)).ToArray();
+            searchableNonTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType != typeof(string)).ToArray();
+            elasticClient.Indices.UpdateSettings(indexName, s => s.IndexSettings(i => i.Setting(UpdatableIndexSettings.MaxResultWindow, maxResultWindow)));
         }
 
-        public async Task<(IList<T>?, long)> GetResult()
+        public async Task<QueryResult<T>> GetResult()
         {
             AddWhereCommands();
             AddSearchCommands();
@@ -46,36 +58,8 @@ namespace OnlineSales.Infrastructure
             var sr = new SearchRequest<T>(indexName);
 
             sr.Query = (orQueries.Count > 0) ? new BoolQuery { Should = orQueries.ToArray(), } : new MatchAllQuery();
-                       
-            if (parseData.OrderData.Count > 0)
-            {
-                var sortedConditions = new List<ISort>();
 
-                foreach (var orderCmd in parseData.OrderData)
-                {
-                    var sortOrder = orderCmd.Ascending ? Nest.SortOrder.Ascending : Nest.SortOrder.Descending;
-
-                    if (orderCmd.Property.PropertyType == typeof(string))
-                    {
-                        var paramExpr = Expression.Parameter(typeof(T), "t");
-                        var propExpr = Expression.Property(paramExpr, orderCmd.Property.Name);
-                        var f = Expression.Lambda<Func<T, object>>(propExpr, paramExpr);
-
-                        if (orderCmd.Property.PropertyType == typeof(string))
-                        {
-                            f = f.AppendSuffix("keyword");
-                        }
-
-                        sortedConditions.Add(new FieldSort { Field = Infer.Field<T>(f), Order = sortOrder, });
-                    }
-                    else
-                    {
-                        sortedConditions.Add(new FieldSort { Field = new Field(orderCmd.Property), Order = sortOrder, });
-                    }                        
-                }
-
-                sr.Sort = sortedConditions;
-            }
+            AddSortConditions(sr);
 
             if (parseData.Skip >= 0)
             {
@@ -98,8 +82,110 @@ namespace OnlineSales.Infrastructure
                 sr.Source = new SourceFilter { Includes = fields.ToArray(), };
             }
 
-            var res = await elasticClient.SearchAsync<T>(sr);
-            return (res.Documents.ToList(), count);
+            return await Query(sr, count);      
+        }
+
+        private void AddSortConditions(SearchRequest<T> sr)
+        {
+            var sortedConditions = new List<ISort>();
+
+            if (parseData.OrderData.Count > 0)
+            {
+                foreach (var orderCmd in parseData.OrderData)
+                {
+                    var sortOrder = orderCmd.Ascending ? Nest.SortOrder.Ascending : Nest.SortOrder.Descending;
+
+                    var field = orderCmd.Property.PropertyType == typeof(string) ? new Field(GetElasticKeywordName(orderCmd.Property)) : new Field(orderCmd.Property);
+                    sortedConditions.Add(new FieldSort { Field = field, Order = sortOrder, UnmappedType = FieldType.Long });
+                }
+            }
+            else
+            {
+                throw new QueryException(string.Empty, "Sorted properties list must be notempty");
+            }
+
+            sr.Sort = sortedConditions;
+        }
+
+        private async Task<QueryResult<T>> Query(SearchRequest<T> sr, long count)
+        {            
+            List<object> CreateSearchAfterObjects(T lastObject)
+            {
+                var res = new List<object>();
+
+                foreach (var p in parseData.OrderData)
+                {
+                    res.Add(p.Property.GetValue(lastObject) !);
+                }
+
+                return res;
+            }
+
+            if ((parseData.Skip >= 0 || parseData.Limit >= 0) && (parseData.Skip + parseData.Limit <= maxResultWindow))
+            {
+                var res = await elasticClient.SearchAsync<T>(sr);
+                CheckSearchRequestResult(res);
+                return new QueryResult<T>(res.Documents.ToList(), count);
+            }
+            else
+            {
+                var result = new List<T>();
+
+                sr.From = null;
+                sr.Size = maxResultWindow;
+                var pit = elasticClient.OpenPointInTime(new OpenPointInTimeRequest(indexName) { KeepAlive = "1m" });
+                sr.PointInTime = new PointInTime(pit.Id, "2m");
+                int total = 0;
+                try
+                {
+                    while (total <= parseData.Skip + parseData.Limit)
+                    {
+                        var res = await elasticClient.SearchAsync<T>(sr);
+                        CheckSearchRequestResult(res);
+                        var ds = res.Documents.ToList();
+                        var newTotal = total + ds.Count;
+                        if (ds.Count == 0)
+                        {
+                            break;
+                        }
+
+                        if (newTotal >= parseData.Skip)
+                        {
+                            if (total <= parseData.Skip)
+                            {
+                                if (newTotal <= parseData.Skip + parseData.Limit)
+                                {
+                                    result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, ds.Count)));
+                                }
+                                else
+                                {
+                                    result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, parseData.Skip + parseData.Limit - total)));
+                                }
+                            }
+                            else
+                            {
+                                if (newTotal <= parseData.Skip + parseData.Limit)
+                                {
+                                    result.AddRange(res.Documents.Take(new Range(0, ds.Count)));
+                                }
+                                else
+                                {
+                                    result.AddRange(res.Documents.Take(new Range(0, parseData.Skip + parseData.Limit - total)));
+                                }
+                            }
+                        }
+
+                        sr.SearchAfter = CreateSearchAfterObjects(ds[ds.Count - 1]);
+                        total = newTotal;
+                    }
+                }
+                finally
+                {
+                    elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
+                }
+
+                return new QueryResult<T>(result, count);
+            }
         }
 
         private long Count()
@@ -114,9 +200,22 @@ namespace OnlineSales.Infrastructure
             else
             {
                 countDescriptor = countDescriptor.Query(q => q.MatchAll());
-            }            
+            }
 
             return elasticClient.Count(countDescriptor).Count;
+        }
+
+        private void CheckSearchRequestResult(ISearchResponse<T> sr)
+        {
+            if (!sr.IsValid)
+            {
+                throw sr.OriginalException;
+            }
+        }
+
+        private string GetElasticKeywordName(PropertyInfo pi)
+        {
+            return char.ToLower(pi.Name[0]) + pi.Name.Substring(1) + ".keyword";
         }
 
         private void AddWhereCommands()
@@ -124,6 +223,22 @@ namespace OnlineSales.Infrastructure
             QueryContainer CreateQueryComparison(QueryParseData<T>.WhereUnitData cmd)
             {
                 object value = cmd.ParseValue();
+
+                TermRangeQuery CreateTermRangeQuery(QueryParseData<T>.WhereUnitData cmd)
+                {
+                    TermRangeQuery res;
+                    if (cmd.Property.PropertyType == typeof(string))
+                    {
+                        res = new TermRangeQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), };
+                    }
+                    else
+                    {
+                        res = new TermRangeQuery { Field = new Field(cmd.Property), };
+                    }
+
+                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, value.ToString());
+                    return res;
+                }
 
                 if (double.TryParse(cmd.StringValue, out _))
                 {
@@ -139,28 +254,48 @@ namespace OnlineSales.Infrastructure
                 }
                 else
                 {
-                    var res = new TermRangeQuery { Field = cmd.Property, };
-                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, value.ToString());
-                    return res;
+                    return CreateTermRangeQuery(cmd);
                 }
             }
 
             QueryContainer CreateQuery(QueryParseData<T>.WhereUnitData cmd)
             {
+                TermQuery CreateTermQuery(QueryParseData<T>.WhereUnitData cmd)
+                {
+                    if (cmd.Property.PropertyType == typeof(string))
+                    {
+                        return new TermQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = cmd.StringValue };
+                    }
+                    else
+                    {
+                        return new TermQuery { Field = new Field(cmd.Property), Value = cmd.StringValue };
+                    }
+                }
+
+                RegexpQuery CreateRegExpQuery(QueryParseData<T>.WhereUnitData cmd)
+                {
+                    return new RegexpQuery { Field = new Field(cmd.Property), Value = cmd.StringValue };
+                }
+
                 try
                 {
                     switch (cmd.Operation)
                     {
                         case WOperand.Equal:
-                            return new MatchQuery() { Field = cmd.Property, Query = cmd.StringValue, };
+                            return CreateTermQuery(cmd);
                         case WOperand.NotEqual:
-                            var mq = new MatchQuery() { Field = cmd.Property, Query = cmd.StringValue, };
-                            return new BoolQuery { MustNot = new QueryContainer[] { mq } };
+                            var tq = CreateTermQuery(cmd);
+                            return new BoolQuery { MustNot = new QueryContainer[] { tq } };
                         case WOperand.GreaterThan:
                         case WOperand.GreaterThanOrEqualTo:
                         case WOperand.LessThan:
                         case WOperand.LessThanOrEqualTo:
                             return CreateQueryComparison(cmd);
+                        case WOperand.Like:
+                            return CreateRegExpQuery(cmd);
+                        case WOperand.NLike:
+                            var req = CreateRegExpQuery(cmd);
+                            return new BoolQuery { MustNot = new QueryContainer[] { req } };
                         default:
                             throw new QueryException(cmd.Cmd.Source, $"No such operand '{cmd.Operation}'");
                     }
@@ -192,25 +327,35 @@ namespace OnlineSales.Infrastructure
             }
         }
 
-        private PropertyInfo[] CreateSearchableFields()
-        {
-            return typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false)).ToArray();
-        }
-
         private void AddSearchCommands()
         {
+            List<QueryContainer> sq = new List<QueryContainer>();            
+
             if (parseData.SearchData.Count > 0)
             {
-                var cQ = new MultiMatchQuery
+                var tQ = new MultiMatchQuery
                 {
                     Query = string.Join(" ", parseData.SearchData),
-                    Fields = searchableProperties,
+                    Fields = searchableTextProperties,
+                    Lenient = true,
+                    Fuzziness = Fuzziness.Auto,
+                    Operator = Operator.Or,
+                };
+
+                sq.Add(tQ);
+
+                var ntQ = new MultiMatchQuery
+                {
+                    Query = string.Join(" ", parseData.SearchData),
+                    Fields = searchableNonTextProperties,
                     Lenient = true,
                     Operator = Operator.Or,
                 };
 
-                andQueries.Add(cQ);
+                sq.Add(ntQ);
             }
+
+            andQueries.Add(new BoolQuery { Should = sq.ToArray() });
         }
     }
 }

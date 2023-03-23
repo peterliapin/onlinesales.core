@@ -1,0 +1,22 @@
+{
+  "YARPSettings": {
+    "Routes": {
+      "Kibana": {
+        "ClusterId": "Kibana",
+        "AuthorizationPolicy": "ProxyAuth",
+        "Match": {
+          "Path": "kibana/{**catch-all}"
+        }
+      }
+    },
+    "Clusters": {
+      "Kibana": {
+        "Destinations": {
+          "Kibana": {
+            "Address": "http://localhost:5601"
+          }
+        }
+      }
+    }
+  }
+}

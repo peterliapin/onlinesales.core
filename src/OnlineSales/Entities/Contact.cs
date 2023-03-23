@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.DataAnnotations;
+using OnlineSales.Geography;
 
 namespace OnlineSales.Entities;
 
@@ -27,7 +28,14 @@ public class Contact : BaseEntity
     [Required]
     public string Email { get; set; } = string.Empty;
 
-    public string? CompanyName { get; set; }
+    [Searchable]
+    public Continent? ContinentCode { get; set; }
+
+    [Searchable]
+    public Country? CountryCode { get; set; }
+
+    [Searchable]
+    public string? CityName { get; set; }
 
     [Searchable]
     public string? Address1 { get; set; }
@@ -35,11 +43,11 @@ public class Contact : BaseEntity
     [Searchable]
     public string? Address2 { get; set; }
 
+    [Searchable]
     public string? State { get; set; }
 
+    [Searchable]
     public string? Zip { get; set; }
-
-    public string? Location { get; set; }
 
     [Searchable]
     public string? Phone { get; set; }
@@ -65,5 +73,13 @@ public class Contact : BaseEntity
     [ForeignKey("AccountId")]
     public virtual Account? Account { get; set; }
 
+    public int? UnsubscribeId { get; set; }
+
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    [JsonIgnore]
+    [ForeignKey("UnsubscribeId")]
+    public virtual Unsubscribe? Unsubscribe { get; set; }
+
+    [Searchable]
     public string? Source { get; set; }
 }

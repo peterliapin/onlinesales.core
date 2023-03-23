@@ -41,7 +41,6 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     public async Task ImportFileUpdateByIndexTest()
     {
         await PostImportTest(itemsUrl, "contactBase.csv");
-        await SyncElasticSearch(itemsUrl, 4);
         var allContactsResponse = await GetTest(itemsUrl);
         allContactsResponse.Should().NotBeNull();
 
@@ -91,19 +90,17 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
 
     protected override void GenerateBulkRecords(int dataCount, Action<TestContact>? populateAttributes = null)
     {
-        List<TestContact> testContacts = new List<TestContact>();
+        var contacts = new List<Contact>();
 
         for (int i = 0; i < dataCount; i++)
         {
-             var contact = new TestContact(i.ToString());
-             contact.Domain = new Domain() { Name = contact.Email.Split("@").Last() };
-
-             testContacts.Add(contact);
+            var contact = new Contact();
+            contact.Email = $"contact{i}@test{i}.net";
+            contact.Domain = new Domain() { Name = contact.Email.Split("@").Last() };
+            contacts.Add(contact);
         }
 
-        var dbData = mapper.Map<List<Contact>>(testContacts);
-
-        App.PopulateBulkData(dbData);
+        App.PopulateBulkData(contacts);
     }
 
     private string DomainChecker(string email)

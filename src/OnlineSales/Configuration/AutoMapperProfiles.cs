@@ -30,14 +30,14 @@ public class AutoMapperProfiles : Profile
         CreateMap<CommentImportDto, Comment>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
-        CreateMap<PostCreateDto, Post>().ReverseMap();
-        CreateMap<PostUpdateDto, Post>()
+        CreateMap<ContentCreateDto, Content>().ReverseMap();
+        CreateMap<ContentUpdateDto, Content>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Post, PostUpdateDto>()
+        CreateMap<Content, ContentUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Post, PostDetailsDto>()
+        CreateMap<Content, ContentDetailsDto>()
            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<PostImportDto, Post>()
+        CreateMap<ContentImportDto, Content>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<OrderCreateDto, Order>().ReverseMap();
@@ -76,8 +76,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<Contact, ContactDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<ContactImportDto, Contact>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<ContactCreateWithDomainDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();

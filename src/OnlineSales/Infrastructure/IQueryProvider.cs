@@ -2,13 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Globalization;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
@@ -16,6 +9,20 @@ namespace OnlineSales.Infrastructure
     public interface IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        public Task<(IList<T>?, long)> GetResult();
+        public Task<QueryResult<T>> GetResult();
+    }
+
+    public class QueryResult<T>
+        where T : BaseEntityWithId
+    {
+        public QueryResult(IList<T>? records, long totalCount)
+        {
+            Records = records;
+            TotalCount = totalCount;
+        }
+
+        public IList<T>? Records { get; init; }
+
+        public long TotalCount { get; init; }
     }
 }

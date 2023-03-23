@@ -23,8 +23,6 @@ public class DomainTaskTests : BaseTest
     [Fact]
     public async Task ExecuteTest()
     {
-        await Stop();
-
         var validDomain = new TestDomain()
         {
             Name = "gmail.com",
@@ -87,19 +85,6 @@ public class DomainTaskTests : BaseTest
 
         filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
-    }
-
-    private async Task Stop()
-    {
-        HttpResponseMessage responce = await GetRequest(tasksUrl + "/stop/" + taskName);
-
-        responce.StatusCode.Should().Be(HttpStatusCode.OK);
-        responce.Should().NotBeNull();
-
-        var content = await responce.Content.ReadAsStringAsync();
-        var task = JsonHelper.Deserialize<TaskDetailsDto>(content);
-
-        task!.IsRunning.Should().BeFalse();
     }
 
     private async Task Execute()

@@ -2,10 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using AutoMapper;
+using CsvHelper;
+using CsvHelper.Configuration;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using OnlineSales.DTOs;
@@ -21,6 +24,11 @@ public class BaseTest : IDisposable
     protected readonly HttpClient client;
     protected readonly IMapper mapper;
 
+    static BaseTest()
+    {
+        AssertionOptions.AssertEquivalencyUsing(e => e.Using(new RelaxedEnumEquivalencyStep()));
+    }
+
     public BaseTest()
     {
         client = App.CreateClient(
@@ -31,8 +39,6 @@ public class BaseTest : IDisposable
 
         mapper = App.GetMapper();
         App.CleanDatabase();
-
-        StopElasticSearch().Wait();
     }
 
     public virtual void Dispose()
@@ -47,7 +53,7 @@ public class BaseTest : IDisposable
         return new StringContent(payloadString, Encoding.UTF8, "application/json");
     }
 
-    protected async Task SyncElasticSearch(string url, int numberOfItems)
+    protected async Task SyncElasticSearch()
     {
         var taskExecuteResponce = await GetRequest("/api/tasks/execute/SyncEsTask");
         taskExecuteResponce.Should().NotBeNull();
@@ -55,20 +61,6 @@ public class BaseTest : IDisposable
         var content = await taskExecuteResponce.Content.ReadAsStringAsync();
         var task = JsonHelper.Deserialize<TaskExecutionDto>(content);
         task!.Completed.Should().BeTrue();
-
-        var count = 0;
-        while (count != numberOfItems)
-        {
-            var res = await GetTest<List<Order>>(url);
-            count = res!.Count;
-        }
-    }
-
-    protected async Task StopElasticSearch()
-    {
-        var taskExecuteResponce = await GetRequest("/api/tasks/stop/SyncEsTask");
-        taskExecuteResponce.Should().NotBeNull();
-        taskExecuteResponce.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     protected Task<HttpResponseMessage> GetRequest(string url, string authToken = "Success")
@@ -111,6 +103,32 @@ public class BaseTest : IDisposable
             CheckForRedundantProperties(content);
 
             return JsonHelper.Deserialize<T>(content);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    protected async Task<List<TI>?> GetTestCSV<TI>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    where TI : class
+    {
+        var response = await GetTest(url, expectedCode, authToken);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (expectedCode == HttpStatusCode.OK)
+        {
+            TextReader tr = new StringReader(content);
+            var reader = new CsvReader(tr, new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                PrepareHeaderForMatch = (args) => char.ToLower(args.Header[0]) + args.Header.Substring(1),
+                MissingFieldFound = null,
+                HeaderValidated = null,
+            });
+
+            var res = reader.GetRecords<TI>();
+            return res.ToList();
         }
         else
         {

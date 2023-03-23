@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using OnlineSales.Plugin.AzureAD.Exceptions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace OnlineSales.Plugin.AzureAD;
@@ -18,20 +18,29 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
     {
         var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddMicrosoftIdentityWebApi(configuration, subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
+        services.ConfigureAuth(configuration);
 
         services.AddAuthorization(options =>
         {
             options.AddPolicy("Administrators", opts =>
             {
+                if (string.IsNullOrEmpty(administratorsGroupId) || !Guid.TryParse(administratorsGroupId, out _))
+                {
+                    throw new MissingAdminGroupException("AzureAd:GroupsMapping:Administrators field is required.");
+                }
+
                 opts.RequireClaim(
                     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-                    administratorsGroupId ?? Guid.NewGuid().ToString());
+                    administratorsGroupId);
             });
         });
+        services.Configure<CookiePolicyOptions>(options =>
+        {
+            options.MinimumSameSitePolicy = SameSiteMode.None;
+            options.Secure = CookieSecurePolicy.Always;
+        });
     }
-    
+
     public void ConfigureSwagger(SwaggerGenOptions options, OpenApiInfo settings)
     {
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -63,7 +72,10 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 
     public void ConfigureApplication(IApplicationBuilder application)
     {
-        application.UseAuthentication();
-        application.UseAuthorization();
+        var app = (WebApplication)application;
+        app.UseCookiePolicy();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapRazorPages();
     }
 }

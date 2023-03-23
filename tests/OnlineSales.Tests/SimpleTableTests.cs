@@ -128,8 +128,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         if (createTestItem)
         {
             await CreateItem();
-            await SyncElasticSearch(itemsUrl, 1);
-        }       
+        }
 
         var response = await GetTest($"{this.itemsUrl}?{filter}");
         response.Should().NotBeNull();
@@ -163,7 +162,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
     }
 
     [Theory]
-    [InlineData("filter[limit]=550", 150)]
+    [InlineData("filter[limit]=15001", 150)]
     public async Task InvalidLimit(string filter, int dataCount)
     {
         GenerateBulkRecords(dataCount);
@@ -315,8 +314,6 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         const int numberOfItems = 10;               
 
         GenerateBulkRecords(numberOfItems);
-
-        await SyncElasticSearch(itemsUrl, numberOfItems);
 
         var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
 

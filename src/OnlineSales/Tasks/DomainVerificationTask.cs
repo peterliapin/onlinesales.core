@@ -42,7 +42,7 @@ public class DomainVerificationTask : BaseTask
     {
         try
         {
-            var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null);
+            var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null /*|| d.MxCheck == null*/);
             int totalSize = domains.Count();
 
             for (int start = 0; start < totalSize; start += taskConfig.BatchSize)

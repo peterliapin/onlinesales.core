@@ -14,15 +14,15 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    [Migration("20230220154625_RenameImageTablePlusModifyContent")]
-    partial class RenameImageTablePlusModifyContent
+    [Migration("20230316070520_RemoveCompanyAndLocation")]
+    partial class RemoveCompanyAndLocation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("ProductVersion", "7.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -219,10 +219,14 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("author_name");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("Body")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("content");
+                        .HasColumnName("body");
+
+                    b.Property<int>("ContentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("content_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -245,10 +249,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("parent_id");
 
-                    b.Property<int>("PostId")
-                        .HasColumnType("integer")
-                        .HasColumnName("post_id");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -264,11 +264,11 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_comment");
 
+                    b.HasIndex("ContentId")
+                        .HasDatabaseName("ix_comment_content_id");
+
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_comment_parent_id");
-
-                    b.HasIndex("PostId")
-                        .HasDatabaseName("ix_comment_post_id");
 
                     b.ToTable("comment", (string)null);
                 });
@@ -293,10 +293,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("Address2")
                         .HasColumnType("text")
                         .HasColumnName("address2");
-
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("text")
-                        .HasColumnName("company_name");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -330,10 +326,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("text")
                         .HasColumnName("last_name");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("text")
-                        .HasColumnName("location");
 
                     b.Property<string>("Phone")
                         .HasColumnType("text")
@@ -438,6 +430,108 @@ namespace OnlineSales.Migrations
                         .HasDatabaseName("ix_contact_email_schedule_schedule_id");
 
                     b.ToTable("contact_email_schedule", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Content", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowComments")
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_comments");
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("author");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("body");
+
+                    b.Property<string>("Categories")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("categories");
+
+                    b.Property<string>("CoverImageAlt")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cover_image_alt");
+
+                    b.Property<string>("CoverImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cover_image_url");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("language");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("tags");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_content");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_content_slug");
+
+                    b.ToTable("content", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
@@ -1162,108 +1256,6 @@ namespace OnlineSales.Migrations
                     b.ToTable("order_item", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Post", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("AllowComments")
-                        .HasColumnType("boolean")
-                        .HasColumnName("allow_comments");
-
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("author");
-
-                    b.Property<string>("Categories")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("categories");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("content");
-
-                    b.Property<string>("CoverImageAlt")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("cover_image_alt");
-
-                    b.Property<string>("CoverImageUrl")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("cover_image_url");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("language");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("slug");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("tags");
-
-                    b.Property<string>("Template")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("template");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("title");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_post");
-
-                    b.HasIndex("Slug")
-                        .IsUnique()
-                        .HasDatabaseName("ix_post_slug");
-
-                    b.ToTable("post", (string)null);
-                });
-
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
                 {
                     b.Property<int>("Id")
@@ -1305,21 +1297,21 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
                 {
+                    b.HasOne("OnlineSales.Entities.Content", "Content")
+                        .WithMany("Comments")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_content_content_id");
+
                     b.HasOne("OnlineSales.Entities.Comment", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
                         .HasConstraintName("fk_comment_comment_parent_id");
 
-                    b.HasOne("OnlineSales.Entities.Post", "Post")
-                        .WithMany("Comments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_comment_post_post_id");
+                    b.Navigation("Content");
 
                     b.Navigation("Parent");
-
-                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
@@ -1434,7 +1426,7 @@ namespace OnlineSales.Migrations
                     b.Navigation("Contact");
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Post", b =>
+            modelBuilder.Entity("OnlineSales.Entities.Content", b =>
                 {
                     b.Navigation("Comments");
                 });

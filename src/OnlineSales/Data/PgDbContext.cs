@@ -53,7 +53,7 @@ public class PgDbContext : DbContext
 
     public bool IsImportRequest { get; set; }
 
-    public virtual DbSet<Post>? Posts { get; set; }
+    public virtual DbSet<Content>? Content { get; set; }
 
     public virtual DbSet<Comment>? Comments { get; set; }
 
@@ -90,6 +90,8 @@ public class PgDbContext : DbContext
     public virtual DbSet<Domain>? Domains { get; set; }
 
     public virtual DbSet<Account>? Accounts { get; set; }
+
+    public virtual DbSet<Unsubscribe>? Unsubscribes { get; set; }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {

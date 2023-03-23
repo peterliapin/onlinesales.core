@@ -12,6 +12,8 @@ namespace OnlineSales.Tests.Environment;
 
 public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
+    public const string SchemeName = "TestScheme";
+
     public TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
         : base(options, logger, encoder, clock)
     {
@@ -26,7 +28,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
             var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, "TestScheme");
+            var ticket = new AuthenticationTicket(principal, SchemeName);
 
             result = AuthenticateResult.Success(ticket);            
         }

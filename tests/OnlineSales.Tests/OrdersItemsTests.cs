@@ -243,8 +243,6 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         await CreateItem();
         await PostImportTest(itemsUrl, fileName);
 
-        await SyncElasticSearch(itemsUrl, 3);
-
         var allOrderItemsResponse = await GetTest(itemsUrl);
         allOrderItemsResponse.Should().NotBeNull();
 
@@ -261,8 +259,6 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     {
         await CreateItem();
         await PostImportTest(itemsUrl, fileName, HttpStatusCode.NotFound);
-
-        await SyncElasticSearch(itemsUrl, 1);
 
         var allOrderItemsResponse = await GetTest(itemsUrl);
         allOrderItemsResponse.Should().NotBeNull();

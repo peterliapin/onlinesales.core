@@ -1,0 +1,12 @@
+﻿{
+  "SendGridApi": {
+    "ApiKey": "$SENDGRIDAPI__AUTHKEY"
+  },
+  "Tasks": {
+    "SyncSuppressionsTask": {
+      "CronSchedule": "0/30 * * * * ?",
+      "RetryCount": "2",
+      "RetryInterval": "1"
+    }
+  }
+}

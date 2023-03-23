@@ -5,36 +5,52 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
+using OnlineSales.Geography;
 
 namespace OnlineSales.Entities;
 
 [Table("account")]
+[SupportsElastic]
 [SupportsChangeLog]
 [Index(nameof(Name), IsUnique = true)]
 public class Account : BaseEntity
 {
+    [Searchable]
     public string Name { get; set; } = string.Empty;
 
-    public string? City { get; set; }
+    [Searchable]
+    public string? CityName { get; set; }
 
-    public string? StateCode { get; set; }
+    [Searchable]
+    public string? State { get; set; }
 
-    public string? CountryCode { get; set; }
+    [Searchable]
+    public Continent? ContinentCode { get; set; }
 
+    [Searchable]
+    public Country? CountryCode { get; set; }
+
+    [Searchable]
     public string? SiteUrl { get; set; }
 
-    public string? EmployeesRange { get; set; } 
+    [Searchable]
+    public string? EmployeesRange { get; set; }
 
+    [Searchable]
     public double? Revenue { get; set; }
 
+    [Searchable]
     [Column(TypeName = "jsonb")]
     public string[]? Tags { get; set; }
 
+    [Searchable]
     [Column(TypeName = "jsonb")]
     public Dictionary<string, string>? SocialMedia { get; set; }
 
+    [Searchable]
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
 
+    [Searchable]
     public string? Source { get; set; }
 }

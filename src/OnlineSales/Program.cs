@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -56,7 +56,8 @@ public class Program
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
-        builder.Services.AddSingleton<IDomainService, DomainService>();
+        builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
+        builder.Services.AddSingleton<IDomainService, DomainService>();        
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
@@ -64,7 +65,7 @@ public class Program
         builder.Services.AddSingleton<ILockService, LockService>();
         builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
         builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
-        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();
+        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();        
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
 
         ConfigureCacheProfiles(builder);
@@ -335,24 +336,19 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        var taskRunnerEnabled = builder.Configuration.GetValue<bool>("TaskRunner:Enable") !;
+        var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
 
-        if (taskRunnerEnabled)
+        builder.Services.AddQuartz(q =>
         {
-            var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
+            q.UseMicrosoftDependencyInjectionJobFactory();
 
-            builder.Services.AddQuartz(q =>
-            {
-                q.UseMicrosoftDependencyInjectionJobFactory();
+            q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 
-                q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
+            q.AddTrigger(opts =>
+                opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(taskRunnerSchedule));
+        });
 
-                q.AddTrigger(opts =>
-                    opts.ForJob("TaskRunner").WithIdentity("TaskRunner").WithCronSchedule(taskRunnerSchedule));
-            });
-
-            builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-        }
+        builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
         builder.Services.AddTransient<TaskRunner>();
     }
@@ -392,7 +388,7 @@ public class Program
         builder.Services.AddScoped<ITask, SyncEsTask>();
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, DomainVerificationTask>();
-        builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();                       
+        builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)
@@ -414,7 +410,14 @@ public class Program
             {
                 policy
                     .AllowAnyMethod()
+                    .AllowCredentials()
                     .AllowAnyHeader();
+                if (builder.Environment.IsDevelopment())
+                {
+                    policy.SetIsOriginAllowed(origin => true);
+                    return;
+                }
+
                 if (corsSettings.AllowedOrigins.FirstOrDefault() == "*")
                 {
                     policy.AllowAnyOrigin();
