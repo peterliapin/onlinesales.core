@@ -55,36 +55,38 @@ public class SyncSuppressionsTask : BaseTask
         return true;
     }
 
-    private string GetSecondaryApiKeyName(int i)
+    private string CreateSourceString(string keyName, string suppressionType)
     {
-        return $"SecondaryApiKey{i}";
+        return $"SendGrid_{suppressionType}_{keyName}";
     }
 
     private async Task Unsubscribe<T>(string suppressionType)
         where T : SuppressionDto
     {
-        var primaryKeyData = await GetLatestSuppressionsByType<T>(primaryApiKeyName, SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey, suppressionType);
+        var sourceAndKeyDictionary = new Dictionary<string, string>();
 
-        foreach (var pkd in primaryKeyData)
-        {
-            await contactService.Unsubscribe(pkd.Email, pkd.GetReason(), $"SendGrid_{suppressionType}_{primaryApiKeyName}", pkd.CreatedAt, null);
-        }
+        sourceAndKeyDictionary.Add(CreateSourceString(primaryApiKeyName, suppressionType), SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey);
 
         for (int i = 0; i < SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys.Count; ++i)
         {
-            var secondaryKeyData = await GetLatestSuppressionsByType<T>(GetSecondaryApiKeyName(i), SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys[i], suppressionType);
-
-            foreach (var skd in secondaryKeyData)
-            {
-                await contactService.Unsubscribe(skd.Email, skd.GetReason(), $"SendGrid_{suppressionType}_{GetSecondaryApiKeyName(i)}", skd.CreatedAt, null);
-            }
+            sourceAndKeyDictionary.Add(CreateSourceString($"SecondaryApiKey{i}", suppressionType), SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys[i]);
         }
+
+        foreach (var (source, key) in sourceAndKeyDictionary)
+        {
+            var supressions = await GetLatestSuppressionsByType<T>(source, key, suppressionType);
+
+            foreach (var supression in supressions)
+            {
+                await contactService.Unsubscribe(supression.Email, supression.GetReason(), source, supression.CreatedAt, null);
+            }
+        }  
     }
 
-    private async Task<List<T>> GetLatestSuppressionsByType<T>(string apiKeyName, string apiKeyValue, string suppressionType)
+    private async Task<List<T>> GetLatestSuppressionsByType<T>(string source, string apiKeyValue, string suppressionType)
     {
         var query = from u in dbContext.Unsubscribes
-                    where u.Source == $"SendGrid_{suppressionType}_{apiKeyName}"
+                    where u.Source == source
                     orderby u.CreatedAt descending
                     select u.CreatedAt;
 

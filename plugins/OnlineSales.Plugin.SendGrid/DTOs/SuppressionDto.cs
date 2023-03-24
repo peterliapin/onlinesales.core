@@ -27,7 +27,7 @@ public class SuppressionDto
 
     public virtual string GetReason()
     {
-        return "Unsunsribed";
+        return "Unsubsribed";
     }
 }
 
