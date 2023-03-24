@@ -13,5 +13,7 @@ public class PluginConfig
 
 public class SendGridApiConfig
 {
-    public string ApiKey { get; set; } = string.Empty;
+    public string PrimaryApiKey { get; set; } = string.Empty;
+
+    public List<string> SecondaryApiKeys { get; set; } = new List<string>();
 }
