@@ -53,36 +53,44 @@ namespace OnlineSales.Infrastructure
                 });
             }
 
-            var count = Count();
-
-            var sr = new SearchRequest<T>(indexName);
-
-            sr.Query = (orQueries.Count > 0) ? new BoolQuery { Should = orQueries.ToArray(), } : new MatchAllQuery();
-
-            AddSortConditions(sr);
-
-            if (parseData.Skip >= 0)
+            var pit = elasticClient.OpenPointInTime(new OpenPointInTimeRequest(indexName) { KeepAlive = "2m" });
+            try
             {
-                sr.From = parseData.Skip;
-            }
+                var count = Count();
 
-            if (parseData.Limit >= 0)
-            {
-                sr.Size = parseData.Limit;
-            }
+                var sr = new SearchRequest<T>(indexName);
 
-            if (parseData.SelectData.IsSelect)
-            {
-                var fields = new List<Field>();
-                foreach (var sp in parseData.SelectData.SelectedProperties)
+                sr.Query = (orQueries.Count > 0) ? new BoolQuery { Should = orQueries.ToArray(), } : new MatchAllQuery();
+
+                AddSortConditions(sr);
+
+                if (parseData.Skip >= 0)
                 {
-                    fields.Add(sp);
+                    sr.From = parseData.Skip;
                 }
 
-                sr.Source = new SourceFilter { Includes = fields.ToArray(), };
-            }
+                if (parseData.Limit >= 0)
+                {
+                    sr.Size = parseData.Limit;
+                }
 
-            return await Query(sr, count);      
+                if (parseData.SelectData.IsSelect)
+                {
+                    var fields = new List<Field>();
+                    foreach (var sp in parseData.SelectData.SelectedProperties)
+                    {
+                        fields.Add(sp);
+                    }
+
+                    sr.Source = new SourceFilter { Includes = fields.ToArray(), };
+                }
+
+                return await Query(sr, count, pit.Id);
+            }
+            finally
+            {
+                elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
+            }
         }
 
         private void AddSortConditions(SearchRequest<T> sr)
@@ -107,7 +115,7 @@ namespace OnlineSales.Infrastructure
             sr.Sort = sortedConditions;
         }
 
-        private async Task<QueryResult<T>> Query(SearchRequest<T> sr, long count)
+        private async Task<QueryResult<T>> Query(SearchRequest<T> sr, long count, string pitId)
         {            
             List<object> CreateSearchAfterObjects(T lastObject)
             {
@@ -133,55 +141,47 @@ namespace OnlineSales.Infrastructure
 
                 sr.From = null;
                 sr.Size = maxResultWindow;
-                var pit = elasticClient.OpenPointInTime(new OpenPointInTimeRequest(indexName) { KeepAlive = "1m" });
-                sr.PointInTime = new PointInTime(pit.Id, "2m");
+                sr.PointInTime = new PointInTime(pitId, "2m");
                 int total = 0;
-                try
+                while (total <= parseData.Skip + parseData.Limit)
                 {
-                    while (total <= parseData.Skip + parseData.Limit)
+                    var res = await elasticClient.SearchAsync<T>(sr);
+                    CheckSearchRequestResult(res);
+                    var ds = res.Documents.ToList();
+                    var newTotal = total + ds.Count;
+                    if (ds.Count == 0)
                     {
-                        var res = await elasticClient.SearchAsync<T>(sr);
-                        CheckSearchRequestResult(res);
-                        var ds = res.Documents.ToList();
-                        var newTotal = total + ds.Count;
-                        if (ds.Count == 0)
-                        {
-                            break;
-                        }
+                        break;
+                    }
 
-                        if (newTotal >= parseData.Skip)
+                    if (newTotal >= parseData.Skip)
+                    {
+                        if (total <= parseData.Skip)
                         {
-                            if (total <= parseData.Skip)
+                            if (newTotal <= parseData.Skip + parseData.Limit)
                             {
-                                if (newTotal <= parseData.Skip + parseData.Limit)
-                                {
-                                    result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, ds.Count)));
-                                }
-                                else
-                                {
-                                    result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, parseData.Skip + parseData.Limit - total)));
-                                }
+                                result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, ds.Count)));
                             }
                             else
                             {
-                                if (newTotal <= parseData.Skip + parseData.Limit)
-                                {
-                                    result.AddRange(res.Documents.Take(new Range(0, ds.Count)));
-                                }
-                                else
-                                {
-                                    result.AddRange(res.Documents.Take(new Range(0, parseData.Skip + parseData.Limit - total)));
-                                }
+                                result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, parseData.Skip + parseData.Limit - total)));
                             }
                         }
-
-                        sr.SearchAfter = CreateSearchAfterObjects(ds[ds.Count - 1]);
-                        total = newTotal;
+                        else
+                        {
+                            if (newTotal <= parseData.Skip + parseData.Limit)
+                            {
+                                result.AddRange(res.Documents.Take(new Range(0, ds.Count)));
+                            }
+                            else
+                            {
+                                result.AddRange(res.Documents.Take(new Range(0, parseData.Skip + parseData.Limit - total)));
+                            }
+                        }
                     }
-                }
-                finally
-                {
-                    elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
+
+                    sr.SearchAfter = CreateSearchAfterObjects(ds[ds.Count - 1]);
+                    total = newTotal;
                 }
 
                 return new QueryResult<T>(result, count);
