@@ -23,6 +23,9 @@ public class CommentCreateDto
     public int ContentId { get; set; }
 
     public int? ParentId { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class CommentUpdateDto
@@ -86,4 +89,7 @@ public class CommentImportDto
 
     [Optional]
     public string? UpdatedByUserAgent { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }

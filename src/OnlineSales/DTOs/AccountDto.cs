@@ -35,6 +35,8 @@ public class AccountCreateDto
 
     public Dictionary<string, string>? SocialMedia { get; set; }
 
+    public string? Source { get; set; }
+
     [Optional]
     public string? Data { get; set; }
 }
@@ -56,6 +58,8 @@ public class AccountDetailsInfo
     public string[]? Tags { get; set; }
 
     public Dictionary<string, string>? SocialMedia { get; set; }
+
+    public string? Source { get; set; }
 
     public string? Data { get; set; }
 
@@ -79,6 +83,10 @@ public class AccountUpdateDto
     public string[]? Tags { get; set; }
 
     public Dictionary<string, string>? SocialMedia { get; set; }
+
+    public string? Source { get; set; }
+
+    public string? Data { get; set; }
 }
 
 public class AccountDetailsDto : AccountCreateDto

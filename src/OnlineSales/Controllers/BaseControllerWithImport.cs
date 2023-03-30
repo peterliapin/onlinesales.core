@@ -38,10 +38,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
     [HttpPost]
     [Route("import")]
+    [RequestSizeLimit(100 * 1024 * 1024)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]    
     public virtual async Task<ActionResult> Import([FromBody] List<TI> records)
     {
         AlternateKeyRelationList = GetRecordsWithAlternateKey(records);

@@ -156,7 +156,8 @@ public abstract class ChangeLogTask : BaseTask
             minLogId = lastProcessedTask.ChangeLogIdMax + 1;
         }
 
-        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize && c.ObjectType == entity).OrderBy(b => b.Id).ToList();
+        // 3000000 - tests show that limit of 3 millions records is optimal to split change_log table into the parts with acceptable performance
+        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + 3000000 && c.ObjectType == entity).OrderBy(b => b.Id).Take(ChangeLogBatchSize).ToList();
 
         return changeLogList;
     }

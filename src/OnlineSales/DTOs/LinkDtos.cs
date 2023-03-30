@@ -16,6 +16,9 @@ public class LinkCreateDto
 
     [Required]
     public string Name { get; set; } = string.Empty;
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class LinkUpdateDto
@@ -25,6 +28,9 @@ public class LinkUpdateDto
     public string? Destination { get; set; }
 
     public string? Name { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class LinkDetailsDto : LinkCreateDto

@@ -12,6 +12,3 @@ public class UnsubscribeDetailsDto
 
     public int? ContactId { get; set; }
 }
-
-
-

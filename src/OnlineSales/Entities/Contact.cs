@@ -18,15 +18,28 @@ namespace OnlineSales.Entities;
 [Index(nameof(Email), IsUnique = true)]
 public class Contact : BaseEntity
 {
+    private string email = string.Empty;
+
     [Searchable]
     public string? LastName { get; set; }
 
     [Searchable]
     public string? FirstName { get; set; }
 
-    [Searchable]
     [Required]
-    public string Email { get; set; } = string.Empty;
+    [Searchable]
+    public string Email
+    {
+        get
+        {
+            return email;
+        }
+
+        set
+        {
+            email = value.ToLower();
+        }
+    }
 
     [Searchable]
     public Continent? ContinentCode { get; set; }
@@ -79,7 +92,4 @@ public class Contact : BaseEntity
     [JsonIgnore]
     [ForeignKey("UnsubscribeId")]
     public virtual Unsubscribe? Unsubscribe { get; set; }
-
-    [Searchable]
-    public string? Source { get; set; }
 }

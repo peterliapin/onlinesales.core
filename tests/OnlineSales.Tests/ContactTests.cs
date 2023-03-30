@@ -84,7 +84,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     protected override ContactUpdateDto UpdateItem(TestContact to)
     {
         var from = new ContactUpdateDto();
-        to.Email = from.Email = "Updated" + to.Email;
+        to.Email = from.Email = "updated" + to.Email;
         return from;
     }
 
@@ -96,7 +96,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         {
             var contact = new Contact();
             contact.Email = $"contact{i}@test{i}.net";
-            contact.Domain = new Domain() { Name = contact.Email.Split("@").Last() };
+            contact.Domain = new Domain() { Name = contact.Email.Split("@").Last().ToLower() };
             contacts.Add(contact);
         }
 
