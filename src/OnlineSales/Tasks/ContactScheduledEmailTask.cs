@@ -4,7 +4,6 @@
 
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -16,26 +15,13 @@ public class ContactScheduledEmailTask : BaseTask
 {
     private readonly PgDbContext dbContext;
     private readonly IEmailFromTemplateService emailFromTemplateService;
-    private readonly TaskConfig? taskConfig = new TaskConfig();
 
     public ContactScheduledEmailTask(PgDbContext dbContext, IEmailFromTemplateService emailFromTemplateService, IConfiguration configuration, TaskStatusService taskStatusService)
-        : base(taskStatusService)
+        : base("Tasks:ContactScheduledEmail", configuration, taskStatusService)
     {
         this.dbContext = dbContext;
         this.emailFromTemplateService = emailFromTemplateService;
-
-        var config = configuration.GetSection("Tasks:ContactScheduledEmail") !.Get<TaskConfig>();
-        if (config is not null)
-        {
-            taskConfig = config;
-        }
     }
-
-    public override string CronSchedule => taskConfig!.CronSchedule;
-
-    public override int RetryCount => taskConfig!.RetryCount;
-
-    public override int RetryInterval => taskConfig!.RetryInterval;
 
     public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {

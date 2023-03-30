@@ -1,9 +1,7 @@
 ﻿// <copyright file="SyncSuppressionsTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
-using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
@@ -21,30 +19,14 @@ public class SyncSuppressionsTask : BaseTask
     protected readonly PgDbContext dbContext;
     protected readonly IContactService contactService;
 
-    private readonly TaskConfig taskConfig = new TaskConfig();
     private readonly string primaryApiKeyName = "PrimaryApiKey";
 
     public SyncSuppressionsTask(TaskStatusService taskStatusService, PgDbContext dbContext, IContactService contactService, IConfiguration configuration)
-        : base(taskStatusService)
+        : base("Tasks:SyncSuppressionsTask", configuration, taskStatusService)
     {
         this.dbContext = dbContext;
         this.contactService = contactService;
-
-        var section = configuration.GetSection("Tasks:SyncSuppressionsTask");
-
-        var config = section.Get<TaskConfig>();
-
-        if (config is not null)
-        {
-            taskConfig = config;
-        }
     }
-
-    public override string CronSchedule => taskConfig.CronSchedule;
-
-    public override int RetryCount => taskConfig.RetryCount;
-
-    public override int RetryInterval => taskConfig.RetryInterval;
 
     public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {

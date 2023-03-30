@@ -82,6 +82,8 @@ public class GeolocationApiConfig
 
 public class TaskConfig
 {
+    public bool Enable { get; set; }
+
     public string CronSchedule { get; set; } = string.Empty;
 
     public int RetryCount { get; set; }

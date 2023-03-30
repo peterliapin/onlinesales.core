@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reflection;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -18,12 +19,23 @@ public abstract class ChangeLogTask : BaseTask
 
     private readonly HashSet<Type> loggedTypes;
 
-    protected ChangeLogTask(PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
-        : base(taskStatusService)
+    protected ChangeLogTask(string configKey, IConfiguration configuration, PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
+        : base(configKey, configuration, taskStatusService)
     {
         this.dbContext = dbContext;
         this.pluginDbContexts = pluginDbContexts;
         this.loggedTypes = GetTypes(dbContext);
+
+        var config = configuration.GetSection(configKey) !.Get<ChangeLogTaskConfig>();
+
+        if (config is not null)
+        {
+            ChangeLogBatchSize = config.BatchSize;
+        }
+        else
+        {
+            throw new MissingConfigurationException($"The specified configuration section for the provided configKey {configKey} could not be found in the settings file.");
+        }
 
         foreach (var pt in pluginDbContexts)
         {
@@ -32,7 +44,7 @@ public abstract class ChangeLogTask : BaseTask
         }
     }    
 
-    public abstract int ChangeLogBatchSize { get; }
+    public int ChangeLogBatchSize { get; private set; }
 
     public override Task<bool> Execute(TaskExecutionLog currentJob)
     {
