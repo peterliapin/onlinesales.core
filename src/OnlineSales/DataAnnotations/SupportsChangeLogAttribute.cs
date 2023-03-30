@@ -7,4 +7,5 @@ namespace OnlineSales.DataAnnotations;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class SupportsChangeLogAttribute : Attribute
 {
+    public bool SaveEntity { get; set; } = true;
 }

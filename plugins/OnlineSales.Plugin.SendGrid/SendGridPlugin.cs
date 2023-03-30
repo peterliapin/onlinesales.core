@@ -4,9 +4,12 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.SendGrid.Configuration;
+using OnlineSales.Plugin.SendGrid.Data;
 using OnlineSales.Plugin.SendGrid.Tasks;
+using OnlineSales.SendGrid.Tasks;
 
 namespace OnlineSales.Plugin.SendGrid;
 
@@ -23,6 +26,10 @@ public class SendGridPlugin : IPlugin
             Configuration = pluginConfig;
         }
 
+        services.AddScoped<PluginDbContextBase, SendgridDbContext>();
+        services.AddScoped<SendgridDbContext, SendgridDbContext>();
+
         services.AddScoped<ITask, SyncSuppressionsTask>();
+        services.AddScoped<ITask, SyncEventsTask>();
     }
 }

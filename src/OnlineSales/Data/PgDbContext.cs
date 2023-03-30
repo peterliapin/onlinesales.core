@@ -5,6 +5,7 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -169,7 +170,15 @@ public class PgDbContext : DbContext
             {
                 // save object id which we only recieve after SaveChanges (for new records)
                 change.Value.ObjectId = ((BaseEntityWithId)change.Key.Entity).Id;
-                change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
+
+                if (change.Key.Entity.GetType().GetCustomAttributes<SupportsChangeLogAttribute>().FirstOrDefault() !.SaveEntity)
+                {
+                    change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
+                }
+                else
+                {
+                    change.Value.Data = JsonHelper.Serialize(new { });
+                }
             }
 
             ChangeLogs!.AddRange(changes.Values);

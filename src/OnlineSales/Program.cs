@@ -67,6 +67,7 @@ public class Program
         builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
         builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();        
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
+        builder.Services.AddSingleton<ActivityLogService, ActivityLogService>();
 
         ConfigureCacheProfiles(builder);
 
