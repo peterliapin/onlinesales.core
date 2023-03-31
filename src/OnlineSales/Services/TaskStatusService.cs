@@ -2,47 +2,35 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using DnsClient;
-using DnsClient.Protocol;
-using HtmlAgilityPack;
-using OnlineSales.Entities;
-using OnlineSales.Interfaces;
-
 namespace OnlineSales.Services;
 
 public class TaskStatusService 
 {
-    private readonly Dictionary<string, bool> data = new Dictionary<string, bool>();
+    private readonly Dictionary<string, bool> taskStatusByName = new Dictionary<string, bool>();
 
-    private readonly bool valueOnStartUp;
-
-    public TaskStatusService(IConfiguration configuration)
+    public void SetInitialState(string name, bool running)
     {
-        valueOnStartUp = configuration.GetValue<bool>("TaskRunner:Enable");
+        if (!taskStatusByName.ContainsKey(name))
+        {
+            taskStatusByName[name] = running;
+        }
     }
 
     public bool IsRunning(string name)
     {
-        if (data.ContainsKey(name))
+        if (taskStatusByName.ContainsKey(name))
         {
-            return data[name];
+            return taskStatusByName[name];
         }
         else
         {
-            return valueOnStartUp;
+            return false;
         }
     }
 
     public void SetRunning(string name, bool running)
     {
-        if (data.ContainsKey(name))
-        {
-            data[name] = running;
-        }
-        else
-        {
-            data.Add(name, running);
-        }        
+        taskStatusByName[name] = running;
     }
 }
 

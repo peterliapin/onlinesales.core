@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Geography;
@@ -14,28 +13,13 @@ namespace OnlineSales.Tasks;
 
 public class SyncIpDetailsTask : ChangeLogTask
 {
-    private readonly ChangeLogTaskConfig? taskConfig = new ChangeLogTaskConfig();
     private readonly IpDetailsService ipDetailsService;
 
     public SyncIpDetailsTask(IConfiguration configuration, PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, IpDetailsService ipDetailsService, TaskStatusService taskStatusService)
-        : base(dbContext, pluginDbContexts, taskStatusService)
+        : base("Tasks:SyncIpDetailsTask", configuration, dbContext, pluginDbContexts, taskStatusService)
     {
-        var config = configuration.GetSection("Tasks:SyncIpDetailsTask") !.Get<ChangeLogTaskConfig>();
-        if (config is not null)
-        {
-            taskConfig = config;
-        }
-
         this.ipDetailsService = ipDetailsService;
     }
-
-    public override int ChangeLogBatchSize => taskConfig!.BatchSize;
-
-    public override string CronSchedule => taskConfig!.CronSchedule;
-
-    public override int RetryCount => taskConfig!.RetryCount;
-
-    public override int RetryInterval => taskConfig!.RetryInterval;
 
     internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {

@@ -30,12 +30,12 @@ public class DomainTaskTests : BaseTest
 
         var invalidDomain = new TestDomain()
         {
-            Name = "SomeIncorrectDomainName",
+            Name = "incorrect-domain",
         };
 
         var filledDomain = new TestDomain()
         {
-            Name = "filledDomainName",
+            Name = "filled-domain-name",
             HttpCheck = false,
             Url = "Url",
             Title = "Title",

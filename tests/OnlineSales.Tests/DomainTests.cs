@@ -89,7 +89,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     [Fact]
     public async Task GetNewInvalidDomainTest()
     {
-        var domainName = "SomeIncorrectDomainName";
+        var domainName = "incorrect-domain";
 
         var url = itemsUrl + "/verify/" + domainName;
 
@@ -108,7 +108,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     protected override DomainUpdateDto UpdateItem(TestDomain to)
     {
         var from = new DomainUpdateDto();
-        to.Name = from.Name = to.Name + "Updated";
+        to.Name = from.Name = "new-" + to.Name;
         return from;
     }
 }

@@ -30,6 +30,9 @@ public class OrderCreateDto
     public bool TestOrder { get; set; } = false;
 
     public string? Data { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class OrderUpdateDto

@@ -33,6 +33,9 @@ public class DomainCreateDto
     public List<DnsRecord>? DnsRecords { get; set; }
 
     public bool? DnsCheck { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class DomainUpdateDto
@@ -109,4 +112,7 @@ public class DomainImportDto
 
     [Optional]
     public DateTime? UpdatedAt { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }

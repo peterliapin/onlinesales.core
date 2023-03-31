@@ -40,6 +40,9 @@ public class ContentCreateDto
     public string? Tags { get; set; }
 
     public bool AllowComments { get; set; } = false;
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class ContentUpdateDto
@@ -73,6 +76,8 @@ public class ContentUpdateDto
     public string? Tags { get; set; }
 
     public bool? AllowComments { get; set; }
+
+    public string? Source { get; set; }
 }
 
 public class ContentDetailsDto : ContentCreateDto

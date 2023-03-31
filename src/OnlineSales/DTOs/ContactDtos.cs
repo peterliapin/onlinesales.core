@@ -50,6 +50,9 @@ public abstract class BaseContactDto
 
     [Optional]
     public int? UnsubscribeId { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class ContactCreateDto : BaseContactDto
@@ -100,9 +103,6 @@ public class ContactImportDto : ContactCreateDto
 
     [Optional]
     public string? UpdatedByUserAgent { get; set; }
-
-    [Optional]
-    public string? Source { get; set; }
 
     [Optional]
     public int? AccountId { get; set; }

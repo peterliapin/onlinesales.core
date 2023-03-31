@@ -1,9 +1,12 @@
 ﻿{
   "SendGridApi": {
-    "ApiKey": "$SENDGRIDAPI__AUTHKEY"
+    "PrimaryApiKey": "$SENDGRIDAPI__PRIMARYAPIKEY",
+    "SecondaryApiKeys": [
+    ]
   },
   "Tasks": {
     "SyncSuppressionsTask": {
+      "Enable": false,
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1"
