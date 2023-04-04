@@ -13,6 +13,8 @@ public class ActivityLogDto
 {
     public string Source { get; set; } = string.Empty;
 
+    public int SourceId { get; set; }
+
     public string Type { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }

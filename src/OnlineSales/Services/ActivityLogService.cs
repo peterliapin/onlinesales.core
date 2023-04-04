@@ -4,6 +4,7 @@
 
 using System.Configuration;
 using Nest;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 
@@ -21,21 +22,47 @@ namespace OnlineSales.Services
             this.esDbContext = esDbContext;
         }
 
-        public async Task<bool> AddActivityRecords(List<ActivityLogDto> records)
+        public async Task<int> GetMaxId(string source)
         {
-            if (!esDbContext.ElasticClient.Indices.Exists(indexName).Exists)
+            var sr = new SearchRequest<ActivityLogDto>(indexName);
+            sr.Query = new TermQuery() { Field = "source.keyword", Value = source };
+            sr.Sort = new List<ISort>() { new FieldSort { Field = "sourceId", Order = Nest.SortOrder.Descending } };
+            sr.Size = 1;
+            var res = await esDbContext.ElasticClient.SearchAsync<ActivityLogDto>(sr);
+            if (res != null)
             {
-                esDbContext.ElasticClient.Indices.Create(indexName, index => index.Map<ActivityLogDto>(x => x.AutoMap()));
+                var doc = res.Documents.FirstOrDefault();
+                if (doc != null)
+                {
+                    return doc.SourceId;
+                }
             }
 
-            var responce = await esDbContext.ElasticClient.IndexManyAsync<ActivityLogDto>(records, indexName);
+            return 0;
+        }
 
-            if (!responce.IsValid)
+        public async Task<bool> AddActivityRecords(List<ActivityLogDto> records)
+        {
+            if (records.Count > 0)
             {
-                Log.Error("Cannot save logs in Elastic Search. Reason: " + responce.DebugInformation);
-            }            
+                if (!esDbContext.ElasticClient.Indices.Exists(indexName).Exists)
+                {
+                    esDbContext.ElasticClient.Indices.Create(indexName, index => index.Map<ActivityLogDto>(x => x.AutoMap()));
+                }
 
-            return responce.IsValid;
+                var responce = await esDbContext.ElasticClient.IndexManyAsync<ActivityLogDto>(records, indexName);
+
+                if (!responce.IsValid)
+                {
+                    Log.Error("Cannot save logs in Elastic Search. Reason: " + responce.DebugInformation);
+                }
+
+                return responce.IsValid;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

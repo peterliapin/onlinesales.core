@@ -11,10 +11,13 @@ namespace OnlineSales.Tasks;
 
 public abstract class BaseTask : ITask
 {
+    protected readonly string configKey;
+
     private readonly TaskStatusService taskStatusService;
 
     protected BaseTask(string configKey, IConfiguration configuration, TaskStatusService taskStatusService)
     {
+        this.configKey = configKey;
         this.taskStatusService = taskStatusService;
 
         var config = configuration.GetSection(configKey) !.Get<TaskConfig>();
