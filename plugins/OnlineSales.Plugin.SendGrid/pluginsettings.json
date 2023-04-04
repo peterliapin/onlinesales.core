@@ -3,8 +3,7 @@
     "PrimaryApiKey": "$SENDGRIDAPI__PRIMARYAPIKEY",
     "SecondaryApiKeys": [
     ],
-    "WebhookPublicKeys": [
-      "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEV0is5meSc6Q7s8IhTrcLFQ2NMTaOoNUkbVwExSgC3+TCdY0hqVjzfDa09M/Uzr8DPFEDcCKVwGOCieLwhw6qyw=="
+    "WebhookPublicKeys": [      
     ]
   },
   "Tasks": {

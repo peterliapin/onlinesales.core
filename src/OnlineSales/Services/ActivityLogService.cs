@@ -45,11 +45,6 @@ namespace OnlineSales.Services
         {
             if (records.Count > 0)
             {
-                if (!esDbContext.ElasticClient.Indices.Exists(indexName).Exists)
-                {
-                    esDbContext.ElasticClient.Indices.Create(indexName, index => index.Map<ActivityLogDto>(x => x.AutoMap()));
-                }
-
                 var responce = await esDbContext.ElasticClient.IndexManyAsync<ActivityLogDto>(records, indexName);
 
                 if (!responce.IsValid)

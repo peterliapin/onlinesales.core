@@ -49,8 +49,8 @@ namespace OnlineSales.SendGrid.Tasks
         {
             try
             {
-                var maxId = await logService.GetMaxId(SourceName) + 1;
-                var events = sgDbContext.SendgridEvents!.Where(e => e.Id >= maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
+                var maxId = await logService.GetMaxId(SourceName);
+                var events = sgDbContext.SendgridEvents!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
                 var res = await logService.AddActivityRecords(events);
                 if (!res)
                 {

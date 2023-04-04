@@ -5,13 +5,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Nest;
-using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Plugin.SendGrid.Entities;
 
-[Table("sendgrid_events")]
-[SupportsChangeLog(SaveEntity = false)]
+[Table("sendgrid_event")]
 public class SendgridEvent : BaseEntityWithId
 {
     public DateTime CreatedAt { get; set; }

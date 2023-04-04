@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Newtonsoft.Json;
+
 namespace OnlineSales.Plugin.SendGrid.DTOs;
 
 public class WebhookEventDto : EmailDto
@@ -10,9 +12,11 @@ public class WebhookEventDto : EmailDto
 
     public string Event { get; set; } = string.Empty;
 
-    public string Sg_Message_Id { get; set; } = string.Empty;
+    [JsonProperty("sg_message_id")]
+    public string SendGridMessageId { get; set; } = string.Empty;
 
-    public string Sg_Event_Id { get; set; } = string.Empty;
+    [JsonProperty("sg_event_id")]
+    public string SendGridEventId { get; set; } = string.Empty;
 
     public string Reason { get; set; } = string.Empty;
 

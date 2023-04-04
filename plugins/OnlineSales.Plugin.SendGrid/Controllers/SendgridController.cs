@@ -3,37 +3,29 @@
 // </copyright>
 
 using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using Elasticsearch.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Nest;
 using Newtonsoft.Json;
 using OnlineSales.Data;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.SendGrid.Data;
 using OnlineSales.Plugin.SendGrid.DTOs;
 using OnlineSales.Plugin.SendGrid.Entities;
 using OnlineSales.Plugin.SendGrid.Exceptions;
-using SendGrid;
 using SendGrid.Helpers.EventWebhook;
 using Serilog;
-using Serilog.Events;
 
 namespace OnlineSales.Plugin.SendGrid.Controllers;
 
 [Route("api/[controller]")]
 public class SendgridController : ControllerBase
 {
+    private static readonly int BatchSize = 10;
+
     private static readonly DateTime UnixTimestampZeroDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
     private readonly SendgridDbContext dbContext;
@@ -84,31 +76,72 @@ public class SendgridController : ControllerBase
         return await AddEvents(records);
     }
 
-    private async Task<ActionResult> AddEvents<T>(List<T> records)
-        where T : EmailDto
+    private async Task<Dictionary<Contact, List<T>>> CreateNonExistedContacts<T>(IEnumerable<IGrouping<string, T>> emailAndRecords)
     {
-        try
+        var contactRecords = new Dictionary<Contact, List<T>>();
+        var nonExistedContacts = new List<Contact>();
+
+        int position = 0;
+
+        while (position < emailAndRecords.Count())
         {
-            foreach (var r in records)
+            var batch = emailAndRecords.Skip(position).Take(BatchSize);
+            var existedContacts = dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToHashSet();
+            foreach (var b in batch)
             {
-                var contact = dbContext.Contacts!.Where(c => c.Email == r.Email).FirstOrDefault();
+                var contact = existedContacts.FirstOrDefault(c => c.Email == b.Key);
                 if (contact == null)
                 {
-                    contact = new Contact() { Email = r.Email, };
-                    await contactService.SaveAsync(contact);
-                    var sgevent = Convert(r, contact);
-                    await dbContext.SendgridEvents!.AddAsync(sgevent);
+                    contact = new Contact() { Email = b.Key };
+                    nonExistedContacts.Add(contact);
                 }
-                else
+
+                contactRecords[contact] = b.ToList();
+            }
+
+            position += BatchSize;
+        }
+
+        await contactService.EnrichWithDomainIdAsync(nonExistedContacts);
+        await dbContext.Contacts!.AddRangeAsync(nonExistedContacts);
+
+        return contactRecords;
+    }
+
+    private async Task AddEventRecords<T>(Dictionary<Contact, List<T>> contactsAndRecords)
+    {
+        int position = 0;
+        while (position < contactsAndRecords.Count)
+        {
+            var batch = contactsAndRecords.Skip(position).Take(BatchSize);
+            var existingRecords = dbContext.SendgridEvents!.Where(e => batch.Select(b => b.Key).Contains(e.Contact)).ToList();
+            foreach (var contactAndRecords in batch)
+            {
+                foreach (var record in contactAndRecords.Value)
                 {
-                    var sgevent = Convert<T>(r, contact);
-                    var existingEvent = dbContext.SendgridEvents!.Where(e => e.ContactId == sgevent.ContactId && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt).FirstOrDefault();
-                    if (existingEvent == null)
+                    var sgevent = Convert<T>(record, contactAndRecords.Key);
+                    var existingRecord = existingRecords.FirstOrDefault(e => e.Contact.Email == sgevent.Contact!.Email && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt);
+                    if (existingRecord == null)
                     {
                         await dbContext.SendgridEvents!.AddAsync(sgevent);
                     }
                 }
             }
+
+            position += BatchSize;
+        }
+    }
+
+    private async Task<ActionResult> AddEvents<T>(List<T> records)
+        where T : EmailDto
+    {
+        try
+        {
+            var emailRecords = records.GroupBy(r => r.Email); 
+
+            var contactRecords = await CreateNonExistedContacts(emailRecords);
+
+            await AddEventRecords(contactRecords);
 
             await dbContext.SaveChangesAsync();
 
@@ -133,7 +166,7 @@ public class SendgridController : ControllerBase
         }
         else
         {
-            throw new SendGridApiException("Cannot create ActivityLogDto");
+            throw new SendGridApiException("Cannot create SendgridEvent");
         }
     }
 
@@ -143,10 +176,10 @@ public class SendgridController : ControllerBase
         {
             CreatedAt = GetDateTime(me.Processed),
             Event = GetEvent(me),
-            MessageId = me.Message_id,
+            MessageId = me.SendGridMessageId,
             Reason = me.Reason,
-            Ip = me.Originating_ip,
-            ContactId = contact.Id,
+            Ip = me.OriginatingIp,
+            Contact = contact,
         };
     }
 
@@ -156,10 +189,10 @@ public class SendgridController : ControllerBase
         {
             CreatedAt = GetDateTime(we.Timestamp),
             Event = GetEvent(we),
-            MessageId = we.Sg_Message_Id,
+            MessageId = we.SendGridMessageId,
             Reason = we.Reason,
             Ip = we.Ip,
-            ContactId = contact.Id,
+            Contact = contact,
         };
     }
 

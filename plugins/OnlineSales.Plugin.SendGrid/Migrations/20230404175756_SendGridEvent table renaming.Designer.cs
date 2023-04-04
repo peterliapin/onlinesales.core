@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Entities;
@@ -13,9 +14,11 @@ using OnlineSales.Plugin.SendGrid.Data;
 namespace OnlineSales.Plugin.SendGrid.Migrations
 {
     [DbContext(typeof(SendgridDbContext))]
-    partial class SendgridDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230404175756_SendGridEvent table renaming")]
+    partial class SendGridEventtablerenaming
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

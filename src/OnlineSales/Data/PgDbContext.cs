@@ -170,15 +170,7 @@ public class PgDbContext : DbContext
             {
                 // save object id which we only recieve after SaveChanges (for new records)
                 change.Value.ObjectId = ((BaseEntityWithId)change.Key.Entity).Id;
-
-                if (change.Key.Entity.GetType().GetCustomAttributes<SupportsChangeLogAttribute>().FirstOrDefault() !.SaveEntity)
-                {
-                    change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
-                }
-                else
-                {
-                    change.Value.Data = JsonHelper.Serialize(new { });
-                }
+                change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
             }
 
             ChangeLogs!.AddRange(changes.Values);
