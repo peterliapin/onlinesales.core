@@ -7,13 +7,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OnlineSales.Plugin.SendGrid.Migrations
 {
     /// <inheritdoc />
-    public partial class SendgridEvents : Migration
+    public partial class SendGridEvents : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "sendgrid_events",
+                name: "sendgrid_event",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -29,17 +29,17 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_sendgrid_events", x => x.id);
+                    table.PrimaryKey("pk_sendgrid_event", x => x.id);
                     table.ForeignKey(
-                        name: "fk_sendgrid_events_contact_contact_id",
+                        name: "fk_sendgrid_event_contact_contact_id",
                         column: x => x.contact_id,
                         principalTable: "contact",
                         principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_sendgrid_events_contact_id",
-                table: "sendgrid_events",
+                name: "ix_sendgrid_event_contact_id",
+                table: "sendgrid_event",
                 column: "contact_id");
         }
 
@@ -47,7 +47,7 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "sendgrid_events");
+                name: "sendgrid_event");
         }
     }
 }

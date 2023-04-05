@@ -1,4 +1,4 @@
-﻿// <copyright file="SyncEventsTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="SyncActivityLogTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -19,7 +19,7 @@ using Serilog;
 
 namespace OnlineSales.SendGrid.Tasks
 {
-    public class SyncEventsTask : BaseTask
+    public class SyncActivityLogTask : BaseTask
     {
         private static readonly string SourceName = "SendGrid";
 
@@ -29,8 +29,8 @@ namespace OnlineSales.SendGrid.Tasks
 
         private readonly int batchSize;
 
-        public SyncEventsTask(IConfiguration configuration, SendgridDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
-            : base("Tasks:SyncEventsTask", configuration, taskStatusService)
+        public SyncActivityLogTask(IConfiguration configuration, SendgridDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
+            : base("Tasks:SyncActivityLogTask", configuration, taskStatusService)
         {
             this.sgDbContext = dbContext;
             this.logService = logService;

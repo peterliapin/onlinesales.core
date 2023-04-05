@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.SendGrid.Data;
 using OnlineSales.Plugin.SendGrid.DTOs;
@@ -24,9 +25,7 @@ namespace OnlineSales.Plugin.SendGrid.Controllers;
 [Route("api/[controller]")]
 public class SendgridController : ControllerBase
 {
-    private static readonly int BatchSize = 10;
-
-    private static readonly DateTime UnixTimestampZeroDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    private static readonly int BatchSize = 500;    
 
     private readonly SendgridDbContext dbContext;
 
@@ -86,17 +85,17 @@ public class SendgridController : ControllerBase
         while (position < emailAndRecords.Count())
         {
             var batch = emailAndRecords.Skip(position).Take(BatchSize);
-            var existedContacts = dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToList();
+            var existedContacts = dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToDictionary(c => c.Email, c => c);
             foreach (var b in batch)
             {
-                var contact = existedContacts.FirstOrDefault(c => c.Email == b.Key);
-                if (contact == null)
+                var isExists = existedContacts.TryGetValue(b.Key, out var contact);
+                if (!isExists)
                 {
                     contact = new Contact() { Email = b.Key };
                     nonExistedContacts.Add(contact);
                 }
 
-                contactRecords[contact] = b.ToList();
+                contactRecords[contact!] = b.ToList();
             }
 
             position += BatchSize;
@@ -187,7 +186,7 @@ public class SendgridController : ControllerBase
     {
         return new SendgridEvent()
         {
-            CreatedAt = GetDateTime(we.Timestamp),
+            CreatedAt = DateTimeHelper.GetDateTime(we.Timestamp),
             Event = GetEvent(we),
             MessageId = we.SendGridMessageId,
             Reason = we.Reason,
@@ -229,11 +228,6 @@ public class SendgridController : ControllerBase
     {
         using var reader = new StreamReader(body);
         return await reader.ReadToEndAsync();
-    }
-
-    private DateTime GetDateTime(double timestamp)
-    {
-        return UnixTimestampZeroDate.AddSeconds(timestamp).ToUniversalTime();
     }
 
     private DateTime GetDateTime(string processed)

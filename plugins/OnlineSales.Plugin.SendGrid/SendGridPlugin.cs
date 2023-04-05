@@ -30,6 +30,6 @@ public class SendGridPlugin : IPlugin
         services.AddScoped<SendgridDbContext, SendgridDbContext>();
 
         services.AddScoped<ITask, SyncSuppressionsTask>();
-        services.AddScoped<ITask, SyncEventsTask>();
+        services.AddScoped<ITask, SyncActivityLogTask>();
     }
 }

@@ -13,7 +13,7 @@
       "RetryCount": "2",
       "RetryInterval": "1"
     },
-    "SyncEventsTask": {
+    "SyncActivityLogTask": {
       "Enable": true,
       "CronSchedule": "0/30 * * * * ? *",
       "RetryCount": "2",

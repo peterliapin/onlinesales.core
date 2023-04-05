@@ -14,8 +14,8 @@ using OnlineSales.Plugin.SendGrid.Data;
 namespace OnlineSales.Plugin.SendGrid.Migrations
 {
     [DbContext(typeof(SendgridDbContext))]
-    [Migration("20230403131632_SendgridEvents")]
-    partial class SendgridEvents
+    [Migration("20230405181639_SendGridEvents")]
+    partial class SendGridEvents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1525,12 +1525,12 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
                         .HasColumnName("source");
 
                     b.HasKey("Id")
-                        .HasName("pk_sendgrid_events");
+                        .HasName("pk_sendgrid_event");
 
                     b.HasIndex("ContactId")
-                        .HasDatabaseName("ix_sendgrid_events_contact_id");
+                        .HasDatabaseName("ix_sendgrid_event_contact_id");
 
-                    b.ToTable("sendgrid_events", (string)null);
+                    b.ToTable("sendgrid_event", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
@@ -1687,7 +1687,7 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
                     b.HasOne("OnlineSales.Entities.Contact", "Contact")
                         .WithMany()
                         .HasForeignKey("ContactId")
-                        .HasConstraintName("fk_sendgrid_events_contact_contact_id");
+                        .HasConstraintName("fk_sendgrid_event_contact_contact_id");
 
                     b.Navigation("Contact");
                 });
