@@ -86,7 +86,7 @@ public class SendgridController : ControllerBase
         while (position < emailAndRecords.Count())
         {
             var batch = emailAndRecords.Skip(position).Take(BatchSize);
-            var existedContacts = dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToHashSet();
+            var existedContacts = dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToList();
             foreach (var b in batch)
             {
                 var contact = existedContacts.FirstOrDefault(c => c.Email == b.Key);
@@ -120,7 +120,7 @@ public class SendgridController : ControllerBase
                 foreach (var record in contactAndRecords.Value)
                 {
                     var sgevent = Convert<T>(record, contactAndRecords.Key);
-                    var existingRecord = existingRecords.FirstOrDefault(e => e.Contact.Email == sgevent.Contact!.Email && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt);
+                    var existingRecord = existingRecords.FirstOrDefault(e => e.Contact!.Email == sgevent.Contact!.Email && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt);
                     if (existingRecord == null)
                     {
                         await dbContext.SendgridEvents!.AddAsync(sgevent);
