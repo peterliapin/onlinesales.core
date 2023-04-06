@@ -10,6 +10,8 @@ namespace OnlineSales.Interfaces
     {
         Task SaveAsync(Contact contact);
 
+        Task SaveAsync(List<Contact> contacts);
+
         Task EnrichWithDomainIdAsync(List<Contact> contacts);
 
         void EnrichWithAccountId(List<Contact> contacts);

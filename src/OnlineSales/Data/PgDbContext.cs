@@ -5,6 +5,7 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;

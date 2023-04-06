@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -26,19 +27,28 @@ namespace OnlineSales.Services
 
         public async Task SaveAsync(Contact contact)
         {
-            EnrichWithDomainId(contact);
-            EnrichWithAccountId(contact);
-
-            if (contact.Id > 0)
-            {
-                pgDbContext.Contacts!.Update(contact);
-            }
-            else
-            {
-                await pgDbContext.Contacts!.AddAsync(contact);
-            }
-
+            await SaveContactAsync(contact);
             await pgDbContext.SaveChangesAsync();
+        }
+
+        public async Task SaveAsync(List<Contact> contacts)
+        {
+            await EnrichWithDomainIdAsync(contacts);
+            EnrichWithAccountId(contacts);
+
+            var sortedContacts = contacts.GroupBy(c => c.Id > 0);
+
+            foreach (var group in sortedContacts)
+            {
+                if (group.Key)
+                {
+                    pgDbContext.UpdateRange(group.ToList());
+                }
+                else
+                {
+                    await pgDbContext.AddRangeAsync(group.ToList());
+                }
+            }
         }
 
         public void EnrichWithDomainId(Contact contact)
@@ -245,5 +255,20 @@ namespace OnlineSales.Services
         //     }
         //     return newAccount;
         // }
+
+        private async Task SaveContactAsync(Contact contact)
+        {
+            EnrichWithDomainId(contact);
+            EnrichWithAccountId(contact);
+
+            if (contact.Id > 0)
+            {
+                pgDbContext.Contacts!.Update(contact);
+            }
+            else
+            {
+                await pgDbContext.Contacts!.AddAsync(contact);
+            }
+        }
     }
 }
