@@ -31,6 +31,26 @@ namespace OnlineSales.Services
             await pgDbContext.SaveChangesAsync();
         }
 
+        public async Task SaveAsync(List<Contact> contacts)
+        {
+            await EnrichWithDomainIdAsync(contacts);
+            EnrichWithAccountId(contacts);
+
+            var sortedContacts = contacts.GroupBy(c => c.Id > 0);
+
+            foreach (var group in sortedContacts)
+            {
+                if (group.Key)
+                {
+                    pgDbContext.UpdateRange(group.ToList());
+                }
+                else
+                {
+                    await pgDbContext.AddRangeAsync(group.ToList());
+                }
+            }
+        }
+
         public void EnrichWithDomainId(Contact contact)
         {
             var domainName = GetDomainFromEmail(contact.Email);
