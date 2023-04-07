@@ -93,37 +93,4 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
 
         return NoContent();
     }
-
-    protected override List<OrderItem> GetMappedRecords(List<OrderItemImportDto> records)
-    {
-        var orders = dbContext!.Orders!.Select(o => new { o.Id, o.RefNo }).ToList();
-
-        var refOrders = from order in orders
-                            join record in records
-                                on order.RefNo equals record.OrderRefNo
-                        select order;
-
-        foreach (var item in records)
-        {
-            if (item.OrderId > 0)
-            {
-                continue;
-            }
-
-            if (!string.IsNullOrEmpty(item.OrderRefNo))
-            {
-                var refOrder = refOrders!.FirstOrDefault(r => r.RefNo == item.OrderRefNo);
-
-                if (refOrder is not null)
-                {
-                    item.OrderId = refOrder.Id;
-                    continue;
-                }
-            }
-
-            throw new EntityNotFoundException("No referenced order found for order item.");
-        }
-
-        return mapper.Map<List<OrderItem>>(records);
-    }
 }

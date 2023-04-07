@@ -98,11 +98,8 @@ public class AccountDetailsDto : AccountCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class AccountImportDto
+public class AccountImportDto : BaseImportDto
 {
-    [Optional]
-    public int? Id { get; set; }
-
     [Optional]
     public string Name { get; set; } = string.Empty;
 
@@ -132,13 +129,4 @@ public class AccountImportDto
 
     [Optional]
     public string? Data { get; set; }
-
-    [Optional]
-    public string? Source { get; set; }
-
-    [Optional]
-    public DateTime? CreatedAt { get; set; }
-
-    [Optional]
-    public DateTime? UpdatedAt { get; set; }
 }

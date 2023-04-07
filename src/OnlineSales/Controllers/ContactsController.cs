@@ -106,13 +106,6 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         return Ok(returnedValue);
     }
 
-    protected override async Task SaveBatchChangesAsync(List<Contact> contacts)
-    {
-        await contactService.EnrichWithDomainIdAsync(contacts);
-
-        await base.SaveBatchChangesAsync(contacts);
-    }
-
     private static string EmailToGravatarUrl(string email)
     {
         byte[] emailBytes = Encoding.ASCII.GetBytes(email);

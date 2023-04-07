@@ -58,30 +58,33 @@ public class OrderDetailsDto : OrderCreateDto
     public decimal Total { get; set; }
 }
 
-public class OrderImportDto : OrderCreateDto
+public class OrderImportDto : BaseImportDto
 {
     [Optional]
-    public int? Id { get; set; }
+    public string? RefNo { get; set; } = string.Empty;
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    public string? OrderNumber { get; set; }
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
+    public string? AffiliateName { get; set; }
 
     [Optional]
-    public string? CreatedByIp { get; set; }
+    public decimal? ExchangeRate { get; set; } = 1;
+
+    [Required]
+    public string? Currency { get; set; } = string.Empty;
 
     [Optional]
-    public string? CreatedByUserAgent { get; set; }
-
-    [Optional]
-    public string? UpdatedByIp { get; set; }
-
-    [Optional]
-    public string? UpdatedByUserAgent { get; set; }
+    public int? ContactId { get; set; }
 
     [Optional]
     [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
     public string? ContactEmail { get; set; }
+
+    [Optional]
+    public bool? TestOrder { get; set; } = false;
+
+    [Optional]
+    public string? Data { get; set; }
 }

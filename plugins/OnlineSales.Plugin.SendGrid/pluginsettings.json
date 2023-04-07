@@ -6,7 +6,7 @@
   },
   "Tasks": {
     "SyncSuppressionsTask": {
-      "Enable": false,
+      "Enable": true,
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1"

@@ -89,26 +89,41 @@ public class ContentDetailsDto : ContentCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class ContentImportDto : ContentCreateDto
+public class ContentImportDto : BaseImportDto
 {
     [Optional]
-    public int? Id { get; set; }
+    public string? Title { get; set; } = string.Empty;
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    public string? Description { get; set; } = string.Empty;
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
+    public string? Body { get; set; } = string.Empty;
 
     [Optional]
-    public string? CreatedByIp { get; set; }
+    public string? CoverImageUrl { get; set; }
 
     [Optional]
-    public string? CreatedByUserAgent { get; set; }
+    public string? CoverImageAlt { get; set; }
 
     [Optional]
-    public string? UpdatedByIp { get; set; }
+    public string? Slug { get; set; } = string.Empty;
 
     [Optional]
-    public string? UpdatedByUserAgent { get; set; }
+    public string? Type { get; set; } = string.Empty;
+
+    [Optional]
+    public string? Author { get; set; }
+
+    [Optional]
+    public string? Language { get; set; }
+
+    [Optional]
+    public string? Categories { get; set; }
+
+    [Optional]
+    public string? Tags { get; set; }
+
+    [Optional]
+    public bool? AllowComments { get; set; }
 }

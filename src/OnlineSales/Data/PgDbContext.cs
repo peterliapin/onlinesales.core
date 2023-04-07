@@ -207,7 +207,7 @@ public class PgDbContext : DbContext
 
     private DateTime GetDateWithKind(DateTime date)
     {
-        if (date.Kind == DateTimeKind.Unspecified)
+        if (date.Kind == DateTimeKind.Unspecified || date.Kind == DateTimeKind.Local)
         {
             return DateTime.SpecifyKind(date, DateTimeKind.Utc);
         }

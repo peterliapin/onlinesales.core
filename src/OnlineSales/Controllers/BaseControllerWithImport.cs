@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Linq.Expressions;
-using System.Reflection;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
+using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 
@@ -21,20 +21,12 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     where TC : class
     where TU : class
     where TD : class
-    where TI : class
+    where TI : BaseImportDtoWithIdAndSource
 {
     public BaseControllerWithImport(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
         : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
     }
-
-    public int ImportBatchSize { get; set; } = 50;
-
-    public List<TI>? AlternateKeyRelationList { get; set; }
-
-    public AlternateKeyAttribute? AlternateKeyCustomAttribute { get; set; }
-
-    public PropertyInfo? AlternateKey { get; set; }
 
     [HttpPost]
     [Route("import")]
@@ -42,341 +34,317 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]    
-    public virtual async Task<ActionResult> Import([FromBody] List<TI> records)
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public virtual async Task<ActionResult> Import([FromBody] List<TI> importRecords)
     {
-        AlternateKeyRelationList = GetRecordsWithAlternateKey(records);
+        dbContext.IsImportRequest = true;
 
-        var importingRecords = GetMappedRecords(records);
+        var typeIdentifiersMap = BuildTypeIdentifiersMap(importRecords);
 
-        using (var transaction = dbContext.Database.BeginTransaction())
+        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords);
+
+        var relatedTObjectsMap = relatedObjectsMap[typeof(T)];
+
+        foreach (var importRecord in importRecords)
         {
-            try
+            BaseEntityWithId? dbRecord = null;
+
+            foreach (var identifierProperty in relatedTObjectsMap.IdentifierPropertyNames)
             {
-                dbContext.IsImportRequest = true;
+                var identifierPropertyInfo = importRecord.GetType().GetProperty(identifierProperty) !;
 
-                await SaveBatchChangesAsync(importingRecords);
+                var propertyValue = identifierPropertyInfo.GetValue(importRecord);
 
-                transaction.Commit();
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                Log.Error(ex, "Error when executing batch import");
-
-                throw;
-            }
-        }
-
-        return Ok();
-    }
-
-    protected virtual List<T> GetMappedRecords(List<TI> records)
-    {
-        UpdateParentBySurrogateForeignKey(records);
-
-        return mapper.Map<List<T>>(records);
-    }
-
-    /// <summary>
-    /// When a foreign key value is not provided, an alternative foreign key is used to
-    /// to query the parent and retrieve the value of foreign key.
-    /// </summary>
-    protected virtual void UpdateParentBySurrogateForeignKey(List<TI> records)
-    {
-        try
-        {
-            // Check whether surrogate foreign key is available or not
-            var surrogateForeignKeyProperty = typeof(TI).GetProperties().FirstOrDefault(p => p.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).Length > 0);
-
-            if (surrogateForeignKeyProperty is not null)
-            {
-                var customAttribute = (SurrogateForeignKeyAttribute)surrogateForeignKeyProperty!.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).First();
-
-                var foreignKeyEntityType = customAttribute.RelatedType;
-                var foreignKeyEntityUniqueIndex = customAttribute.RelatedTypeUniqeIndex;
-                var sourceForeignKey = customAttribute.SourceForeignKey;
-
-                // Get the records which do not have a value for foreign key
-                var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceForeignKey))).ToList();
-                if (recordsWithoutFk.Count > 0)
+                if (propertyValue != null && relatedTObjectsMap[identifierProperty].TryGetValue(propertyValue, out dbRecord))
                 {
-                    // Get list of surrogate foreign key values. (ex: list of contentSlug in comments)
-                    var uniqueKeyValues = recordsWithoutFk.Select(r => GetValueByPropertyName(r, surrogateForeignKeyProperty.Name)).ToList();
+                    mapper.Map(importRecord, dbRecord);
+                    FixDateKindIfNeeded((T)dbRecord!);
+                    break;
+                }
+            }
 
-                    if (uniqueKeyValues.Count > 0)
+            if (dbRecord == null)
+            {
+                dbRecord = mapper.Map<T>(importRecord);
+                FixDateKindIfNeeded((T)dbRecord!);
+                await dbSet.AddAsync((T)dbRecord);
+            }
+
+            for (var i = 0; i < relatedTObjectsMap.SurrogateKeyPropertyNames.Count; i++)
+            {
+                var surrogateKeyAttribute = relatedTObjectsMap.SurrogateKeyPropertyAttributes[i];
+                var surrogateKeyPropertyInfo = importRecord.GetType().GetProperty(relatedTObjectsMap.SurrogateKeyPropertyNames[i]) !;
+
+                var surrogateKeyValue = surrogateKeyPropertyInfo.GetValue(importRecord);
+
+                BaseEntityWithId? relatedObject;
+
+                if (surrogateKeyValue != null)
+                {
+                    var relatedObjectMap = relatedObjectsMap[surrogateKeyAttribute.RelatedType];
+
+                    if (relatedObjectMap[surrogateKeyAttribute.RelatedTypeUniqeIndex].TryGetValue(surrogateKeyValue, out relatedObject) && relatedObject != null)
                     {
-                        // Need to query the foreign key entity
-                        var parentDbSet = dbContext.SetDbEntity(foreignKeyEntityType).AsNoTracking().ToList();
+                        var targetPropertyInfo = dbRecord.GetType().GetProperty(surrogateKeyAttribute.SourceForeignKey.Replace("Id", string.Empty));
 
-                        if (parentDbSet.Count > 0)
+                        if (targetPropertyInfo != null)
                         {
-                            // Get the foreign key entities matching surrogate foreign key values (ex: Content where slug equals to contentSlug in comments)
-                            var parentListByUniqueKey = parentDbSet.Where(r => uniqueKeyValues!.Contains(GetValueByPropertyName(r, foreignKeyEntityUniqueIndex)));
-
-                            if (parentListByUniqueKey is not null)
-                            {
-                                foreach (var record in recordsWithoutFk)
-                                {
-                                    // Find the parent using surrogate fk and update the main fk with parent id.
-                                    var matchingParent = parentListByUniqueKey!.Where(p => GetValueByPropertyName(p, foreignKeyEntityUniqueIndex) !.ToString() !.ToLower() == GetValueByPropertyName(record, surrogateForeignKeyProperty.Name) !.ToString() !.ToLower());
-
-                                    record.GetType() !.GetProperty(sourceForeignKey) !.SetValue(record, Convert.ToInt32(matchingParent.Select(i => GetValueByPropertyName(i, "Id")).First()));
-                                }
-                            }
+                            targetPropertyInfo.SetValue(dbRecord, relatedObject);
+                        }
+                        else
+                        {
+                            // TODO: Add handling for system error - property mapping is set incorrectly
                         }
                     }
                     else
                     {
-                        string message = "Either foreign key or a surrogate foreign key should be present in a importing record.";
-
-                        Log.Error(message);
-                        throw new InvalidImportFileException(message);
+                        // TODO: Add error handling to report that surrogate key was invalid
                     }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error while updating parent references.");
-            throw;
-        }
-    }
-
-    protected virtual async Task SaveBatchChangesAsync(List<T> importingRecords)
-    {
-        int position = 0;
-
-        while (position < importingRecords.Count)
-        {
-            var batch = importingRecords.Skip(position).Take(ImportBatchSize).ToList();
-
-            // Find existing items by Id.
-            var existingItems = dbSet.Where(t => batch.Select(b => b.Id).Contains(t.Id)).AsNoTracking().ToList();
-
-            // Find existing items by indexes and updated batch accordingly.
-            UpdateExistingItemsAndBatchItemsByIndexes(batch, existingItems);
-
-            foreach (var item in batch)
-            {
-                if (existingItems.Any(t => t.Id == item.Id))
-                {
-                    dbSet.Update(item);
-                }
-                else
-                {
-                    await dbSet.AddAsync(item);
-                }
-            }
-
-            await dbContext.SaveChangesAsync();
-
-            await BatchWiseSecondaryUpdate(batch);
-
-            position += ImportBatchSize;
-        }
-    }
-
-    /// <summary>
-    /// Any batch wise operation using new Ids after a batch is saved.
-    /// </summary>
-    protected virtual async Task BatchWiseSecondaryUpdate(List<T> batch)
-    {
-        await UpdateParentByAlternateKey(batch);
-    }
-
-    /// <summary>
-    /// Find the import records which contain an alternate key to relate to its own parent
-    /// and do not contain a parent id at the import.
-    /// </summary>
-    private List<TI>? GetRecordsWithAlternateKey(List<TI> records)
-    {
-        List<TI> alternateKeyRelationList = new List<TI>();
-        // Check whether alternate key is available or not
-        AlternateKey = typeof(TI).GetProperties().FirstOrDefault(p => p.GetCustomAttributes(typeof(AlternateKeyAttribute), true).Length > 0);
-
-        if (AlternateKey is not null)
-        {
-            AlternateKeyCustomAttribute = (AlternateKeyAttribute)AlternateKey!.GetCustomAttributes(typeof(AlternateKeyAttribute), true).First();
-
-            var sourceParentIdProperty = AlternateKeyCustomAttribute.SourceParentIdProperty;
-
-            // Get the records which do not have a value for parent id (ex: ParentId of CommentImportDto is not provided)
-            var recordsWithoutFk = records.Where(r => IsEmpty(GetValueByPropertyName(r, sourceParentIdProperty) !)).ToList();
-            if (recordsWithoutFk.Count > 0)
-            {
-                foreach (var record in recordsWithoutFk)
-                {
-                    // Get the value of the alternate key (ex: value of 'ParentKey' of CommentImportDto)
-                    var keyValue = GetValueByPropertyName(record, AlternateKey.Name);
-
-                    // foreign key is not provided but parent key is provided.
-                    if (!IsEmpty(keyValue))
-                    {
-                        // Once all records are saved, this list should be reconsidered to update the parent id (ex: to update the ParentId of comment)
-                        alternateKeyRelationList.Add(record);
-                    }
-                }
-            }
-        }
-
-        return alternateKeyRelationList;
-    }
-
-    /// <summary>
-    /// Items which do not have a parent id but a parent key is provided at the import
-    /// will be updated with the parent id.
-    /// </summary>
-    private async Task UpdateParentByAlternateKey(List<T> batch)
-    {
-        if (AlternateKeyRelationList is null || AlternateKeyRelationList.Count == 0)
-        {
-            return;
-        }
-
-        var parentUniqueIndex = AlternateKeyCustomAttribute!.ParentUniqueIndex;
-        var sourceForeignKey = AlternateKeyCustomAttribute!.SourceParentIdProperty;
-
-        var entityList = dbSet.AsNoTracking().AsEnumerable();
-
-        // Batch items are already saved in the database hense it has the id.
-        foreach (var item in batch)
-        {
-            var sourceForeignKeyValue = GetValueByPropertyName(item, sourceForeignKey);
-
-            // If parent id is empty.
-            if (IsEmpty(sourceForeignKeyValue))
-            {
-                var key = GetValueByPropertyName(item, parentUniqueIndex) !;
-
-                // Find the corresponding importing (TI) record by Key.
-                var matchingImportingRecord = AlternateKeyRelationList.FirstOrDefault(a => GetValueByPropertyName(a, parentUniqueIndex) !.ToString() == key.ToString());
-                if (matchingImportingRecord is null)
-                {
-                    continue;
-                }
-
-                var alternateKeyOfMatchingImportRecord = GetValueByPropertyName(matchingImportingRecord, AlternateKey!.Name);
-                // Check whether alternate key (Parent Key) is provided.
-                if (alternateKeyOfMatchingImportRecord is not null)
-                {
-                    // Find the parent item (T) by alternate key.
-                    var parentItem = entityList.FirstOrDefault(b => GetValueByPropertyName(b, parentUniqueIndex) !.ToString() !.ToLower() == alternateKeyOfMatchingImportRecord.ToString() !.ToLower());
-                    if (parentItem is null)
-                    {
-                        var message = "No parent entity is available for given alternate key";
-                        Log.Error(message);
-                        throw new InvalidImportFileException(message);
-                    }
-
-                    // Update the current item (T) by parent item id.
-                    item.GetType().GetProperty(sourceForeignKey) !.SetValue(item, parentItem!.Id);
-                    dbSet.Update(item);
                 }
             }
         }
 
         await dbContext.SaveChangesAsync();
+
+        return Ok();
     }
 
-    private object? GetValueByPropertyName(object r, string name)
+    private void FixDateKindIfNeeded(T record)
     {
-        var property = r.GetType().GetProperty(name);
-        if (property is not null)
+        var createdAtRecord = record as IHasCreatedAt;
+
+        if (createdAtRecord != null && createdAtRecord.CreatedAt.Kind != DateTimeKind.Utc)
         {
-            return property.GetValue(r) !;
+            createdAtRecord.CreatedAt = createdAtRecord.CreatedAt.ToUniversalTime();
         }
 
-        return null;
-    }
+        var updatedAtRecord = record as IHasUpdatedAt;
 
-    private bool IsEmpty(object? value)
-    {
-        if (value is null)
+        if (updatedAtRecord != null && updatedAtRecord.UpdatedAt is not null && updatedAtRecord.UpdatedAt.Value.Kind != DateTimeKind.Utc)
         {
-            return true;
-        }
-        else if (value is string str)
-        {
-            return string.IsNullOrEmpty(str);
-        }
-        else
-        {
-            return Convert.ToDouble(value) == 0;
+            updatedAtRecord.UpdatedAt = updatedAtRecord.UpdatedAt.Value.ToUniversalTime();
         }
     }
 
-    private void UpdateExistingItemsAndBatchItemsByIndexes(List<T> batch, List<T> existingItems)
+    private TypedRelatedObjectsMap BuildRelatedObjectsMap(TypeIdentifiers typeIdentifiersMap, List<TI> importRecords)
     {
-        var entityType = dbContext.Model.FindEntityType(typeof(T));
+        var typedRelatedObjectsMap = new TypedRelatedObjectsMap();
 
-        var properties = entityType!.GetProperties();
-
-        foreach (var prop in properties)
+        foreach (var type in typeIdentifiersMap.Keys)
         {
-            // Get the unique index but not the Id since its already considered.
-            if (prop.IsUniqueIndex() && !prop.IsPrimaryKey())
+            var identifierValues = typeIdentifiersMap[type];
+
+            var relatedObjectsMap = new RelatedObjectsMap
             {
-                var filterProperty = prop.Name;
+                IdentifierPropertyNames = identifierValues.IdentifierPropertyNames,
+                SurrogateKeyPropertyNames = identifierValues.SurrogateKeyPropertyNames,
+                SurrogateKeyPropertyAttributes = identifierValues.SurrogateKeyPropertyAttributes,
+            };
 
-                var filterValues = batch.Where(b => b.Id == 0).Select(b => b.GetType().GetProperty(filterProperty) !.GetValue(b)).ToList();
+            var mappedObjectsCash = new Dictionary<TI, object>();
 
-                var exp = BuildExpressionForPropertyFilter<T>(filterValues, filterProperty, typeof(T));
+            foreach (var propertyName in identifierValues.Keys)
+            {
+                var existingRecordsProperty = type.GetProperty(propertyName) !;
+                var importRecordsPropery = typeof(TI).GetProperty(propertyName) !;
 
-                // Filter dbSet<T> from unique index property and its values to find existing records.
-                var filteredData = dbSet.Where(exp).AsNoTracking().ToList();
+                var propertyValues = identifierValues[propertyName];
 
-                existingItems.AddRange(filteredData);
+                var predicate = BuildPropertyValuesPredicate(type, propertyName, propertyValues);
 
-                UpdateBatchItemId(batch, filteredData, filterProperty);
+                var existingObjects = dbContext.SetDbEntity(type)
+                                        .Where(predicate).AsQueryable()
+                                        .ToList();
+
+                relatedObjectsMap[propertyName] = propertyValues
+                       .Select(uid =>
+                        {
+                            var record = existingObjects.FirstOrDefault(c => uid.Equals(existingRecordsProperty.GetValue(c)));
+
+                            if (type == typeof(T))
+                            {
+                                var importRecord = importRecords.FirstOrDefault(c => uid.Equals(importRecordsPropery.GetValue(c)));
+
+                                if (importRecord != null)
+                                {
+                                    if (record == null && !mappedObjectsCash.TryGetValue(importRecord, out record))
+                                    {
+                                        record = mapper.Map<T>(importRecord);
+                                        FixDateKindIfNeeded((T)record);
+                                        dbSet.Add((T)record);
+                                    }
+
+                                    mappedObjectsCash[importRecord] = record;
+                                }
+                            }
+
+                            return new { Uid = uid, Record = record };
+                        })
+                       .ToDictionary(x => x.Uid, x => x.Record as BaseEntityWithId);
+            }
+
+            typedRelatedObjectsMap[type] = relatedObjectsMap;
+        }
+
+        return typedRelatedObjectsMap;
+    }
+
+    private TypeIdentifiers BuildTypeIdentifiersMap(List<TI> importRecords)
+    {
+        var typeIdentifiersMap = new TypeIdentifiers
+        {
+            { typeof(T), new IdentifierValues() },
+        };
+
+        var idValues = importRecords
+                    .Where(r => r.Id is not null && r.Id > 0)
+                    .Select(r => (object)r.Id!.Value)
+                    .Distinct()
+                    .ToList();
+
+        if (idValues.Count > 0)
+        {
+            typeIdentifiersMap[typeof(T)]["Id"] = idValues;
+            typeIdentifiersMap[typeof(T)].IdentifierPropertyNames.Add("Id");
+        }
+
+        var uniqueIndexPropertyName = FindAlternateKeyPropertyName();
+
+        if (uniqueIndexPropertyName != null)
+        {
+            var property = typeof(TI).GetProperty(uniqueIndexPropertyName) !;
+
+            var uniqueValues = importRecords
+                                   .Where(r => property.GetValue(r) != null && property.GetValue(r) !.ToString() != string.Empty)
+                                   .Select(r => property.GetValue(r))
+                                   .Distinct()
+                                   .ToList();
+
+            if (uniqueValues.Count > 0)
+            {
+                typeIdentifiersMap[typeof(T)][uniqueIndexPropertyName] = uniqueValues!;
+                typeIdentifiersMap[typeof(T)].IdentifierPropertyNames.Add(uniqueIndexPropertyName);
             }
         }
+
+        var importProperties = typeof(TI).GetProperties();
+
+        foreach (var property in importProperties)
+        {
+            var surrpogateForeignKeyAttribute = property.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).FirstOrDefault() as SurrogateForeignKeyAttribute;
+
+            if (surrpogateForeignKeyAttribute == null)
+            {
+                continue;
+            }
+
+            var type = surrpogateForeignKeyAttribute.RelatedType;
+
+            var identifierName = surrpogateForeignKeyAttribute.RelatedTypeUniqeIndex;
+
+            var identifierValues = importRecords
+                                   .Where(r => property.GetValue(r) != null && property.GetValue(r) !.ToString() != string.Empty)
+                                   .Select(r => property.GetValue(r))
+                                   .Distinct()
+                                   .ToList();
+
+            if (identifierValues.Count == 0)
+            {
+                continue;
+            }
+
+            if (!typeIdentifiersMap.ContainsKey(type))
+            {
+                typeIdentifiersMap[type] = new IdentifierValues();
+            }
+
+            if (!typeIdentifiersMap[type].ContainsKey(identifierName))
+            {
+                typeIdentifiersMap[type][identifierName] = new List<object>();
+            }
+
+            typeIdentifiersMap[type][identifierName].AddRange(identifierValues!);
+
+            typeIdentifiersMap[type][identifierName] = typeIdentifiersMap[type][identifierName].Distinct().ToList();
+
+            typeIdentifiersMap[typeof(T)].SurrogateKeyPropertyNames.Add(property.Name);
+            typeIdentifiersMap[typeof(T)].SurrogateKeyPropertyAttributes.Add(surrpogateForeignKeyAttribute);
+        }
+
+        return typeIdentifiersMap;
     }
 
-    private Expression<Func<TA, bool>> BuildExpressionForPropertyFilter<TA>(List<object?> filterValues, string filterProperty, Type targetListType)
+    private string FindAlternateKeyPropertyName()
     {
-        var parameter = Expression.Parameter(targetListType, "t");
+        var uniqueIndexPropertyName = typeof(T).GetCustomAttributes(typeof(IndexAttribute), true)
+                               .Select(a => (IndexAttribute)a)
+                               .Where(a => a.IsUnique)
+                               .Select(a => a.PropertyNames[0]) // for now the assumption is that we do not support composite indexes
+                               .FirstOrDefault(); // and we only support a single index per entity
 
-        var property = Expression.Property(parameter, filterProperty);
+        if (uniqueIndexPropertyName is null)
+        {
+            uniqueIndexPropertyName = typeof(T).GetCustomAttributes(typeof(SurrogateIdentityAttribute), true)
+                                   .Select(a => (SurrogateIdentityAttribute)a)
+                                   .Select(a => a.PropertyName) // for now the assumption is that we do not support composite indexes
+                                   .FirstOrDefault(); // and we only support a single index per entity
+        }
 
+        return uniqueIndexPropertyName!;
+    }
+
+    private Func<object, bool> BuildPropertyValuesPredicate(Type targetType, string propertyName, List<object> propertyValues)
+    {
+        // Get the property info for the property name
+        var propertyInfo = targetType.GetProperty(propertyName);
+
+        // Create a parameter expression for the object type
+        var objectParam = Expression.Parameter(typeof(object), "o");
+
+        // Convert the object parameter to the target type
+        var convertedParam = Expression.Convert(objectParam, targetType);
+
+        // Create the property access expression for the property name
+        var propertyAccess = Expression.Property(convertedParam, propertyInfo!);
+
+        // Convert the property access expression to type object
+        var convertedPropertyAccess = Expression.Convert(propertyAccess, typeof(object));
+
+        // Create the constant expression for the property values
+        var valuesConstant = Expression.Constant(propertyValues, typeof(List<object>));
         var containsMethod = typeof(List<object>).GetMethod("Contains", new[] { typeof(object) });
+        var containsExpression = Expression.Call(valuesConstant, containsMethod!, convertedPropertyAccess);
 
-        var filterExpression = Expression.Call(Expression.Constant(filterValues), containsMethod!, property);
+        // Create the lambda expression for the predicate
+        var lambdaExpression = Expression.Lambda<Func<object, bool>>(containsExpression, objectParam);
 
-        return Expression.Lambda<Func<TA, bool>>(filterExpression, parameter);
+        return lambdaExpression.Compile();
     }
+}
 
-    private void UpdateBatchItemId(List<T> batch, List<T> existingItems, string filterProperty)
-    {
-        foreach (var item in existingItems)
-        {
-            // Update the Id of the batch item if record found by unique index property.
-            var batchItem = GetMatchingItem(batch, item, filterProperty);
-            if (batchItem is not null)
-            {
-                batchItem.Id = item.Id;
-            }
-        }
-    }
+internal class TypedRelatedObjectsMap : Dictionary<Type, RelatedObjectsMap>
+{
+}
 
-    private T? GetMatchingItem(List<T> batch, T item, string filterProperty)
-    {
-        var exp = BuildExpressionToFindMatchingItem(item, filterProperty);
+internal class RelatedObjectsMap : Dictionary<string, Dictionary<object, BaseEntityWithId?>>
+{
+    public List<string> IdentifierPropertyNames { get; set; } = new List<string>();
 
-        return batch.FirstOrDefault(exp.Compile());
-    }
+    public List<string> SurrogateKeyPropertyNames { get; set; } = new List<string>();
 
-    private Expression<Func<T, bool>> BuildExpressionToFindMatchingItem(T itemToMatch, string propertyOfItemToMatch)
-    {
-        var parameter = Expression.Parameter(typeof(T), "t");
+    public List<SurrogateForeignKeyAttribute> SurrogateKeyPropertyAttributes { get; set; } = new List<SurrogateForeignKeyAttribute>();
+}
 
-        var property = Expression.Property(parameter, propertyOfItemToMatch);
+internal class TypeIdentifiers : Dictionary<Type, IdentifierValues>
+{
+}
 
-        var filterValue = Expression.Constant(itemToMatch.GetType().GetProperty(propertyOfItemToMatch) !.GetValue(itemToMatch));
+internal class IdentifierValues : Dictionary<string, List<object>>
+{
+    public List<string> IdentifierPropertyNames { get; set; } = new List<string>();
 
-        var filterExpression = Expression.Equal(property, filterValue);
+    public List<string> SurrogateKeyPropertyNames { get; set; } = new List<string>();
 
-        return Expression.Lambda<Func<T, bool>>(filterExpression, parameter);
-    }
+    public List<SurrogateForeignKeyAttribute> SurrogateKeyPropertyAttributes { get; set; } = new List<SurrogateForeignKeyAttribute>();
 }
 
