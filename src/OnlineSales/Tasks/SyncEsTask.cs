@@ -32,7 +32,7 @@ namespace OnlineSales.Tasks
             this.esDbContext = esDbContext;
         }        
 
-        internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
+        protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {
             var bulkPayload = new StringBuilder();
             

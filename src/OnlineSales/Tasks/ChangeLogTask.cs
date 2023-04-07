@@ -82,7 +82,7 @@ public abstract class ChangeLogTask : BaseTask
         return Task.FromResult(true);
     }
 
-    internal abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
+    protected abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
 
     protected HashSet<Type> GetTypes(PgDbContext context)
     {

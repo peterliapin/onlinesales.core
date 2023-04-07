@@ -15,15 +15,15 @@ namespace OnlineSales.Plugin.AzureAD
     public static class Authentication
     {
         // Selects between App/Api schemes. Look into line 23.  if cookies available authorize using them if not - try to use API, if bearer not avaiable try to perform APP authentication 
-        public const string DefaultAuthScheme = "ApiAppAuthentication";
+        public const string ApiAppAuthScheme = "ApiAppAuthentication";
         public const string AppAuthScheme = "WebAppAuthentication";
         public const string ApiAuthScheme = "WebApiAuthentication";
         private static string cookieName = "auth_ticket";
 
         public static void ConfigureAuth(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddAuthentication(DefaultAuthScheme)
-             .AddPolicyScheme(DefaultAuthScheme, DefaultAuthScheme, opts =>
+            services.AddAuthentication(ApiAppAuthScheme)
+             .AddPolicyScheme(ApiAppAuthScheme, ApiAppAuthScheme, opts =>
              {
                  opts.ForwardDefaultSelector = ctx =>
                  {
@@ -63,7 +63,7 @@ namespace OnlineSales.Plugin.AzureAD
                      identityOptions.ClientId = configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
                      identityOptions.ClientSecret = configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
                  }, jwtBearerScheme: ApiAuthScheme);
-            services.AddAuthentication()
+            services.AddAuthentication(ApiAuthScheme)
                         .AddMicrosoftIdentityWebApp(configuration, openIdConnectScheme: AppAuthScheme);
             services.Configure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {

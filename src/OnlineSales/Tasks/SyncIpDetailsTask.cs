@@ -21,7 +21,7 @@ public class SyncIpDetailsTask : ChangeLogTask
         this.ipDetailsService = ipDetailsService;
     }
 
-    internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
+    protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
         var ipDetailsCollection = new List<IpDetails>();
         var ipList = GetDistinctIps(nextBatch);

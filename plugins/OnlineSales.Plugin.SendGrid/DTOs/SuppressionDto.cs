@@ -2,22 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using OnlineSales.Helpers;
+
 namespace OnlineSales.Plugin.SendGrid.DTOs;
 
 public class SuppressionDto
 {
-    private static readonly DateTime UnixTimestampZeroDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
     public double Created
     {
         get
         {
-            return (int)CreatedAt.Subtract(UnixTimestampZeroDate).TotalSeconds;
+            return DateTimeHelper.GetTimeStamp(CreatedAt);
         }
 
         set
         {
-            CreatedAt = UnixTimestampZeroDate.AddSeconds(value);
+            CreatedAt = DateTimeHelper.GetDateTime(value);
         }
     }
 
