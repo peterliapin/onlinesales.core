@@ -35,18 +35,24 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public virtual async Task<ActionResult> Import([FromBody] List<TI> importRecords)
+    public virtual async Task<ActionResult<ImportResult>> Import([FromBody] List<TI> importRecords)
     {
+        var result = new ImportResult();
+
+        var newRecords = new List<T>();
+
         dbContext.IsImportRequest = true;
 
         var typeIdentifiersMap = BuildTypeIdentifiersMap(importRecords);
 
-        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords);
+        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords);
 
         var relatedTObjectsMap = relatedObjectsMap[typeof(T)];
 
-        foreach (var importRecord in importRecords)
+        for (var i = 0; i < importRecords.Count; i++)
         {
+            var importRecord = importRecords[i];
+
             BaseEntityWithId? dbRecord = null;
 
             foreach (var identifierProperty in relatedTObjectsMap.IdentifierPropertyNames)
@@ -58,6 +64,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 if (propertyValue != null && relatedTObjectsMap[identifierProperty].TryGetValue(propertyValue, out dbRecord))
                 {
                     mapper.Map(importRecord, dbRecord);
+                    result.Updated++;
                     FixDateKindIfNeeded((T)dbRecord!);
                     break;
                 }
@@ -67,13 +74,13 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             {
                 dbRecord = mapper.Map<T>(importRecord);
                 FixDateKindIfNeeded((T)dbRecord!);
-                await dbSet.AddAsync((T)dbRecord);
+                newRecords.Add((T)dbRecord!);
             }
 
-            for (var i = 0; i < relatedTObjectsMap.SurrogateKeyPropertyNames.Count; i++)
+            for (var j = 0; j < relatedTObjectsMap.SurrogateKeyPropertyNames.Count; j++)
             {
-                var surrogateKeyAttribute = relatedTObjectsMap.SurrogateKeyPropertyAttributes[i];
-                var surrogateKeyPropertyInfo = importRecord.GetType().GetProperty(relatedTObjectsMap.SurrogateKeyPropertyNames[i]) !;
+                var surrogateKeyAttribute = relatedTObjectsMap.SurrogateKeyPropertyAttributes[j];
+                var surrogateKeyPropertyInfo = importRecord.GetType().GetProperty(relatedTObjectsMap.SurrogateKeyPropertyNames[j]) !;
 
                 var surrogateKeyValue = surrogateKeyPropertyInfo.GetValue(importRecord);
 
@@ -85,7 +92,9 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                     if (relatedObjectMap[surrogateKeyAttribute.RelatedTypeUniqeIndex].TryGetValue(surrogateKeyValue, out relatedObject) && relatedObject != null)
                     {
-                        var targetPropertyInfo = dbRecord.GetType().GetProperty(surrogateKeyAttribute.SourceForeignKey.Replace("Id", string.Empty));
+                        var navigationPropertyName = surrogateKeyAttribute.SourceForeignKey.Replace("Id", string.Empty);
+
+                        var targetPropertyInfo = dbRecord.GetType().GetProperty(navigationPropertyName);
 
                         if (targetPropertyInfo != null)
                         {
@@ -93,20 +102,33 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                         }
                         else
                         {
-                            // TODO: Add handling for system error - property mapping is set incorrectly
+                            throw new ServerException($"Entity {dbRecord.GetType().Name} does not have a required navigation property '{navigationPropertyName}");
                         }
                     }
                     else
                     {
-                        // TODO: Add error handling to report that surrogate key was invalid
+                        if (newRecords.Contains((T)dbRecord))
+                        {
+                            newRecords.Remove((T)dbRecord);
+                            result.AddError(i, $"Row number {i} references {surrogateKeyAttribute.RelatedType} that does not exist in the database ({surrogateKeyAttribute.RelatedTypeUniqeIndex} = {surrogateKeyValue}).");
+                        }
                     }
                 }
             }
-        }
+        }        
+
+        await SaveRangeAsync(newRecords);
+
+        result.Added = newRecords.Count;
+
+        return Ok(result);
+    }
+
+    protected virtual async Task SaveRangeAsync(List<T> newRecords)
+    {
+        await dbSet.AddRangeAsync(newRecords);
 
         await dbContext.SaveChangesAsync();
-
-        return Ok();
     }
 
     private void FixDateKindIfNeeded(T record)
@@ -126,7 +148,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         }
     }
 
-    private TypedRelatedObjectsMap BuildRelatedObjectsMap(TypeIdentifiers typeIdentifiersMap, List<TI> importRecords)
+    private TypedRelatedObjectsMap BuildRelatedObjectsMap(TypeIdentifiers typeIdentifiersMap, List<TI> importRecords, List<T> newRecords)
     {
         var typedRelatedObjectsMap = new TypedRelatedObjectsMap();
 
@@ -171,7 +193,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                                     {
                                         record = mapper.Map<T>(importRecord);
                                         FixDateKindIfNeeded((T)record);
-                                        dbSet.Add((T)record);
+                                        newRecords.Add((T)record);
                                     }
 
                                     mappedObjectsCash[importRecord] = record;
@@ -322,6 +344,38 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     }
 }
 
+public class ImportResult
+{
+    public int Added { get; set; }
+
+    public int Updated { get; set; }
+
+    public int Failed { get; set; }
+
+    public int Skipped { get; set; }
+
+    public List<ImportError>? Errors { get; set; }
+
+    public void AddError(int row, string message)
+    {
+        Failed++;
+        Errors = Errors ?? new List<ImportError>();
+
+        Errors.Add(new ImportError
+        {
+            Row = row,
+            Message = message,
+        });
+    }
+}
+
+public class ImportError
+{
+    public int Row { get; set; }
+
+    public string Message { get; set; } = string.Empty;
+}
+
 internal class TypedRelatedObjectsMap : Dictionary<Type, RelatedObjectsMap>
 {
 }
@@ -347,4 +401,3 @@ internal class IdentifierValues : Dictionary<string, List<object>>
 
     public List<SurrogateForeignKeyAttribute> SurrogateKeyPropertyAttributes { get; set; } = new List<SurrogateForeignKeyAttribute>();
 }
-

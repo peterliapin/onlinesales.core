@@ -11,6 +11,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using OnlineSales.Controllers;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
@@ -158,11 +159,15 @@ public class BaseTest : IDisposable
         return location;
     }
 
-    protected async Task PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
     {
         var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName, authToken);
 
         response.StatusCode.Should().Be(expectedCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        return JsonHelper.Deserialize<ImportResult>(content) !;
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")

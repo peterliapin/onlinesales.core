@@ -101,7 +101,7 @@ public class SendgridController : ControllerBase
             position += BatchSize;
         }
 
-        await contactService.SaveAsync(nonExistedContacts);
+        await contactService.SaveRangeAsync(nonExistedContacts);
 
         return contactRecords;
     }
