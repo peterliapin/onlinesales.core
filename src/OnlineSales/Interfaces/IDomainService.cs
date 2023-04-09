@@ -10,6 +10,10 @@ namespace OnlineSales.Interfaces
     {
         public Task Verify(Domain domain);
 
+        public void VerifyFreeAndDisposable(Domain domain);
+
         public string GetDomainNameByUrl(string url);
+
+        public string GetDomainNameByEmail(string email);
     }
 }

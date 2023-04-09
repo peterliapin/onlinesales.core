@@ -10,6 +10,6 @@ namespace OnlineSales.Interfaces
     {
         Task<Domain> Verify(string email);
 
-        Task Verify(string email, Domain domain);
+        Task VerifyDomain(string email, Domain domain);
     }
 }

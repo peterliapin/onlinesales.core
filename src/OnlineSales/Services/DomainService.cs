@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Net.Mail;
+using System.Security.Policy;
 using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
@@ -12,7 +14,11 @@ using OnlineSales.Interfaces;
 namespace OnlineSales.Services
 {
     public class DomainService : IDomainService
-    {       
+    {
+        private static HashSet<string> freeDomains = InitDomainsList("Resources\\free_domains.txt");
+
+        private static HashSet<string> disposableDomains = InitDomainsList("Resources\\disposable_domains.txt");
+
         private readonly LookupClient lookupClient;
         // private readonly IMxVerifyService mxVerifyService;
 
@@ -25,6 +31,13 @@ namespace OnlineSales.Services
                 UseCache = true,
                 Timeout = new TimeSpan(0, 0, 60),                
             });
+        }
+
+        public void VerifyFreeAndDisposable(Domain domain)
+        {
+            domain.Free = freeDomains.Contains(domain.Name);
+
+            domain.Disposable = disposableDomains.Contains(domain.Name);
         }
 
         public async Task Verify(Domain domain)
@@ -56,6 +69,25 @@ namespace OnlineSales.Services
             }
         }
 
+        public string GetDomainNameByEmail(string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    return string.Empty;
+                }
+
+                var address = new MailAddress(email);
+                return address.Host;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.Message);
+                return string.Empty;
+            }
+        }
+
         public string GetDomainNameByUrl(string url)
         {
             try
@@ -77,6 +109,16 @@ namespace OnlineSales.Services
                 Log.Error(ex.Message);
                 return string.Empty;
             }
+        }
+
+        private static HashSet<string> InitDomainsList(string filename)
+        {
+            if (!File.Exists(filename))
+            {
+                throw new FileNotFoundException(filename);
+            }
+
+            return File.ReadAllLines(filename).ToHashSet();
         }
 
         private async Task VerifyHttp(Domain domain)

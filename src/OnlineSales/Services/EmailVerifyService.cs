@@ -24,7 +24,7 @@ namespace OnlineSales.Services
 
         public async Task<Domain> Verify(string email)
         {
-            var domainName = email.Split("@").Last();
+            var domainName = domainService.GetDomainNameByEmail(email);
             
             var domain = await (from d in pgContext.Domains
                                 where d.Name == domainName
@@ -48,29 +48,19 @@ namespace OnlineSales.Services
                 }
 
                 await domainService.Verify(domain!);
-                await Verify(email, domain);
+                await VerifyDomain(email, domain);
                 await pgContext.SaveChangesAsync();
 
                 return domain;
             }
         }
 
-        public async Task Verify(string email, Domain domain)
+        public async Task VerifyDomain(string email, Domain domain)
         {
-            bool freeCheck = false;
-            bool disposableCheck = false;
-            bool catchAllCheck = false;
-
             var emailVerify = await emailValidationExternalService.Validate(email);
-
-            if (!bool.TryParse(emailVerify!.FreeCheck, out freeCheck) || !bool.TryParse(emailVerify!.DisposableCheck, out disposableCheck) || !bool.TryParse(emailVerify!.CatchAllCheck, out catchAllCheck))
-            {
-                throw new KeyNotFoundException("Some values are not found for email validation");
-            }
-
-            domain.Free = freeCheck;
-            domain.Disposable = disposableCheck;
-            domain.CatchAll = catchAllCheck;
+            domain.Free = emailVerify.FreeCheck;
+            domain.Disposable = emailVerify.DisposableCheck;
+            domain.CatchAll = emailVerify.CatchAllCheck;
         }
     }
 }

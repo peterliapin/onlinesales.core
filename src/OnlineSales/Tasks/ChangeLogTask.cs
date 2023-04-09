@@ -26,7 +26,7 @@ public abstract class ChangeLogTask : BaseTask
         this.pluginDbContexts = pluginDbContexts;
         this.loggedTypes = GetTypes(dbContext);
 
-        var config = configuration.GetSection(configKey) !.Get<ChangeLogTaskConfig>();
+        var config = configuration.GetSection(configKey) !.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {

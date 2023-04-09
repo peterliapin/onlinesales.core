@@ -9,11 +9,10 @@ namespace OnlineSales.Tests.TestServices
 {
     public class TestAccountExternalService : IAccountExternalService
     {
-        public Task<AccountDetailsInfo> GetAccountDetails(string domain)
+        public Task<AccountDetailsInfo?> GetAccountDetails(string domain)
         {
-            var account = new AccountDetailsInfo()
+            AccountDetailsInfo account = new AccountDetailsInfo()
             {
-                AccountSynced = true,
                 CityName = "Colombo",
                 CountryCode = "LK",
                 EmployeesRange = "500 - 1000",
@@ -29,7 +28,7 @@ namespace OnlineSales.Tests.TestServices
                 Tags = new string[] { "Information technology", "App Development" },
             };
 
-            return Task.FromResult(account);
+            return Task.FromResult<AccountDetailsInfo?>(account);
         }
     }
 }

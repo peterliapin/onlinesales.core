@@ -10,11 +10,19 @@ using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
+public enum AccountSyncStatus
+{
+    NotIntended = 0,
+    NotInitialized = 1,
+    Successful = 2,
+    Failed = 3,
+}
 
 [Table("domain")]
 [SupportsChangeLog]
 [SupportsElastic]
 [Index(nameof(Name), IsUnique = true)]
+
 public class Domain : BaseEntityWithIdAndDates
 {
     private string name = string.Empty;
@@ -64,6 +72,8 @@ public class Domain : BaseEntityWithIdAndDates
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
+
+    public AccountSyncStatus AccountStatus { get; set; } = AccountSyncStatus.NotIntended;
 }
 
 public class DnsRecord

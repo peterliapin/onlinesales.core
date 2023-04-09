@@ -62,8 +62,6 @@ public class AccountDetailsInfo
     public string? Source { get; set; }
 
     public string? Data { get; set; }
-
-    public bool AccountSynced { get; set; } = false;
 }
 
 public class AccountUpdateDto

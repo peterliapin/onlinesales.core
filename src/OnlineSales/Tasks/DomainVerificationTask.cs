@@ -24,7 +24,7 @@ public class DomainVerificationTask : BaseTask
         this.dbContext = dbContext;
         this.domainService = domainService;
 
-        var config = configuration.GetSection(ConfigKey) !.Get<ChangeLogTaskConfig>();
+        var config = configuration.GetSection(ConfigKey) !.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {
