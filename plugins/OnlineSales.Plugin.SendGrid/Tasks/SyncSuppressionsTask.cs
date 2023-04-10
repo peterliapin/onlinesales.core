@@ -62,7 +62,9 @@ public class SyncSuppressionsTask : BaseTask
             {
                 await contactService.Unsubscribe(supression.Email, supression.GetReason(), source, supression.CreatedAt, null);
             }
-        }  
+        }
+
+        await dbContext.SaveChangesAsync();
     }
 
     private async Task<List<T>> GetLatestSuppressionsByType<T>(string source, string apiKeyValue, string suppressionType)

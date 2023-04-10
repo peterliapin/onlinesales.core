@@ -42,27 +42,15 @@ public class LinkDetailsDto : LinkCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class LinkImportDto : LinkCreateDto
+public class LinkImportDto : BaseImportDto
 {
     [Optional]
-    public int? Id { get; set; }
+    public string? Uid { get; set; }
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    public string? Destination { get; set; }
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
-
-    [Optional]
-    public string? CreatedByIp { get; set; }
-
-    [Optional]
-    public string? CreatedByUserAgent { get; set; }
-
-    [Optional]
-    public string? UpdatedByIp { get; set; }
-
-    [Optional]
-    public string? UpdatedByUserAgent { get; set; }
+    public string? Name { get; set; }
 }
 

@@ -17,31 +17,21 @@ namespace OnlineSales.Services
             this.pgDbContext = pgDbContext;
         }
 
-        public async Task<int> AddOrderItem(Order order, OrderItem orderItem)
+        public async Task AddAsync(Order order, OrderItem orderItem)
         {
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, order.ExchangeRate);
 
-            using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
-            {
-                await pgDbContext.AddAsync(orderItem);
+            await pgDbContext.AddAsync(orderItem);
 
-                var totals = CalculateTotalsForOrder(orderItem);
+            var totals = CalculateTotalsForOrder(orderItem);
 
-                order.CurrencyTotal = totals.currencyTotal;
-                order.Total = totals.total;
-                order.Quantity = totals.quantity;
-
-                pgDbContext.Update(order);
-                await pgDbContext.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-            }
-
-            return orderItem.Id;
+            order.CurrencyTotal = totals.currencyTotal;
+            order.Total = totals.total;
+            order.Quantity = totals.quantity;            
         }
 
-        public async Task DeleteOrderItem(Order order, OrderItem orderItem)
+        public async Task DeleteAsync(Order order, OrderItem orderItem)
         {
             using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
             {
@@ -63,28 +53,16 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task<OrderItem> UpdateOrderItem(Order order, OrderItem orderItem)
+        public void Update(Order order, OrderItem orderItem)
         {
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, order!.ExchangeRate);
 
-            using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
-            {
-                pgDbContext.Update(orderItem);
+            var totals = CalculateTotalsForOrder(orderItem, orderItem.Id);
 
-                var totals = CalculateTotalsForOrder(orderItem, orderItem.Id);
-
-                order.CurrencyTotal = totals.currencyTotal;
-                order.Total = totals.total;
-                order.Quantity = totals.quantity;
-
-                pgDbContext.Update(order);
-                await pgDbContext.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-            }
-
-            return orderItem;
+            order.CurrencyTotal = totals.currencyTotal;
+            order.Total = totals.total;
+            order.Quantity = totals.quantity;
         }
 
         private decimal CalculateOrderItemCurrencyTotal(OrderItem orderItem)
