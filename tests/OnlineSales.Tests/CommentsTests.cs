@@ -161,6 +161,17 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         addedComment6.ParentId.Should().Be(4);
     }
 
+    [Fact]
+    public async Task MultiIterationsImportTest()
+    {
+        var fkItemCreate1 = new TestContent("1");
+        await PostTest("/api/content", fkItemCreate1);
+
+        await PostImportTest(itemsUrl, "commentsWithKey.csv");
+
+        await PostImportTest(itemsUrl, "commentsWithKeyUpdate.csv");        
+    }
+
     protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
         var testComment = new TestComment(uid, fkId);

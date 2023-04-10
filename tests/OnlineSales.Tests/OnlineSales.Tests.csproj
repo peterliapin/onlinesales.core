@@ -57,6 +57,8 @@
     <None Remove="Resources\ImportFiles\ordersNoFK.csv" />
     <None Remove="Resources\wavepoint.png" />
     <None Remove="Resources\wavepointModified.png" />
+    <None Remove="Resources\ImportFiles\commentsWithKey.csv" />
+    <None Remove="Resources\ImportFiles\commentsWithKey %28copy%29.csv" />
   </ItemGroup>
   <ItemGroup>
     <None Update="xunit.runner.json">
@@ -108,5 +110,7 @@
     <EmbeddedResource Include="Resources\ImportFiles\commentsBasic.json" />
     <EmbeddedResource Include="Resources\wavepoint.png" />
     <EmbeddedResource Include="Resources\wavepointModified.png" />
+    <EmbeddedResource Include="Resources\ImportFiles\commentsWithKey.csv" />
+    <EmbeddedResource Include="Resources\ImportFiles\commentsWithKeyUpdate.csv" />
   </ItemGroup>
 </Project>

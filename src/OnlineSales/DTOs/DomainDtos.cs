@@ -71,13 +71,10 @@ public class DomainDetailsDto : DomainCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class DomainImportDto
+public class DomainImportDto : BaseImportDtoWithDates
 {
-    [Optional]
-    public int? Id { get; set; }
-
     [Required]
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; } = string.Empty;
 
     [Optional]
     public string? Title { get; set; }
@@ -106,13 +103,4 @@ public class DomainImportDto
 
     [Optional]
     public bool? DnsCheck { get; set; }
-
-    [Optional]
-    public DateTime? CreatedAt { get; set; }
-
-    [Optional]
-    public DateTime? UpdatedAt { get; set; }
-
-    [Optional]
-    public string? Source { get; set; }
 }

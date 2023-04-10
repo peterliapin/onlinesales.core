@@ -47,11 +47,13 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
 
         var orderItem = mapper.Map<OrderItem>(value);
 
-        var createdItemId = await orderItemService.AddOrderItem(existOrder, orderItem);
+        await orderItemService.AddAsync(existOrder, orderItem);
+
+        await dbContext.SaveChangesAsync();
 
         var returnedValue = mapper.Map<OrderItemDetailsDto>(orderItem);
 
-        return CreatedAtAction(nameof(GetOne), new { id = createdItemId }, returnedValue);
+        return CreatedAtAction(nameof(GetOne), new { id = orderItem.Id }, returnedValue);
     }
 
     [HttpPatch("{id}")]
@@ -61,19 +63,26 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Patch(int id, [FromBody] OrderItemUpdateDto value)
     {
-        var existingEntity = await FindOrThrowNotFound(id);
+        var orderItem = await FindOrThrowNotFound(id);
 
-        var existingOrder = await (from order in this.dbContext.Orders
-                                where order.Id == existingEntity.OrderId
-                                select order).FirstOrDefaultAsync();
+        var order = await (from o in dbContext.Orders
+                                where o.Id == orderItem.OrderId
+                                select o).FirstOrDefaultAsync();
 
-        mapper.Map(value, existingEntity);
+        if (order == null)
+        {
+            ModelState.AddModelError("OrderId", "The referenced order was not found");
 
-        var updatedItem = await orderItemService.UpdateOrderItem(existingOrder!, existingEntity);
+            throw new InvalidModelStateException(ModelState);
+        }
 
-        var returnItem = mapper.Map<OrderItemDetailsDto>(updatedItem);
+        mapper.Map(value, orderItem);
 
-        return returnItem;
+        orderItemService.Update(order!, orderItem);
+
+        await dbContext.SaveChangesAsync();
+
+        return mapper.Map<OrderItemDetailsDto>(orderItem);
     }
 
     [HttpDelete("{id}")]
@@ -89,41 +98,8 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
                                    where order.Id == existingEntity.OrderId
                                    select order).FirstOrDefaultAsync();
 
-        await orderItemService.DeleteOrderItem(existingOrder!, existingEntity);
+        await orderItemService.DeleteAsync(existingOrder!, existingEntity);
 
         return NoContent();
-    }
-
-    protected override List<OrderItem> GetMappedRecords(List<OrderItemImportDto> records)
-    {
-        var orders = dbContext!.Orders!.Select(o => new { o.Id, o.RefNo }).ToList();
-
-        var refOrders = from order in orders
-                            join record in records
-                                on order.RefNo equals record.OrderRefNo
-                        select order;
-
-        foreach (var item in records)
-        {
-            if (item.OrderId > 0)
-            {
-                continue;
-            }
-
-            if (!string.IsNullOrEmpty(item.OrderRefNo))
-            {
-                var refOrder = refOrders!.FirstOrDefault(r => r.RefNo == item.OrderRefNo);
-
-                if (refOrder is not null)
-                {
-                    item.OrderId = refOrder.Id;
-                    continue;
-                }
-            }
-
-            throw new EntityNotFoundException("No referenced order found for order item.");
-        }
-
-        return mapper.Map<List<OrderItem>>(records);
     }
 }
