@@ -50,14 +50,12 @@ namespace OnlineSales.Migrations
             migrationBuilder.RenameColumn("cats_temp", "content", "categories");
         }
 
+#pragma warning disable
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string[]>(
-                 name: "cats_temp",
-                 table: "content",
-                 type: "text[]",
-                 nullable: false);
         }
+#pragma warning
+
     }
 }
