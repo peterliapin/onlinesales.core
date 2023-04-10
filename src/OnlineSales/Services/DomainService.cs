@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Net.Mail;
+using System.Reflection;
 using System.Security.Policy;
 using System.Text;
 using DnsClient;
@@ -15,9 +16,9 @@ namespace OnlineSales.Services
 {
     public class DomainService : IDomainService
     {
-        private static HashSet<string> freeDomains = InitDomainsList("Resources\\free_domains.txt");
+        private static HashSet<string> freeDomains = InitDomainsList("free_domains.txt");
 
-        private static HashSet<string> disposableDomains = InitDomainsList("Resources\\disposable_domains.txt");
+        private static HashSet<string> disposableDomains = InitDomainsList("disposable_domains.txt");
 
         private readonly LookupClient lookupClient;
         // private readonly IMxVerifyService mxVerifyService;
@@ -113,12 +114,36 @@ namespace OnlineSales.Services
 
         private static HashSet<string> InitDomainsList(string filename)
         {
-            if (!File.Exists(filename))
+            var res = new HashSet<string>();
+
+            var asm = Assembly.GetExecutingAssembly();
+            var resourcePath = asm.GetManifestResourceNames().Single(str => str.EndsWith(filename));
+
+            if (resourcePath == null)
             {
                 throw new FileNotFoundException(filename);
             }
 
-            return File.ReadAllLines(filename).ToHashSet();
+            using (var rsrcStream = asm.GetManifestResourceStream(resourcePath))
+            {
+                if (rsrcStream == null)
+                {
+                    throw new FileNotFoundException(filename);
+                }
+                else
+                {
+                    using (var sRdr = new StreamReader(rsrcStream))
+                    {
+                        string? line = null;
+                        while ((line = sRdr.ReadLine()) != null)
+                        {                            
+                            res.Add(line);
+                        }
+                    }
+                }
+            }
+
+            return res;
         }
 
         private async Task VerifyHttp(Domain domain)

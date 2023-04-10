@@ -95,10 +95,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\free_domains.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>    
     <EmbeddedResource Include="Resources\disposable_domains.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   
