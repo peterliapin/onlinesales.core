@@ -19,7 +19,7 @@ public class TestContent : ContentCreateDto
         CoverImageUrl = $"/api/images/{Slug}/cover.png";
         CoverImageAlt = $"This is a sample Cover alt{uid}";
         Language = "en-US";
-        Categories = new string[] { "Product" };
+        Category = "Product";
         Tags = new string[] { "Tag1" };
         AllowComments = true;
     }

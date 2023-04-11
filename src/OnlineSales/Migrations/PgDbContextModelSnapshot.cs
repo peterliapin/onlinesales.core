@@ -491,10 +491,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
-                    b.Property<string[]>("Categories")
+                    b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("categories");
+                        .HasColumnType("text")
+                        .HasColumnName("category");
 
                     b.Property<string>("CoverImageAlt")
                         .IsRequired()

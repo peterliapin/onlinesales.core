@@ -65,7 +65,7 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
 
     public async Task<ActionResult<string[]>> GetCategories()
     {
-        var categories = (await this.dbSet.Select(c => c.Categories).ToArrayAsync()).SelectMany(z => z).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
+        var categories = (await this.dbSet.Select(c => c.Category).ToArrayAsync()).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
         return Ok(categories);
     }
 }

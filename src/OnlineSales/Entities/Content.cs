@@ -46,7 +46,7 @@ public class Content : BaseEntity
     [Required]
     public string Language { get; set; } = string.Empty;
 
-    public string[] Categories { get; set; } = Array.Empty<string>();
+    public string Category { get; set; } = string.Empty;
 
     public string[] Tags { get; set; } = Array.Empty<string>();
 
