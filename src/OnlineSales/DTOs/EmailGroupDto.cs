@@ -15,7 +15,7 @@ public class EmailGroupCreateDto
 
 public class EmailGroupUpdateDto
 {
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Name { get; set; }
 }
 

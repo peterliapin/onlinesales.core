@@ -36,6 +36,7 @@ public abstract class BaseContactDto
 
     public string? Language { get; set; }
 
+    [SwaggerHide]
     public int? UnsubscribeId { get; set; }
 
     public string? Source { get; set; }
