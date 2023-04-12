@@ -19,19 +19,16 @@ public class ContactAccountTask : BaseTask
 
     protected readonly PgDbContext dbContext;
 
-    private readonly IDomainService domainService;    
-
     private readonly IAccountExternalService accountExternalService;
 
     private readonly IMapper mapper;
 
     private readonly int batchSize;
 
-    public ContactAccountTask(IConfiguration configuration, TaskStatusService taskStatusService, PgDbContext dbContext, IDomainService domainService, IAccountExternalService accountExternalService, IMapper mapper)
+    public ContactAccountTask(IConfiguration configuration, TaskStatusService taskStatusService, PgDbContext dbContext, IAccountExternalService accountExternalService, IMapper mapper)
         : base(ConfigKey, configuration, taskStatusService)
     {
         this.dbContext = dbContext;
-        this.domainService = domainService;
         this.accountExternalService = accountExternalService;
         this.mapper = mapper;
 
@@ -102,11 +99,6 @@ public class ContactAccountTask : BaseTask
                 }
                 else
                 {
-                    if (domain.Free == null && domain.Disposable == null)
-                    {
-                        domainService.VerifyFreeAndDisposable(domain);
-                    }
-
                     if (domain.Free.HasValue && !domain.Free.Value && domain.Disposable.HasValue && !domain.Disposable.Value)
                     {
                         var accInfo = await accountExternalService.GetAccountDetails(domain.Name);

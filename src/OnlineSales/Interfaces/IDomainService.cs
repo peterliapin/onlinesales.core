@@ -10,7 +10,9 @@ namespace OnlineSales.Interfaces
     {
         public Task Verify(Domain domain);
 
-        public void VerifyFreeAndDisposable(Domain domain);
+        public Domain CreateDomain(string name, string? source = null);
+
+        public void EnrichWithFreeAndDisposable(List<Domain> domains);
 
         public string GetDomainNameByUrl(string url);
 

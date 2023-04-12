@@ -34,13 +34,6 @@ namespace OnlineSales.Services
             });
         }
 
-        public void VerifyFreeAndDisposable(Domain domain)
-        {
-            domain.Free = freeDomains.Contains(domain.Name);
-
-            domain.Disposable = disposableDomains.Contains(domain.Name);
-        }
-
         public async Task Verify(Domain domain)
         {
             if (domain.DnsCheck == null)
@@ -68,6 +61,29 @@ namespace OnlineSales.Services
                 domain.Title = null;
                 domain.Description = null;
             }
+        }
+
+        public void EnrichWithFreeAndDisposable(List<Domain> domains)
+        {
+            foreach (var d in domains)
+            {
+                if (d.Free == null || d.Disposable == null)
+                {
+                    VerifyFreeAndDisposable(d);
+                }
+            }
+        }
+
+        public Domain CreateDomain(string name, string? source = null)
+        {
+            var result = new Domain() { Name = name };
+            if (source != null)
+            {
+                result.Source = source;
+            }
+
+            VerifyFreeAndDisposable(result);
+            return result;
         }
 
         public string GetDomainNameByEmail(string email)
@@ -144,6 +160,13 @@ namespace OnlineSales.Services
             }
 
             return res;
+        }
+
+        private void VerifyFreeAndDisposable(Domain domain)
+        {
+            domain.Free = freeDomains.Contains(domain.Name);
+
+            domain.Disposable = disposableDomains.Contains(domain.Name);
         }
 
         private async Task VerifyHttp(Domain domain)

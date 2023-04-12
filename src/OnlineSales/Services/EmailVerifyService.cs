@@ -38,11 +38,7 @@ namespace OnlineSales.Services
             {
                 if (domain is null)
                 {
-                    domain = new Domain()
-                    {
-                        Name = domainName,
-                        Source = email,
-                    };
+                    domain = domainService.CreateDomain(domainName, email);
 
                     pgContext.Add(domain);
                 }
@@ -58,8 +54,6 @@ namespace OnlineSales.Services
         public async Task VerifyDomain(string email, Domain domain)
         {
             var emailVerify = await emailValidationExternalService.Validate(email);
-            domain.Free = emailVerify.FreeCheck;
-            domain.Disposable = emailVerify.DisposableCheck;
             domain.CatchAll = emailVerify.CatchAllCheck;
         }
     }

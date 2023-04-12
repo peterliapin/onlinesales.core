@@ -40,10 +40,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 
         if (domain == null)
         {
-            domain = new Domain
-            {
-                Name = name,
-            };
+            domain = domainService.CreateDomain(name);
 
             await dbSet.AddAsync(domain);
         }
@@ -54,6 +51,12 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         var resultConverted = mapper.Map<DomainDetailsDto>(domain);
 
         return Ok(resultConverted);
+    }
+
+    protected override async Task SaveRangeAsync(List<Domain> newRecords)
+    {
+        domainService.EnrichWithFreeAndDisposable(newRecords);
+        await base.SaveRangeAsync(newRecords);
     }
 }
 

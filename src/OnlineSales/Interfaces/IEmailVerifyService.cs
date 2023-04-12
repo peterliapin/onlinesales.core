@@ -9,7 +9,5 @@ namespace OnlineSales.Interfaces
     public interface IEmailVerifyService
     {
         Task<Domain> Verify(string email);
-
-        Task VerifyDomain(string email, Domain domain);
     }
 }

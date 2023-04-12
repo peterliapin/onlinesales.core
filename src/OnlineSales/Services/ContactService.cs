@@ -92,7 +92,7 @@ namespace OnlineSales.Services
             }
             else
             {
-                contact.Domain = new Domain() { Name = domainName };
+                contact.Domain = domainService.CreateDomain(domainName);
                 contact.Domain.AccountStatus = AccountSyncStatus.NotInitialized;
             }
         }
