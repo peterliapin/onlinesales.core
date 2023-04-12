@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230407173312_TagsAndCatsToArray")]
+    partial class TagsAndCatsToArray
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -491,10 +494,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
-                    b.Property<string>("Category")
+                    b.Property<string[]>("Categories")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("category");
+                        .HasColumnType("text[]")
+                        .HasColumnName("categories");
 
                     b.Property<string>("CoverImageAlt")
                         .IsRequired()
@@ -586,10 +589,6 @@ namespace OnlineSales.Migrations
                     b.Property<int?>("AccountId")
                         .HasColumnType("integer")
                         .HasColumnName("account_id");
-
-                    b.Property<int>("AccountStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_status");
 
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
