@@ -35,9 +35,9 @@ public class ContentCreateDto
     [Required]
     public string Language { get; set; } = string.Empty;
 
-    public string? Categories { get; set; }
+    public string Category { get; set; } = string.Empty;
 
-    public string? Tags { get; set; }
+    public string[] Tags { get; set; } = Array.Empty<string>();
 
     public bool AllowComments { get; set; } = false;
 
@@ -71,9 +71,9 @@ public class ContentUpdateDto
     [NonEmptyString]
     public string? Language { get; set; }
 
-    public string? Categories { get; set; }
+    public string? Category { get; set; }
 
-    public string? Tags { get; set; }
+    public string[]? Tags { get; set; }
 
     public bool? AllowComments { get; set; }
 
@@ -119,7 +119,7 @@ public class ContentImportDto : BaseImportDto
     public string? Language { get; set; }
 
     [Optional]
-    public string? Categories { get; set; }
+    public string? Category { get; set; }
 
     [Optional]
     public string? Tags { get; set; }
