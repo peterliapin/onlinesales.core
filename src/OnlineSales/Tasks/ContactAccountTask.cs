@@ -48,29 +48,20 @@ public class ContactAccountTask : BaseTask
     {
         try   
         {
-            var contactsToHandle = dbContext.Contacts !.Where(c => c.AccountId == null);
-
-            int totalSize = contactsToHandle.Count();  
+            var domainsToHandle = dbContext.Domains!.Where(d => d.AccountStatus == AccountSyncStatus.NotInitialized);
+            int totalSize = domainsToHandle.Count();
             for (int start = 0; start < totalSize; start += batchSize)
             {
-                var batch = contactsToHandle.Skip(start).Take(batchSize);
-                var domainIds = batch.Select(c => c.DomainId).ToHashSet();
-                var domains = dbContext.Domains!.Where(d => domainIds.Contains(d.Id)).ToList();
-                var domainAndContacts = batch.GroupBy(c => c.DomainId).ToDictionary(g => domains.FirstOrDefault(d => d.Id == g.Key) !, g => g.ToList());
-
-                var newlyCreatedAccounts = new HashSet<Account>();
-                foreach (var dc in domainAndContacts)
+                var batch = domainsToHandle.Skip(start).Take(batchSize).ToList();
+                await SetDomainsAccounts(batch);
+                var domainIdDictionary = batch.ToDictionary(d => d.Id, d => d);
+                var contacts = dbContext.Contacts!.Where(c => domainIdDictionary.Keys.Contains(c.DomainId));
+                foreach (var c in contacts)
                 {
-                    if (dc.Key.AccountStatus == AccountSyncStatus.NotInitialized)
-                    {
-                        foreach (var contact in dc.Value)
-                        {
-                            await SetContactAccountFromDomainAccount(contact, dc.Key, newlyCreatedAccounts);
-                        }
-                    }
+                    c.AccountId = null;
+                    c.Account = domainIdDictionary[c.DomainId].Account;
                 }
 
-                await dbContext.Accounts !.AddRangeAsync(newlyCreatedAccounts);
                 await dbContext.SaveChangesAsync();
             }
         }
@@ -83,60 +74,50 @@ public class ContactAccountTask : BaseTask
         return true;
     }
 
-    private async Task SetContactAccountFromDomainAccount(Contact contact, Domain domain, HashSet<Account> newAccounts)
+    private async Task SetDomainsAccounts(List<Domain> domains)
     {
-        try
+        var newAccounts = new HashSet<Account>();
+        foreach (var domain in domains)
         {
-            if (domain != null)
+            try
             {
-                if (domain.AccountId != null)
+                if (domain.Free.HasValue && !domain.Free.Value && domain.Disposable.HasValue && !domain.Disposable.Value)
                 {
-                    contact.AccountId = domain.AccountId;
-                }
-                else if (domain.Account != null)
-                {
-                    contact.Account = domain.Account;
-                }
-                else
-                {
-                    if (domain.Free.HasValue && !domain.Free.Value && domain.Disposable.HasValue && !domain.Disposable.Value)
+                    var accInfo = await accountExternalService.GetAccountDetails(domain.Name);
+                    if (accInfo == null)
                     {
-                        var accInfo = await accountExternalService.GetAccountDetails(domain.Name);
-                        if (accInfo == null)
-                        {
-                            accInfo = new AccountDetailsInfo() { Name = domain.Name };
-                            domain.AccountStatus = AccountSyncStatus.Failed;
-                        }
-                        else
-                        {
-                            domain.AccountStatus = AccountSyncStatus.Successful;
-                        }
+                        accInfo = new AccountDetailsInfo() { Name = domain.Name };
+                        domain.AccountStatus = AccountSyncStatus.Failed;
+                    }
+                    else
+                    {
+                        domain.AccountStatus = AccountSyncStatus.Successful;
+                    }
 
-                        var existingAccount = dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
-                        if (existingAccount == null)
-                        {
-                            existingAccount = newAccounts.FirstOrDefault(a => a.Name == accInfo.Name);
-                        }
+                    var existingAccount = dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
+                    if (existingAccount == null)
+                    {
+                        existingAccount = newAccounts.FirstOrDefault(a => a.Name == accInfo.Name);
+                    }
 
-                        if (existingAccount != null)
-                        {
-                            contact.Account = existingAccount;
-                            domain.Account = existingAccount;
-                        }
-                        else
-                        {
-                            var account = mapper.Map<Account>(accInfo);
-                            newAccounts.Add(account);
-                            contact.Account = account;
-                            domain.Account = account;
-                        }
+                    if (existingAccount != null)
+                    {
+                        domain.Account = existingAccount;
+                    }
+                    else
+                    {
+                        var account = mapper.Map<Account>(accInfo);
+                        newAccounts.Add(account);
+                        domain.Account = account;
                     }
                 }
             }
+            catch (Exception e)
+            {
+                Log.Error("Cannot set Account for Domain in ContactAccountTask. Domain name: " + domain.Name + ". Reason: " + e.Message);
+            }
         }
-        catch (Exception e)
-        {
-            Log.Error("Cannot set Account for Contact in ContactAccountTask. Contact email: " + contact.Email + ". Reason: " + e.Message);
-        }
+
+        await dbContext.Accounts!.AddRangeAsync(newAccounts);
     }
 }
