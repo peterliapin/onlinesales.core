@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -64,7 +65,6 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                 if (propertyValue != null && relatedTObjectsMap[identifierProperty].TryGetValue(propertyValue, out dbRecord))
                 {
                     mapper.Map(importRecord, dbRecord);
-                    result.Updated++;
                     FixDateKindIfNeeded((T)dbRecord!);
                     break;
                 }
@@ -86,7 +86,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                 BaseEntityWithId? relatedObject;
 
-                if (surrogateKeyValue != null)
+                if (surrogateKeyValue != null && surrogateKeyValue.ToString() != string.Empty)
                 {
                     var relatedObjectMap = relatedObjectsMap[surrogateKeyAttribute.RelatedType];
 
@@ -94,32 +94,53 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                     {
                         var navigationPropertyName = surrogateKeyAttribute.SourceForeignKey.Replace("Id", string.Empty);
 
-                        var targetPropertyInfo = dbRecord.GetType().GetProperty(navigationPropertyName);
+                        var targetNavigationPropertyInfo = dbRecord.GetType().GetProperty(navigationPropertyName);
 
-                        if (targetPropertyInfo != null)
+                        if (targetNavigationPropertyInfo == null)
                         {
-                            targetPropertyInfo.SetValue(dbRecord, relatedObject);
+                            throw new ServerException($"Entity {dbRecord.GetType().Name} does not have a required navigation property '{navigationPropertyName}'");
                         }
-                        else
-                        {
-                            throw new ServerException($"Entity {dbRecord.GetType().Name} does not have a required navigation property '{navigationPropertyName}");
-                        }
+
+                        targetNavigationPropertyInfo.SetValue(dbRecord, relatedObject);
                     }
                     else
                     {
+                        result.AddError(i, $"Row number {i} references {surrogateKeyAttribute.RelatedType} that does not exist in the database ({surrogateKeyAttribute.RelatedTypeUniqeIndex} = {surrogateKeyValue}).");
+
                         if (newRecords.Contains((T)dbRecord))
                         {
-                            newRecords.Remove((T)dbRecord);
-                            result.AddError(i, $"Row number {i} references {surrogateKeyAttribute.RelatedType} that does not exist in the database ({surrogateKeyAttribute.RelatedTypeUniqeIndex} = {surrogateKeyValue}).");
+                            newRecords.Remove((T)dbRecord);                            
                         }
                     }
                 }
             }
-        }        
+        }
 
         await SaveRangeAsync(newRecords);
 
-        result.Added = newRecords.Count;
+        var entriesByState = dbContext.ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is BaseEntityWithId && (
+                e.State == EntityState.Added
+                || e.State == EntityState.Modified))
+            .GroupBy(e => e.State)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        result.Skipped = importRecords.Count - result.Failed;
+
+        if (entriesByState.TryGetValue(EntityState.Added, out List<EntityEntry>? added))
+        {
+            result.Added = added.Count;
+            result.Skipped -= result.Added;
+        }
+
+        if (entriesByState.TryGetValue(EntityState.Modified, out List<EntityEntry>? modified))
+        {
+            result.Updated = modified.Count;
+            result.Skipped -= result.Updated;
+        }
+
+        await dbContext.SaveChangesAsync();
 
         return Ok(result);
     }
@@ -127,8 +148,6 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     protected virtual async Task SaveRangeAsync(List<T> newRecords)
     {
         await dbSet.AddRangeAsync(newRecords);
-
-        await dbContext.SaveChangesAsync();
     }
 
     private void FixDateKindIfNeeded(T record)

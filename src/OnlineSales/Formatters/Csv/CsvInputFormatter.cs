@@ -64,6 +64,7 @@ public class CsvInputFormatter : InputFormatter
 
         using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
+            csv.Context.TypeConverterCache.AddConverter<string?>(new NullableStringConverter());
             csv.Context.TypeConverterCache.RemoveConverter<DateTime?>();
             csv.Context.TypeConverterCache.AddConverter<DateTime?>(new NullableDateTimeToUtcConverter(typeof(DateTime?), csv.Context.TypeConverterCache));
 
@@ -101,6 +102,19 @@ public class CsvInputFormatter : InputFormatter
         }
 
         return false;
+    }
+}
+
+public class NullableStringConverter : DefaultTypeConverter
+{
+    public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return null;
+        }
+
+        return text;
     }
 }
 
