@@ -57,7 +57,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
-        builder.Services.AddSingleton<IDomainService, DomainService>();        
+        builder.Services.AddTransient<IDomainService, DomainService>();        
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();

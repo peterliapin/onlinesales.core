@@ -92,8 +92,8 @@ namespace OnlineSales.Services
             }
             else
             {
-                contact.Domain = domainService.CreateDomain(domainName);
-                contact.Domain.AccountStatus = AccountSyncStatus.NotInitialized;
+                contact.Domain = new Domain() { Name = domainName, AccountStatus = AccountSyncStatus.NotInitialized };
+                await domainService.SaveAsync(contact.Domain);
             }
         }
 

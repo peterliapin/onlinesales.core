@@ -9,6 +9,7 @@ using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
+using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces; 
 
@@ -20,12 +21,16 @@ namespace OnlineSales.Services
 
         private static HashSet<string> disposableDomains = InitDomainsList("disposable_domains.txt");
 
+        private readonly PgDbContext pgDbContext;
+
         private readonly LookupClient lookupClient;
         // private readonly IMxVerifyService mxVerifyService;
 
-        public DomainService(IMxVerifyService mxVerifyService)
+        public DomainService(PgDbContext pgDbContext, IMxVerifyService mxVerifyService)
         {
             // this.mxVerifyService = mxVerifyService;
+
+            this.pgDbContext = pgDbContext;
 
             lookupClient = new LookupClient(new LookupClientOptions
             {
@@ -63,27 +68,37 @@ namespace OnlineSales.Services
             }
         }
 
-        public void EnrichWithFreeAndDisposable(List<Domain> domains)
+        public async Task SaveAsync(Domain domain)
         {
-            foreach (var d in domains)
+            VerifyFreeAndDisposable(domain);
+
+            if (domain.Id > 0)
             {
-                if (d.Free == null || d.Disposable == null)
-                {
-                    VerifyFreeAndDisposable(d);
-                }
+                pgDbContext.Domains !.Update(domain);
+            }
+            else
+            {
+                await pgDbContext.Domains !.AddAsync(domain);
             }
         }
 
-        public Domain CreateDomain(string name, string? source = null)
+        public async Task SaveRangeAsync(List<Domain> domains)
         {
-            var result = new Domain() { Name = name };
-            if (source != null)
-            {
-                result.Source = source;
-            }
+            domains.ForEach(d => VerifyFreeAndDisposable(d));
 
-            VerifyFreeAndDisposable(result);
-            return result;
+            var sortedDomains = domains.GroupBy(d => d.Id > 0);
+
+            foreach (var group in sortedDomains)
+            {
+                if (group.Key)
+                {
+                    pgDbContext.UpdateRange(group.ToList());
+                }
+                else
+                {
+                    await pgDbContext.AddRangeAsync(group.ToList());
+                }
+            }
         }
 
         public string GetDomainNameByEmail(string email)
@@ -97,29 +112,6 @@ namespace OnlineSales.Services
 
                 var address = new MailAddress(email);
                 return address.Host;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.Message);
-                return string.Empty;
-            }
-        }
-
-        public string GetDomainNameByUrl(string url)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(url))
-                {
-                    return string.Empty;
-                }
-
-                Uri uri = new Uri(url);
-                string domain = uri.Host;
-                string[] parts = domain.Split('.');
-                string domainWithoutSubdomains = parts[parts.Length - 2] + "." + parts[parts.Length - 1];
-
-                return domainWithoutSubdomains;
             }
             catch (Exception ex)
             {
@@ -164,9 +156,12 @@ namespace OnlineSales.Services
 
         private void VerifyFreeAndDisposable(Domain domain)
         {
-            domain.Free = freeDomains.Contains(domain.Name);
+            if (domain.Free == null || domain.Disposable == null)
+            {
+                domain.Free = freeDomains.Contains(domain.Name);
 
-            domain.Disposable = disposableDomains.Contains(domain.Name);
+                domain.Disposable = disposableDomains.Contains(domain.Name);
+            }
         }
 
         private async Task VerifyHttp(Domain domain)

@@ -38,9 +38,8 @@ namespace OnlineSales.Services
             {
                 if (domain is null)
                 {
-                    domain = domainService.CreateDomain(domainName, email);
-
-                    pgContext.Add(domain);
+                    domain = new Domain() { Name = domainName, Source = email };
+                    await domainService.SaveAsync(domain);
                 }
 
                 await domainService.Verify(domain!);
