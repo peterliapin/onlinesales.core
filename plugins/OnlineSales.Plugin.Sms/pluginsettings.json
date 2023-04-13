@@ -41,6 +41,14 @@
       "Gateway": "AmazonSns"
     },
     {
+      "Code": "+76",
+      "Gateway": "SmscKz"
+    },
+    {
+      "Code": "+77",
+      "Gateway": "SmscKz"
+    },
+    {
       "Code": "+94",
       "Gateway": "NotifyLk"
     },

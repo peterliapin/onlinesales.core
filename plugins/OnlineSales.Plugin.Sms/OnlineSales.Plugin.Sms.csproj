@@ -27,16 +27,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.28" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.7" />
-    <PackageReference Include="Twilio" Version="6.2.5" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.47" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.9" />
+    <PackageReference Include="Twilio" Version="6.4.0" />
     <!-- Insert additional references above this line -->
   </ItemGroup>
 
   <!--This ItemGroup is required to support migration generating with the "dotnet ef migrations add" command-->
   <ItemGroup Condition="'$(Configuration)'=='Migration'">
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

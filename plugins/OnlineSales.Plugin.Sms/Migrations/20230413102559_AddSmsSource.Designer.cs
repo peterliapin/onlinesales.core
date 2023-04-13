@@ -3,19 +3,22 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Entities;
-using OnlineSales.Plugin.Vsto.Data;
+using OnlineSales.Plugin.Sms.Data;
 
 #nullable disable
 
-namespace OnlineSales.Plugin.Vsto.Migrations
+namespace OnlineSales.Plugin.Sms.Migrations
 {
-    [DbContext(typeof(VstoDbContext))]
-    partial class VstoDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(SmsDbContext))]
+    [Migration("20230413102559_AddSmsSource")]
+    partial class AddSmsSource
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1477,7 +1480,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         });
                 });
 
-            modelBuilder.Entity("OnlineSales.Plugin.Vsto.Entities.VstoUserVersion", b =>
+            modelBuilder.Entity("OnlineSales.Plugin.Sms.Entities.SmsLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1486,29 +1489,45 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("ExpireDateTime")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expire_date_time");
+                        .HasColumnName("created_at");
 
-                    b.Property<string>("IpAddress")
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("ip_address");
+                        .HasColumnName("message");
 
-                    b.Property<string>("Subfolder")
+                    b.Property<string>("Recipient")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("subfolder");
+                        .HasColumnName("recipient");
 
-                    b.Property<string>("Version")
+                    b.Property<string>("Sender")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("version");
+                        .HasColumnName("sender");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
-                        .HasName("pk_vsto_user_version");
+                        .HasName("pk_sms_log");
 
-                    b.ToTable("vsto_user_version", (string)null);
+                    b.ToTable("sms_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>

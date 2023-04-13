@@ -3,10 +3,8 @@
 // </copyright>
 
 using Microsoft.Extensions.Configuration;
-using OnlineSales.Infrastructure;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Exceptions;
-using PhoneNumbers;
 
 namespace OnlineSales.Plugin.Sms.Services;
 
@@ -14,7 +12,6 @@ public class SmsService : ISmsService
 {
     private readonly PluginConfig pluginSettings = new PluginConfig();
     private readonly Dictionary<string, ISmsService> countrySmsServices = new Dictionary<string, ISmsService>();
-    private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
 
     public SmsService(IConfiguration configuration)
     {
@@ -48,20 +45,19 @@ public class SmsService : ISmsService
 
     private ISmsService? GetSmsService(string recipient)
     {
-        var phoneNumber = phoneNumberUtil.Parse(recipient, string.Empty);
+        var key = countrySmsServices.Keys.FirstOrDefault(key => recipient.StartsWith(key));
 
-        ISmsService? smsService;
-
-        if (countrySmsServices.TryGetValue("+" + phoneNumber.CountryCode, out smsService))
+        if (key != null)
         {
-            // nothing here
-        }
-        else if (countrySmsServices.TryGetValue("default", out smsService))
-        {
-            // nothing here
+            return countrySmsServices[key];
         }
 
-        return smsService;
+        if (countrySmsServices.TryGetValue("default", out ISmsService? smsService))
+        {
+            return smsService;
+        }
+
+        return null;
     }
 
     private void InitGateways()

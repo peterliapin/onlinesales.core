@@ -8,7 +8,7 @@ using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
-{    
+{
     public class ESQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
