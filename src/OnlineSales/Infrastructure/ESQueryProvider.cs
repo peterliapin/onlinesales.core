@@ -2,22 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections.Immutable;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
-using DnsClient;
-using Microsoft.AspNetCore.OData.Formatter.Wrapper;
 using Nest;
-using Newtonsoft.Json.Linq;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace OnlineSales.Infrastructure
-{    
+{
     public class ESQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
