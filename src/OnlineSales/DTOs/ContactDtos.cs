@@ -12,44 +12,33 @@ namespace OnlineSales.DTOs;
 
 public abstract class BaseContactDto
 {
-    [Optional]
     public string? LastName { get; set; }
 
-    [Optional]
     public string? FirstName { get; set; }
 
-    [Optional]
-    public string? ContinentCode { get; set; }
+    public Continent? ContinentCode { get; set; }
 
-    [Optional]
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
-    [Optional]
     public string? CityName { get; set; }
 
-    [Optional]
     public string? Address1 { get; set; }
 
-    [Optional]
     public string? Address2 { get; set; }
 
-    [Optional]
     public string? State { get; set; }
 
-    [Optional]
     public string? Zip { get; set; }
 
-    [Optional]
     public string? Phone { get; set; }
 
-    [Optional]
     public int? Timezone { get; set; }
 
-    [Optional]
     public string? Language { get; set; }
 
-    [Optional]
     public int? UnsubscribeId { get; set; }
+
+    public string? Source { get; set; }
 }
 
 public class ContactCreateDto : BaseContactDto
@@ -78,39 +67,58 @@ public class ContactDetailsDto : ContactCreateDto
     public int DomainId { get; set; }
 }
 
-public class ContactImportDto : ContactCreateDto
+public class ContactImportDto : BaseImportDto
 {
     [Optional]
-    public int? Id { get; set; }
+    [EmailAddress]
+    public string? Email { get; set; } = string.Empty;
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    public string? LastName { get; set; }
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
+    public string? FirstName { get; set; }
 
     [Optional]
-    public string? CreatedByIp { get; set; }
+    public Continent? ContinentCode { get; set; }
 
     [Optional]
-    public string? CreatedByUserAgent { get; set; }
+    public Country? CountryCode { get; set; }
 
     [Optional]
-    public string? UpdatedByIp { get; set; }
+    public string? CityName { get; set; }
 
     [Optional]
-    public string? UpdatedByUserAgent { get; set; }
+    public string? Address1 { get; set; }
 
     [Optional]
-    public string? Source { get; set; }
+    public string? Address2 { get; set; }
+
+    [Optional]
+    public string? State { get; set; }
+
+    [Optional]
+    public string? Zip { get; set; }
+
+    [Optional]
+    public string? Phone { get; set; }
+
+    [Optional]
+    public int? Timezone { get; set; }
+
+    [Optional]
+    public string? Language { get; set; }
+
+    [Optional]
+    public int? UnsubscribeId { get; set; }
 
     [Optional]
     public int? AccountId { get; set; }
 
     [Optional]
-    public int DomainId { get; set; }
-
-    [Optional]
     [SurrogateForeignKey(typeof(Account), "Name", "AccountId")]
     public string? AccountName { get; set; }
+
+    [Optional]
+    public int? DomainId { get; set; }
 }

@@ -5,6 +5,7 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -207,7 +208,7 @@ public class PgDbContext : DbContext
 
     private DateTime GetDateWithKind(DateTime date)
     {
-        if (date.Kind == DateTimeKind.Unspecified)
+        if (date.Kind == DateTimeKind.Unspecified || date.Kind == DateTimeKind.Local)
         {
             return DateTime.SpecifyKind(date, DateTimeKind.Utc);
         }

@@ -254,7 +254,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
     {
         GenerateBulkRecords(10);
 
-        await GetTest<List<Order>>(itemsUrl + "?SomeIncorrectQuery", HttpStatusCode.BadRequest);
+        await GetTest<List<Order>>(itemsUrl + "?incorrect-query", HttpStatusCode.BadRequest);
     }
 
     [Fact]

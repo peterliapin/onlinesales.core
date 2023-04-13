@@ -35,6 +35,8 @@ public class AccountCreateDto
 
     public Dictionary<string, string>? SocialMedia { get; set; }
 
+    public string? Source { get; set; }
+
     [Optional]
     public string? Data { get; set; }
 }
@@ -56,6 +58,8 @@ public class AccountDetailsInfo
     public string[]? Tags { get; set; }
 
     public Dictionary<string, string>? SocialMedia { get; set; }
+
+    public string? Source { get; set; }
 
     public string? Data { get; set; }
 
@@ -79,6 +83,10 @@ public class AccountUpdateDto
     public string[]? Tags { get; set; }
 
     public Dictionary<string, string>? SocialMedia { get; set; }
+
+    public string? Source { get; set; }
+
+    public string? Data { get; set; }
 }
 
 public class AccountDetailsDto : AccountCreateDto
@@ -90,11 +98,8 @@ public class AccountDetailsDto : AccountCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class AccountImportDto
+public class AccountImportDto : BaseImportDto
 {
-    [Optional]
-    public int? Id { get; set; }
-
     [Optional]
     public string Name { get; set; } = string.Empty;
 
@@ -124,13 +129,4 @@ public class AccountImportDto
 
     [Optional]
     public string? Data { get; set; }
-
-    [Optional]
-    public string? Source { get; set; }
-
-    [Optional]
-    public DateTime? CreatedAt { get; set; }
-
-    [Optional]
-    public DateTime? UpdatedAt { get; set; }
 }

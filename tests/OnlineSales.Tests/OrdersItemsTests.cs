@@ -258,7 +258,10 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     public async Task ImportFileNoOrderRefNotFoundTest(string fileName, int expectedCount)
     {
         await CreateItem();
-        await PostImportTest(itemsUrl, fileName, HttpStatusCode.NotFound);
+        var importResult = await PostImportTest(itemsUrl, fileName, HttpStatusCode.OK);
+
+        importResult.Added.Should().Be(0);
+        importResult.Failed.Should().Be(1);
 
         var allOrderItemsResponse = await GetTest(itemsUrl);
         allOrderItemsResponse.Should().NotBeNull();

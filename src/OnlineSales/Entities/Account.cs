@@ -50,7 +50,4 @@ public class Account : BaseEntity
     [Searchable]
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
-
-    [Searchable]
-    public string? Source { get; set; }
 }

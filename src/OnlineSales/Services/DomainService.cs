@@ -7,9 +7,9 @@ using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
 using OnlineSales.Entities;
-using OnlineSales.Services;
+using OnlineSales.Interfaces; 
 
-namespace OnlineSales.Interfaces
+namespace OnlineSales.Services
 {
     public class DomainService : IDomainService
     {       

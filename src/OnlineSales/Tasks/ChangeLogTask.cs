@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reflection;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -18,12 +19,23 @@ public abstract class ChangeLogTask : BaseTask
 
     private readonly HashSet<Type> loggedTypes;
 
-    protected ChangeLogTask(PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
-        : base(taskStatusService)
+    protected ChangeLogTask(string configKey, IConfiguration configuration, PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, TaskStatusService taskStatusService)
+        : base(configKey, configuration, taskStatusService)
     {
         this.dbContext = dbContext;
         this.pluginDbContexts = pluginDbContexts;
         this.loggedTypes = GetTypes(dbContext);
+
+        var config = configuration.GetSection(configKey) !.Get<ChangeLogTaskConfig>();
+
+        if (config is not null)
+        {
+            ChangeLogBatchSize = config.BatchSize;
+        }
+        else
+        {
+            throw new MissingConfigurationException($"The specified configuration section for the provided configKey {configKey} could not be found in the settings file.");
+        }
 
         foreach (var pt in pluginDbContexts)
         {
@@ -32,7 +44,7 @@ public abstract class ChangeLogTask : BaseTask
         }
     }    
 
-    public abstract int ChangeLogBatchSize { get; }
+    public int ChangeLogBatchSize { get; private set; }
 
     public override Task<bool> Execute(TaskExecutionLog currentJob)
     {
@@ -70,7 +82,7 @@ public abstract class ChangeLogTask : BaseTask
         return Task.FromResult(true);
     }
 
-    internal abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
+    protected abstract void ExecuteLogTask(List<ChangeLog> nextBatch);
 
     protected HashSet<Type> GetTypes(PgDbContext context)
     {
@@ -156,7 +168,8 @@ public abstract class ChangeLogTask : BaseTask
             minLogId = lastProcessedTask.ChangeLogIdMax + 1;
         }
 
-        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + ChangeLogBatchSize && c.ObjectType == entity).OrderBy(b => b.Id).ToList();
+        // 3000000 - tests show that limit of 3 millions records is optimal to split change_log table into the parts with acceptable performance
+        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + 3000000 && c.ObjectType == entity).OrderBy(b => b.Id).Take(ChangeLogBatchSize).ToList();
 
         return changeLogList;
     }

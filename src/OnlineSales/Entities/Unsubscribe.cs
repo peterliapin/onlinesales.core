@@ -14,8 +14,6 @@ namespace OnlineSales.Entities;
 [SupportsElastic]
 public class Unsubscribe : BaseCreateByEntity
 {
-    public string Source { get; set; } = string.Empty;
-
     public string Reason { get; set; } = string.Empty;
 
     public int? ContactId { get; set; }

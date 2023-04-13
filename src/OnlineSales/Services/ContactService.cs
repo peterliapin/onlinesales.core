@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -26,7 +27,7 @@ namespace OnlineSales.Services
 
         public async Task SaveAsync(Contact contact)
         {
-            EnrichWithDomainId(contact);
+            await EnrichWithDomainId(contact);
             EnrichWithAccountId(contact);
 
             if (contact.Id > 0)
@@ -37,15 +38,56 @@ namespace OnlineSales.Services
             {
                 await pgDbContext.Contacts!.AddAsync(contact);
             }
-
-            await pgDbContext.SaveChangesAsync();
         }
 
-        public void EnrichWithDomainId(Contact contact)
+        public async Task SaveRangeAsync(List<Contact> contacts)
+        {
+            await EnrichWithDomainIdAsync(contacts);
+            EnrichWithAccountId(contacts);
+
+            var sortedContacts = contacts.GroupBy(c => c.Id > 0);
+
+            foreach (var group in sortedContacts)
+            {
+                if (group.Key)
+                {
+                    pgDbContext.UpdateRange(group.ToList());
+                }
+                else
+                {
+                    await pgDbContext.AddRangeAsync(group.ToList());
+                }
+            }
+        }
+
+        public async Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip)
+        {
+            var contact = (from u in pgDbContext.Contacts
+                           where u.Email == email
+                           select u).FirstOrDefault();
+
+            if (contact != null)
+            {
+                var unsubscribe = new Unsubscribe
+                {
+                    ContactId = contact.Id,
+                    Reason = reason,
+                    CreatedByIp = ip,
+                    Source = source,
+                    CreatedAt = createdAt,
+                };
+
+                await pgDbContext.Unsubscribes!.AddAsync(unsubscribe);
+
+                contact.Unsubscribe = unsubscribe;
+            }            
+        }
+
+        private async Task EnrichWithDomainId(Contact contact)
         {
             var domainName = GetDomainFromEmail(contact.Email);
 
-            var domainsQueryResult = pgDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefault();
+            var domainsQueryResult = await pgDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefaultAsync();
 
             if (domainsQueryResult != null)
             {
@@ -58,7 +100,7 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task EnrichWithDomainIdAsync(List<Contact> contacts)
+        private async Task EnrichWithDomainIdAsync(List<Contact> contacts)
         {
             var newDomains = new Dictionary<string, Domain>();
 
@@ -113,12 +155,12 @@ namespace OnlineSales.Services
             }
         }
 
-        public string GetDomainFromEmail(string email)
+        private string GetDomainFromEmail(string email)
         {
             return email.Split("@").Last().ToString();
         }
 
-        public void EnrichWithAccountId(Contact contact)
+        private void EnrichWithAccountId(Contact contact)
         {
             if (!contact.AccountId.HasValue)
             {
@@ -140,7 +182,7 @@ namespace OnlineSales.Services
             }
         }
 
-        public void EnrichWithAccountId(List<Contact> contacts)
+        private void EnrichWithAccountId(List<Contact> contacts)
         {
             // var newAccounts = new Dictionary<string, Account>();
             // var updatedContact = new List<Contact>();
@@ -182,31 +224,6 @@ namespace OnlineSales.Services
 
                 updatedContact.Add(contact);
             } */
-        }
-
-        public async Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip)
-        {
-            var contact = (from u in pgDbContext.Contacts
-                            where u.Email == email
-                            select u).FirstOrDefault();
-
-            if (contact != null)
-            {
-                var unsubscribe = new Unsubscribe
-                {
-                    ContactId = contact.Id,
-                    Reason = reason,
-                    CreatedByIp = ip,
-                    Source = source,
-                    CreatedAt = createdAt,
-                };                
-
-                await pgDbContext.Unsubscribes !.AddAsync(unsubscribe);
-
-                contact.Unsubscribe = unsubscribe;
-            }
-
-            await pgDbContext.SaveChangesAsync();
         }
 
         // public async Task<bool> DomainVerifyAndCreateAccount(Contact contact)

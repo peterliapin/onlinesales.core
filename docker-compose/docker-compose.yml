@@ -12,6 +12,7 @@ services:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    restart: unless-stopped
 
   kibana:
     container_name: kibana

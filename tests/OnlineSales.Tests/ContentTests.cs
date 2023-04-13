@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using FluentAssertions;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
@@ -24,6 +26,28 @@ public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdate
     public async Task CreateAndGetItemTestAnonymous()
     {
         await CreateAndGetItemWithAuthentification("Anonymous");
+    }
+
+    [Fact]
+    public async Task CheckTags()
+    {
+        await CreateItem();
+        var response = await GetTest(itemsUrl + "/tags", HttpStatusCode.OK);
+        var content = await response.Content.ReadAsStringAsync();
+        var data = JsonHelper.Deserialize<string[]>(content);
+        data.Should().NotBeNull();
+        data.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task CheckCategories()
+    {
+        await CreateItem();
+        var response = await GetTest(itemsUrl + "/categories", HttpStatusCode.OK);
+        var content = await response.Content.ReadAsStringAsync();
+        var data = JsonHelper.Deserialize<string[]>(content);
+        data.Should().NotBeNull();
+        data.Should().NotBeEmpty();
     }
 
     protected override ContentUpdateDto UpdateItem(TestContent to)

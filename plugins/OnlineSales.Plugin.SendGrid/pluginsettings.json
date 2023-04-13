@@ -1,12 +1,24 @@
 ﻿{
   "SendGridApi": {
-    "ApiKey": "$SENDGRIDAPI__AUTHKEY"
+    "PrimaryApiKey": "$SENDGRIDAPI__PRIMARYAPIKEY",
+    "SecondaryApiKeys": [
+    ],
+    "WebhookPublicKeys": [      
+    ]
   },
   "Tasks": {
     "SyncSuppressionsTask": {
+      "Enable": false,
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1"
+    },
+    "SyncActivityLogTask": {
+      "Enable": false,
+      "CronSchedule": "0/30 * * * * ? *",
+      "RetryCount": "2",
+      "RetryInterval": "5",
+      "BatchSize": "5000"
     }
   }
 }

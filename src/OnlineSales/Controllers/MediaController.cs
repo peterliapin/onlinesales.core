@@ -25,7 +25,7 @@ namespace OnlineSales.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MediaDetailsDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -80,9 +80,9 @@ namespace OnlineSales.Controllers
             Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
             Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
 
-            var fileData = new Dictionary<string, string>()
+            var fileData = new MediaDetailsDto()
             {
-                { "location", $"{Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/")}" },
+                Location = Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
             };
             return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }

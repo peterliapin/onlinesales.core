@@ -7,6 +7,7 @@ using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -74,6 +75,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         await contactService.SaveAsync(contact);
 
+        await dbContext.SaveChangesAsync();
+
         var returnedValue = mapper.Map<ContactDetailsDto>(contact);
 
         returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
@@ -99,6 +102,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         await contactService.SaveAsync(existingContact);
 
+        await dbContext.SaveChangesAsync();
+
         var returnedValue = mapper.Map<ContactDetailsDto>(existingContact);
 
         returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
@@ -106,11 +111,9 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         return Ok(returnedValue);
     }
 
-    protected override async Task SaveBatchChangesAsync(List<Contact> contacts)
+    protected override async Task SaveRangeAsync(List<Contact> newRecords)
     {
-        await contactService.EnrichWithDomainIdAsync(contacts);
-
-        await base.SaveBatchChangesAsync(contacts);
+        await contactService.SaveRangeAsync(newRecords);
     }
 
     private static string EmailToGravatarUrl(string email)

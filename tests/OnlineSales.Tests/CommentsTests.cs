@@ -161,6 +161,41 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         addedComment6.ParentId.Should().Be(4);
     }
 
+    [Fact]
+    public async Task MultiIterationsImportTest()
+    {
+        var fkItemCreate1 = new TestContent("1");
+        await PostTest("/api/content", fkItemCreate1);
+
+        var importResult = await PostImportTest(itemsUrl, "commentsWithKey.csv");
+
+        importResult.Added.Should().Be(4);
+        importResult.Updated.Should().Be(0);
+        importResult.Failed.Should().Be(0);
+        importResult.Skipped.Should().Be(0);
+
+        importResult = await PostImportTest(itemsUrl, "commentsWithKeyUpdate.csv");
+
+        importResult.Added.Should().Be(2);
+        importResult.Updated.Should().Be(1);
+        importResult.Failed.Should().Be(0);
+        importResult.Skipped.Should().Be(3);
+
+        importResult = await PostImportTest(itemsUrl, "commentsWithKeyUpdate.csv");
+
+        importResult.Added.Should().Be(1);
+        importResult.Updated.Should().Be(0);
+        importResult.Failed.Should().Be(0);
+        importResult.Skipped.Should().Be(5);
+
+        importResult = await PostImportTest(itemsUrl, "commentsWithKeyUpdateWithErrors.csv");
+
+        importResult.Added.Should().Be(1);
+        importResult.Updated.Should().Be(1);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(2);
+    }
+
     protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
         var testComment = new TestComment(uid, fkId);

@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
+using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
@@ -29,6 +30,9 @@ public class OrderItemCreateDto
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "Minimum quantity should be 1")]
     public int Quantity { get; set; } = 0;
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class OrderItemUpdateDto
@@ -60,29 +64,28 @@ public class OrderItemDetailsDto : OrderItemCreateDto
     public decimal Total { get; set; } = 0;
 }
 
-public class OrderItemImportDto : OrderItemCreateDto
+public class OrderItemImportDto : BaseImportDto
 {
     [Optional]
-    public int? Id { get; set; }
-
-    [Required]
-    public string OrderRefNo { get; set; } = string.Empty;
+    public int? OrderId { get; set; }
 
     [Optional]
-    public DateTime? CreatedAt { get; set; }
+    [SurrogateForeignKey(typeof(Order), "RefNo", "OrderId")]
+    public string? OrderRefNo { get; set; } = string.Empty;
 
     [Optional]
-    public DateTime? UpdatedAt { get; set; }
+    public string? ProductName { get; set; } = string.Empty;
 
     [Optional]
-    public string? CreatedByIp { get; set; }
+    public string? LicenseCode { get; set; } = string.Empty;
 
     [Optional]
-    public string? CreatedByUserAgent { get; set; }
+    public decimal? UnitPrice { get; set; } = 0;
 
     [Optional]
-    public string? UpdatedByIp { get; set; }
+    [CurrencyCode]
+    public string? Currency { get; set; }
 
     [Optional]
-    public string? UpdatedByUserAgent { get; set; }
+    public int? Quantity { get; set; }
 }

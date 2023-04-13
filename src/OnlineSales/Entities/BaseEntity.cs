@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
@@ -39,6 +40,9 @@ public class BaseEntityWithId
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
+    [Searchable]
+    public string? Source { get; set; }
 }
 
 public interface IHasCreatedAt

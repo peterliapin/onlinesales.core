@@ -18,47 +18,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class AccountsController : BaseControllerWithImport<Account, AccountCreateDto, AccountUpdateDto, AccountDetailsDto, AccountImportDto>
 {
-    private readonly IDomainService domainService;
-
     public AccountsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService, EsDbContext esDbContext)
         : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
-        this.domainService = domainService;
-    }
-
-    protected override Task BatchWiseSecondaryUpdate(List<Account> batch)
-    {
-        AddNewDomainsByAccounts(batch);
-
-        return base.BatchWiseSecondaryUpdate(batch);
-    }
-
-    private void AddNewDomainsByAccounts(List<Account> accounts)
-    {
-        var importingDomains = accounts.Where(a => !string.IsNullOrEmpty(a.SiteUrl)).Select(a => domainService.GetDomainNameByUrl(a.SiteUrl!));
-
-        var uniqueDomains = importingDomains.GroupBy(d => d).Select(g => g.First()).ToList();
-
-        if (uniqueDomains.Any())
-        {
-            var newDomains = uniqueDomains.Where(d => !dbContext!.Domains!.Select(s => s.Name.ToLower()).Contains(d.ToLower())).ToList();
-
-            if (newDomains.Any())
-            {
-                foreach (var domain in newDomains)
-                {
-                    var newDomain = new Domain()
-                    {
-                        Name = domain,
-                        AccountId = accounts.Where(b => domainService.GetDomainNameByUrl(b.SiteUrl!) == domain).Select(b => b.Id).First(),
-                        CreatedAt = DateTime.UtcNow,
-                    };
-
-                    dbContext!.Domains!.Add(newDomain);
-                }
-
-                dbContext.SaveChanges();
-            }
-        }
     }
 }

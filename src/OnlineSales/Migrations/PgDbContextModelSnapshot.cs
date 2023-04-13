@@ -147,6 +147,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("object_type");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.HasKey("Id")
                         .HasName("pk_change_log");
 
@@ -177,6 +181,10 @@ namespace OnlineSales.Migrations
                     b.Property<DateTime>("End")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime>("Start")
                         .HasColumnType("timestamp with time zone")
@@ -249,6 +257,10 @@ namespace OnlineSales.Migrations
                     b.Property<int?>("ParentId")
                         .HasColumnType("integer")
                         .HasColumnName("parent_id");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -424,6 +436,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("schedule_id");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -475,10 +491,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
-                    b.Property<string>("Categories")
+                    b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("categories");
+                        .HasColumnName("category");
 
                     b.Property<string>("CoverImageAlt")
                         .IsRequired()
@@ -517,9 +533,13 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("slug");
 
-                    b.Property<string>("Tags")
-                        .IsRequired()
+                    b.Property<string>("Source")
                         .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string[]>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text[]")
                         .HasColumnName("tags");
 
                     b.Property<string>("Title")
@@ -609,7 +629,6 @@ namespace OnlineSales.Migrations
                         .HasColumnName("name");
 
                     b.Property<string>("Source")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("source");
 
@@ -668,6 +687,10 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -731,6 +754,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("schedule_id");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -791,6 +818,10 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("schedule");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -870,6 +901,10 @@ namespace OnlineSales.Migrations
                     b.Property<int>("RetryInterval")
                         .HasColumnType("integer")
                         .HasColumnName("retry_interval");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -965,6 +1000,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<string>("Uid")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1026,6 +1065,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("referrer");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.HasKey("Id")
                         .HasName("pk_link_log");
 
@@ -1084,6 +1127,10 @@ namespace OnlineSales.Migrations
                     b.Property<long>("Size")
                         .HasColumnType("bigint")
                         .HasColumnName("size");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1166,6 +1213,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("ref_no");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<bool>("TestOrder")
                         .HasColumnType("boolean")
                         .HasColumnName("test_order");
@@ -1247,6 +1298,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric")
                         .HasColumnName("total");
@@ -1301,6 +1356,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("scheduled_execution_time");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -1346,7 +1405,6 @@ namespace OnlineSales.Migrations
                         .HasColumnName("reason");
 
                     b.Property<string>("Source")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("source");
 

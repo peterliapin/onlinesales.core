@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using Elasticsearch.Net;
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -17,19 +16,12 @@ namespace OnlineSales.Tasks
 {
     public class SyncEsTask : ChangeLogTask
     {
-        private readonly ChangeLogTaskConfig? taskConfig = new ChangeLogTaskConfig();
         private readonly EsDbContext esDbContext;
         private readonly string prefix = string.Empty;
 
         public SyncEsTask(IConfiguration configuration, PgDbContext dbContext, IEnumerable<PluginDbContextBase> pluginDbContexts, EsDbContext esDbContext, TaskStatusService taskStatusService)
-            : base(dbContext, pluginDbContexts, taskStatusService)
+            : base("Tasks:SyncEsTask", configuration, dbContext, pluginDbContexts, taskStatusService)
         {
-            var config = configuration.GetSection("Tasks:SyncEsTask") !.Get<ChangeLogTaskConfig>();
-            if (config is not null)
-            {
-                taskConfig = config;
-            }
-
             var elasticPrefix = configuration.GetSection("Elastic:IndexPrefix").Get<string>();
 
             if (!string.IsNullOrEmpty(elasticPrefix))
@@ -38,17 +30,9 @@ namespace OnlineSales.Tasks
             }
 
             this.esDbContext = esDbContext;
-        }
+        }        
 
-        public override int ChangeLogBatchSize => taskConfig!.BatchSize;
-
-        public override string CronSchedule => taskConfig!.CronSchedule;
-
-        public override int RetryCount => taskConfig!.RetryCount;
-
-        public override int RetryInterval => taskConfig!.RetryInterval;
-
-        internal override void ExecuteLogTask(List<ChangeLog> nextBatch)
+        protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {
             var bulkPayload = new StringBuilder();
             

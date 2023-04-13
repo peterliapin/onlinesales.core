@@ -17,9 +17,22 @@ namespace OnlineSales.Entities;
 [Index(nameof(Name), IsUnique = true)]
 public class Domain : BaseEntityWithIdAndDates
 {
+    private string name = string.Empty;
+
     [Required]
     [Searchable]
-    public string Name { get; set; } = string.Empty;
+    public string Name
+    {
+        get
+        {
+            return name;
+        }
+
+        set
+        {
+            name = value.ToLower();
+        }
+    }
 
     [Searchable]
     public string? Title { get; set; }
@@ -51,8 +64,6 @@ public class Domain : BaseEntityWithIdAndDates
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
-
-    public string Source { get; set; } = string.Empty;
 }
 
 public class DnsRecord

@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Security.Policy;
 using FluentAssertions;
-using Microsoft.OData.UriParser;
-using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
@@ -30,12 +27,12 @@ public class DomainTaskTests : BaseTest
 
         var invalidDomain = new TestDomain()
         {
-            Name = "SomeIncorrectDomainName",
+            Name = "incorrect-domain",
         };
 
         var filledDomain = new TestDomain()
         {
-            Name = "filledDomainName",
+            Name = "filled-domain-name",
             HttpCheck = false,
             Url = "Url",
             Title = "Title",

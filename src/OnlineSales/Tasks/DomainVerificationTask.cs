@@ -12,31 +12,29 @@ namespace OnlineSales.Tasks;
 
 public class DomainVerificationTask : BaseTask
 {
+    private const string ConfigKey = "Tasks:DomainVerificationTask";
+
     protected readonly PgDbContext dbContext;
-
-    private readonly ChangeLogTaskConfig taskConfig = new ChangeLogTaskConfig();
-
     private readonly IDomainService domainService;
+    private readonly int batchSize;
 
     public DomainVerificationTask(PgDbContext dbContext, IConfiguration configuration, IDomainService domainService, TaskStatusService taskStatusService)
-        : base(taskStatusService)
+        : base(ConfigKey, configuration, taskStatusService)
     {
         this.dbContext = dbContext;
         this.domainService = domainService;
 
-        var section = configuration.GetSection("Tasks:DomainVerificationTask");        
-        var config = section.Get<ChangeLogTaskConfig>();
+        var config = configuration.GetSection(ConfigKey) !.Get<ChangeLogTaskConfig>();
+
         if (config is not null)
         {
-            taskConfig = config;
+            batchSize = config.BatchSize;
+        }
+        else
+        {
+            throw new MissingConfigurationException($"The specified configuration section for the provided ConfigKey {ConfigKey} could not be found in the settings file.");
         }
     }
-
-    public override string CronSchedule => taskConfig.CronSchedule;
-
-    public override int RetryCount => taskConfig.RetryCount;
-
-    public override int RetryInterval => taskConfig.RetryInterval;
 
     public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {
@@ -45,9 +43,9 @@ public class DomainVerificationTask : BaseTask
             var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null /*|| d.MxCheck == null*/);
             int totalSize = domains.Count();
 
-            for (int start = 0; start < totalSize; start += taskConfig.BatchSize)
+            for (int start = 0; start < totalSize; start += batchSize)
             {
-                domains.Skip(start).Take(taskConfig.BatchSize).AsParallel().ForAll(domain =>
+                domains.Skip(start).Take(batchSize).AsParallel().ForAll(domain =>
                 {
                     domainService.Verify(domain).Wait();
                 });

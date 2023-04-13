@@ -23,6 +23,9 @@ public class CommentCreateDto
     public int ContentId { get; set; }
 
     public int? ParentId { get; set; }
+
+    [Optional]
+    public string? Source { get; set; }
 }
 
 public class CommentUpdateDto
@@ -40,11 +43,8 @@ public class CommentDetailsDto : CommentCreateDto
     public DateTime? UpdatedAt { get; set; }
 }
 
-public class CommentImportDto
+public class CommentImportDto : BaseImportDto
 {
-    [Optional]
-    public int? Id { get; set; }
-
     public string AuthorName { get; set; } = string.Empty;
 
     [EmailAddress]
@@ -60,30 +60,13 @@ public class CommentImportDto
     [SurrogateForeignKey(typeof(Content), "Slug", "ContentId")]
     public string? ContentSlug { get; set; }
 
+    [Optional]
     public int? ParentId { get; set; }
 
-    [Required]
+    [Optional]
     public string? Key { get; set; }
 
     [Optional]
-    [AlternateKey("Key", "ParentId")]
+    [SurrogateForeignKey(typeof(Comment), "Key", "ParentId")]
     public string? ParentKey { get; set; }
-
-    [Optional]
-    public DateTime? CreatedAt { get; set; }
-
-    [Optional]
-    public DateTime? UpdatedAt { get; set; }
-
-    [Optional]
-    public string? CreatedByIp { get; set; }
-
-    [Optional]
-    public string? CreatedByUserAgent { get; set; }
-
-    [Optional]
-    public string? UpdatedByIp { get; set; }
-
-    [Optional]
-    public string? UpdatedByUserAgent { get; set; }
 }

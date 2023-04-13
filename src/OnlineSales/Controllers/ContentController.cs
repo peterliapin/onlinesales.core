@@ -5,6 +5,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -43,5 +44,28 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
     public override Task<ActionResult<ContentDetailsDto>> GetOne(int id)
     {
         return base.GetOne(id);
+    }
+
+    [HttpGet("tags")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<string[]>> GetTags()
+    {
+        var tags = (await this.dbSet.Select(c => c.Tags).ToArrayAsync()).SelectMany(z => z).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
+        return Ok(tags);
+    }
+
+    [HttpGet("categories")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+
+    public async Task<ActionResult<string[]>> GetCategories()
+    {
+        var categories = (await this.dbSet.Select(c => c.Category).ToArrayAsync()).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
+        return Ok(categories);
     }
 }
