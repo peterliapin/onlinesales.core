@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Controllers;
 
-[ApiExplorerSettings(IgnoreApi = true)
+[ApiExplorerSettings(IgnoreApi = true)]
 [AllowAnonymous]
 public class ErrorsController : Controller
 {
