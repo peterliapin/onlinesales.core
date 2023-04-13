@@ -4,7 +4,6 @@
 
 using System.Security.Policy;
 using FluentAssertions;
-using Microsoft.OData.UriParser;
 using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;

@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.Json;
 using FluentAssertions;
 using FluentAssertions.Equivalency.Steps;
-using Microsoft.OData.UriParser;
 using Nest;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
