@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Exceptions;
@@ -28,6 +29,7 @@ public class MessagesController : Controller
 
     [HttpPost]
     [Route("sms")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -84,10 +86,19 @@ public class MessagesController : Controller
         }
         finally
         {
-            if (dbContext != null)
+            try
             {
-                dbContext.SmsLogs!.Add(smsLog);
-                await dbContext.SaveChangesAsync();
+                if (dbContext != null)
+                {
+                    dbContext.SmsLogs!.Add(smsLog);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
+
+                smsLog.Status = SmsLog.SmsStatus.NotSent;
             }
         }
     }
