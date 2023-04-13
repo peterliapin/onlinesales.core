@@ -3,7 +3,6 @@
 // </copyright>
 
 using FluentAssertions;
-using Microsoft.OData;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;

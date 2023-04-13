@@ -19,6 +19,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<List<DnsRecord>?, List<DnsRecord>>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<Dictionary<string, string>?, Dictionary<string, string>>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<DateTime?, DateTime>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()

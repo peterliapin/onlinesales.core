@@ -19,7 +19,7 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -509,10 +509,10 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
-                    b.Property<string>("Categories")
+                    b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("categories");
+                        .HasColumnName("category");
 
                     b.Property<string>("CoverImageAlt")
                         .IsRequired()
@@ -555,9 +555,9 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
                         .HasColumnType("text")
                         .HasColumnName("source");
 
-                    b.Property<string>("Tags")
+                    b.Property<string[]>("Tags")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("text[]")
                         .HasColumnName("tags");
 
                     b.Property<string>("Title")
@@ -1659,14 +1659,14 @@ namespace OnlineSales.Plugin.SendGrid.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Order", "Contact")
+                    b.HasOne("OnlineSales.Entities.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_item_order_order_id");
 
-                    b.Navigation("Contact");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>

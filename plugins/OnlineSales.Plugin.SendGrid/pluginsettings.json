@@ -8,13 +8,13 @@
   },
   "Tasks": {
     "SyncSuppressionsTask": {
-      "Enable": true,
+      "Enable": false,
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1"
     },
     "SyncActivityLogTask": {
-      "Enable": true,
+      "Enable": false,
       "CronSchedule": "0/30 * * * * ? *",
       "RetryCount": "2",
       "RetryInterval": "5",

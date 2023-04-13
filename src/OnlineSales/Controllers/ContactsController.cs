@@ -114,8 +114,6 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     protected override async Task SaveRangeAsync(List<Contact> newRecords)
     {
         await contactService.SaveRangeAsync(newRecords);
-
-        await dbContext.SaveChangesAsync();
     }
 
     private static string EmailToGravatarUrl(string email)
