@@ -19,7 +19,7 @@ public class MessagesController : Controller
 {
     private readonly ISmsService smsService;
     private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
-    private readonly SmsDbContext? dbContext;
+    private readonly SmsDbContext dbContext;
 
     public MessagesController(SmsDbContext dbContext, ISmsService smsService)
     {
@@ -37,14 +37,6 @@ public class MessagesController : Controller
         [FromBody] SmsDetailsDto smsDetails,
         [FromHeader(Name = "Authentication")] string accessToken)
     {
-        var smsLog = new Entities.SmsLog
-        {
-            Sender = string.Empty,
-            Recipient = smsDetails.Recipient,
-            Message = smsDetails.Message,
-            Status = Entities.SmsLog.SmsStatus.Sent,
-        };
-
         try
         {
             if (accessToken == null || accessToken.Replace("Bearer ", string.Empty) != SmsPlugin.Configuration.SmsAccessKey)
@@ -70,9 +62,20 @@ public class MessagesController : Controller
                 throw new InvalidModelStateException(ModelState);
             }
 
-            smsLog.Sender = smsService.GetSender(recipient);
+            var smsLog = new SmsLog
+            {
+                Sender = smsService.GetSender(recipient),
+                Recipient = smsDetails.Recipient,
+                Message = smsDetails.Message,
+                Status = Entities.SmsLog.SmsStatus.NotSent,
+            };
+
+            dbContext.SmsLogs!.Add(smsLog);
+            await dbContext.SaveChangesAsync();
 
             await smsService.SendAsync(recipient, smsDetails.Message);
+
+            smsLog.Status = SmsLog.SmsStatus.Sent;
 
             return Ok();
         }
@@ -80,26 +83,11 @@ public class MessagesController : Controller
         {
             Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
 
-            smsLog.Status = SmsLog.SmsStatus.NotSent;
-
             throw;
         }
         finally
         {
-            try
-            {
-                if (dbContext != null)
-                {
-                    dbContext.SmsLogs!.Add(smsLog);
-                    await dbContext.SaveChangesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
-
-                smsLog.Status = SmsLog.SmsStatus.NotSent;
-            }
+            await dbContext.SaveChangesAsync();
         }
     }
 }
