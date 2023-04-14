@@ -11,7 +11,7 @@ public static class PluginManager
     private static readonly string PluginsFolder = Path.Combine(AppContext.BaseDirectory, "plugins");
     private static readonly List<IPlugin> PluginList = new List<IPlugin>();
 
-    public static void Init(IConfigurationBuilder configurationBuilder)
+    public static void Init(ConfigurationManager configurationManager)
     {
         var pluginsDirectory = new DirectoryInfo(PluginsFolder);
 
@@ -19,7 +19,7 @@ public static class PluginManager
         {
             Log.Information("Loading plugins from the folder {0}", PluginsFolder);
 
-            LoadPlugins(pluginsDirectory, configurationBuilder);
+            LoadPlugins(pluginsDirectory, configurationManager);
         }
         else
         {
@@ -44,9 +44,15 @@ public static class PluginManager
         return PluginList;
     }
 
-    private static void LoadPlugins(DirectoryInfo pluginsDirectory, IConfigurationBuilder configurationBuilder)
+    private static void LoadPlugins(DirectoryInfo pluginsDirectory, ConfigurationManager configurationManager)
     {
-        foreach (var pluginDirectory in pluginsDirectory.GetDirectories())
+        var enabledPlugins = configurationManager.GetSection("Plugins").Get<string[]>();
+        if (enabledPlugins == null)
+        {
+            enabledPlugins = new string[] { };
+        }
+
+        foreach (var pluginDirectory in pluginsDirectory.GetDirectories().Where(p => enabledPlugins.Contains(p.Name)))
         {
             var pluginDllName = pluginDirectory.Name + ".dll";
 
@@ -58,7 +64,7 @@ public static class PluginManager
                     var plugin = LoadPlugin(pluginInfo.FullName);
 
                     // we'll add plugin configuration json file to the configurationBuilder only if plugin has been loaded.
-                    MergePluginConfig(pluginDirectory, configurationBuilder);
+                    MergePluginConfig(pluginDirectory, configurationManager);
 
                     PluginList.Add(plugin);
 
@@ -103,14 +109,14 @@ public static class PluginManager
         return entryPoint;
     }
 
-    private static void MergePluginConfig(DirectoryInfo pluginDirectory, IConfigurationBuilder configurationBuilder)
+    private static void MergePluginConfig(DirectoryInfo pluginDirectory, ConfigurationManager configurationManager)
     {
         var pluginSettingsInfo = pluginDirectory.GetFiles("pluginsettings.json").FirstOrDefault();
 
         if (pluginSettingsInfo != null)
         {
             Log.Information($"Loading plugin settings from {pluginSettingsInfo.FullName}");
-            configurationBuilder.AddJsonFile(pluginSettingsInfo.FullName);
+            configurationManager.AddJsonFile(pluginSettingsInfo.FullName);
         }
     }
 }
