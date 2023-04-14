@@ -3,6 +3,7 @@
 // </copyright>
 
 using OnlineSales.DTOs;
+using OnlineSales.Geography;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests.TestServices
@@ -14,7 +15,7 @@ namespace OnlineSales.Tests.TestServices
             AccountDetailsInfo account = new AccountDetailsInfo()
             {
                 CityName = "Colombo",
-                CountryCode = "LK",
+                CountryCode = Country.LK,
                 EmployeesRange = "500 - 1000",
                 Name = "WaveAccess SL",
                 Revenue = 90000000,

@@ -3,6 +3,7 @@
 // </copyright>
 
 using OnlineSales.DTOs;
+using OnlineSales.Geography;
 
 namespace OnlineSales.Tests.TestEntities
 {
@@ -12,7 +13,7 @@ namespace OnlineSales.Tests.TestEntities
         {
             Name = $"WaveAccess {uid}";
             EmployeesRange = "500 - 1000";
-            CountryCode = "LK";
+            CountryCode = Country.LK;
             SocialMedia = new Dictionary<string, string>()
             {
                 { "Facebook", "https://fb.com/waveaccess" },

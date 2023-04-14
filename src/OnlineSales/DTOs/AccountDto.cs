@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Geography;
 
 namespace OnlineSales.DTOs;
@@ -16,12 +17,13 @@ public class AccountCreateDto
     public string? State { get; set; }
 
     [Optional]
-    public string? ContinentCode { get; set; }
+    public Continent? ContinentCode { get; set; }
 
     [Optional]
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     [Optional]
+    [SwaggerExample<string>("Colombo")]
     public string? CityName { get; set; }
 
     [Optional]
@@ -49,7 +51,7 @@ public class AccountDetailsInfo
 
     public string? State { get; set; }
 
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     public string? EmployeesRange { get; set; }
 
@@ -72,7 +74,7 @@ public class AccountUpdateDto
 
     public string? StateCode { get; set; }
 
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     public string? EmployeesRange { get; set; }
 
@@ -108,7 +110,7 @@ public class AccountImportDto : BaseImportDto
     public string? StateCode { get; set; }
 
     [Optional]
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     [Optional]
     public string? SiteUrl { get; set; }

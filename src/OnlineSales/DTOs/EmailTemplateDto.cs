@@ -34,19 +34,19 @@ public class EmailTemplateCreateDto
 
 public class EmailTemplateUpdateDto
 {
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Name { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Subject { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? BodyTemplate { get; set; }
 
     [EmailAddress]
     public string? FromEmail { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? FromName { get; set; }
 
     public int? GroupId { get; set; }
