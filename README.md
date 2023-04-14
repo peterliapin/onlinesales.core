@@ -184,6 +184,8 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
 
     * Any plugin-level configurations should be added to a file named `pluginsettings.json` within the plugin project, which is getting merged with `appsettings.json`.
 
+    * Plugin loading is enabled by adding the plugin directory name to 'Plugins' section of 'appsettings.json' file
+    
     * `PluginManager` class of the core project is responsible for loading all supported plugins and merging configurations into `appsettings.json`
 
     * `Program` class of the core project initiates the `PluginManager` at the application startup.
@@ -232,6 +234,15 @@ At pipeline runtime, secrets of `appsettings.json` file (or appsettings.unittest
             services.AddSingleton<IEmailService, EmailService>();
             ```
     * `IConfiguration` can be used to access all the configurations available in `appsettings.json`.
+
+6. To make plugin loading enabled add the plugin directory name to 'Plugins' section of 'appsettings.json' file
+    * Example
+        ```
+        "Plugins": [ "OnlineSales.Plugin.AzureAD", "OnlineSales.Plugin.Email" ],
+        ```
+
+7. To make plugin loading disabled remove the plugin directory name from 'Plugins' section of 'appsettings.json' file
+    
 
 <a id="plugin-migrations"></a>
 ### Plugin-level migrations
