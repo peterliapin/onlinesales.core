@@ -108,7 +108,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     protected override DomainUpdateDto UpdateItem(TestDomain to)
     {
         var from = new DomainUpdateDto();
-        to.Name = from.Name = "new-" + to.Name;
+        to.Description = from.Description = "new-" + to.Description;
         return from;
     }
 }
