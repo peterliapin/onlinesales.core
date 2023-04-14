@@ -24,11 +24,11 @@ namespace OnlineSales.Services
 
             if (SerializeOptions.PropertyNamingPolicy == null)
             {
-                JsonHelper.Configure(SerializeOptions, JsonNamingConvention.CamelCase);
+                JsonHelper.Configure(SerializeOptions, new CityNamingPolicy());
             }
         }
 
-        public async Task<AccountDetailsInfo> GetAccountDetails(string domain)
+        public async Task<AccountDetailsInfo?> GetAccountDetails(string domain)
         {
             var apiUrl = accountDetailsApiConfig.Value.Url;
             var accessToken = accountDetailsApiConfig.Value.ApiKey;
@@ -50,51 +50,73 @@ namespace OnlineSales.Services
                 var apiSuccess = Convert.ToBoolean(jsonDoc.RootElement.GetProperty("success").ValueKind.ToString());
                 if (apiSuccess)
                 {
-                    var company = jsonDoc.RootElement.GetProperty("objects").GetProperty("company");
+                    AccountDetailsInfo? companybasicDetails = null;
 
-                    var socials = jsonDoc.RootElement.GetProperty("domain").GetProperty("social_media");
-
-                    var companybasicDetails = JsonSerializer.Deserialize<AccountDetailsInfo>(company, SerializeOptions);
-
-                    if (companybasicDetails!.Name == null)
+                    if (jsonDoc.RootElement.TryGetProperty("objects", out var objects) && objects.TryGetProperty("company", out var company))
                     {
-                        return new AccountDetailsInfo()
+                        try
                         {
-                            Name = domain,
-                        };
+                            companybasicDetails = JsonSerializer.Deserialize<AccountDetailsInfo>(company, SerializeOptions);
+                        }
+                        catch (Exception ex) 
+                        {
+                            Log.Error("Cannot deserialize AccountDetailsInfo. Reason: " + ex.Message);
+                        }                        
                     }
 
-                    var socialsDecoded = JsonSerializer.Deserialize<Dictionary<string, string>>(socials, SerializeOptions);
-
-                    if (socials.ValueKind != JsonValueKind.Null)
+                    if (companybasicDetails == null)
                     {
-                        var socialsNullRemoved = socialsDecoded!.Where(f => f.Value != null).ToDictionary(x => x.Key, x => x.Value);
+                        return null;
+                    }
 
-                        companybasicDetails!.SocialMedia = socialsNullRemoved;
+                    Dictionary<string, string>? socialsDecoded = null;
+
+                    if (jsonDoc.RootElement.TryGetProperty("domain", out var accountDomain) && accountDomain.TryGetProperty("social_media", out var socials))
+                    {
+                        try
+                        {
+                            socialsDecoded = JsonSerializer.Deserialize<Dictionary<string, string>>(socials, SerializeOptions);
+
+                            if (socials.ValueKind != JsonValueKind.Null)
+                            {
+                                var socialsNullRemoved = socialsDecoded!.Where(f => f.Value != null).ToDictionary(x => x.Key, x => x.Value);
+
+                                companybasicDetails!.SocialMedia = socialsNullRemoved;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Cannot deserialize AccountDetailsInfo. Reason: " + ex.Message);
+                        }
                     }
 
                     companybasicDetails!.Data = jsonDoc.RootElement.ToString();
-
-                    companybasicDetails.AccountSynced = true;
 
                     return companybasicDetails;
                 }
                 else
                 {
-                    return new AccountDetailsInfo()
-                    {
-                        Name = domain,
-                        AccountSynced = false,
-                    };
+                    return null;
                 }
             }
             else
             {
-                return new AccountDetailsInfo()
+                return null;
+            }
+        }
+
+        private sealed class CityNamingPolicy : JsonNamingPolicy
+        {
+            public override string ConvertName(string name)
+            {
+                if (name == "CityName")
                 {
-                    Name = domain,
-                    AccountSynced = false,
-                };
+                    return "city";
+                }
+                else
+                {
+                    return JsonNamingPolicy.CamelCase.ConvertName(name);
+                }
             }
         }
     }

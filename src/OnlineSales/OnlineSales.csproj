@@ -91,5 +91,14 @@
   <ItemGroup Label="FilesToCopy">
     <Content Include="OnlineSales.targets" PackagePath="build/OnlineSales.targets" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\free_domains.txt">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>    
+    <EmbeddedResource Include="Resources\disposable_domains.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
   
 </Project>

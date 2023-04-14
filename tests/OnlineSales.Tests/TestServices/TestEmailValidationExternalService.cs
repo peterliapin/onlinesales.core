@@ -14,9 +14,9 @@ namespace OnlineSales.Tests.TestServices
             var emailVerifyInfo = new EmailVerifyInfoDto()
             {
                 EmailAddress = email,
-                CatchAllCheck = "true",
-                DisposableCheck = "false",
-                FreeCheck = "false",
+                CatchAllCheck = true,
+                DisposableCheck = false,
+                FreeCheck = false,
             };
 
             return Task.FromResult(emailVerifyInfo);

@@ -2,23 +2,35 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Net.Mail;
+using System.Reflection;
+using System.Security.Policy;
 using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
+using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces; 
 
 namespace OnlineSales.Services
 {
     public class DomainService : IDomainService
-    {       
+    {
+        private static HashSet<string> freeDomains = InitDomainsList("free_domains.txt");
+
+        private static HashSet<string> disposableDomains = InitDomainsList("disposable_domains.txt");
+
+        private readonly PgDbContext pgDbContext;
+
         private readonly LookupClient lookupClient;
         // private readonly IMxVerifyService mxVerifyService;
 
-        public DomainService(IMxVerifyService mxVerifyService)
+        public DomainService(PgDbContext pgDbContext, IMxVerifyService mxVerifyService)
         {
             // this.mxVerifyService = mxVerifyService;
+
+            this.pgDbContext = pgDbContext;
 
             lookupClient = new LookupClient(new LookupClientOptions
             {
@@ -56,26 +68,99 @@ namespace OnlineSales.Services
             }
         }
 
-        public string GetDomainNameByUrl(string url)
+        public async Task SaveAsync(Domain domain)
+        {
+            VerifyFreeAndDisposable(domain);
+
+            if (domain.Id > 0)
+            {
+                pgDbContext.Domains !.Update(domain);
+            }
+            else
+            {
+                await pgDbContext.Domains !.AddAsync(domain);
+            }
+        }
+
+        public async Task SaveRangeAsync(List<Domain> domains)
+        {
+            domains.ForEach(d => VerifyFreeAndDisposable(d));
+
+            var sortedDomains = domains.GroupBy(d => d.Id > 0);
+
+            foreach (var group in sortedDomains)
+            {
+                if (group.Key)
+                {
+                    pgDbContext.UpdateRange(group.ToList());
+                }
+                else
+                {
+                    await pgDbContext.AddRangeAsync(group.ToList());
+                }
+            }
+        }
+
+        public string GetDomainNameByEmail(string email)
         {
             try
             {
-                if (string.IsNullOrEmpty(url))
+                if (string.IsNullOrEmpty(email))
                 {
                     return string.Empty;
                 }
 
-                Uri uri = new Uri(url);
-                string domain = uri.Host;
-                string[] parts = domain.Split('.');
-                string domainWithoutSubdomains = parts[parts.Length - 2] + "." + parts[parts.Length - 1];
-
-                return domainWithoutSubdomains;
+                var address = new MailAddress(email);
+                return address.Host;
             }
             catch (Exception ex)
             {
                 Log.Error(ex.Message);
                 return string.Empty;
+            }
+        }
+
+        private static HashSet<string> InitDomainsList(string filename)
+        {
+            var res = new HashSet<string>();
+
+            var asm = Assembly.GetExecutingAssembly();
+            var resourcePath = asm.GetManifestResourceNames().Single(str => str.EndsWith(filename));
+
+            if (resourcePath == null)
+            {
+                throw new FileNotFoundException(filename);
+            }
+
+            using (var rsrcStream = asm.GetManifestResourceStream(resourcePath))
+            {
+                if (rsrcStream == null)
+                {
+                    throw new FileNotFoundException(filename);
+                }
+                else
+                {
+                    using (var sRdr = new StreamReader(rsrcStream))
+                    {
+                        string? line = null;
+                        while ((line = sRdr.ReadLine()) != null)
+                        {                            
+                            res.Add(line);
+                        }
+                    }
+                }
+            }
+
+            return res;
+        }
+
+        private void VerifyFreeAndDisposable(Domain domain)
+        {
+            if (domain.Free == null || domain.Disposable == null)
+            {
+                domain.Free = freeDomains.Contains(domain.Name);
+
+                domain.Disposable = disposableDomains.Contains(domain.Name);
             }
         }
 
