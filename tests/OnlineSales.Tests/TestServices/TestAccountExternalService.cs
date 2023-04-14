@@ -2,37 +2,32 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-<<<<<<< HEAD
-using OnlineSales.DTOs;
 using OnlineSales.Geography;
-=======
->>>>>>> 5d108d4 (Import now can detect duplicate records + usings refactoring in tests)
 using OnlineSales.Interfaces;
 
-namespace OnlineSales.Tests.TestServices
+namespace OnlineSales.Tests.TestServices;
+
+public class TestAccountExternalService : IAccountExternalService
 {
-    public class TestAccountExternalService : IAccountExternalService
+    public Task<AccountDetailsInfo?> GetAccountDetails(string domain)
     {
-        public Task<AccountDetailsInfo?> GetAccountDetails(string domain)
+        AccountDetailsInfo account = new AccountDetailsInfo()
         {
-            AccountDetailsInfo account = new AccountDetailsInfo()
+            CityName = "Colombo",
+            CountryCode = Country.LK,
+            EmployeesRange = "500 - 1000",
+            Name = "WaveAccess SL",
+            Revenue = 90000000,
+            State = "WA",
+            SocialMedia = new Dictionary<string, string>()
             {
-                CityName = "Colombo",
-                CountryCode = Country.LK,
-                EmployeesRange = "500 - 1000",
-                Name = "WaveAccess SL",
-                Revenue = 90000000,
-                State = "WA",
-                SocialMedia = new Dictionary<string, string>()
-                {
-                    { "Facebook", "https://fb.com/waveaccess" },
-                    { "Instagram", "https://www.instagram.com/waveaccess" },
-                },
+                { "Facebook", "https://fb.com/waveaccess" },
+                { "Instagram", "https://www.instagram.com/waveaccess" },
+            },
 
-                Tags = new string[] { "Information technology", "App Development" },
-            };
+            Tags = new string[] { "Information technology", "App Development" },
+        };
 
-            return Task.FromResult<AccountDetailsInfo?>(account);
-        }
+        return Task.FromResult<AccountDetailsInfo?>(account);
     }
 }
