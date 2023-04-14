@@ -4,10 +4,8 @@
 
 using System.Text.Json;
 using System.Web;
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OnlineSales.Entities;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 

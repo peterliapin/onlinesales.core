@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.DTOs;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests.TestServices

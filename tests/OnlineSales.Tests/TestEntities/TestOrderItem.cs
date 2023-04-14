@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using OnlineSales.DTOs;
 
 namespace OnlineSales.Tests.TestEntities;
 

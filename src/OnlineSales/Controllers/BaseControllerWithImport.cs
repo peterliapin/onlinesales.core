@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -41,18 +42,25 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         var result = new ImportResult();
 
         var newRecords = new List<T>();
+        var duplicates = new Dictionary<TI, object>();
 
         dbContext.IsImportRequest = true;
 
         var typeIdentifiersMap = BuildTypeIdentifiersMap(importRecords);
 
-        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords);
+        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords, duplicates);
 
         var relatedTObjectsMap = relatedObjectsMap[typeof(T)];
 
         for (var i = 0; i < importRecords.Count; i++)
         {
             var importRecord = importRecords[i];
+
+            if (duplicates.TryGetValue(importRecord, out object? identifierValue))
+            {
+                result.AddError(i, $"Row number {i} has a duplicate indentification value {identifierValue} and will be skipped. Please ensure that each record has a unique key to avoid data loss.");
+                continue;
+            }
 
             BaseEntityWithId? dbRecord = null;
 
@@ -120,7 +128,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         var entriesByState = dbContext.ChangeTracker
             .Entries()
-            .Where(e => e.Entity is BaseEntityWithId && (
+            .Where(e => e.Entity is T && (
                 e.State == EntityState.Added
                 || e.State == EntityState.Modified))
             .GroupBy(e => e.State)
@@ -167,7 +175,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         }
     }
 
-    private TypedRelatedObjectsMap BuildRelatedObjectsMap(TypeIdentifiers typeIdentifiersMap, List<TI> importRecords, List<T> newRecords)
+    private TypedRelatedObjectsMap BuildRelatedObjectsMap(TypeIdentifiers typeIdentifiersMap, List<TI> importRecords, List<T> newRecords, Dictionary<TI, object> duplicates)
     {
         var typedRelatedObjectsMap = new TypedRelatedObjectsMap();
 
@@ -187,36 +195,48 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             foreach (var propertyName in identifierValues.Keys)
             {
                 var existingRecordsProperty = type.GetProperty(propertyName) !;
-                var importRecordsPropery = typeof(TI).GetProperty(propertyName) !;
+                var importRecordsProperty = typeof(TI).GetProperty(propertyName) !;
 
                 var propertyValues = identifierValues[propertyName];
 
                 var predicate = BuildPropertyValuesPredicate(type, propertyName, propertyValues);
 
-                var existingObjects = dbContext.SetDbEntity(type)
+                var existingObjectsDict = dbContext.SetDbEntity(type)
                                         .Where(predicate).AsQueryable()
-                                        .ToList();
+                                        .ToDictionary(x => existingRecordsProperty.GetValue(x) !, x => x);
+
+                Dictionary<object, TI>? importRecordsDict = null;
+
+                if (type == typeof(T))
+                {
+                    var uniqueGroups = importRecords
+                                        .Select(x => new { Identifier = importRecordsProperty.GetValue(x), Record = x })
+                                        .Where(x => x.Identifier != null && x.Identifier.ToString() != "0" && x.Identifier.ToString() != string.Empty)
+                                        .GroupBy(x => x.Identifier!);
+
+                    importRecordsDict = uniqueGroups.ToDictionary(g => g.Key, g => g.First().Record);
+
+                    duplicates.AddRangeIfNotExists(uniqueGroups
+                                        .Where(g => g.Count() > 1)
+                                        .SelectMany(g => g.Skip(1))
+                                        .ToDictionary(x => x.Record, x => x.Identifier!));
+                }                
 
                 relatedObjectsMap[propertyName] = propertyValues
                        .Select(uid =>
                         {
-                            var record = existingObjects.FirstOrDefault(c => uid.Equals(existingRecordsProperty.GetValue(c)));
+                            existingObjectsDict.TryGetValue(uid, out object? record);
 
-                            if (type == typeof(T))
+                            if (type == typeof(T) && importRecordsDict!.TryGetValue(uid, out TI? importRecord))
                             {
-                                var importRecord = importRecords.FirstOrDefault(c => uid.Equals(importRecordsPropery.GetValue(c)));
-
-                                if (importRecord != null)
+                                if (record == null && !mappedObjectsCash.TryGetValue(importRecord, out record))
                                 {
-                                    if (record == null && !mappedObjectsCash.TryGetValue(importRecord, out record))
-                                    {
-                                        record = mapper.Map<T>(importRecord);
-                                        FixDateKindIfNeeded((T)record);
-                                        newRecords.Add((T)record);
-                                    }
-
-                                    mappedObjectsCash[importRecord] = record;
+                                    record = mapper.Map<T>(importRecord);
+                                    FixDateKindIfNeeded((T)record);
+                                    newRecords.Add((T)record);
                                 }
+
+                                mappedObjectsCash[importRecord] = record;
                             }
 
                             return new { Uid = uid, Record = record };

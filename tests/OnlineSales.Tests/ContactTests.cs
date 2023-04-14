@@ -2,17 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System;
-using System.Net.Http.Headers;
-using System.Security.Policy;
-using System.Text;
 using System.Text.Json;
-using FluentAssertions;
-using FluentAssertions.Equivalency.Steps;
-using Nest;
-using OnlineSales.DTOs;
-using OnlineSales.Entities;
-using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdateDto>
@@ -124,6 +114,40 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         var dbDomainId = dbContext!.Contacts!.Where(contactsDb => contactsDb.Id == contactId).Select(contact => contact.DomainId).FirstOrDefault();
 
         await DeleteTest($"/api/domains/{dbDomainId}");
+    }
+
+    [Fact]
+    public async Task DuplicatedRecordsImportTest()
+    {
+        // first attempt to import records with some duplicates
+        var importResult = await PostImportTest(itemsUrl, "contactsWithDuplicates.csv");
+
+        importResult.Added.Should().Be(2);
+        importResult.Updated.Should().Be(0);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(0);
+
+        importResult.Errors!.Count.Should().Be(2);
+
+        // second attempt to import records with some duplicates
+        importResult = await PostImportTest(itemsUrl, "contactsWithDuplicatesUpdate.csv");
+
+        importResult.Added.Should().Be(0);
+        importResult.Updated.Should().Be(2);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(0);
+
+        importResult.Errors!.Count.Should().Be(2);
+
+        // third attempt to import records with some duplicates
+        importResult = await PostImportTest(itemsUrl, "contactsWithDuplicatesUpdate.csv");
+
+        importResult.Added.Should().Be(0);
+        importResult.Updated.Should().Be(0);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(2);
+
+        importResult.Errors!.Count.Should().Be(2);
     }
 
     protected override ContactUpdateDto UpdateItem(TestContact to)

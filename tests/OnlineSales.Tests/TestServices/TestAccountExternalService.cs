@@ -2,8 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+<<<<<<< HEAD
 using OnlineSales.DTOs;
 using OnlineSales.Geography;
+=======
+>>>>>>> 5d108d4 (Import now can detect duplicate records + usings refactoring in tests)
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests.TestServices

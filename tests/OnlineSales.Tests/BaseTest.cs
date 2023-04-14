@@ -9,11 +9,8 @@ using System.Text;
 using AutoMapper;
 using CsvHelper;
 using CsvHelper.Configuration;
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using OnlineSales.Controllers;
-using OnlineSales.DTOs;
-using OnlineSales.Entities;
 using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
