@@ -34,6 +34,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
                     administratorsGroupId);
             });
         });
+
         services.Configure<CookiePolicyOptions>(options =>
         {
             options.MinimumSameSitePolicy = SameSiteMode.None;
@@ -51,6 +52,7 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
             Type = SecuritySchemeType.ApiKey,
             Scheme = "Bearer",
         });
+
         options.AddSecurityRequirement(new OpenApiSecurityRequirement()
         {
             {

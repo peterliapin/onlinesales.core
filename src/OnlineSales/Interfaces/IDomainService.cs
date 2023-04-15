@@ -6,10 +6,10 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IDomainService
+    public interface IDomainService : ISaveService<Domain>
     {
         public Task Verify(Domain domain);
 
-        public string GetDomainNameByUrl(string url);
+        public string GetDomainNameByEmail(string email);
     }
 }

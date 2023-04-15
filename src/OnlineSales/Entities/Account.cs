@@ -33,6 +33,8 @@ public class Account : BaseEntity
     [Searchable]
     public string? SiteUrl { get; set; }
 
+    public string? LogoUrl { get; set; }
+
     [Searchable]
     public string? EmployeesRange { get; set; }
 

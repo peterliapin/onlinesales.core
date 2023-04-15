@@ -37,10 +37,10 @@ public class OrderItemCreateDto
 
 public class OrderItemUpdateDto
 {
-    [NonEmptyString]
+    [MinLength(1)]
     public string? ProductName { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? LicenseCode { get; set; }
 
     public decimal? UnitPrice { get; set; }

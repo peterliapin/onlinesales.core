@@ -19,7 +19,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -33,12 +33,16 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("City")
+                    b.Property<string>("CityName")
                         .HasColumnType("text")
-                        .HasColumnName("city");
+                        .HasColumnName("city_name");
 
-                    b.Property<string>("CountryCode")
-                        .HasColumnType("text")
+                    b.Property<int?>("ContinentCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("continent_code");
+
+                    b.Property<int?>("CountryCode")
+                        .HasColumnType("integer")
                         .HasColumnName("country_code");
 
                     b.Property<DateTime>("CreatedAt")
@@ -82,9 +86,9 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("source");
 
-                    b.Property<string>("StateCode")
+                    b.Property<string>("State")
                         .HasColumnType("text")
-                        .HasColumnName("state_code");
+                        .HasColumnName("state");
 
                     b.Property<string[]>("Tags")
                         .HasColumnType("jsonb")
@@ -146,6 +150,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("object_type");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.HasKey("Id")
                         .HasName("pk_change_log");
 
@@ -179,6 +187,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime>("End")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime>("Start")
                         .HasColumnType("timestamp with time zone")
@@ -255,6 +267,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("parent_id");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -303,9 +319,17 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address2");
 
-                    b.Property<string>("CompanyName")
+                    b.Property<string>("CityName")
                         .HasColumnType("text")
-                        .HasColumnName("company_name");
+                        .HasColumnName("city_name");
+
+                    b.Property<int?>("ContinentCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("continent_code");
+
+                    b.Property<int?>("CountryCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("country_code");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -340,10 +364,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
-                    b.Property<string>("Location")
-                        .HasColumnType("text")
-                        .HasColumnName("location");
-
                     b.Property<string>("Phone")
                         .HasColumnType("text")
                         .HasColumnName("phone");
@@ -359,6 +379,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<int?>("Timezone")
                         .HasColumnType("integer")
                         .HasColumnName("timezone");
+
+                    b.Property<int?>("UnsubscribeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("unsubscribe_id");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -388,6 +412,9 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("ix_contact_email");
+
+                    b.HasIndex("UnsubscribeId")
+                        .HasDatabaseName("ix_contact_unsubscribe_id");
 
                     b.ToTable("contact", null, t =>
                         {
@@ -423,6 +450,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<int>("ScheduleId")
                         .HasColumnType("integer")
                         .HasColumnName("schedule_id");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
@@ -478,10 +509,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
-                    b.Property<string>("Categories")
+                    b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("categories");
+                        .HasColumnName("category");
 
                     b.Property<string>("CoverImageAlt")
                         .IsRequired()
@@ -520,9 +551,13 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("slug");
 
-                    b.Property<string>("Tags")
-                        .IsRequired()
+                    b.Property<string>("Source")
                         .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<string[]>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text[]")
                         .HasColumnName("tags");
 
                     b.Property<string>("Title")
@@ -573,10 +608,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("account_id");
 
-                    b.Property<bool>("AccountSynced")
-                        .HasColumnType("boolean")
-                        .HasColumnName("account_synced");
-
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
                         .HasColumnName("catch_all");
@@ -609,13 +640,16 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("http_check");
 
+                    b.Property<bool?>("MxCheck")
+                        .HasColumnType("boolean")
+                        .HasColumnName("mx_check");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
                     b.Property<string>("Source")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("source");
 
@@ -677,6 +711,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -743,6 +781,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("schedule_id");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -806,6 +848,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("schedule");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -888,6 +934,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<int>("RetryInterval")
                         .HasColumnType("integer")
                         .HasColumnName("retry_interval");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -989,6 +1039,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<string>("Uid")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1053,6 +1107,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("referrer");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.HasKey("Id")
                         .HasName("pk_link_log");
 
@@ -1114,6 +1172,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<long>("Size")
                         .HasColumnType("bigint")
                         .HasColumnName("size");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1199,6 +1261,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("ref_no");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<bool>("TestOrder")
                         .HasColumnType("boolean")
                         .HasColumnName("test_order");
@@ -1283,6 +1349,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric")
                         .HasColumnName("total");
@@ -1340,6 +1410,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("scheduled_execution_time");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -1352,6 +1426,52 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasName("pk_task_execution_log");
 
                     b.ToTable("task_execution_log", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ContactId")
+                        .HasColumnType("integer")
+                        .HasColumnName("contact_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.HasKey("Id")
+                        .HasName("pk_unsubscribe");
+
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_unsubscribe_contact_id");
+
+                    b.ToTable("unsubscribe", null, t =>
                         {
                             t.ExcludeFromMigrations();
                         });
@@ -1425,9 +1545,17 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_contact_domain_domain_id");
 
+                    b.HasOne("OnlineSales.Entities.Unsubscribe", "Unsubscribe")
+                        .WithMany()
+                        .HasForeignKey("UnsubscribeId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_contact_unsubscribe_unsubscribe_id");
+
                     b.Navigation("Account");
 
                     b.Navigation("Domain");
+
+                    b.Navigation("Unsubscribe");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
@@ -1512,12 +1640,22 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Order", "Contact")
+                    b.HasOne("OnlineSales.Entities.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_item_order_order_id");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .HasConstraintName("fk_unsubscribe_contact_contact_id");
 
                     b.Navigation("Contact");
                 });

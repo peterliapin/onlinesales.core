@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -57,7 +56,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
-        builder.Services.AddSingleton<IDomainService, DomainService>();        
+        builder.Services.AddTransient<IDomainService, DomainService>();        
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
@@ -331,6 +330,10 @@ public class Program
                 swaggerConfigurator.ConfigureSwagger(config, openApiInfo);
             }
 
+            config.SupportNonNullableReferenceTypes();
+
+            config.SchemaFilter<CustomSwaggerScheme>();
+
             config.SwaggerDoc("v1", openApiInfo);
         });
     }
@@ -390,6 +393,7 @@ public class Program
         builder.Services.AddScoped<ITask, SyncIpDetailsTask>();
         builder.Services.AddScoped<ITask, DomainVerificationTask>();
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
+        builder.Services.AddScoped<ITask, ContactAccountTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

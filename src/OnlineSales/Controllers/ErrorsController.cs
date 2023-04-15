@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace OnlineSales.Controllers;
 
 [ApiExplorerSettings(IgnoreApi = true)]
+[AllowAnonymous]
 public class ErrorsController : Controller
 {
     [Route("/error")]

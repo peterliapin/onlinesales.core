@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.IO;
 using System.Net.Http.Headers;
-using System.Reflection;
-using FluentAssertions;
 
 namespace OnlineSales.Tests;
 

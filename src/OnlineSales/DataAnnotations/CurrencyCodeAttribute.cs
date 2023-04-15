@@ -4,11 +4,37 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Text;
+using Npgsql.Internal.TypeHandlers.NetworkHandlers;
 
 namespace OnlineSales.DataAnnotations;
 
 public class CurrencyCodeAttribute : ValidationAttribute
 {
+    public static string GetAllCurrencyCodesRegex()
+    {
+        var sb = new StringBuilder("^(");
+
+        CultureInfo.GetCultures(CultureTypes.AllCultures).Where(c => !c.IsNeutralCulture).ToList().ForEach(c =>
+        {
+            try
+            {
+                var ri = new RegionInfo(c.Name);
+                sb.Append(ri.ISOCurrencySymbol);
+                sb.Append("|");
+            }
+            catch
+            {
+                Log.Error("Cannot get CurrencySymbol for culture. CultureName: " + c.Name);
+            }
+        });
+
+        sb.Remove(sb.Length - 1, 1);
+        sb.Append(")$");
+
+        return sb.ToString();
+    }
+
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
         var currencyCode = value as string;

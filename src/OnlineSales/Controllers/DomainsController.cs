@@ -11,6 +11,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -40,12 +41,8 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 
         if (domain == null)
         {
-            domain = new Domain
-            {
-                Name = name,
-            };
-
-            await dbSet.AddAsync(domain);
+            domain = new Domain() { Name = name };
+            await domainService.SaveAsync(domain);
         }
 
         await domainService.Verify(domain);
@@ -54,6 +51,13 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         var resultConverted = mapper.Map<DomainDetailsDto>(domain);
 
         return Ok(resultConverted);
+    }
+
+    protected override async Task SaveRangeAsync(List<Domain> newRecords)
+    {
+        await domainService.SaveRangeAsync(newRecords);
+
+        await dbContext.SaveChangesAsync();
     }
 }
 

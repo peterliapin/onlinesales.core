@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Geography;
 
 namespace OnlineSales.DTOs;
@@ -15,18 +16,20 @@ public class AccountCreateDto
 
     public string? State { get; set; }
 
-    [Optional]
-    public string? ContinentCode { get; set; }
+    public Continent? ContinentCode { get; set; }
 
-    [Optional]
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
-    [Optional]
+    [SwaggerExample<string>("Colombo")]
     public string? CityName { get; set; }
 
-    [Optional]
+    [SwaggerExample<string>("https://example.com")]
     public string? SiteUrl { get; set; }
 
+    [SwaggerExample<string>("https://example.com/logo.png")]
+    public string? LogoUrl { get; set; }
+
+    [SwaggerExample<string>("50K-100K")]
     public string? EmployeesRange { get; set; }
 
     public double? Revenue { get; set; }
@@ -45,11 +48,15 @@ public class AccountDetailsInfo
 {
     public string? Name { get; set; }
 
+    public string? SiteUrl { get; set; }
+
+    public string? LogoUrl { get; set; }
+
     public string? CityName { get; set; }
 
     public string? State { get; set; }
 
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     public string? EmployeesRange { get; set; }
 
@@ -62,19 +69,21 @@ public class AccountDetailsInfo
     public string? Source { get; set; }
 
     public string? Data { get; set; }
-
-    public bool AccountSynced { get; set; } = false;
 }
 
 public class AccountUpdateDto
 {
     public string? Name { get; set; }
 
+    public string? SiteUrl { get; set; }
+
+    public string? LogoUrl { get; set; }
+
     public string? City { get; set; }
 
     public string? StateCode { get; set; }
 
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     public string? EmployeesRange { get; set; }
 
@@ -110,10 +119,13 @@ public class AccountImportDto : BaseImportDto
     public string? StateCode { get; set; }
 
     [Optional]
-    public string? CountryCode { get; set; }
+    public Country? CountryCode { get; set; }
 
     [Optional]
     public string? SiteUrl { get; set; }
+
+    [Optional]
+    public string? LogoUrl { get; set; }
 
     [Optional]
     public string? EmployeesRange { get; set; }

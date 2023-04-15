@@ -6,12 +6,8 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IContactService
+    public interface IContactService : ISaveService<Contact>
     {
-        Task SaveAsync(Contact contact);
-
-        Task SaveRangeAsync(List<Contact> contacts);
-
         Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip);
     }
 }

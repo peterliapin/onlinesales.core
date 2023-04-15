@@ -3,9 +3,6 @@
 // </copyright>
 
 using System.Text.Json;
-using FluentAssertions;
-using OnlineSales.DTOs;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdateDto>
@@ -13,6 +10,44 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     public ContactTests()
         : base("/api/contacts")
     {
+    }
+
+    [Fact]
+    public async Task ContactAccountTaskTest()
+    {
+        var notinitializedEmail = "email@notinitializeddomain.com";
+
+        // posted contacts marked as notInitialized and the details of their accounts should be retrieved
+        var item = TestData.Generate<TestContact>();
+        item.Email = notinitializedEmail;
+        await PostTest(itemsUrl, item);
+
+        // imported contacts marked as notIntended and the details of their accounts shouldn't be retrieved
+        await PostImportTest(itemsUrl, "contacts.json");
+
+        HttpResponseMessage executeResponce = await GetRequest("/api/tasks/execute/ContactAccountTask");
+        executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var contacts = App.GetDbContext() !.Contacts!.ToList();
+        contacts.Count.Should().BeGreaterThan(1);
+
+        foreach (var contact in contacts)
+        {
+            var domain = App.GetDbContext() !.Domains!.Where(d => d.Id == contact!.DomainId).FirstOrDefault();
+            domain.Should().NotBeNull();
+            if (contact.Email == notinitializedEmail)
+            {
+                domain !.AccountStatus.Should().Be(AccountSyncStatus.Successful);
+                domain.AccountId.Should().NotBeNull();
+            }
+            else
+            {
+                domain!.AccountStatus.Should().Be(AccountSyncStatus.NotIntended);
+                domain.AccountId.Should().BeNull();
+            }
+
+            domain.AccountId.Should().Be(contact.AccountId);
+        }
     }
 
     [Fact]
@@ -79,6 +114,40 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         var dbDomainId = dbContext!.Contacts!.Where(contactsDb => contactsDb.Id == contactId).Select(contact => contact.DomainId).FirstOrDefault();
 
         await DeleteTest($"/api/domains/{dbDomainId}");
+    }
+
+    [Fact]
+    public async Task DuplicatedRecordsImportTest()
+    {
+        // first attempt to import records with some duplicates
+        var importResult = await PostImportTest(itemsUrl, "contactsWithDuplicates.csv");
+
+        importResult.Added.Should().Be(2);
+        importResult.Updated.Should().Be(0);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(0);
+
+        importResult.Errors!.Count.Should().Be(2);
+
+        // second attempt to import records with some duplicates
+        importResult = await PostImportTest(itemsUrl, "contactsWithDuplicatesUpdate.csv");
+
+        importResult.Added.Should().Be(0);
+        importResult.Updated.Should().Be(2);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(0);
+
+        importResult.Errors!.Count.Should().Be(2);
+
+        // third attempt to import records with some duplicates
+        importResult = await PostImportTest(itemsUrl, "contactsWithDuplicatesUpdate.csv");
+
+        importResult.Added.Should().Be(0);
+        importResult.Updated.Should().Be(0);
+        importResult.Failed.Should().Be(2);
+        importResult.Skipped.Should().Be(2);
+
+        importResult.Errors!.Count.Should().Be(2);
     }
 
     protected override ContactUpdateDto UpdateItem(TestContact to)

@@ -19,7 +19,7 @@ namespace OnlineSales.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -64,6 +64,10 @@ namespace OnlineSales.Migrations
                     b.Property<string>("EmployeesRange")
                         .HasColumnType("text")
                         .HasColumnName("employees_range");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("logo_url");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -587,6 +591,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("account_id");
 
+                    b.Property<int>("AccountStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("account_status");
+
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
                         .HasColumnName("catch_all");
@@ -610,6 +618,10 @@ namespace OnlineSales.Migrations
                     b.Property<List<DnsRecord>>("DnsRecords")
                         .HasColumnType("jsonb")
                         .HasColumnName("dns_records");
+
+                    b.Property<string>("FaviconUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("favicon_url");
 
                     b.Property<bool?>("Free")
                         .HasColumnType("boolean")
@@ -1546,14 +1558,14 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Order", "Contact")
+                    b.HasOne("OnlineSales.Entities.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_item_order_order_id");
 
-                    b.Navigation("Contact");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>
