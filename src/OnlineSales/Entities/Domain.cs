@@ -50,6 +50,8 @@ public class Domain : BaseEntityWithIdAndDates
 
     public string? Url { get; set; }
 
+    public string? FaviconUrl { get; set; }
+
     public bool? HttpCheck { get; set; }
 
     public bool? Free { get; set; }

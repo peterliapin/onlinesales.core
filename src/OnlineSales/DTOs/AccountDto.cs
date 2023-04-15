@@ -16,19 +16,20 @@ public class AccountCreateDto
 
     public string? State { get; set; }
 
-    [Optional]
     public Continent? ContinentCode { get; set; }
 
-    [Optional]
     public Country? CountryCode { get; set; }
 
-    [Optional]
     [SwaggerExample<string>("Colombo")]
     public string? CityName { get; set; }
 
-    [Optional]
+    [SwaggerExample<string>("https://example.com")]
     public string? SiteUrl { get; set; }
 
+    [SwaggerExample<string>("https://example.com/logo.png")]
+    public string? LogoUrl { get; set; }
+
+    [SwaggerExample<string>("50K-100K")]
     public string? EmployeesRange { get; set; }
 
     public double? Revenue { get; set; }
@@ -46,6 +47,10 @@ public class AccountCreateDto
 public class AccountDetailsInfo
 {
     public string? Name { get; set; }
+
+    public string? SiteUrl { get; set; }
+
+    public string? LogoUrl { get; set; }
 
     public string? CityName { get; set; }
 
@@ -69,6 +74,10 @@ public class AccountDetailsInfo
 public class AccountUpdateDto
 {
     public string? Name { get; set; }
+
+    public string? SiteUrl { get; set; }
+
+    public string? LogoUrl { get; set; }
 
     public string? City { get; set; }
 
@@ -114,6 +123,9 @@ public class AccountImportDto : BaseImportDto
 
     [Optional]
     public string? SiteUrl { get; set; }
+
+    [Optional]
+    public string? LogoUrl { get; set; }
 
     [Optional]
     public string? EmployeesRange { get; set; }
