@@ -111,7 +111,11 @@ public class BaseTest : IDisposable
     protected async Task<List<TI>?> GetTestCSV<TI>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
     where TI : class
     {
-        var response = await GetTest(url, expectedCode, authToken);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/csv"));
+
+        var response = await client.SendAsync(request);
 
         var content = await response.Content.ReadAsStringAsync();
 

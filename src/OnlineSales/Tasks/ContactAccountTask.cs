@@ -81,35 +81,38 @@ public class ContactAccountTask : BaseTask
         {
             try
             {
-                if (domain.Free.HasValue && !domain.Free.Value && domain.Disposable.HasValue && !domain.Disposable.Value)
+                if (domain.Free == true || domain.Disposable == true)
                 {
-                    var accInfo = await accountExternalService.GetAccountDetails(domain.Name);
-                    if (accInfo == null)
-                    {
-                        accInfo = new AccountDetailsInfo() { Name = domain.Name };
-                        domain.AccountStatus = AccountSyncStatus.Failed;
-                    }
-                    else
-                    {
-                        domain.AccountStatus = AccountSyncStatus.Successful;
-                    }
+                    domain.AccountStatus = AccountSyncStatus.NotIntended;
+                    continue;
+                }
 
-                    var existingAccount = dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
-                    if (existingAccount == null)
-                    {
-                        existingAccount = newAccounts.FirstOrDefault(a => a.Name == accInfo.Name);
-                    }
+                var accInfo = await accountExternalService.GetAccountDetails(domain.Name);
+                if (accInfo == null)
+                {
+                    accInfo = new AccountDetailsInfo() { Name = domain.Name };
+                    domain.AccountStatus = AccountSyncStatus.Failed;
+                }
+                else
+                {
+                    domain.AccountStatus = AccountSyncStatus.Successful;
+                }
 
-                    if (existingAccount != null)
-                    {
-                        domain.Account = existingAccount;
-                    }
-                    else
-                    {
-                        var account = mapper.Map<Account>(accInfo);
-                        newAccounts.Add(account);
-                        domain.Account = account;
-                    }
+                var existingAccount = dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
+                if (existingAccount == null)
+                {
+                    existingAccount = newAccounts.FirstOrDefault(a => a.Name == accInfo.Name);
+                }
+
+                if (existingAccount != null)
+                {
+                    domain.Account = existingAccount;
+                }
+                else
+                {
+                    var account = mapper.Map<Account>(accInfo);
+                    newAccounts.Add(account);
+                    domain.Account = account;
                 }
             }
             catch (Exception e)
