@@ -56,8 +56,6 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
     protected override async Task SaveRangeAsync(List<Domain> newRecords)
     {
         await domainService.SaveRangeAsync(newRecords);
-
-        await dbContext.SaveChangesAsync();
     }
 }
 
