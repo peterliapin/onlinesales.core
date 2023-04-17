@@ -6,6 +6,8 @@ using System.Collections;
 using System.Globalization;
 using System.Text;
 using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 
@@ -41,6 +43,7 @@ public class CsvOutputFormatter : OutputFormatter
 
         await using (var csv = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
         {
+            csv.Context.TypeConverterCache.AddConverter<DateTime>(new JsonStyleDateTimeConverter());
             csv.Context.RegisterCamelCaseClassMap(itemType!);
 
             await csv.WriteRecordsAsync(context.Object as IEnumerable);
@@ -60,5 +63,28 @@ public class CsvOutputFormatter : OutputFormatter
     private bool IsTypeOfIEnumerable(Type type)
     {
         return typeof(IEnumerable).IsAssignableFrom(type);
+    }
+}
+
+public class JsonStyleDateTimeConverter : ITypeConverter
+{
+    public string? ConvertToString(object? value, IWriterRow row, MemberMapData memberMapData)
+    {
+        if (value is DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+        }
+
+        return string.Empty;
+    }
+
+    public object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
+    {
+        if (DateTime.TryParse(text, out DateTime result))
+        {
+            return result;
+        }
+
+        return null;
     }
 }
