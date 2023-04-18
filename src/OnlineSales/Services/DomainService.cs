@@ -6,8 +6,7 @@ using System.Net.Mail;
 using System.Reflection;
 using System.Security.Policy;
 using System.Text;
-using DnsClient;
-using DnsClient.Protocol;
+using ARSoft.Tools.Net.Dns;
 using HtmlAgilityPack;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -23,27 +22,23 @@ namespace OnlineSales.Services
 
         private readonly PgDbContext pgDbContext;
 
-        private readonly LookupClient lookupClient;
-        // private readonly IMxVerifyService mxVerifyService;
+        private readonly DnsStubResolver lookupClient;
+        private readonly IMxVerifyService mxVerifyService;
 
         public DomainService(PgDbContext pgDbContext, IMxVerifyService mxVerifyService)
         {
-            // this.mxVerifyService = mxVerifyService;
+            this.mxVerifyService = mxVerifyService;
 
             this.pgDbContext = pgDbContext;
 
-            lookupClient = new LookupClient(new LookupClientOptions
-            {
-                UseCache = true,
-                Timeout = new TimeSpan(0, 0, 60),                
-            });
+            lookupClient = new ();
         }
 
         public async Task Verify(Domain domain)
         {
             if (domain.DnsCheck == null)
             {
-                await VerifyDns(domain);
+                VerifyDns(domain);
             }            
 
             if (domain.DnsCheck is true)
@@ -53,10 +48,10 @@ namespace OnlineSales.Services
                     await VerifyHttp(domain);
                 }
 
-                // if (domain.MxCheck == null)
-                // {
-                //     await VerifyMX(domain);
-                // }       
+                if (domain.MxCheck == null)
+                {
+                    await VerifyMX(domain);
+                }
             }
             else
             {
@@ -199,21 +194,21 @@ namespace OnlineSales.Services
             }
         }
 
-        /*
         private async Task VerifyMX(Domain domain)
         {
             domain.MxCheck = false;
 
-            var mxRecords = await lookupClient.QueryAsync(domain.Name, QueryType.MX);
+            var mxRecords = domain
+                .DnsRecords
+                ?.OfType<MxRecord>()
+                .ToArray()
+                ?? Array.Empty<MxRecord>();
 
-            var orderedMxRecordValues = from r in mxRecords.AllRecords
-                                        where r is MxRecord
-                                        orderby ((MxRecord)r).Preference ascending
-                                        select ((MxRecord)r).Exchange.Value;
-
-            foreach (var mxRecordValue in orderedMxRecordValues)
+            foreach (var mxRecordValue in mxRecords)
             {
-                var mxVerify = await mxVerifyService.Verify(mxRecordValue);
+                var mxHost = mxRecordValue.Name.ToString().TrimEnd('.');
+
+                var mxVerify = await mxVerifyService.Verify(mxHost);
 
                 if (mxVerify)
                 {
@@ -222,16 +217,26 @@ namespace OnlineSales.Services
                 }
             }
         }
-        */
 
-        private async Task VerifyDns(Domain domain)
+        private void VerifyDns(Domain domain)
         {
             domain.DnsRecords = null;
             domain.DnsCheck = false;
-                     
-            var result = await lookupClient.QueryAsync(domain.Name, QueryType.ANY);
 
-            var dnsRecords = GetDnsRecords(result, domain);
+            var listOfDnsRecords = new List<DnsRecordBase>();
+
+            listOfDnsRecords.AddRange(lookupClient.Resolve<DnsRecordBase>(domain.Name, RecordType.A));
+            listOfDnsRecords.AddRange(lookupClient.Resolve<DnsRecordBase>(domain.Name, RecordType.Ns));
+            listOfDnsRecords.AddRange(lookupClient.Resolve<DnsRecordBase>(domain.Name, RecordType.Txt));
+
+            // CName record it's not a best way to resolve domain IP
+            // It works like  CName -> CName -> CName -> IP
+            listOfDnsRecords.AddRange(lookupClient.Resolve<DnsRecordBase>(domain.Name, RecordType.CName));
+
+            // Get all Mx records and order it by Preference (lowest - most prefered)
+            listOfDnsRecords.AddRange(lookupClient.Resolve<DnsRecordBase>(domain.Name, RecordType.Mx).Cast<MxRecord>().OrderBy(record => record.Preference).Cast<DnsRecordBase>().ToList());
+
+            var dnsRecords = GetDnsRecords(listOfDnsRecords.ToArray(), domain);
 
             if (dnsRecords.Count > 0)
             {
@@ -240,17 +245,17 @@ namespace OnlineSales.Services
             }
         }
 
-        private List<DnsRecord> GetDnsRecords(IDnsQueryResponse dnsQueryResponse, Domain d)
+        private List<DnsRecord> GetDnsRecords(DnsRecordBase[] records, Domain d)
         {
             var dnsRecords = new List<DnsRecord>();
 
-            foreach (var dnsResponseRecord in dnsQueryResponse.AllRecords)
+            foreach (var dnsResponseRecord in records)
             {
                 try
                 {
                     var dnsRecord = new DnsRecord
                     {
-                        DomainName = dnsResponseRecord.DomainName.Value,
+                        DomainName = dnsResponseRecord.Name.ToString().TrimEnd('.'),
                         RecordClass = dnsResponseRecord.RecordClass.ToString(),
                         RecordType = dnsResponseRecord.RecordType.ToString(),
                         TimeToLive = dnsResponseRecord.TimeToLive,
@@ -265,20 +270,25 @@ namespace OnlineSales.Services
                                 continue;
                             }
 
-                            dnsRecord.Value = a.Address.ToString();
+                            dnsRecord.Value = a.Address.ToString().TrimEnd('.');
                             break;
+
                         case CNameRecord cname:
-                            dnsRecord.Value = cname.CanonicalName.Value;
+                            dnsRecord.Value = cname.CanonicalName.ToString();
                             break;
+
                         case MxRecord mx:
-                            dnsRecord.Value = mx.Exchange.Value;
+                            dnsRecord.Value = mx.ExchangeDomainName.ToString().TrimEnd('.');
                             break;
+
                         case TxtRecord txt:
-                            dnsRecord.Value = string.Concat(txt.Text);
+                            dnsRecord.Value = txt.TextData;
                             break;
+
                         case NsRecord ns:
-                            dnsRecord.Value = ns.NSDName.Value;
+                            dnsRecord.Value = ns.Name.ToString().TrimEnd('.');
                             break;
+
                         default:
                             continue;
                     }

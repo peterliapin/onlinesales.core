@@ -33,6 +33,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Migration|AnyCPU' " />
   <ItemGroup>
+    <PackageReference Include="ARSoft.Tools.Net.Dns" Version="2.3.1" />
     <PackageReference Include="DistributedLock.Postgres" Version="1.0.4" />
     <PackageReference Include="DnsClient" Version="1.7.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
