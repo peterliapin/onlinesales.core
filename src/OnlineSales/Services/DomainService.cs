@@ -187,7 +187,6 @@ namespace OnlineSales.Services
                     {
                         domain.Title = GetTitle(htmlDoc);
                         domain.Description = GetDescription(htmlDoc);
-                        domain.FaviconUrl = GetFavicon(htmlDoc);
                     }
 
                     break;
@@ -221,7 +220,7 @@ namespace OnlineSales.Services
 
         private void VerifyDns(Domain domain)
         {
-            domain.DnsRecords = new ();
+            domain.DnsRecords = null;
             domain.DnsCheck = false;
 
             var listOfDnsRecords = new List<DnsRecordBase>();
@@ -350,15 +349,6 @@ namespace OnlineSales.Services
         private string? GetDescription(HtmlDocument htmlDoc)
         {
             return GetNodeContentByAttr(htmlDoc, "description");
-        }
-
-        private string? GetFavicon(HtmlDocument htmlDoc)
-        {
-            var linkNodes = htmlDoc.DocumentNode
-                .SelectNodes("//link")
-                .FirstOrDefault(n => n.GetAttributeValue("href", "none").Contains(".ico"))
-                ?.GetAttributeValue("href", string.Empty);
-            return linkNodes;
         }
 
         private string? GetNodeContentByAttr(HtmlDocument htmlDoc, string value)
