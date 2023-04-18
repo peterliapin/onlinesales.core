@@ -75,7 +75,7 @@ namespace OnlineSales.Infrastructure
                             }
                             else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
                             {
-                                SetStringExample(property, propertySchema.Value, DateTime.UtcNow.ToString("O"));
+                                SetStringExample(property, propertySchema.Value, new DateTime(2023, 04, 18, 12, 0, 0, DateTimeKind.Utc).ToString("O"));
                                 propertySchema.Value.Pattern = @"^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(2[0-4]|1[0-9]|0[1-9]):(2[0-4]|1[0-9]|0[1-9]):([1-5]?0[0-9]).(\d{7})Z$";
                             }
                         }
