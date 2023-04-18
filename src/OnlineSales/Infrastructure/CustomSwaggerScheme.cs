@@ -44,7 +44,7 @@ namespace OnlineSales.Infrastructure
                             {
                                 if (property.GetCustomAttribute<EmailAddressAttribute>() != null)
                                 {
-                                    propertySchema.Value.Pattern = @"([\w\.\-] +)@([\w\-] +)((\.(\w){ 2,3})+)$";
+                                    propertySchema.Value.Pattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){1,63})+)$";
                                     SetStringExample(property, propertySchema.Value, "example@example.com");
                                 }
                                 else if (property.GetCustomAttribute<CurrencyCodeAttribute>() != null)
@@ -52,18 +52,7 @@ namespace OnlineSales.Infrastructure
                                     propertySchema.Value.Pattern = CurrencySymbolsRegex;
                                     SetStringExample(property, propertySchema.Value, "USD");
                                 }
-                                else if (property.GetCustomAttribute<RequiredAttribute>() != null)
-                                {
-                                    propertySchema.Value.Pattern = CreateMinLengthRegex(1);
-                                    SetStringExample(property, propertySchema.Value);
-                                }
-                                else if (property.GetCustomAttribute<MinLengthAttribute>() != null)
-                                {
-                                    var minLength = property.GetCustomAttribute<MinLengthAttribute>() !.Length;
-                                    propertySchema.Value.Pattern = CreateMinLengthRegex(minLength);
-                                    SetStringExample(property, propertySchema.Value);
-                                }
-                                else
+                                else 
                                 {
                                     SetStringExample(property, propertySchema.Value);
                                 }
@@ -86,8 +75,8 @@ namespace OnlineSales.Infrastructure
                             }
                             else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
                             {
-                                SetStringExample(property, propertySchema.Value, DateTime.UtcNow.ToString("yyyy-MM-ddTHH\\:mm\\:ssZ"));
-                                propertySchema.Value.Pattern = @"^(\d{4})-(1[0-2]|[1-9])-(3[01]|[12][0-9]|[1-9])T(2[0-4]|1[0-9]|[1-9]):(2[0-4]|1[0-9]|[1-9]):([1-5]?[0-9])Z$";
+                                SetStringExample(property, propertySchema.Value, DateTime.UtcNow.ToString("O"));
+                                propertySchema.Value.Pattern = @"^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(2[0-4]|1[0-9]|0[1-9]):(2[0-4]|1[0-9]|0[1-9]):([1-5]?0[0-9]).(\d{7})Z$";
                             }
                         }
                     }
@@ -153,11 +142,6 @@ namespace OnlineSales.Infrastructure
             var array = new OpenApiObject();
             array.AddRangeIfNotExists<string, IOpenApiAny>(attr != null ? attr.Value.ToDictionary(x => x.Key, x => (IOpenApiAny)new OpenApiString(x.Value)) : new Dictionary<string, IOpenApiAny>() { { "key1", new OpenApiString("value1") }, { "key2", new OpenApiString("value2") } });
             schema.Example = array;
-        }
-
-        private static string CreateMinLengthRegex(int minLength)
-        {
-            return @$"^.{{{minLength},}}$";
         }
 
         private static string CreateTitle(string name)
