@@ -14,7 +14,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    [Migration("20230418233108_IdentityCore")]
+    [Migration("20230419093438_IdentityCore")]
     partial class IdentityCore
     {
         /// <inheritdoc />
