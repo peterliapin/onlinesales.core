@@ -24,11 +24,11 @@ namespace OnlineSales.Services
         private readonly PgDbContext pgDbContext;
 
         private readonly LookupClient lookupClient;
-        // private readonly IMxVerifyService mxVerifyService;
+        private readonly IMxVerifyService mxVerifyService;
 
         public DomainService(PgDbContext pgDbContext, IMxVerifyService mxVerifyService)
         {
-            // this.mxVerifyService = mxVerifyService;
+            this.mxVerifyService = mxVerifyService;
 
             this.pgDbContext = pgDbContext;
 
@@ -53,10 +53,10 @@ namespace OnlineSales.Services
                     await VerifyHttp(domain);
                 }
 
-                // if (domain.MxCheck == null)
-                // {
-                //     await VerifyMX(domain);
-                // }       
+                if (domain.MxCheck == null)
+                {
+                    await VerifyMX(domain);
+                }
             }
             else
             {
@@ -199,7 +199,6 @@ namespace OnlineSales.Services
             }
         }
 
-        /*
         private async Task VerifyMX(Domain domain)
         {
             domain.MxCheck = false;
@@ -222,7 +221,6 @@ namespace OnlineSales.Services
                 }
             }
         }
-        */
 
         private async Task VerifyDns(Domain domain)
         {
