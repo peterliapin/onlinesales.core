@@ -16,24 +16,9 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
 {
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
+        // var administratorsGroupId = configuration.GetValue<string>("AzureAd:GroupsMapping:Administrators");
 
         services.ConfigureAuth(configuration);
-
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("Administrators", opts =>
-            {
-                if (string.IsNullOrEmpty(administratorsGroupId) || !Guid.TryParse(administratorsGroupId, out _))
-                {
-                    throw new MissingAdminGroupException("AzureAd:GroupsMapping:Administrators field is required.");
-                }
-
-                opts.RequireClaim(
-                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
-                    administratorsGroupId);
-            });
-        });
         services.Configure<CookiePolicyOptions>(options =>
         {
             options.MinimumSameSitePolicy = SameSiteMode.None;
@@ -74,8 +59,6 @@ public class AzureADPlugin : IPlugin, ISwaggerConfigurator, IPluginApplication
     {
         var app = (WebApplication)application;
         app.UseCookiePolicy();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapRazorPages();
+        // app.MapRazorPages();
     }
 }

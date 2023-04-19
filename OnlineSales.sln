@@ -48,9 +48,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.Email", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.Vsto", "plugins\OnlineSales.Plugin.Vsto\OnlineSales.Plugin.Vsto.csproj", "{1DA75BFA-CEFD-4B3D-87D6-76E17FD20282}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.ReverseProxy", "plugins\OnlineSales.Plugin.ReverseProxy\OnlineSales.Plugin.ReverseProxy.csproj", "{9D3BD61F-94A1-4F00-B646-0681A2062A5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.ReverseProxy", "plugins\OnlineSales.Plugin.ReverseProxy\OnlineSales.Plugin.ReverseProxy.csproj", "{9D3BD61F-94A1-4F00-B646-0681A2062A5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.SendGrid", "plugins\OnlineSales.Plugin.SendGrid\OnlineSales.Plugin.SendGrid.csproj", "{5FFB36F9-CA3A-4B57-90F0-88970A67F49C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.SendGrid", "plugins\OnlineSales.Plugin.SendGrid\OnlineSales.Plugin.SendGrid.csproj", "{5FFB36F9-CA3A-4B57-90F0-88970A67F49C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

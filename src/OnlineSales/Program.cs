@@ -2,15 +2,22 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Net.Mail;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.Entities;
 using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
@@ -72,6 +79,8 @@ public class Program
         ConfigureCacheProfiles(builder);
 
         ConfigureConventions(builder);
+        ConfigureIdentity(builder);
+        // ConfigureAuth(builder.Services, builder.Configuration);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();
@@ -127,6 +136,9 @@ public class Program
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseCors();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         PluginManager.Init(app);
 
@@ -430,4 +442,65 @@ public class Program
             });
         });
     }
+
+    private static void ConfigureIdentity(WebApplicationBuilder builder)
+    {
+        builder.Services.AddIdentity<User, IdentityRole>()
+            .AddEntityFrameworkStores<PgDbContext>();
+    }
+
+    /*
+    private static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAuthentication()
+         .AddMicrosoftIdentityWebApi(
+             jwtOptions =>
+             {
+                 jwtOptions.Events = new JwtBearerEventsHandler();
+             }, identityOptions =>
+             {
+                 identityOptions.Instance = configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
+                 identityOptions.TenantId = configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
+                 identityOptions.Domain = configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
+                 identityOptions.ClientId = configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
+                 identityOptions.ClientSecret = configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
+             });
+    }
+
+    public class JwtBearerEventsHandler : JwtBearerEvents
+    {
+        public override async Task TokenValidated(TokenValidatedContext context)
+        {
+            var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>() !;
+            var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>() !;
+
+            var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(userEmail))
+            {
+                await AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
+                return;
+            }
+
+            var user = await userManager.FindByEmailAsync(userEmail);
+            if (user == null)
+            {
+                user = new User
+                {
+                    UserName = userEmail,
+                    Email = userEmail,
+                    CreatedAt = DateTime.UtcNow,
+                    DisplayName = userEmail,
+                };
+                await userManager.CreateAsync(user);
+            }
+
+            user.LastTimeLoggedIn = DateTime.UtcNow;
+            await userManager.UpdateAsync(user);
+
+            await signInManager.SignInAsync(user, false, "Bearer");
+            context.HttpContext.User = await signInManager.CreateUserPrincipalAsync(user);
+        }
+    }
+    */
 }
