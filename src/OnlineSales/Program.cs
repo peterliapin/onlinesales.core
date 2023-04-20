@@ -474,13 +474,6 @@ public class Program
                  identityOptions.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
                  identityOptions.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
              });
-        builder.Services.AddAuthentication()
-            .AddMicrosoftAccount(options =>
-            {
-                options.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
-                options.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
-            });
-
         builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(
             identityOptions =>
             {
