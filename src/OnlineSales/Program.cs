@@ -459,7 +459,7 @@ public class Program
         {
             // Cookie settings
             options.Cookie.HttpOnly = true;
-            options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+            options.ExpireTimeSpan = TimeSpan.FromHours(12);
 
             options.LoginPath = "/api/Identity/ExternalLogin";
             options.AccessDeniedPath = "/AccessDenied";
