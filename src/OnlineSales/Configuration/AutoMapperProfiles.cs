@@ -122,6 +122,14 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<AccountImportDto, Account>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<User, UserCreateDto>().ReverseMap();
+        CreateMap<User, UserUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<UserUpdateDto, User>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<User, UserDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

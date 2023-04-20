@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Configuration;
 using System.Net.Mail;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -15,11 +16,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
+using OnlineSales.Identity;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -80,7 +83,6 @@ public class Program
 
         ConfigureConventions(builder);
         ConfigureIdentity(builder);
-        // ConfigureAuth(builder.Services, builder.Configuration);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();
@@ -142,6 +144,7 @@ public class Program
 
         PluginManager.Init(app);
 
+        app.UseCookiePolicy();
         app.MapControllers();
 
         app.UseSpa(spa =>
@@ -447,60 +450,56 @@ public class Program
     {
         builder.Services.AddIdentity<User, IdentityRole>()
             .AddEntityFrameworkStores<PgDbContext>();
-    }
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            // Cookie settings
+            options.Cookie.HttpOnly = true;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
 
-    /*
-    private static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddAuthentication()
-         .AddMicrosoftIdentityWebApi(
+            options.LoginPath = "/api/Identity/ExternalLogin";
+            options.AccessDeniedPath = "/AccessDenied";
+            options.SlidingExpiration = true;
+        });
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddMicrosoftIdentityWebApi(
              jwtOptions =>
              {
-                 jwtOptions.Events = new JwtBearerEventsHandler();
+                 jwtOptions.Events = new AzureAdJwtBearerEventsHandler();
              }, identityOptions =>
              {
-                 identityOptions.Instance = configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
-                 identityOptions.TenantId = configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
-                 identityOptions.Domain = configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
-                 identityOptions.ClientId = configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
-                 identityOptions.ClientSecret = configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
+                 identityOptions.Instance = builder.Configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
+                 identityOptions.TenantId = builder.Configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
+                 identityOptions.Domain = builder.Configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
+                 identityOptions.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
+                 identityOptions.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
              });
-    }
+        builder.Services.AddAuthentication()
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
+                options.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
+            });
 
-    public class JwtBearerEventsHandler : JwtBearerEvents
-    {
-        public override async Task TokenValidated(TokenValidatedContext context)
+        builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(
+            identityOptions =>
+            {
+                identityOptions.Instance = builder.Configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
+                identityOptions.TenantId = builder.Configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
+                identityOptions.Domain = builder.Configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
+                identityOptions.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
+                identityOptions.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
+                identityOptions.CallbackPath = "/api/Identity/Callback";
+                identityOptions.SkipUnrecognizedRequests = true;
+            }, cookieOptions =>
+            {
+                cookieOptions.Cookie.Name = "auth_ticket";
+                cookieOptions.Events = new AzureAdCookieEventsHandler();
+            });
+        builder.Services.Configure<CookiePolicyOptions>(options =>
         {
-            var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>() !;
-            var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>() !;
-
-            var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(userEmail))
-            {
-                await AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
-                return;
-            }
-
-            var user = await userManager.FindByEmailAsync(userEmail);
-            if (user == null)
-            {
-                user = new User
-                {
-                    UserName = userEmail,
-                    Email = userEmail,
-                    CreatedAt = DateTime.UtcNow,
-                    DisplayName = userEmail,
-                };
-                await userManager.CreateAsync(user);
-            }
-
-            user.LastTimeLoggedIn = DateTime.UtcNow;
-            await userManager.UpdateAsync(user);
-
-            await signInManager.SignInAsync(user, false, "Bearer");
-            context.HttpContext.User = await signInManager.CreateUserPrincipalAsync(user);
-        }
+            options.MinimumSameSitePolicy = SameSiteMode.None;
+            options.Secure = CookieSecurePolicy.Always;
+        });
     }
-    */
 }

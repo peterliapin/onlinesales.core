@@ -1,23 +1,20 @@
-﻿// <copyright file="JwtBearerEventsHandler.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="AzureAdJwtBearerEventsHandler.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Entities;
 
-namespace OnlineSales.Plugin.AzureAD;
-
-public class JwtBearerEventsHandler : JwtBearerEvents
+namespace OnlineSales.Identity;
+public class AzureAdJwtBearerEventsHandler : JwtBearerEvents
 {
     public override async Task TokenValidated(TokenValidatedContext context)
     {
         var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>() !;
         var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>() !;
 
-        var userEmail = context.Principal!.Identity!.Name;
+        var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(userEmail))
         {
@@ -32,12 +29,16 @@ public class JwtBearerEventsHandler : JwtBearerEvents
             {
                 UserName = userEmail,
                 Email = userEmail,
+                CreatedAt = DateTime.UtcNow,
+                DisplayName = userEmail,
             };
             await userManager.CreateAsync(user);
         }
 
-        await signInManager.SignInWithClaimsAsync(user, null, context.Principal.Claims);
-        await context.HttpContext.SignInAsync("Cookies", context.Principal!);
-        await base.TokenValidated(context);
+        user.LastTimeLoggedIn = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);
+
+        await signInManager.SignInAsync(user, false, "AzureAdBearer");
+        context.HttpContext.User = await signInManager.CreateUserPrincipalAsync(user);
     }
 }

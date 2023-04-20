@@ -36,7 +36,8 @@
     <PackageReference Include="DistributedLock.Postgres" Version="1.0.4" />
     <PackageReference Include="DnsClient" Version="1.7.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.5" />
     <PackageReference Include="Microsoft.Identity.Web" Version="2.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

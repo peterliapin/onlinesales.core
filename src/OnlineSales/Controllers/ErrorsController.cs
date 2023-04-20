@@ -68,7 +68,12 @@ public class ErrorsController : Controller
                     dbUpdateException.InnerException!.Message);
 
                 break;
-
+            case IdentityException identityException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status400BadRequest,
+                    identityException.ErrorMessage);
+                break;
             default:
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(
                     HttpContext,
