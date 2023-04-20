@@ -130,7 +130,7 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<UserUpdateDto, User>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<User, UserDetailsDto>()
+        CreateMap<User, UserDetailsDto>();
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)
