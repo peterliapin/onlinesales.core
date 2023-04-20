@@ -17,7 +17,7 @@ public class UnsubscribeDto
     public string Source { get; set; } = string.Empty;
 }
 
-public class UbsubscribeDetailsDto : UnsubscribeDto
+public class UnsubscribeDetailsDto : UnsubscribeDto
 {
     public int Id { get; set; }
 
