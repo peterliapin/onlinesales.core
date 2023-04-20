@@ -47,28 +47,28 @@ public class ContentCreateDto
 
 public class ContentUpdateDto
 {
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Title { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Description { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Body { get; set; }
 
     public string? CoverImageUrl { get; set; }
 
     public string? CoverImageAlt { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Slug { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Type { get; set; }
 
     public string? Author { get; set; }
 
-    [NonEmptyString]
+    [MinLength(1)]
     public string? Language { get; set; }
 
     public string? Category { get; set; }

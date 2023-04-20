@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using OnlineSales.DTOs;
 using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;

@@ -62,10 +62,12 @@ public class ErrorsController : Controller
                 break;
 
             case DbUpdateException dbUpdateException:
+                var dbError = dbUpdateException.InnerException ?? dbUpdateException;
+
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(
                     HttpContext,
                     StatusCodes.Status422UnprocessableEntity,
-                    dbUpdateException.InnerException!.Message);
+                    dbError.Message);
 
                 break;
             case IdentityException identityException:

@@ -7,7 +7,7 @@
     <RootNamespace>OnlineSales</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>98270385-43f2-4d3c-98d5-02d0d77fc2d9</UserSecretsId>
-    <ReleaseVersion>1.2.1-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.2-pre</ReleaseVersion>
     <AssemblyName>OnlineSales</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>OnlineSales</PackageId>
@@ -95,6 +95,15 @@
 
   <ItemGroup Label="FilesToCopy">
     <Content Include="OnlineSales.targets" PackagePath="build/OnlineSales.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\free_domains.txt">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>    
+    <EmbeddedResource Include="Resources\disposable_domains.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   
 </Project>

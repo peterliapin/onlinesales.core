@@ -2,13 +2,38 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
+using OnlineSales.Entities;
+
 namespace OnlineSales.DTOs;
 
-public class UnsubscribeDetailsDto
-{
-    public string Source { get; set; } = string.Empty;
+public class UnsubscribeDto
+{   
+    public int ContactId { get; set; }
 
     public string Reason { get; set; } = string.Empty;
 
-    public int? ContactId { get; set; }
+    public string Source { get; set; } = string.Empty;
+}
+
+public class UnsubscribeDetailsDto : UnsubscribeDto
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+}
+
+public class UnsubscribeImportDto : BaseImportDtoWithIdAndSource
+{
+    public string Reason { get; set; } = string.Empty;
+
+    public int ContactId { get; set; }
+
+    [Optional]
+    [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
+    public string ContactEmail { get; set; } = string.Empty;
+
+    [Optional]
+    public DateTime? CreatedAt { get; set; }
 }

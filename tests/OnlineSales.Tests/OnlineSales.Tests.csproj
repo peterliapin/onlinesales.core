@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-    <ReleaseVersion>1.2.1-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.2-pre</ReleaseVersion>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
@@ -36,30 +36,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Environment\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Resources\" />
-    <None Remove="Resources\comments.csv" />
-    <None Remove="Resources\ImportFiles\commentsBasic.json" />
-    <None Remove="Resources\ImportFiles\commentsFull.csv" />
-    <None Remove="Resources\ImportFiles\commentsFull.json" />
-    <None Remove="Resources\ImportFiles\commentsNoFKHasUKey.csv" />
-    <None Remove="Resources\ImportFiles\commentsNoFKHasUKeyUpdate.csv" />
-    <None Remove="Resources\ImportFiles\commentsWithOldParentKey.csv" />
-    <None Remove="Resources\ImportFiles\commentsWithParentKey.csv" />
-    <None Remove="Resources\ImportFiles\contactBase.csv" />
-    <None Remove="Resources\ImportFiles\contactsToUpdate.csv" />
-    <None Remove="Resources\ImportFiles\contacts.json" />
-    <None Remove="Resources\ImportFiles\orderItems.csv" />
-    <None Remove="Resources\ImportFiles\orderItems.json" />
-    <None Remove="Resources\ImportFiles\orderItemsNoRef.csv" />
-    <None Remove="Resources\ImportFiles\orderItemsNoRef.json" />
-    <None Remove="Resources\ImportFiles\ordersNoFK.csv" />
-    <None Remove="Resources\wavepoint.png" />
-    <None Remove="Resources\wavepointModified.png" />
-    <None Remove="Resources\ImportFiles\commentsWithKey.csv" />
-    <None Remove="Resources\ImportFiles\commentsWithKey %28copy%29.csv" />
-    <None Remove="Resources\ImportFiles\commentsWithKeyUpdate %28copy%29.csv" />
   </ItemGroup>
   <ItemGroup>
     <None Update="xunit.runner.json">
@@ -114,5 +90,11 @@
     <EmbeddedResource Include="Resources\ImportFiles\commentsWithKey.csv" />
     <EmbeddedResource Include="Resources\ImportFiles\commentsWithKeyUpdate.csv" />
     <EmbeddedResource Include="Resources\ImportFiles\commentsWithKeyUpdateWithErrors.csv" />
+    <EmbeddedResource Include="Resources\ImportFiles\contactsWithDuplicates.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\ImportFiles\contactsWithDuplicatesUpdate.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

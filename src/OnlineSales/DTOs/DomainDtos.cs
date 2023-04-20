@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using CsvHelper.Configuration.Attributes;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
@@ -13,13 +14,18 @@ namespace OnlineSales.DTOs;
 public class DomainCreateDto
 {
     [Required]
+    [SwaggerExample<string>("example.com")]
     public string Name { get; set; } = string.Empty;
 
     public string? Title { get; set; }
 
     public string? Description { get; set; }
 
+    [SwaggerExample<string>("https://example.com")]
     public string? Url { get; set; }
+
+    [SwaggerExample<string>("https://example.com/favicon.ico")]
+    public string? FaviconUrl { get; set; }
 
     public bool? HttpCheck { get; set; }
 
@@ -40,13 +46,15 @@ public class DomainCreateDto
 
 public class DomainUpdateDto
 {
-    public string? Name { get; set; }
-
     public string? Title { get; set; }
 
     public string? Description { get; set; }
 
+    [SwaggerExample<string>("https://example.com")]
     public string? Url { get; set; }
+
+    [SwaggerExample<string>("https://example.com/favicon.ico")]
+    public string? FaviconUrl { get; set; }
 
     public bool? HttpCheck { get; set; }
 
@@ -83,7 +91,12 @@ public class DomainImportDto : BaseImportDtoWithDates
     public string? Description { get; set; }
 
     [Optional]
+    [SwaggerExample<string>("https://example.com")]
     public string? Url { get; set; }
+
+    [Optional]
+    [SwaggerExample<string>("https://example.com/favicon.ico")]
+    public string? FaviconUrl { get; set; }
 
     [Optional]
     public bool? HttpCheck { get; set; }

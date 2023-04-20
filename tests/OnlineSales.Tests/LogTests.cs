@@ -2,10 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
-using OnlineSales.Entities;
-using Serilog;
-
 namespace OnlineSales.Tests;
 
 public class LogTests : BaseTest

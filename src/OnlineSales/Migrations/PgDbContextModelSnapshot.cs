@@ -229,6 +229,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("employees_range");
 
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("logo_url");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
@@ -751,6 +755,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("account_id");
 
+                    b.Property<int>("AccountStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("account_status");
+
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
                         .HasColumnName("catch_all");
@@ -774,6 +782,10 @@ namespace OnlineSales.Migrations
                     b.Property<List<DnsRecord>>("DnsRecords")
                         .HasColumnType("jsonb")
                         .HasColumnName("dns_records");
+
+                    b.Property<string>("FaviconUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("favicon_url");
 
                     b.Property<bool?>("Free")
                         .HasColumnType("boolean")

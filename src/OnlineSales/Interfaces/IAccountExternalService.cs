@@ -8,6 +8,6 @@ namespace OnlineSales.Interfaces
 {
     public interface IAccountExternalService
     {
-        Task<AccountDetailsInfo> GetAccountDetails(string domain);
+        Task<AccountDetailsInfo?> GetAccountDetails(string domain);
     }
 }

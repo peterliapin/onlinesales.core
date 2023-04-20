@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.DTOs;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests.TestServices
@@ -14,9 +13,9 @@ namespace OnlineSales.Tests.TestServices
             var emailVerifyInfo = new EmailVerifyInfoDto()
             {
                 EmailAddress = email,
-                CatchAllCheck = "true",
-                DisposableCheck = "false",
-                FreeCheck = "false",
+                CatchAllCheck = true,
+                DisposableCheck = false,
+                FreeCheck = false,
             };
 
             return Task.FromResult(emailVerifyInfo);

@@ -6,5 +6,18 @@ namespace OnlineSales.Plugin.SendGrid.DTOs;
 
 public class EmailDto
 {
-    public string Email { get; set; } = string.Empty;
+    private string email = string.Empty;
+
+    public string Email
+    {
+        get
+        {
+            return email;
+        }
+
+        set
+        {
+            email = value.ToLower();
+        }
+    }
 }
