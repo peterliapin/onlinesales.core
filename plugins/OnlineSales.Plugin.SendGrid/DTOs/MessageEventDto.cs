@@ -16,9 +16,9 @@ public class MessageEventDto : EmailDto
 
     public string Event { get; set; } = string.Empty;
 
-    public string Type { get; set; } = string.Empty;
+    public string? Type { get; set; } = string.Empty;
 
-    public string Reason { get; set; } = string.Empty;
+    public string? Reason { get; set; } = string.Empty;
 
     [Name("originating_ip")]
     public string? OriginatingIp { get; set; } = string.Empty;

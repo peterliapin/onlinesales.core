@@ -36,6 +36,7 @@ public abstract class BaseContactDto
 
     public string? Language { get; set; }
 
+    [SwaggerHide]
     public int? UnsubscribeId { get; set; }
 
     public string? Source { get; set; }
@@ -43,15 +44,41 @@ public abstract class BaseContactDto
 
 public class ContactCreateDto : BaseContactDto
 {
+    private string email = string.Empty;
+
     [Required]
     [EmailAddress]
-    public string Email { get; set; } = string.Empty;
+    public string Email
+    {
+        get
+        {
+            return email;
+        }
+
+        set
+        {
+            email = value.ToLower();
+        }
+    }
 }
 
 public class ContactUpdateDto : BaseContactDto
 {
+    private string? email;
+
     [EmailAddress]
-    public string? Email { get; set; }
+    public string? Email
+    {
+        get
+        {
+            return email;
+        }
+
+        set
+        {
+            email = value == null ? null : value.ToLower();
+        }
+    }
 }
 
 public class ContactDetailsDto : ContactCreateDto
@@ -69,9 +96,22 @@ public class ContactDetailsDto : ContactCreateDto
 
 public class ContactImportDto : BaseImportDto
 {
+    private string? email;
+
     [Optional]
     [EmailAddress]
-    public string? Email { get; set; } = string.Empty;
+    public string? Email
+    {
+        get
+        {
+            return email;
+        }
+
+        set
+        {
+            email = value == null ? null : value.ToLower();
+        }
+    }
 
     [Optional]
     public string? LastName { get; set; }

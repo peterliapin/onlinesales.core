@@ -91,7 +91,7 @@ public class TaskConfig
     public int RetryInterval { get; set; }
 }
 
-public class ChangeLogTaskConfig : TaskConfig
+public class TaskWithBatchConfig : TaskConfig
 {
     public int BatchSize { get; set; }
 }

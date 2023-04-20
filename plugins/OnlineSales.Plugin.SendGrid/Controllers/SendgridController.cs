@@ -175,7 +175,7 @@ public class SendgridController : ControllerBase
             CreatedAt = GetDateTime(me.Processed),
             Event = GetEvent(me),
             MessageId = me.SendGridMessageId,
-            Reason = me.Reason,
+            Reason = me.Reason ?? string.Empty,
             Ip = me.OriginatingIp,
             Contact = contact,
         };

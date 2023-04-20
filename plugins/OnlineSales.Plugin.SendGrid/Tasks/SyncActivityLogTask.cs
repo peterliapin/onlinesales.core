@@ -34,7 +34,7 @@ namespace OnlineSales.SendGrid.Tasks
         {
             this.sgDbContext = dbContext;
             this.logService = logService;
-            var config = configuration.GetSection(this.configKey) !.Get<ChangeLogTaskConfig>();
+            var config = configuration.GetSection(this.configKey) !.Get<TaskWithBatchConfig>();
             if (config is not null)
             {
                 batchSize = config.BatchSize;

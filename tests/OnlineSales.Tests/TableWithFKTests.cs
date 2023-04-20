@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.Entities;
-
 namespace OnlineSales.Tests;
 
 public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>

@@ -2,11 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
-using Nest;
-using OnlineSales.DTOs;
-using OnlineSales.Entities;
-
 namespace OnlineSales.Tests;
 public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
 {
@@ -108,7 +103,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto>
     protected override DomainUpdateDto UpdateItem(TestDomain to)
     {
         var from = new DomainUpdateDto();
-        to.Name = from.Name = "new-" + to.Name;
+        to.Description = from.Description = "new-" + to.Description;
         return from;
     }
 }

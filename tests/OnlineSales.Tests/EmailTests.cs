@@ -2,20 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using FluentAssertions;
+namespace OnlineSales.Tests;
 
-namespace OnlineSales.Tests
+public class EmailTests : BaseTest
 {
-    public class EmailTests : BaseTest
+    [Fact]
+    public async Task RetrieveInformationsFromEmail()
     {
-        [Fact]
-        public async Task RetrieveInformationsFromEmail()
-        {
-            var email = "hello@wave-access.com";
-            var url = "/api/email/verify/" + email;
-            var requestedData = await GetTest(url);
+        var email = "hello@wave-access.com";
+        var url = "/api/email/verify/" + email;
+        var requestedData = await GetTest(url);
 
-            requestedData.Should().NotBeNull();
-        }
+        requestedData.Should().NotBeNull();
     }
 }

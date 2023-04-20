@@ -122,7 +122,7 @@ namespace OnlineSales.Controllers
         }
 
         [HttpGet("export")]
-        [Produces("text/csv")]
+        [Produces("text/csv", "text/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)

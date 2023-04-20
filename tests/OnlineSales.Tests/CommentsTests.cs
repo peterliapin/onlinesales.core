@@ -3,9 +3,6 @@
 // </copyright>
 
 using System.Text.Json;
-using FluentAssertions;
-using OnlineSales.DTOs;
-using OnlineSales.Entities;
 
 namespace OnlineSales.Tests;
 

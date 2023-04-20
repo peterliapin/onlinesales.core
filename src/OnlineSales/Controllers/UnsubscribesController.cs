@@ -5,37 +5,22 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class UnsubscribesController : Controller
+public class UnsubscribesController : BaseControllerWithImport<Unsubscribe, UnsubscribeDto, UnsubscribeDto, UnsubscribeDetailsDto, UnsubscribeImportDto>
 {
-    protected readonly PgDbContext dbContext;
-    protected readonly IMapper mapper;
-
-    public UnsubscribesController(PgDbContext dbContext, IMapper mapper)
+    public UnsubscribesController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService, EsDbContext esDbContext)
+        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
-        this.dbContext = dbContext;
-        this.mapper = mapper;
-    }
-
-    // GET api/unsubscribes/
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public virtual async Task<ActionResult<List<Unsubscribe>>> GetAll()
-    {
-        var unsibscribes = await (from u in dbContext.Unsubscribes
-                                  select u)
-                           .ToListAsync();
-
-        return Ok(unsibscribes);
     }
 }
 
