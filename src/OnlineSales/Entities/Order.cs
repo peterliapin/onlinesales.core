@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
@@ -22,7 +23,6 @@ public class Order : BaseEntity
     [Required]
     public int ContactId { get; set; }
 
-    [JsonIgnore]
     [ForeignKey("ContactId")]
     public virtual Contact? Contact { get; set; }
 
@@ -89,4 +89,7 @@ public class Order : BaseEntity
 
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
+
+    [Ignore]
+    public virtual ICollection<OrderItem>? OrderItems { get; set; }
 }

@@ -2,12 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Collections;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using AutoMapper.Internal;
-using Nest;
+using OnlineSales.Data;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
@@ -15,22 +18,51 @@ namespace OnlineSales.Infrastructure
     public class QueryParseData<T>
         where T : BaseEntityWithId
     {
-        public readonly int Limit = 0;
-        public readonly int Skip = 0;
-        public readonly ImmutableList<string> SearchData;
-        public readonly ImmutableList<WhereCommandData> WhereData;
-        public readonly ImmutableList<OrderCommandData> OrderData;
-        public readonly SelectCommandData SelectData;
+        private readonly PgDbContext dbContext;
 
-        public QueryParseData(string[] cmds, int maxLimitSize)
+        public QueryParseData(string[] cmds, int maxLimitSize, PgDbContext dbContext)
         {
+            this.dbContext = dbContext;
             var commands = Parse(cmds);
+            IncludeData = ParseIncludeCommands(commands);
             Limit = ParseLimitCommands(commands, maxLimitSize);
             Skip = ParseSkipCommands(commands);
             SearchData = ParseSearchCommands(commands);
             WhereData = ParseWhereCommands(commands);
             OrderData = ParseOrderCommands(commands);
             SelectData = ParseSelectCommands(commands);
+        }
+
+        public int Limit { get; set; } = 0;
+
+        public int Skip { get; set; } = 0;
+
+        public List<string> SearchData { get; set; }
+
+        public List<WhereCommandData> WhereData { get; set; }
+
+        public List<OrderCommandData> OrderData { get; set; }
+
+        public List<PropertyInfo> IncludeData { get; set; }
+
+        public SelectCommandData SelectData { get; set; }
+
+        private static PropertyInfo ParseProperty(string? propertyName, QueryCommand cmd)
+        {
+            if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new QueryException(cmd.Source, "Property field not found");
+            }
+
+            var typeProperties = typeof(T).GetProperties();
+            var property = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
+
+            if (property == null)
+            {
+                throw new QueryException(cmd.Source, $"No such property '{propertyName}'");
+            }
+
+            return property;
         }
 
         private QueryCommand[] Parse(string[] query)
@@ -137,7 +169,7 @@ namespace OnlineSales.Infrastructure
             };
         }
 
-        private ImmutableList<OrderCommandData> ParseOrderCommands(QueryCommand[] commands)
+        private List<OrderCommandData> ParseOrderCommands(QueryCommand[] commands)
         {
             var result = new List<OrderCommandData>();
 
@@ -165,10 +197,10 @@ namespace OnlineSales.Infrastructure
                 result.Add(new OrderCommandData("Id"));
             }
 
-            return result.ToImmutableList();
+            return result;
         }
 
-        private ImmutableList<string> ParseSearchCommands(QueryCommand[] commands)
+        private List<string> ParseSearchCommands(QueryCommand[] commands)
         {
             var result = new List<string>();
             foreach (var cmdValue in commands.Where(c => c.Type == FilterType.Search && c.Value.Length > 0).Select(cmd => cmd.Value))
@@ -176,10 +208,10 @@ namespace OnlineSales.Infrastructure
                 result.Add(cmdValue);
             }
 
-            return result.ToImmutableList();
+            return result;
         }
 
-        private ImmutableList<WhereCommandData> ParseWhereCommands(QueryCommand[] commands)
+        private List<WhereCommandData> ParseWhereCommands(QueryCommand[] commands)
         {
             var result = new List<WhereCommandData>();
             var orResult = new List<WhereUnitData>();
@@ -226,7 +258,7 @@ namespace OnlineSales.Infrastructure
                 });
             }
 
-            return result.ToImmutableList();
+            return result;
         }
 
         private int ParseLimitCommands(QueryCommand[] commands, int maxLimitSize)
@@ -274,9 +306,31 @@ namespace OnlineSales.Infrastructure
             return res;
         }
 
+        private List<PropertyInfo> ParseIncludeCommands(QueryCommand[] commands)
+        {
+            var result = new List<PropertyInfo>();
+            foreach (var cmd in commands.Where(c => c.Type == FilterType.Include).ToArray())
+            {
+                var property = ParseProperty(cmd.Value, cmd);
+                var isCollection = property.PropertyType.IsGenericType && typeof(ICollection<>).MakeGenericType(property.PropertyType.GetGenericArguments()).IsAssignableFrom(property.PropertyType);
+
+                if (dbContext.Model.FindEntityType(property.PropertyType) != null
+                    || (isCollection && dbContext.Model.FindEntityType(property.PropertyType.GetGenericArguments().Single()) != null))
+                {
+                    result.Add(property);
+                }
+                else
+                {
+                    throw new QueryException(cmd.Source, "Invalid property in include query");
+                }
+            }
+
+            return result;
+        }     
+
         public sealed class SelectCommandData
         {
-            public IList<PropertyInfo> SelectedProperties { get; set; } = new List<PropertyInfo>();
+            public List<PropertyInfo> SelectedProperties { get; set; } = new List<PropertyInfo>();
 
             public bool IsSelect { get; set; } = false;
         }
@@ -426,24 +480,6 @@ namespace OnlineSales.Infrastructure
                 }
 
                 return parsedValue;
-            }
-
-            private static PropertyInfo ParseProperty(string? propertyName, QueryCommand cmd)
-            {
-                if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
-                {
-                    throw new QueryException(cmd.Source, "Property field not found");
-                }
-
-                var typeProperties = typeof(T).GetProperties();
-                var property = typeProperties.FirstOrDefault(p => p.Name.ToLowerInvariant() == propertyName.ToLowerInvariant());
-
-                if (property == null)
-                {
-                    throw new QueryException(cmd.Source, $"No such property '{propertyName}'");
-                }
-
-                return property;
             }
 
             private WOperand ParseOperation(string? rawOperation, QueryCommand cmd)

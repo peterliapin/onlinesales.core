@@ -14,6 +14,6 @@ public class TestEmailTemplate : EmailTemplateCreateDto
         FromEmail = $"test{uid}@test.net";
         FromName = "TestEmailTemaplteFromName";
         Language = "en";
-        GroupId = groupId;
+        EmailGroupId = groupId;
     }
 }

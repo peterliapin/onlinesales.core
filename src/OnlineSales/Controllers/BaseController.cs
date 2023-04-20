@@ -132,7 +132,6 @@ namespace OnlineSales.Controllers
             var result = await qp.GetResult();
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
             this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
-
             return Ok(mapper.Map<List<TD>>(result.Records));
         }
 
@@ -153,12 +152,12 @@ namespace OnlineSales.Controllers
         private IQueryProvider<T> BuildQueryProvider(int maxLimitSize)
         {
             var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
-            var parseData = new QueryParseData<T>(queryCommands, maxLimitSize);
+            var parseData = new QueryParseData<T>(queryCommands, maxLimitSize, dbContext);
 
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && parseData.SearchData.Count > 0)
             {
                 var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                return new ESQueryProvider<T>(elasticClient, parseData, indexPrefix!);
+                return new MixedQueryProvider<T>(parseData, this.dbSet!.AsQueryable<T>(), elasticClient, indexPrefix!/*, dbContext*/);
             }
             else
             {

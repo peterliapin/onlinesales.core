@@ -15,9 +15,9 @@ namespace OnlineSales.Entities;
 public class Unsubscribe : BaseCreateByEntity
 {
     public string Reason { get; set; } = string.Empty;
-
+    
     public int? ContactId { get; set; }
-
+   
     [Ignore]
     [JsonIgnore]
     [ForeignKey("ContactId")]

@@ -4,6 +4,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Nest;
+using Newtonsoft.Json;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
@@ -22,5 +24,8 @@ namespace OnlineSales.Entities
         [Required]
         [Searchable]
         public string Language { get; set; } = string.Empty;
+
+        [JsonIgnore]
+        public virtual ICollection<EmailTemplate>? EmailTemplates { get; set; }
     }
 }

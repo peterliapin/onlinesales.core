@@ -69,13 +69,18 @@ public class Domain : BaseEntityWithIdAndDates
     public bool? MxCheck { get; set; }
 
     public int? AccountId { get; set; }
-    
+
+    [Ignore]
     [JsonIgnore]
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
 
     public AccountSyncStatus AccountStatus { get; set; } = AccountSyncStatus.NotIntended;
+
+    [Ignore]
+    [JsonIgnore]
+    public virtual ICollection<Contact>? Contacts { get; set; }
 }
 
 public class DnsRecord

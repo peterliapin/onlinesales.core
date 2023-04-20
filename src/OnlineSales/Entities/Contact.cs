@@ -81,15 +81,21 @@ public class Contact : BaseEntity
 
     public int? AccountId { get; set; }
 
-    [DeleteBehavior(DeleteBehavior.Restrict)]
+    [Ignore]
     [JsonIgnore]
     [ForeignKey("AccountId")]
+    [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
-
+    
     public int? UnsubscribeId { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.SetNull)]
+    
+    [Ignore]
     [JsonIgnore]
     [ForeignKey("UnsubscribeId")]
+    [DeleteBehavior(DeleteBehavior.SetNull)]
     public virtual Unsubscribe? Unsubscribe { get; set; }
+
+    [Ignore]
+    [JsonIgnore]
+    public virtual ICollection<Order>? Orders { get; set; }
 }

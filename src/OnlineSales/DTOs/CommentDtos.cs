@@ -22,7 +22,7 @@ public class CommentCreateDto
     [Required]
     public int ContentId { get; set; }
 
-    public int? ParentId { get; set; }
+    public int? ParentId { get; set; }    
 
     [Optional]
     public string? Source { get; set; }
@@ -34,13 +34,22 @@ public class CommentUpdateDto
     public string Body { get; set; } = string.Empty;
 }
 
-public class CommentDetailsDto : CommentCreateDto
+public class CommentDetailsDtoBase : CommentCreateDto
 {
     public int Id { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+}
+
+public class CommentDetailsDto : CommentDetailsDtoBase
+{
+    [Ignore]
+    public ContentDetailsDtoBase? Content { get; set; }
+
+    [Ignore]
+    public CommentDetailsDtoBase? Parent { get; set; }
 }
 
 public class CommentImportDto : BaseImportDto

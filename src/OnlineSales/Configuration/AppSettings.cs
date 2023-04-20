@@ -19,7 +19,7 @@ public class PostgresConfig : BaseServiceConfig
 {
     public string Database { get; set; } = string.Empty;
 
-    public string ConnectionString => $"User ID={UserName};Password={Password};Server={Server};Port={Port};Database={Database};Pooling=true;";
+    public string ConnectionString => $"User ID={UserName};Password={Password};Server={Server};Port={Port};Database={Database};Pooling=true;IncludeErrorDetails=true;";
 }
 
 public class ElasticConfig : BaseServiceConfig

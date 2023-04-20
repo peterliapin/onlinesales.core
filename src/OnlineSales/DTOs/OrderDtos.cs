@@ -45,7 +45,7 @@ public class OrderUpdateDto
     public string? Data { get; set; }
 }
 
-public class OrderDetailsDto : OrderCreateDto
+public class OrderDetailsDtoBase : OrderCreateDto
 {
     public int Id { get; set; }
 
@@ -56,6 +56,15 @@ public class OrderDetailsDto : OrderCreateDto
     public int Quantity { get; set; }
 
     public decimal Total { get; set; }
+}
+
+public class OrderDetailsDto : OrderDetailsDtoBase
+{
+    [Ignore]
+    public List<OrderItemDetailsDtoBase>? OrderItems { get; set; }
+
+    [Ignore]
+    public ContactDetailsDtoBase? Contact { get; set; }
 }
 
 public class OrderImportDto : BaseImportDto

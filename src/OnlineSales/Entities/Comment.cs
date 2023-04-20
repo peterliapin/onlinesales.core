@@ -44,7 +44,7 @@ public class Comment : BaseEntity
     [JsonIgnore]
     [ForeignKey("ContentId")]
     public virtual Content? Content { get; set; }
-
+   
     public int? ParentId { get; set; }
 
     [Ignore]

@@ -4,6 +4,7 @@
 
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using AutoMapper;
 using AutoMapper.Internal;
@@ -34,6 +35,7 @@ namespace OnlineSales.Infrastructure
             var totalCount = query.Count();
             IList<T>? records;
 
+            AddIncludeCommands();
             AddOrderCommands();
             AddSkipCommand();
             AddLimitCommand();
@@ -47,6 +49,14 @@ namespace OnlineSales.Infrastructure
             }
 
             return new QueryResult<T>(records, totalCount);
+        }
+
+        private void AddIncludeCommands()
+        {
+            foreach (var data in parseData.IncludeData)
+            {
+                query = query.Include(data.Name);
+            }
         }
 
         private void AddOrderCommands()
