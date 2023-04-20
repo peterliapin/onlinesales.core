@@ -14,7 +14,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
-[Authorize(AuthenticationSchemes = "Bearer")]
+[Authorize]
 [Route("api/[controller]")]
 public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto, EmailGroupDetailsDto>
 {

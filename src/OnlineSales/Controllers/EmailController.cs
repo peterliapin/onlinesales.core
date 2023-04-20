@@ -12,7 +12,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
     [Route("api/[controller]")]
     public class EmailController : ControllerBase
     {

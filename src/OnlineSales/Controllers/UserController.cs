@@ -18,7 +18,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
-[Authorize(AuthenticationSchemes = "Bearer")]
+[Authorize]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {

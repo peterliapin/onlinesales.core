@@ -16,7 +16,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Controllers;
 
-[Authorize(AuthenticationSchemes = "Bearer")]
+[Authorize]
 [Route("api/[controller]")]
 public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto, LinkDetailsDto>
 {

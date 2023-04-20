@@ -466,7 +466,11 @@ public class Program
             options.SlidingExpiration = true;
         });
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
             .AddMicrosoftIdentityWebApi(
              jwtOptions =>
              {
