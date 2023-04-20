@@ -15,7 +15,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(AuthenticationSchemes = "Bearer")]
 [Route("api/[controller]")]
 public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderItemCreateDto, OrderItemUpdateDto, OrderItemDetailsDto, OrderItemImportDto>
 {

@@ -13,7 +13,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(AuthenticationSchemes = "Bearer")]
 [Route("api/[controller]")]
 public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
