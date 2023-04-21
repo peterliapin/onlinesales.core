@@ -334,6 +334,8 @@ public class Program
 
             config.SchemaFilter<CustomSwaggerScheme>();
 
+            config.UseInlineDefinitionsForEnums();
+
             config.SwaggerDoc("v1", openApiInfo);
         });
     }

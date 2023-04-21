@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using AutoMapper.Internal;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using OnlineSales.DataAnnotations;
@@ -20,72 +21,74 @@ namespace OnlineSales.Infrastructure
 
         public void Apply(OpenApiSchema schema, SchemaFilterContext context)
         {
-            if (context.Type.Namespace!.Contains("OnlineSales"))
+            if (context.Type.Namespace!.Contains("OnlineSales") && schema.Properties.Any())
             {
-                if (schema.Properties.Any())
+                var properties = context.Type.GetProperties();
+                foreach (var propertySchema in schema.Properties)
                 {
-                    var properties = context.Type.GetProperties();
-                    foreach (var propertySchema in schema.Properties)
+                    propertySchema.Value.Title = CreateTitle(propertySchema.Key);
+                    var property = properties.FirstOrDefault(m => m.Name.Equals(propertySchema.Key, StringComparison.OrdinalIgnoreCase));
+                    if (property != null)
                     {
-                        propertySchema.Value.Title = CreateTitle(propertySchema.Key);
-                        var property = properties.FirstOrDefault(m => m.Name.Equals(propertySchema.Key, StringComparison.OrdinalIgnoreCase));
-                        if (property != null)
+                        if (property.GetCustomAttribute<SwaggerHideAttribute>() != null)
                         {
-                            if (property.GetCustomAttribute<SwaggerHideAttribute>() != null)
-                            {
-                                propertySchema.Value.Extensions.Add("x-hide", new OpenApiBoolean(true));
-                            }
+                            propertySchema.Value.Extensions.Add("x-hide", new OpenApiBoolean(true));
+                        }
 
-                            if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
+                        if (GetTypeFromNullable(property.PropertyType).IsEnum)
+                        {
+                            propertySchema.Value.Example = new OpenApiString(Activator.CreateInstance(GetTypeFromNullable(property.PropertyType)) !.ToString());
+                        }
+                        else if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
+                        {
+                            SetIntegerExample(property, propertySchema.Value);
+                        }
+                        else if (property.PropertyType == typeof(string))
+                        {
+                            if (property.GetCustomAttribute<EmailAddressAttribute>() != null)
                             {
-                                SetIntegerExample(property, propertySchema.Value);
+                                propertySchema.Value.Pattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){1,63})+)$";
+                                SetStringExample(property, propertySchema.Value, "example@example.com");
                             }
-                            else if (property.PropertyType == typeof(string))
+                            else if (property.GetCustomAttribute<CurrencyCodeAttribute>() != null)
                             {
-                                if (property.GetCustomAttribute<EmailAddressAttribute>() != null)
-                                {
-                                    propertySchema.Value.Pattern = @"^([\w\.\-]+)@([\w\-]+)((\.(\w){1,63})+)$";
-                                    SetStringExample(property, propertySchema.Value, "example@example.com");
-                                }
-                                else if (property.GetCustomAttribute<CurrencyCodeAttribute>() != null)
-                                {
-                                    propertySchema.Value.Pattern = CurrencySymbolsRegex;
-                                    SetStringExample(property, propertySchema.Value, "USD");
-                                }
-                                else 
-                                {
-                                    SetStringExample(property, propertySchema.Value);
-                                }
+                                propertySchema.Value.Pattern = CurrencySymbolsRegex;
+                                SetStringExample(property, propertySchema.Value, "USD");
                             }
-                            else if (property.PropertyType == typeof(double) || property.PropertyType == typeof(double?) || property.PropertyType == typeof(decimal) || property.PropertyType == typeof(decimal?))
+                            else 
                             {
-                                SetDoubleExample(property, propertySchema.Value);
-                            }
-                            else if (property.PropertyType == typeof(string[]))
-                            {
-                                SetStringArrayExample(property, propertySchema.Value);
-                            }
-                            else if (property.PropertyType == typeof(Dictionary<string, string>))
-                            {
-                                SetDictionaryArrayExample(property, propertySchema.Value);
-                            }
-                            else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
-                            {
-                                propertySchema.Value.Example = new OpenApiBoolean(true);
-                            }
-                            else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
-                            {
-                                SetStringExample(property, propertySchema.Value, new DateTime(2023, 04, 18, 12, 0, 0, DateTimeKind.Utc).ToString("O"));
-                                propertySchema.Value.Pattern = @"^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(2[0-4]|1[0-9]|0[1-9]):(2[0-4]|1[0-9]|0[1-9]):([1-5]?0[0-9]).(\d{7})Z$";
+                                SetStringExample(property, propertySchema.Value);
                             }
                         }
+                        else if (property.PropertyType == typeof(double) || property.PropertyType == typeof(double?) || property.PropertyType == typeof(decimal) || property.PropertyType == typeof(decimal?))
+                        {
+                            SetDoubleExample(property, propertySchema.Value);
+                        }
+                        else if (property.PropertyType == typeof(string[]))
+                        {
+                            SetStringArrayExample(property, propertySchema.Value);
+                        }
+                        else if (property.PropertyType == typeof(Dictionary<string, string>))
+                        {
+                            SetDictionaryArrayExample(property, propertySchema.Value);
+                        }
+                        else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                        {
+                            propertySchema.Value.Example = new OpenApiBoolean(true);
+                        }
+                        else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
+                        {
+                            SetStringExample(property, propertySchema.Value, new DateTime(2023, 04, 18, 12, 0, 0, DateTimeKind.Utc).ToString("O"));
+                            propertySchema.Value.Pattern = @"^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(2[0-4]|1[0-9]|0[1-9]):(2[0-4]|1[0-9]|0[1-9]):([1-5]?0[0-9]).(\d{7})Z$";
+                        }                            
                     }
                 }
-                else if (schema.Enum.Count > 0)
-                {
-                    schema.Title = CreateTitle(context.Type.Name);
-                }              
             }
+        }
+
+        private static Type GetTypeFromNullable(Type type)
+        {
+            return type.IsNullableType() ? Nullable.GetUnderlyingType(type) ! : type;
         }
 
         private static void SetIntegerExample(PropertyInfo property, OpenApiSchema schema)
