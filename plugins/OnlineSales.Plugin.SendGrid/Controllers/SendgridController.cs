@@ -120,7 +120,12 @@ public class SendgridController : ControllerBase
                     var sgevent = Convert<T>(record, contactAndRecords.Key);
                     var existingRecord = existingRecords.FirstOrDefault(e => e.Contact!.Email == sgevent.Contact!.Email && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt);
                     if (existingRecord == null)
-                    {
+                    {                        
+                        if (sgevent.Contact != null && sgevent.Contact.DomainId > 0)
+                        {
+                            sgevent.Contact.Domain = null;
+                        }
+
                         await dbContext.SendgridEvents!.AddAsync(sgevent);
                     }
                 }
