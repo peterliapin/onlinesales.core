@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="OnlineSales ruleset for code analyzers" ToolsVersion="14.0">
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+    <Rule Id="CS1591" Action="None" /> <!-- Missing XML comment for publicly visible type or member -->
+  </Rules>    
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA0001" Action="None" /> <!-- XML comments -->
+    <Rule Id="S125" Action="None" /> <!-- Remove this commented out code -->
+    <Rule Id="SA1518" Action="None" /> <!-- Code should not contain blank lines at the end of the file -->
+    <Rule Id="SA1600" Action="None" /> <!-- Elements should be documented -->
+    <Rule Id="SA1028" Action="None" /> <!-- Code should not contain trailing whitespace -->
+    <Rule Id="S1118" Action="None" /> <!-- Add a 'protected' constructor or the 'static' keyword to the class declaration -->
+    <Rule Id="SA1101" Action="None" /> <!-- Prefix local calls with this -->
+    <Rule Id="S1135" Action="None" /> <!-- Complete the task associated to this 'TODO' comment -->
+    <Rule Id="SA1401" Action="None" /> <!-- Field should be private -->
+    <Rule Id="SA1512" Action="None" /> <!-- Single-line comments should not be followed by blank line -->
+    <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
+    <Rule Id="S3881" Action="None" /> <!-- Fix this implementation of 'IDisposable' to conform to the dispose pattern -->
+    <Rule Id="S3925" Action="None" /> <!-- Update this implementation of 'ISerializable' to conform to the recommended serialization pattern. -->
+    <Rule Id="SA1011" Action="None" /> <!-- This is not working properly with Arrays ClosingSquareBracketsMustBeSpacedCorrectly -->
+  </Rules>
+</RuleSet>

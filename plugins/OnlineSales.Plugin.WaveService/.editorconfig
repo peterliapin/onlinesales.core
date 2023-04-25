@@ -1,0 +1,29 @@
+﻿# top-most EditorConfig file
+root = true
+
+[*]
+# (Please don't specify an indent_size here; that has too many unintended consequences.)
+indent_style = space
+insert_final_newline = false
+trim_trailing_whitespace = true
+
+# Code files
+[*.{cs,csx,vb,vbx}]
+indent_size = 4
+dotnet_sort_system_directives_first = true
+
+# Xml project files
+[*.{xml,csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
+indent_size = 2
+
+# Xml config files
+[*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# YML files
+[*.yml]
+indent_size = 2
