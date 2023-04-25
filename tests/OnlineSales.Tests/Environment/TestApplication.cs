@@ -88,7 +88,7 @@ public class TestApplication : WebApplicationFactory<Program>
         }
         catch
         {
-            Thread.Sleep(10000);
+            Thread.Sleep(1000);
             RenewDatabase(context);
         }
     }
