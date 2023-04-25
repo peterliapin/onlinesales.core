@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -30,8 +31,7 @@ public class TestApplication : WebApplicationFactory<Program>
         using (var scope = Services.CreateScope())
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-            dataContaxt.Database.EnsureDeleted();
-            dataContaxt.Database.Migrate();
+            RenewDatabase(dataContaxt);
 
             var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
             esDbContext.ElasticClient.Indices.Delete("*");
@@ -77,5 +77,19 @@ public class TestApplication : WebApplicationFactory<Program>
         });
 
         return base.CreateHost(builder);
+    }
+
+    private void RenewDatabase(PgDbContext context)
+    {
+        try
+        {
+            context.Database.EnsureDeleted();
+            context.Database.Migrate();
+        }
+        catch
+        {
+            Thread.Sleep(1000);
+            RenewDatabase(context);
+        }
     }
 }
