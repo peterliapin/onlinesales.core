@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Identity;
 public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
@@ -22,23 +23,6 @@ public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
             return;
         }
 
-        var user = await userManager.FindByEmailAsync(userEmail);
-        if (user == null)
-        {
-            user = new User
-            {
-                UserName = userEmail,
-                Email = userEmail,
-                CreatedAt = DateTime.UtcNow,
-                DisplayName = userEmail,
-            };
-            await userManager.CreateAsync(user);
-        }
-
-        user.LastTimeLoggedIn = DateTime.UtcNow;
-        await userManager.UpdateAsync(user);
-
-        await signInManager.SignInAsync(user, false, "AzureAdCookie");
-        context.HttpContext.User = await signInManager.CreateUserPrincipalAsync(user);
+        context.HttpContext.User = await IdentityHelper.TryLoginOnRegister(signInManager, userManager, userEmail, "AzureAdCookie");
     }
 }

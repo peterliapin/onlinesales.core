@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Entities;
-using Quartz.Impl.AdoJobStore.Common;
 
 namespace OnlineSales.Controllers;
 
@@ -20,7 +19,7 @@ public class IdentityController : ControllerBase
         this.signInManager = signInManager;
     }
 
-    [HttpGet("ExternalLogin")]
+    [HttpGet("external-login")]
     public ActionResult ExternalLogin(string returnUrl)
     {
         const string provider = "OpenIdConnect";
@@ -29,7 +28,7 @@ public class IdentityController : ControllerBase
         return new ChallengeResult(provider, properties);
     }
 
-    [HttpGet("Callback")]
+    [HttpGet("callback")]
     public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
     {
         var info = await signInManager.GetExternalLoginInfoAsync();

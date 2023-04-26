@@ -2,27 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Configuration;
-using System.Net.Mail;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
-using OnlineSales.Entities;
 using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
-using OnlineSales.Identity;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Services;
@@ -82,7 +71,7 @@ public class Program
         ConfigureCacheProfiles(builder);
 
         ConfigureConventions(builder);
-        ConfigureIdentity(builder);
+        IdentityHelper.ConfigureIdentity(builder);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();
@@ -475,61 +464,6 @@ public class Program
                     policy.WithOrigins(corsSettings.AllowedOrigins);
                 }
             });
-        });
-    }
-
-    private static void ConfigureIdentity(WebApplicationBuilder builder)
-    {
-        builder.Services.AddIdentity<User, IdentityRole>()
-            .AddEntityFrameworkStores<PgDbContext>();
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            // Cookie settings
-            options.Cookie.HttpOnly = true;
-            options.ExpireTimeSpan = TimeSpan.FromHours(12);
-            options.Cookie.Name = "auth_ticket";
-
-            options.LoginPath = "/api/Identity/ExternalLogin";
-            options.AccessDeniedPath = "/AccessDenied";
-            options.SlidingExpiration = true;
-        });
-
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-            .AddMicrosoftIdentityWebApi(
-             jwtOptions =>
-             {
-                 jwtOptions.Events = new AzureAdJwtBearerEventsHandler();
-             }, identityOptions =>
-             {
-                 identityOptions.Instance = builder.Configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
-                 identityOptions.TenantId = builder.Configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
-                 identityOptions.Domain = builder.Configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
-                 identityOptions.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
-                 identityOptions.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
-             });
-        builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(
-            identityOptions =>
-            {
-                identityOptions.Instance = builder.Configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
-                identityOptions.TenantId = builder.Configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
-                identityOptions.Domain = builder.Configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
-                identityOptions.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
-                identityOptions.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
-                identityOptions.CallbackPath = "/api/Identity/Callback";
-                identityOptions.SkipUnrecognizedRequests = true;
-            }, cookieOptions =>
-            {
-                cookieOptions.Cookie.Name = "auth_ticket";
-                cookieOptions.Events = new AzureAdCookieEventsHandler();
-            });
-        builder.Services.Configure<CookiePolicyOptions>(options =>
-        {
-            options.MinimumSameSitePolicy = SameSiteMode.None;
-            options.Secure = CookieSecurePolicy.Always;
         });
     }
 }

@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Identity;
 public class AzureAdJwtBearerEventsHandler : JwtBearerEvents
@@ -22,23 +23,6 @@ public class AzureAdJwtBearerEventsHandler : JwtBearerEvents
             return;
         }
 
-        var user = await userManager.FindByEmailAsync(userEmail);
-        if (user == null)
-        {
-            user = new User
-            {
-                UserName = userEmail,
-                Email = userEmail,
-                CreatedAt = DateTime.UtcNow,
-                DisplayName = userEmail,
-            };
-            await userManager.CreateAsync(user);
-        }
-
-        user.LastTimeLoggedIn = DateTime.UtcNow;
-        await userManager.UpdateAsync(user);
-
-        await signInManager.SignInAsync(user, false, "AzureAdBearer");
-        context.HttpContext.User = await signInManager.CreateUserPrincipalAsync(user);
+        context.HttpContext.User = await IdentityHelper.TryLoginOnRegister(signInManager, userManager, userEmail, "AzureAdBearer");
     }
 }

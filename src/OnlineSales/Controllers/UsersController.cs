@@ -1,16 +1,11 @@
-﻿// <copyright file="UserController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="UsersController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
-using System.Collections.Generic;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Nest;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -20,19 +15,17 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     protected readonly PgDbContext dbContext;
     protected readonly IMapper mapper;
     protected readonly UserManager<User> userManager;
-    protected readonly SignInManager<User> signInManager;
 
-    public UserController(PgDbContext dbContext, IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager)
+    public UsersController(PgDbContext dbContext, IMapper mapper, UserManager<User> userManager)
     {
         this.dbContext = dbContext;
         this.mapper = mapper;
         this.userManager = userManager;
-        this.signInManager = signInManager;
     }
 
     // GET api/user/
