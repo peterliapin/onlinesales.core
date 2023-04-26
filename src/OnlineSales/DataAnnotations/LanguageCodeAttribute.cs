@@ -2,20 +2,28 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Globalization;
 
 namespace OnlineSales.DataAnnotations;
 
 public class LanguageCodeAttribute : ValidationAttribute
 {
+    private readonly bool nullAllowed;
+
+    public LanguageCodeAttribute(bool nullAllowed = false)
+    {
+        this.nullAllowed = nullAllowed;
+    }
+
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        var languageCode = value as string;
-
-        if (string.IsNullOrEmpty(languageCode))
+        if (nullAllowed && value == null)
         {
-            return new ValidationResult("Invalid language code");
+            return ValidationResult.Success;
         }
+
+        var languageCode = value as string;
 
         if (CultureInfo.GetCultures(CultureTypes.AllCultures).FirstOrDefault(culture => culture.Name == languageCode) == null)
         {

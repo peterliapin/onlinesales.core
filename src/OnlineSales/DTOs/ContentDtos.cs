@@ -70,7 +70,7 @@ public class ContentUpdateDto
     public string? Author { get; set; }
 
     [MinLength(1)]
-    [LanguageCode]
+    [LanguageCode(nullAllowed: true)]
     public string? Language { get; set; }
 
     public string? Category { get; set; }
