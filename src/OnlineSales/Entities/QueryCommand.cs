@@ -21,8 +21,6 @@ namespace OnlineSales.Entities
     public enum WOperand
     {
         Equal = 0,
-        And = 1,
-        Or = 2,
         GreaterThan = 3,
         GreaterThanOrEqualTo = 4,
         LessThan = 5,
@@ -30,6 +28,8 @@ namespace OnlineSales.Entities
         NotEqual = 7,
         Like = 8,
         NLike = 9,
+        Contains = 10,
+        NContains = 11,
     }
 
     public class QueryCommand
@@ -46,8 +46,6 @@ namespace OnlineSales.Entities
         public static Dictionary<string, WOperand> OperandMappings { get; } = new Dictionary<string, WOperand>()
         {
             { "eq", WOperand.Equal },
-            { "and", WOperand.And },
-            { "or", WOperand.Or },
             { "gt", WOperand.GreaterThan },
             { "gte", WOperand.GreaterThanOrEqualTo },
             { "lt", WOperand.LessThan },
@@ -55,6 +53,8 @@ namespace OnlineSales.Entities
             { "neq", WOperand.NotEqual },
             { "like", WOperand.Like },
             { "nlike", WOperand.NLike },
+            { "contains", WOperand.Contains },
+            { "ncontains", WOperand.NContains },
         };
 
         public static string AvailableCommandString => FilterMappings.Keys.Aggregate(string.Empty, (acc, key) => $"{acc}{key}, ");
