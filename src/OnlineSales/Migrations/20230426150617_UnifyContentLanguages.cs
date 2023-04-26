@@ -21,7 +21,7 @@ namespace OnlineSales.Migrations
                    IF array_length(regexp_matches(fValue, 'ru', 'i'),1) > 0 THEN
    	                return 'ru-RU';
                    ELSEIF array_length(regexp_match(fValue, 'en', 'i'), 1) > 0 THEN
-   	                return 'en-EN';
+   	                return 'en-US';
                    END IF;
                    return fValue;
                 END;
