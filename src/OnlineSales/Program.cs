@@ -346,6 +346,33 @@ public class Program
                 swaggerConfigurator.ConfigureSwagger(config, openApiInfo);
             }
 
+            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+            {
+                Description = "Copy 'Bearer ' + valid JWT token into field",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+            });
+
+            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme()
+                    {
+                        Reference = new OpenApiReference()
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        },
+                        Scheme = "oauth2",  
+                        Name = "Bearer",
+                        In = ParameterLocation.Header,
+                    },
+                    new List<string>()
+                },
+            });
+
             config.SupportNonNullableReferenceTypes();
 
             config.SchemaFilter<CustomSwaggerScheme>();
@@ -460,6 +487,7 @@ public class Program
             // Cookie settings
             options.Cookie.HttpOnly = true;
             options.ExpireTimeSpan = TimeSpan.FromHours(12);
+            options.Cookie.Name = "auth_ticket";
 
             options.LoginPath = "/api/Identity/ExternalLogin";
             options.AccessDeniedPath = "/AccessDenied";
