@@ -44,8 +44,9 @@ public class UserController : ControllerBase
     public async Task<ActionResult<UserDetailsDto[]>> GetAll()
     {
         var allUsers = await userManager.Users.ToListAsync();
-        var resultsToClient = mapper.Map<UserDetailsDto[]>(allUsers);
-
+        var resultsToClient = mapper.Map<UserDetailsDto[]>(allUsers).ToArray();
+        this.Response.Headers.Add(ResponseHeaderNames.TotalCount, resultsToClient.Count().ToString());
+        this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
         return Ok(resultsToClient);
     }
 
