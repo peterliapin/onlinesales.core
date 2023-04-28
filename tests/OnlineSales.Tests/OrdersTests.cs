@@ -93,7 +93,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         result.Should().BeNull();
 
         var now = DateTime.UtcNow;
-        var timeStr = now.ToString("o");
+        var timeStr = now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][gt]=" + timeStr + "&query=q");
         result!.Count.Should().Be(0);

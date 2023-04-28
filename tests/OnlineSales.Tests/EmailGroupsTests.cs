@@ -128,7 +128,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         result.Should().BeNull();
 
         var now = DateTime.UtcNow;
-        var timeStr = now.ToString("o");
+        var timeStr = now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt][gt]=" + timeStr);
         result!.Count.Should().Be(0);
