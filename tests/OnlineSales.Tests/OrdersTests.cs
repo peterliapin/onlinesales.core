@@ -3,10 +3,11 @@
 // </copyright>
 
 using OnlineSales.Infrastructure;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, ISaveService<Order>>
 {
     public OrdersTests()
         : base("/api/orders")
@@ -30,7 +31,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te1st 4 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
 
         await SyncElasticSearch();
 
@@ -57,7 +58,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = testAN, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
         var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=Id");
@@ -93,7 +94,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>(entitiesNumber, to => to.AffiliateName = "AffiliateName", fkId);
         var bulkEntitiesList = mapper.Map<List<Order>>(bulkList);
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
 
         string totalCountHeader = string.Empty;
         while (totalCountHeader != $"{entitiesNumber}")
@@ -360,13 +361,13 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto>
         return from;
     }
 
-    protected override async Task<(int, string)> CreateFKItem()
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
     {
         var fkItemCreate = new TestContact();
 
-        var fkUrl = await PostTest("/api/contacts", fkItemCreate);
+        var fkUrl = await PostTest("/api/contacts", fkItemCreate, HttpStatusCode.Created, authToken);
 
-        var fkItem = await GetTest<Contact>(fkUrl);
+        var fkItem = await GetTest<Contact>(fkUrl, HttpStatusCode.OK, authToken);
 
         fkItem.Should().NotBeNull();
 

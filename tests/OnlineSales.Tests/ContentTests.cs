@@ -6,7 +6,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
-public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdateDto>
+public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdateDto, ISaveService<Content>>
 {
     public ContentTests()
         : base("/api/content")

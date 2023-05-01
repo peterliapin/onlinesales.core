@@ -59,6 +59,7 @@ public class Program
         builder.Services.AddTransient<IDomainService, DomainService>();        
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
+        builder.Services.AddTransient<ICommentService, CommentService>();        
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();

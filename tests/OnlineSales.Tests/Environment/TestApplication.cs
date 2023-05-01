@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OnlineSales.Data;
-using OnlineSales.Interfaces;
 using OnlineSales.Tests.TestServices;
 
 namespace OnlineSales.Tests.Environment;
@@ -38,12 +37,25 @@ public class TestApplication : WebApplicationFactory<Program>
         }
     }
 
-    public void PopulateBulkData(dynamic bulkItems)
+    public void PopulateBulkData<T, TS>(dynamic bulkItems)
+        where T : BaseEntityWithId
+        where TS : ISaveService<T>
     {
         using (var scope = Services.CreateScope())
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-            dataContaxt.AddRange(bulkItems);
+
+            var saveService = scope.ServiceProvider.GetService<TS>();
+
+            if (saveService != null)
+            {
+                saveService.SaveRangeAsync(bulkItems).Wait();
+            }
+            else
+            {
+                dataContaxt.AddRange(bulkItems);
+            }
+            
             dataContaxt.SaveChangesAsync().Wait();
         }
     }

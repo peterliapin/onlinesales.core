@@ -108,47 +108,55 @@ namespace OnlineSales.Services
                                          DomainName = domainService.GetDomainNameByEmail(contact.Email),
                                      };
 
-            var contactsWithDomainInfo = (from contactWithDomain in contactsWithDomain
-                                      join domain in pgDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
-                                      from domain in domainTemp.DefaultIfEmpty()
-                                      select new
-                                      {
-                                          Contact = contactWithDomain.Contact,
-                                          DomainName = contactWithDomain.DomainName,
-                                          Domain = domain,
-                                          DomainId = domain?.Id ?? 0,
-                                      }).ToList();
-
-            foreach (var contactWithDomainInfo in contactsWithDomainInfo)
+            try
             {
-                if (contactWithDomainInfo.DomainId != 0)
+                var contactsWithDomainInfo = (from contactWithDomain in contactsWithDomain
+                                              join domain in pgDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
+                                              from domain in domainTemp.DefaultIfEmpty()
+                                              select new
+                                              {
+                                                  Contact = contactWithDomain.Contact,
+                                                  DomainName = contactWithDomain.DomainName,
+                                                  Domain = domain,
+                                                  DomainId = domain?.Id ?? 0,
+                                              }).ToList();
+
+                foreach (var contactWithDomainInfo in contactsWithDomainInfo)
                 {
-                    contactWithDomainInfo.Contact.DomainId = contactWithDomainInfo.DomainId;
-                    contactWithDomainInfo.Contact.Domain = contactWithDomainInfo.Domain;
-                }
-                else
-                {                   
-                    var existingDomain = from newDomain in newDomains
-                                         where newDomain.Key == contactWithDomainInfo.DomainName
-                                         select newDomain;
-
-                    if (existingDomain.Any() is false)
+                    if (contactWithDomainInfo.DomainId != 0)
                     {
-                        var domain = new Domain()
-                        {
-                            Name = contactWithDomainInfo.DomainName,
-                            Source = contactWithDomainInfo.Contact.Email,
-                        };
-
-                        newDomains.Add(domain.Name, domain);
-                        await pgDbContext.AddAsync(domain);
-                        contactWithDomainInfo.Contact.Domain = domain;
+                        contactWithDomainInfo.Contact.DomainId = contactWithDomainInfo.DomainId;
+                        contactWithDomainInfo.Contact.Domain = contactWithDomainInfo.Domain;
                     }
                     else
                     {
-                        contactWithDomainInfo.Contact.Domain = existingDomain.FirstOrDefault().Value;
+                        var existingDomain = from newDomain in newDomains
+                                             where newDomain.Key == contactWithDomainInfo.DomainName
+                                             select newDomain;
+
+                        if (existingDomain.Any() is false)
+                        {
+                            var domain = new Domain()
+                            {
+                                Name = contactWithDomainInfo.DomainName,
+                                Source = contactWithDomainInfo.Contact.Email,
+                            };
+
+                            newDomains.Add(domain.Name, domain);
+                            await pgDbContext.AddAsync(domain);
+                            contactWithDomainInfo.Contact.Domain = domain;
+                        }
+                        else
+                        {
+                            contactWithDomainInfo.Contact.Domain = existingDomain.FirstOrDefault().Value;
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "error");
+                throw;
             }
         }
 

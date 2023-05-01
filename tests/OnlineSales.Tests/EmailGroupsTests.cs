@@ -3,9 +3,10 @@
 // </copyright>
 
 using OnlineSales.DataAnnotations;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests;
-public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto>
+public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto, ISaveService<EmailGroup>>
 {
     public EmailGroupsTests()
         : base("/api/email-groups")
@@ -29,7 +30,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         bulkList = TestData.GenerateAndPopulateAttributes<TestEmailGroup>("4", tc => tc.Name = "Te1st 3");
         bulkEntitiesList.Add(mapper.Map<EmailGroup>(bulkList));
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(bulkEntitiesList);
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][Name][like]=.*est");
         result!.Count.Should().Be(3);

@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, ISaveService<OrderItem>>
 {
     public OrdersItemsTests()
         : base("/api/order-items")
@@ -285,11 +285,11 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         return from;
     }
 
-    protected override async Task<(int, string)> CreateFKItem()
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
     {
         var contactCreate = new TestContact();
 
-        var contactUrl = await PostTest("/api/contacts", contactCreate);
+        var contactUrl = await PostTest("/api/contacts", contactCreate, HttpStatusCode.Created, authToken);
 
         var contact = await GetTest<Contact>(contactUrl);
 
@@ -297,7 +297,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         var orderCreate = new TestOrder(string.Empty, contact!.Id);
 
-        var orderUrl = await PostTest("/api/orders", orderCreate);
+        var orderUrl = await PostTest("/api/orders", orderCreate, HttpStatusCode.Created, authToken);
 
         var order = await GetTest<Order>(orderUrl);
 

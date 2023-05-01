@@ -3,9 +3,10 @@
 // </copyright>
 
 using System.Text.Json;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests;
-public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdateDto>
+public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdateDto, IContactService>
 {
     public ContactTests()
         : base("/api/contacts")
@@ -169,7 +170,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
             contacts.Add(contact);
         }
 
-        App.PopulateBulkData(contacts);
+        App.PopulateBulkData<Contact, IContactService>(contacts);
     }
 
     private string DomainChecker(string email)

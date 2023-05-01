@@ -21,6 +21,8 @@ public class ErrorsController : Controller
 
         ProblemDetails problemDetails;
 
+        Log.Error(error, $"Exception catched by the error controller.");
+
         switch (error)
         {
             case InvalidModelStateException exception:

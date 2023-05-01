@@ -4,14 +4,13 @@
 
 using System.Net.Mail;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
 using OnlineSales.Data;
 using OnlineSales.Entities;
-using OnlineSales.Interfaces; 
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services
 {
@@ -41,6 +40,8 @@ namespace OnlineSales.Services
 
         public async Task Verify(Domain domain)
         {
+            VerifyFreeAndDisposable(domain);
+
             if (domain.DnsCheck == null)
             {
                 await VerifyDns(domain);
@@ -294,7 +295,7 @@ namespace OnlineSales.Services
 
         private async Task<HttpResponseMessage?> GetRequest(string url)
         {
-            HttpClient client = new HttpClient();
+            var client = new HttpClient();
 
             try
             {

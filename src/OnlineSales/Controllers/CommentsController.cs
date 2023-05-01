@@ -10,6 +10,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
@@ -17,9 +18,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
-    public CommentsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
+    private readonly ICommentService commentService;
+
+    public CommentsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, ICommentService commentService, EsDbContext esDbContext)
         : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
+        this.commentService = commentService;
     }
 
     [HttpGet]
@@ -50,8 +54,21 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
+    public override async Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
     {
-        return base.Post(value);
+        var comment = mapper.Map<Comment>(value);
+
+        await commentService.SaveAsync(comment);
+
+        await dbContext.SaveChangesAsync();
+
+        var returnedValue = mapper.Map<CommentDetailsDto>(comment);
+
+        return CreatedAtAction(nameof(GetOne), new { id = comment.Id }, returnedValue);
+    }
+
+    protected override async Task SaveRangeAsync(List<Comment> comments)
+    {
+        await commentService.SaveRangeAsync(comments);
     }
 }
