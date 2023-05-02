@@ -90,6 +90,6 @@ public class Order : BaseEntity
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
 }

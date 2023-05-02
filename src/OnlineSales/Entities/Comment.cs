@@ -40,14 +40,14 @@ public class Comment : BaseEntity
     [Required]
     public int ContentId { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("ContentId")]
     public virtual Content? Content { get; set; }
    
     public int? ParentId { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("ParentId")]
     public virtual Comment? Parent { get; set; }

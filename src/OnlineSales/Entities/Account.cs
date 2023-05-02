@@ -55,11 +55,11 @@ public class Account : BaseEntity
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     public virtual ICollection<Contact>? Contacts { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     public virtual ICollection<Domain>? Domains { get; set; }
 }

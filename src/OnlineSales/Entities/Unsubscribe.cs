@@ -17,8 +17,8 @@ public class Unsubscribe : BaseCreateByEntity
     public string Reason { get; set; } = string.Empty;
     
     public int? ContactId { get; set; }
-   
-    [Ignore]
+
+    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("ContactId")]
     public virtual Contact? Contact { get; set; }

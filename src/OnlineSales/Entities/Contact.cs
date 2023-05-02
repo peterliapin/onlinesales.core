@@ -73,7 +73,7 @@ public class Contact : BaseEntity
     [Required]
     public int DomainId { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("DomainId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
@@ -81,21 +81,21 @@ public class Contact : BaseEntity
 
     public int? AccountId { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
     
     public int? UnsubscribeId { get; set; }
-    
-    [Ignore]
+
+    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("UnsubscribeId")]
     [DeleteBehavior(DeleteBehavior.SetNull)]
     public virtual Unsubscribe? Unsubscribe { get; set; }
 
-    [Ignore]
+    [Nest.Ignore]
     [JsonIgnore]
     public virtual ICollection<Order>? Orders { get; set; }
 }
