@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace OnlineSales.Tests;
 
-public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto>
+public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdateDto, ICommentService>
 {
     public CommentsTests()
         : base("/api/comments")
@@ -37,8 +37,10 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsBasic.csv", 2)]
     [InlineData("commentsBasic.json", 2)]
     public async Task ImportFileAddUpdateBasicTest(string fileName, int expectedCount)
-    {
-        await CreateAndGetItemWithAuthentification("Anonymous");
+    {        
+        await CreateFKItemsWithUid();
+        await CreateItem();
+
         await PostImportTest(itemsUrl, fileName);
 
         var newComment = await GetTest<Comment>($"{itemsUrl}/2");
@@ -58,20 +60,24 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsBasic.json")]
     public async Task ImportFileAddUpdateDataTest(string fileName)
     {
-        await CreateAndGetItemWithAuthentification("Anonymous");
+        await CreateFKItemsWithUid();
+        await CreateItem();
+
         await PostImportTest(itemsUrl, fileName);
 
         var updatedComment = await GetTest<Comment>($"{itemsUrl}/1");
         updatedComment.Should().NotBeNull();
 
-        updatedComment!.ContentId.Should().Be(1);
-        updatedComment!.AuthorName.Should().Be("TestComment1");
+        updatedComment!.ContentId.Should().Be(1);        
+        updatedComment!.ContactId.Should().NotBe(0);
+        updatedComment!.AuthorName.Should().Be("Author Name 1");
 
         var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
-        newComment!.ContentId.Should().Be(1);
-        newComment!.AuthorName.Should().Be("TestComment2");
+        newComment!.ContentId.Should().Be(1);        
+        newComment!.ContactId.Should().NotBe(0);
+        newComment!.AuthorName.Should().Be("Author Name 2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
     }
 
@@ -80,14 +86,17 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsFull.json")]
     public async Task ImportFileAddUpdateAllFieldsTest(string fileName)
     {
-        await CreateAndGetItemWithAuthentification("Anonymous");
+        await CreateFKItemsWithUid();
+        await CreateItem();
+
         await PostImportTest(itemsUrl, fileName);
 
         var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
 
         updatedComment!.ContentId.Should().Be(1);
-        updatedComment!.AuthorName.Should().Be("TestComment1");
+        updatedComment!.ContactId.Should().NotBe(0);
+        updatedComment!.AuthorName.Should().Be("Author Name 1");
         updatedComment!.UpdatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         updatedComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         updatedComment!.CreatedByIp.Should().Be("192.168.1.1");
@@ -99,7 +108,8 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         newComment.Should().NotBeNull();
 
         newComment!.ContentId.Should().Be(1);
-        newComment!.AuthorName.Should().Be("TestComment2");
+        newComment!.ContactId.Should().NotBe(0);
+        newComment!.AuthorName.Should().Be("Author Name 2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
         newComment!.UpdatedAt.Should().BeNull();
         newComment!.CreatedByIp.Should().Be("192.168.1.2");
@@ -129,7 +139,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task ImportFileWithParentKeysTest()
     {
-        await CreateFKItemsWithUid();
+        await CreateFKItemsWithUid(6);
         await PostImportTest(itemsUrl, "commentsWithParentKey.csv");
 
         var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
@@ -161,8 +171,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task MultiIterationsImportTest()
     {
-        var fkItemCreate1 = new TestContent("1");
-        await PostTest("/api/content", fkItemCreate1);
+        await CreateFKItemsWithUid(1);
 
         var importResult = await PostImportTest(itemsUrl, "commentsWithKey.csv");
 
@@ -193,6 +202,12 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         importResult.Skipped.Should().Be(2);
     }
 
+    protected override void MustBeEquivalent(object? expected, object? result)
+    {
+        result.Should().BeEquivalentTo(expected, options => options.Excluding(o => ((TestComment)o!).ContactId));
+        ((Comment)result!).ContactId.Should().BePositive();
+    }
+
     protected override async Task<(TestComment, string)> CreateItem(string uid, int fkId)
     {
         var testComment = new TestComment(uid, fkId);
@@ -202,7 +217,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         return (testComment, newCommentUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem()
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
     {
         var fkItemCreate = new TestContent();
 
@@ -222,12 +237,18 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         return from;
     }
 
-    private async Task CreateFKItemsWithUid()
+    private async Task CreateFKItemsWithUid(int contactsCount = 2)
     {
         var fkItemCreate1 = new TestContent("100");
         var fkItemCreate2 = new TestContent("101");
 
         await PostTest("/api/content", fkItemCreate1);
         await PostTest("/api/content", fkItemCreate2);
+
+        for (var i = 1; i <= contactsCount; i++)
+        {
+            var contact = new TestContact(i.ToString());
+            await PostTest("/api/contacts", contact);
+        }
     }
 }

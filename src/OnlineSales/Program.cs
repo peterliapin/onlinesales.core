@@ -59,6 +59,7 @@ public class Program
         builder.Services.AddTransient<IDomainService, DomainService>();        
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
+        builder.Services.AddTransient<ICommentService, CommentService>();        
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
@@ -71,6 +72,7 @@ public class Program
         ConfigureCacheProfiles(builder);
 
         ConfigureConventions(builder);
+        IdentityHelper.ConfigureIdentity(builder);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();
@@ -130,8 +132,12 @@ public class Program
         app.UseStaticFiles();
         app.UseCors();
 
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         PluginManager.Init(app);
 
+        app.UseCookiePolicy();
         app.MapControllers();
 
         app.UseSpa(spa =>
@@ -333,9 +339,38 @@ public class Program
                 swaggerConfigurator.ConfigureSwagger(config, openApiInfo);
             }
 
+            config.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+            {
+                Description = "Copy 'Bearer ' + valid JWT token into field",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer",
+            });
+
+            config.AddSecurityRequirement(new OpenApiSecurityRequirement()
+            {
+                {
+                    new OpenApiSecurityScheme()
+                    {
+                        Reference = new OpenApiReference()
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        },
+                        Scheme = "oauth2",  
+                        Name = "Bearer",
+                        In = ParameterLocation.Header,
+                    },
+                    new List<string>()
+                },
+            });
+
             config.SupportNonNullableReferenceTypes();
 
             config.SchemaFilter<CustomSwaggerScheme>();
+
+            config.UseInlineDefinitionsForEnums();
 
             config.SwaggerDoc("v1", openApiInfo);
         });

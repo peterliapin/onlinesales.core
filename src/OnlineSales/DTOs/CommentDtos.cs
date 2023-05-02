@@ -11,16 +11,32 @@ namespace OnlineSales.DTOs;
 
 public class CommentCreateDto
 {
-    public string AuthorName { get; set; } = string.Empty;
+    private string authorEmail = string.Empty;
 
+    [Required]
     [EmailAddress]
-    public string AuthorEmail { get; set; } = string.Empty;
+    public string AuthorEmail
+    {
+        get
+        {
+            return authorEmail;
+        }
+
+        set
+        {
+            authorEmail = value.ToLower();
+        }
+    }
+
+    public string AuthorName { get; set; } = string.Empty;
 
     [Required]
     public string Body { get; set; } = string.Empty;
 
     [Required]
     public int ContentId { get; set; }
+
+    public int? ContactId { get; set; }
 
     public int? ParentId { get; set; }    
 
@@ -54,13 +70,37 @@ public class CommentDetailsDto : CommentDetailsDtoBase
 
 public class CommentImportDto : BaseImportDto
 {
+    private string authorEmail = string.Empty;
+
+    [Optional]
+    public int? ContactId { get; set; }
+
     public string AuthorName { get; set; } = string.Empty;
 
+    [Required]
     [EmailAddress]
-    public string AuthorEmail { get; set; } = string.Empty;
+    [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
+    public string AuthorEmail
+    {
+        get
+        {
+            return authorEmail;
+        }
+
+        set
+        {
+            authorEmail = value.ToLower();
+        }
+    }
 
     [Required]
     public string Body { get; set; } = string.Empty;
+
+    [Optional]
+    public CommentStatus? Status { get; set; }
+
+    [Optional]
+    public string? Language { get; set; }
 
     [Optional]
     public int? ContentId { get; set; }

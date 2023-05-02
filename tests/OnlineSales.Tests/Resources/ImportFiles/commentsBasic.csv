@@ -1,3 +1,0 @@
-id,createdAt,updatedAt,authorName,authorEmail,body,contentId,parentId,key
-0,2023-01-15T17:32:02.074179Z,,TestComment2,TestAuthor2@wa.com,TestContent2,1,,key1
-1,2023-01-15T17:32:02.074179Z,2023-01-15T17:32:02.074179Z,TestComment1,TestAuthor1@wa.com,TestContent1,1,,key2

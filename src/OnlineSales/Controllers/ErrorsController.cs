@@ -21,6 +21,8 @@ public class ErrorsController : Controller
 
         ProblemDetails problemDetails;
 
+        Log.Error(error, $"Exception catched by the error controller.");
+
         switch (error)
         {
             case InvalidModelStateException exception:
@@ -70,7 +72,12 @@ public class ErrorsController : Controller
                     dbError.Message);
 
                 break;
-
+            case IdentityException identityException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status400BadRequest,
+                    identityException.ErrorMessage);
+                break;
             default:
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(
                     HttpContext,

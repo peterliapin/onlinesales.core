@@ -160,7 +160,7 @@ public class BaseTest : IDisposable
         return location;
     }
 
-    protected async Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async virtual Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
     {
         var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName, authToken);
 
@@ -193,6 +193,31 @@ public class BaseTest : IDisposable
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
+    }
+
+    protected string GetResouceFileTextContent(string fileName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var resourcePath = assembly.GetManifestResourceNames()
+                .Single(str => str.EndsWith(fileName));
+
+        if (resourcePath is null)
+        {
+            return string.Empty;
+        }
+
+        var stream = assembly!.GetManifestResourceStream(resourcePath);
+
+        if (stream != null)
+        {
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        return string.Empty;
     }
 
     private void CheckForRedundantProperties(string content)
@@ -228,46 +253,20 @@ public class BaseTest : IDisposable
 
         var request = new HttpRequestMessage(method, url);
 
-        var file = GetCsvResouceContent(importFileName);
+        var textContent = GetResouceFileTextContent(importFileName);
 
         if (Path.GetExtension(importFileName) !.ToLower() == ".csv")
         {
-            content = new StringContent(file!, Encoding.UTF8, "text/csv"); 
+            content = new StringContent(textContent, Encoding.UTF8, "text/csv"); 
         }
         else
         {
-            content = new StringContent(file!, Encoding.UTF8, "application/json");
+            content = new StringContent(textContent, Encoding.UTF8, "application/json");
         }
 
         request.Content = content;
-
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
 
         return client.SendAsync(request);
-    }
-
-    private string? GetCsvResouceContent(string fileName)
-    {
-        string? content = null;
-        var assembly = Assembly.GetExecutingAssembly();
-
-        var resourcePath = assembly.GetManifestResourceNames()
-                .Single(str => str.EndsWith(fileName));
-
-        if (resourcePath is null)
-        {
-            return null;
-        }
-
-        var stream = assembly!.GetManifestResourceStream(resourcePath);
-        if (stream != null)
-        {
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                content = reader.ReadToEnd();
-            }
-        }
-
-        return content;
     }
 }

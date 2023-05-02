@@ -23,19 +23,47 @@ public enum CommentStatus
 [SurrogateIdentityAttribute(nameof(Key))]
 public class Comment : BaseEntity
 {
-    [Searchable]
+    private string authorEmail = string.Empty;
+
     [Required]
+    [Searchable]
     public string AuthorName { get; set; } = string.Empty;
 
+    [Required]
     [Searchable]
     [EmailAddress]
-    public string AuthorEmail { get; set; } = string.Empty;
+    public string AuthorEmail
+    {
+        get
+        {
+            return authorEmail;
+        }
+
+        set
+        {
+            authorEmail = value.ToLower();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets reference to a contact table.
+    /// </summary>
+    [Required]
+    public int ContactId { get; set; }
+
+    [JsonIgnore]
+    [ForeignKey("ContactId")]
+    public virtual Contact? Contact { get; set; }
 
     [Searchable]
     [Required]
     public string Body { get; set; } = string.Empty;
 
-    public CommentStatus Approved { get; set; } = CommentStatus.NotApproved;
+    [Searchable]
+    [Required]
+    public string Language { get; set; } = string.Empty;
+
+    public CommentStatus Status { get; set; } = CommentStatus.NotApproved;
 
     [Required]
     public int ContentId { get; set; }

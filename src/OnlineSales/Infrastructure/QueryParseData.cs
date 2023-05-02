@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using AutoMapper.Internal;
 using OnlineSales.Data;
@@ -435,51 +436,151 @@ namespace OnlineSales.Infrastructure
                 var rawOperation = cmd.Props.ElementAtOrDefault(indexOffset + 1);
                 Property = ParseProperty(propertyName, cmd);
                 Operation = ParseOperation(rawOperation, cmd);
-                if (Operation != WOperand.Like && Operation != WOperand.NLike)
-                {
-                    ParseValue();
-                }
             }
 
-            public object ParseValue()
+            public enum ContainsType
             {
-                object parsedValue;
-                var type = Property.GetMemberType();
-                // Value cast
-                if (DateTime.TryParseExact(StringValue, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) && (type == typeof(DateTime) || type == typeof(DateTime?)))
+                MatchAll,
+                Substring,
+            }
+
+            public List<Tuple<ContainsType, string>> ParseContainValue(string value)
+            {
+                if (value.Length == 0)
                 {
-                    parsedValue = date;
-                }
-                else if (decimal.TryParse(StringValue, out var decimalValue) && (type == typeof(decimal) || type == typeof(decimal?)))
-                {
-                    parsedValue = decimalValue;
-                }
-                else if (double.TryParse(StringValue, out var doubleValue) && (type == typeof(double) || type == typeof(double?)))
-                {
-                    parsedValue = doubleValue;
-                }
-                else if (int.TryParse(StringValue, out int intValue) && (type == typeof(int) || type == typeof(int?)))
-                {
-                    parsedValue = intValue;
-                }
-                else if (bool.TryParse(StringValue, out bool boolValue) && (type == typeof(bool) || type == typeof(bool?)))
-                {
-                    parsedValue = boolValue;
-                }
-                else if (type.IsEnum && !int.TryParse(StringValue, out _) && Enum.TryParse(type, StringValue, true, out var enumValue))
-                {
-                    parsedValue = enumValue;
-                }
-                else if (type == typeof(string))
-                {
-                    parsedValue = StringValue;
-                }
-                else
-                {
-                    throw new QueryException(Cmd.Source, "Property type and provided type value do not match");
+                    throw new QueryException(Cmd.Source, "Empty contain query argument");
                 }
 
-                return parsedValue;
+                var result = new List<Tuple<ContainsType, string>>();
+                var sb = new StringBuilder();
+
+                for (int i = 0; i < value.Length; ++i)
+                {
+                    if (value[i] == '*')
+                    {
+                        if (i == 0 || value[i - 1] != '\\')
+                        {
+                            if (sb.Length > 0)
+                            {
+                                result.Add(new Tuple<ContainsType, string>(ContainsType.Substring, sb.ToString()));
+                            }
+
+                            result.Add(new Tuple<ContainsType, string>(ContainsType.MatchAll, string.Empty));
+                            sb.Clear();
+                        }
+                        else
+                        {
+                            sb.Remove(sb.Length - 1, 1);
+                            sb.Append('*');
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(value[i]);
+                    }
+                }
+
+                if (sb.Length > 0)
+                {
+                    result.Add(new Tuple<ContainsType, string>(ContainsType.Substring, sb.ToString()));
+                }
+
+                return result;
+            }
+
+            public List<object?> ParseValues(IEnumerable<string> input)
+            {
+                var result = new List<object?>();
+
+                foreach (var sv in input)
+                {
+                    if (IsNullableProperty() && sv == "null" && GetUnderlyingPropertyType() != typeof(string))
+                    {
+                        result.Add(null);
+                    }
+                    else
+                    {
+                        if (GetUnderlyingPropertyType() == typeof(DateTime) && DateTime.TryParseExact(sv, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var date))
+                        {
+                            result.Add(date);
+                        }
+                        else if (GetUnderlyingPropertyType() == typeof(decimal) && decimal.TryParse(sv, out var decimalValue))
+                        {
+                            result.Add(decimalValue);
+                        }
+                        else if (GetUnderlyingPropertyType() == typeof(double) && double.TryParse(sv, out var doubleValue))
+                        {
+                            result.Add(doubleValue);
+                        }
+                        else if (GetUnderlyingPropertyType() == typeof(int) && int.TryParse(sv, out int intValue))
+                        {
+                            result.Add(intValue);
+                        }
+                        else if (GetUnderlyingPropertyType() == typeof(bool) && bool.TryParse(sv, out bool boolValue))
+                        {
+                            result.Add(boolValue);
+                        }
+                        else if (GetUnderlyingPropertyType().IsEnum && !int.TryParse(sv, out _) && Enum.TryParse(GetUnderlyingPropertyType(), sv, true, out var enumValue))
+                        {
+                            result.Add(enumValue);
+                        }
+                        else if (GetUnderlyingPropertyType() == typeof(string))
+                        {
+                            result.Add(sv);
+                        }
+                        else
+                        {
+                            throw new QueryException(Cmd.Source, "Property type and provided type value do not match");
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+            public HashSet<string> ParseStringValues()
+            {
+                var result = new HashSet<string>();
+
+                var sb = new StringBuilder();
+
+                for (int i = 0; i < StringValue.Length; ++i)
+                {
+                    if (StringValue[i] == '|')
+                    {
+                        if (i == 0 || StringValue[i - 1] != '\\')
+                        {
+                            result.Add(sb.ToString());
+                            sb.Clear();
+                        }
+                        else
+                        {
+                            sb.Remove(sb.Length - 1, 1);
+                            sb.Append('|');
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(StringValue[i]);
+                    }
+                }
+
+                result.Add(sb.ToString());
+
+                return result;
+            }
+
+            private bool IsNullableProperty()
+            {
+                var context = new NullabilityInfoContext();
+                var info = context.Create(Property);
+                return info.WriteState == NullabilityState.Nullable;
+            }
+
+            private Type GetUnderlyingPropertyType()
+            {
+                var nt = Nullable.GetUnderlyingType(Property.PropertyType);
+                return nt == null ? Property.PropertyType : nt!;
             }
 
             private WOperand ParseOperation(string? rawOperation, QueryCommand cmd)

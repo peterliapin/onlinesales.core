@@ -2,15 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OnlineSales.Data;
-using OnlineSales.Interfaces;
 using OnlineSales.Tests.TestServices;
 
 namespace OnlineSales.Tests.Environment;
@@ -30,20 +31,32 @@ public class TestApplication : WebApplicationFactory<Program>
         using (var scope = Services.CreateScope())
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-            dataContaxt.Database.EnsureDeleted();
-            dataContaxt.Database.Migrate();
+            RenewDatabase(dataContaxt);
 
             var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
             esDbContext.ElasticClient.Indices.Delete("*");
         }
     }
 
-    public void PopulateBulkData(dynamic bulkItems)
+    public void PopulateBulkData<T, TS>(dynamic bulkItems)
+        where T : BaseEntityWithId
+        where TS : ISaveService<T>
     {
         using (var scope = Services.CreateScope())
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-            dataContaxt.AddRange(bulkItems);
+
+            var saveService = scope.ServiceProvider.GetService<TS>();
+
+            if (saveService != null)
+            {
+                saveService.SaveRangeAsync(bulkItems).Wait();
+            }
+            else
+            {
+                dataContaxt.AddRange(bulkItems);
+            }
+            
             dataContaxt.SaveChangesAsync().Wait();
         }
     }
@@ -71,11 +84,29 @@ public class TestApplication : WebApplicationFactory<Program>
             services.AddScoped<IEmailValidationExternalService, TestEmailValidationExternalService>();
             services.AddScoped<IAccountExternalService, TestAccountExternalService>();
 
-            services.AddAuthentication(defaultScheme: TestAuthenticationHandler.SchemeName)
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = TestAuthenticationHandler.SchemeName;
+                options.DefaultChallengeScheme = TestAuthenticationHandler.SchemeName;
+            })
                 .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
                     TestAuthenticationHandler.SchemeName, options => { });
         });
 
         return base.CreateHost(builder);
+    }
+
+    private void RenewDatabase(PgDbContext context)
+    {
+        try
+        {
+            context.Database.EnsureDeleted();
+            context.Database.Migrate();
+        }
+        catch
+        {
+            Thread.Sleep(1000);
+            RenewDatabase(context);
+        }
     }
 }

@@ -4,10 +4,11 @@
 
 namespace OnlineSales.Tests;
 
-public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
+public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, TU, TS>
     where T : BaseEntity
     where TC : class
     where TU : new()
+    where TS : ISaveService<T>
 {
     protected TableWithFKTests(string url)
         : base(url)
@@ -48,9 +49,9 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
         }
     }
 
-    protected abstract Task<(int, string)> CreateFKItem();
+    protected abstract Task<(int, string)> CreateFKItem(string authToken = "Success");
 
-    protected override async Task<(TC, string)> CreateItem()
+    protected override async Task<(TC, string)> CreateItem(string authToken = "Success")
     {
         var fkItem = await CreateFKItem();
 
@@ -59,7 +60,7 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
         return await CreateItem(string.Empty, fkId);
     }
 
-    protected override void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
+    protected override void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)        
     {
         var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
@@ -67,7 +68,7 @@ public abstract class TableWithFKTests<T, TC, TU> : SimpleTableTests<T, TC, TU>
         var bulkList = TestData.GenerateAndPopulateAttributes<TC>(dataCount, populateAttributes, fkId);
         var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<T, TS>(bulkEntitiesList);
     }
 
     protected abstract Task<(TC, string)> CreateItem(string uid, int fkId);
