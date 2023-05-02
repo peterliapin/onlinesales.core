@@ -148,17 +148,25 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(mapper.Map<EmailGroup>(TestData.GenerateAndPopulateAttributes<TestEmailGroup>("1", tc => tc.Name = "TestEmailGroup")));
         App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(mapper.Map<List<EmailTemplate>>(TestData.GenerateAndPopulateAttributes<TestEmailTemplate>(numberOfTemplates, null, 1)));
 
-        var emailGroupResult = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[include]=EmailTemplates");
+        var emailGroupResult = await GetTest<List<EmailGroupDetailsDto>>(itemsUrl + "?filter[include]=EmailTemplates");
         emailGroupResult!.Count.Should().Be(1);
         emailGroupResult[0].EmailTemplates.Should().NotBeNull();
         emailGroupResult[0].EmailTemplates!.Count.Should().Be(numberOfTemplates);
+        foreach (var eg in emailGroupResult)
+        {
+            foreach (var et in eg.EmailTemplates!)
+            {
+                et.EmailGroup.Should().BeNull(); 
+            }
+        }
 
-        var emailTemplateResult = await GetTest<List<EmailTemplate>>($"/api/email-templates?filter[include]=EmailGroup&filter[where][Id][gt]={numberOfTemplates / 2}");
+        var emailTemplateResult = await GetTest<List<EmailTemplateDetailsDto>>($"/api/email-templates?filter[include]=EmailGroup&filter[where][Id][gt]={numberOfTemplates / 2}");
         emailTemplateResult!.Count.Should().Be(numberOfTemplates / 2);
         foreach (var emailTemplate in emailTemplateResult)
         {
             emailTemplate.EmailGroup.Should().NotBeNull();
             emailTemplate.EmailGroup!.Id.Should().Be(1);
+            emailTemplate.EmailGroup.EmailTemplates.Should().BeNull();
         }
     }
 

@@ -50,22 +50,19 @@ public class CommentUpdateDto
     public string Body { get; set; } = string.Empty;
 }
 
-public class CommentDetailsDtoBase : CommentCreateDto
+public class CommentDetailsDto : CommentCreateDto
 {
     public int Id { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-}
-
-public class CommentDetailsDto : CommentDetailsDtoBase
-{
-    [Ignore]
-    public ContentDetailsDtoBase? Content { get; set; }
 
     [Ignore]
-    public CommentDetailsDtoBase? Parent { get; set; }
+    public ContentDetailsDto? Content { get; set; }
+
+    [Ignore]
+    public CommentDetailsDto? Parent { get; set; }
 }
 
 public class CommentImportDto : BaseImportDto

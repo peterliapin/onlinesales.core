@@ -70,22 +70,19 @@ public class DomainUpdateDto
     public bool? DnsCheck { get; set; }
 }
 
-public class DomainDetailsDtoBase : DomainCreateDto
+public class DomainDetailsDto : DomainCreateDto
 {
     public int Id { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }  
-}
-
-public class DomainDetailsDto : DomainDetailsDtoBase
-{
-    [Ignore]
-    public AccountDetailsDtoBase? Account { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     [Ignore]
-    public List<ContactDetailsDtoBase>? Contacts { get; set; }
+    public AccountDetailsDto? Account { get; set; }
+
+    [Ignore]
+    public List<ContactDetailsDto>? Contacts { get; set; }
 }
 
 public class DomainImportDto : BaseImportDtoWithDates

@@ -53,7 +53,6 @@ public class Content : BaseEntity
 
     public bool AllowComments { get; set; } = false;
 
-    [Nest.Ignore]
     [JsonIgnore]
     public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
 }

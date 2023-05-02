@@ -4,7 +4,6 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
@@ -18,7 +17,6 @@ public class Unsubscribe : BaseCreateByEntity
     
     public int? ContactId { get; set; }
 
-    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("ContactId")]
     public virtual Contact? Contact { get; set; }

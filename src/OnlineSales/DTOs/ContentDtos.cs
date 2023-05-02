@@ -82,19 +82,16 @@ public class ContentUpdateDto
     public string? Source { get; set; }
 }
 
-public class ContentDetailsDtoBase : ContentCreateDto
+public class ContentDetailsDto : ContentCreateDto
 {
     public int Id { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-}
 
-public class ContentDetailsDto : ContentDetailsDtoBase
-{
     [Ignore]
-    public List<CommentDetailsDtoBase>? Comments { get; set; }
+    public List<CommentDetailsDto>? Comments { get; set; }
 }
 
 public class ContentImportDto : BaseImportDto

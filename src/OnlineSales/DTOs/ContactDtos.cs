@@ -81,7 +81,7 @@ public class ContactUpdateDto : BaseContactDto
     }
 }
 
-public class ContactDetailsDtoBase : ContactCreateDto
+public class ContactDetailsDto : ContactCreateDto
 {
     public int Id { get; set; }
 
@@ -94,18 +94,15 @@ public class ContactDetailsDtoBase : ContactCreateDto
     public int DomainId { get; set; }
 
     public int AccountId { get; set; }
-}
-
-public class ContactDetailsDto : ContactDetailsDtoBase
-{
-    [Ignore]
-    public DomainDetailsDtoBase? Domain { get; set; }
 
     [Ignore]
-    public AccountDetailsDtoBase? Account { get; set; }
+    public DomainDetailsDto? Domain { get; set; }
 
     [Ignore]
-    public List<OrderDetailsDtoBase>? Orders { get; set; }
+    public AccountDetailsDto? Account { get; set; }
+
+    [Ignore]
+    public List<OrderDetailsDto>? Orders { get; set; }
 }
 
 public class ContactImportDto : BaseImportDto

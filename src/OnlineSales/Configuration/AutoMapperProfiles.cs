@@ -28,8 +28,6 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Comment, CommentDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Comment, CommentDetailsDtoBase>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<CommentImportDto, Comment>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
@@ -39,8 +37,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<Content, ContentUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Content, ContentDetailsDto>()
-           .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Content, ContentDetailsDtoBase>()
            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<ContentImportDto, Content>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
@@ -52,8 +48,6 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Order, OrderDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Order, OrderDetailsDtoBase>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<OrderImportDto, Order>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
@@ -63,8 +57,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<OrderItem, OrderItemUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<OrderItem, OrderItemDetailsDto>()
-           .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<OrderItem, OrderItemDetailsDtoBase>()
            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<OrderItemImportDto, OrderItem>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
@@ -76,8 +68,6 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<EmailTemplate, EmailTemplateDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<EmailTemplate, EmailTemplateDetailsDtoBase>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<ContactCreateDto, Contact>().ReverseMap();
         CreateMap<ContactUpdateDto, Contact>()
@@ -85,8 +75,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<Contact, ContactUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Contact, ContactDetailsDto>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Contact, ContactDetailsDtoBase>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<ContactImportDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
@@ -97,8 +85,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<EmailGroup, EmailGroupUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<EmailGroup, EmailGroupDetailsDto>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<EmailGroup, EmailGroupDetailsDtoBase>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<Link, LinkCreateDto>().ReverseMap();
@@ -116,8 +102,6 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Domain, DomainDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Domain, DomainDetailsDtoBase>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<DomainImportDto, Domain>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Domain, EmailVerifyDetailsDto>()
@@ -129,8 +113,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<AccountUpdateDto, Account>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Account, AccountDetailsDto>()
-            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<Account, AccountDetailsDtoBase>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<AccountImportDto, Account>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));

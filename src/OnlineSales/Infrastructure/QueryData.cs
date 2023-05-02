@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryParseData.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="QueryData.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -16,15 +16,14 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
 {
-    public class QueryParseData<T>
+    public class QueryData<T>
         where T : BaseEntityWithId
     {
         private readonly PgDbContext dbContext;
 
-        public QueryParseData(string[] cmds, int maxLimitSize, PgDbContext dbContext)
+        public QueryData(List<QueryCommand> commands, int maxLimitSize, PgDbContext dbContext)
         {
             this.dbContext = dbContext;
-            var commands = Parse(cmds);
             IncludeData = ParseIncludeCommands(commands);
             Limit = ParseLimitCommands(commands, maxLimitSize);
             Skip = ParseSkipCommands(commands);
@@ -66,61 +65,7 @@ namespace OnlineSales.Infrastructure
             return property;
         }
 
-        private QueryCommand[] Parse(string[] query)
-        {
-            var processedCommands = new List<QueryCommand>();
-            var errorList = new List<QueryException>();
-
-            foreach (var cmd in query)
-            {
-                var match = Regex.Match(cmd, "query+?=(?'value'.*)");
-                if (match.Success)
-                {
-                    var qcmd = new QueryCommand()
-                    {
-                        Type = FilterType.Search,
-                        Props = new string[0],
-                        Value = match.Groups["value"].Captures[0].Value,
-                        Source = cmd,
-                    };
-                    processedCommands.Add(qcmd);
-                }
-                else
-                {
-                    match = Regex.Match(cmd, "filter(\\[(?'property'.*?)\\])+?=(?'value'.*)");
-                    if (!match.Success)
-                    {
-                        errorList.Add(new QueryException(cmd, "Failed to parse command"));
-                        continue;
-                    }
-
-                    var type = match.Groups["property"].Captures[0].Value.ToLowerInvariant();
-                    if (type == null || string.IsNullOrWhiteSpace(type) || !QueryCommand.FilterMappings.ContainsKey(type))
-                    {
-                        errorList.Add(new QueryException(cmd, $"Failed to parse command. Operator '{type}' not found. Available operators: {QueryCommand.AvailableCommandString}"));
-                        continue;
-                    }
-
-                    var qcmd = new QueryCommand()
-                    {
-                        Type = QueryCommand.FilterMappings.First(m => m.Key == type).Value,
-                        Props = match.Groups["property"].Captures.Skip(1).Select(capture => capture.Value).ToArray(),
-                        Value = match.Groups["value"].Captures[0].Value,
-                        Source = cmd,
-                    };
-                    processedCommands.Add(qcmd);
-                }
-            }
-
-            if (errorList.Any())
-            {
-                throw new QueryException(errorList);
-            }
-
-            return processedCommands.ToArray();
-        }
-
-        private SelectCommandData ParseSelectCommands(QueryCommand[] commands)
+        private SelectCommandData ParseSelectCommands(List<QueryCommand> commands)
         {
             var trueFields = new List<PropertyInfo>();
             var falseFields = new List<PropertyInfo>();
@@ -170,7 +115,7 @@ namespace OnlineSales.Infrastructure
             };
         }
 
-        private List<OrderCommandData> ParseOrderCommands(QueryCommand[] commands)
+        private List<OrderCommandData> ParseOrderCommands(List<QueryCommand> commands)
         {
             var result = new List<OrderCommandData>();
 
@@ -201,7 +146,7 @@ namespace OnlineSales.Infrastructure
             return result;
         }
 
-        private List<string> ParseSearchCommands(QueryCommand[] commands)
+        private List<string> ParseSearchCommands(List<QueryCommand> commands)
         {
             var result = new List<string>();
             foreach (var cmdValue in commands.Where(c => c.Type == FilterType.Search && c.Value.Length > 0).Select(cmd => cmd.Value))
@@ -212,7 +157,7 @@ namespace OnlineSales.Infrastructure
             return result;
         }
 
-        private List<WhereCommandData> ParseWhereCommands(QueryCommand[] commands)
+        private List<WhereCommandData> ParseWhereCommands(List<QueryCommand> commands)
         {
             var result = new List<WhereCommandData>();
             var orResult = new List<WhereUnitData>();
@@ -262,7 +207,7 @@ namespace OnlineSales.Infrastructure
             return result;
         }
 
-        private int ParseLimitCommands(QueryCommand[] commands, int maxLimitSize)
+        private int ParseLimitCommands(List<QueryCommand> commands, int maxLimitSize)
         {
             var res = maxLimitSize;
             var limitCommand = commands.FirstOrDefault(c => c.Type == FilterType.Limit);
@@ -287,7 +232,7 @@ namespace OnlineSales.Infrastructure
             return res;
         }
 
-        private int ParseSkipCommands(QueryCommand[] commands)
+        private int ParseSkipCommands(List<QueryCommand> commands)
         {
             var res = 0;
             var skipCommand = commands.FirstOrDefault(c => c.Type == FilterType.Skip);
@@ -307,7 +252,7 @@ namespace OnlineSales.Infrastructure
             return res;
         }
 
-        private List<PropertyInfo> ParseIncludeCommands(QueryCommand[] commands)
+        private List<PropertyInfo> ParseIncludeCommands(List<QueryCommand> commands)
         {
             var result = new List<PropertyInfo>();
             foreach (var cmd in commands.Where(c => c.Type == FilterType.Include).ToArray())

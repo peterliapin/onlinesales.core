@@ -70,7 +70,6 @@ public class Domain : BaseEntityWithIdAndDates
 
     public int? AccountId { get; set; }
 
-    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
@@ -78,7 +77,6 @@ public class Domain : BaseEntityWithIdAndDates
 
     public AccountSyncStatus AccountStatus { get; set; } = AccountSyncStatus.NotIntended;
 
-    [Nest.Ignore]
     [JsonIgnore]
     public virtual ICollection<Contact>? Contacts { get; set; }
 }

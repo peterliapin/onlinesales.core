@@ -146,23 +146,28 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         App.PopulateBulkData<Order, ISaveService<Order>>(mapper.Map<List<OrderItem>>(TestData.GenerateAndPopulateAttributes<TestOrderItem>(numberOfOrderItems, null, 1)));
         await SyncElasticSearch();
 
-        var orderWithContactAndItems = await GetTest<List<Order>>(itemsUrl + $"?query={affName}&filter[include]=Contact&filter[include]=OrderItems&filter[where][Id]=1");
+        var orderWithContactAndItems = await GetTest<List<OrderDetailsDto>>(itemsUrl + $"?query={affName}&filter[include]=Contact&filter[include]=OrderItems&filter[where][Id]=1");
         orderWithContactAndItems!.Count.Should().Be(1);
         orderWithContactAndItems[0].Contact!.Should().NotBeNull();
         orderWithContactAndItems[0].OrderItems.Should().NotBeNull();
         orderWithContactAndItems[0].OrderItems!.Count.Should().Be(numberOfOrderItems);
+
         foreach (var orderItem in orderWithContactAndItems[0].OrderItems!)
         {
             orderItem.Should().NotBeNull();
+            orderItem.Order.Should().BeNull();
         }
 
-        var orderItemsWithOrder = await GetTest<List<OrderItem>>($"/api/order-items?query=USD&filter[include]=Order&filter[where][Id][gt]={numberOfOrderItems / 2}");
+        orderWithContactAndItems[0].Contact!.Orders.Should().BeNull();
+
+        var orderItemsWithOrder = await GetTest<List<OrderItemDetailsDto>>($"/api/order-items?query=USD&filter[include]=Order&filter[where][Id][gt]={numberOfOrderItems / 2}");
         orderItemsWithOrder.Should().NotBeNull();
         orderItemsWithOrder!.Count.Should().Be(numberOfOrderItems / 2);
         foreach (var orderItem in orderItemsWithOrder)
         {
             orderItem.Should().NotBeNull();
             orderItem.Order.Should().NotBeNull();
+            orderItem.Order!.OrderItems.Should().BeNull();
         }
     }
 

@@ -23,6 +23,7 @@ public class Order : BaseEntity
     [Required]
     public int ContactId { get; set; }
 
+    [JsonIgnore]
     [ForeignKey("ContactId")]
     public virtual Contact? Contact { get; set; }
 
@@ -90,6 +91,6 @@ public class Order : BaseEntity
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
 
-    [Nest.Ignore]
+    [JsonIgnore]
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
 }

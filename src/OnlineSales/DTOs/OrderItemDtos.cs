@@ -51,7 +51,7 @@ public class OrderItemUpdateDto
     public string? Data { get; set; }
 }
 
-public class OrderItemDetailsDtoBase : OrderItemCreateDto
+public class OrderItemDetailsDto : OrderItemCreateDto
 {
     public int Id { get; set; }
 
@@ -62,12 +62,9 @@ public class OrderItemDetailsDtoBase : OrderItemCreateDto
     public decimal CurrencyTotal { get; set; } = 0;
 
     public decimal Total { get; set; } = 0;
-}
 
-public class OrderItemDetailsDto : OrderItemDetailsDtoBase
-{
     [Ignore]
-    public OrderDetailsDtoBase? Order { get; set; }
+    public OrderDetailsDto? Order { get; set; }
 }
 
 public class OrderItemImportDto : BaseImportDto

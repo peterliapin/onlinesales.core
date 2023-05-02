@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
@@ -51,7 +50,6 @@ public class Comment : BaseEntity
     [Required]
     public int ContactId { get; set; }
 
-    [JsonIgnore]
     [ForeignKey("ContactId")]
     public virtual Contact? Contact { get; set; }
 
@@ -68,14 +66,12 @@ public class Comment : BaseEntity
     [Required]
     public int ContentId { get; set; }
 
-    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("ContentId")]
     public virtual Content? Content { get; set; }
    
     public int? ParentId { get; set; }
 
-    [Nest.Ignore]
     [JsonIgnore]
     [ForeignKey("ParentId")]
     public virtual Comment? Parent { get; set; }

@@ -53,17 +53,14 @@ public class EmailTemplateUpdateDto
     public int? EmailGroupId { get; set; }
 }
 
-public class EmailTemplateDetailsDtoBase : EmailTemplateCreateDto
+public class EmailTemplateDetailsDto : EmailTemplateCreateDto
 {
     public int Id { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-}
 
-public class EmailTemplateDetailsDto : EmailTemplateDetailsDtoBase
-{
     [Ignore]
-    public EmailGroupDetailsDtoBase? EmailGroup { get; set; }
+    public EmailGroupDetailsDto? EmailGroup { get; set; }
 }
