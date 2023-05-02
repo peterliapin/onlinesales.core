@@ -33,6 +33,11 @@ namespace OnlineSales.Infrastructure
 
         public async Task<QueryResult<T>> GetResult()
         {
+            if (!elasticClient.Indices.Exists(indexName).Exists)
+            {
+                return new QueryResult<T>(new List<T>(), 0);
+            }
+
             AddWhereCommands();
             AddSearchCommands();
 
@@ -200,7 +205,14 @@ namespace OnlineSales.Infrastructure
         {
             if (!sr.IsValid)
             {
-                throw sr.OriginalException;
+                if (sr.OriginalException != null)
+                {
+                    throw sr.OriginalException;
+                }
+                else
+                {
+                    throw new QueryException(string.Empty, "Invalid elastic search Responce. Reason: " + sr.DebugInformation);
+                }
             }
         }
 
