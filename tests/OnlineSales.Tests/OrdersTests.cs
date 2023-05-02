@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using OnlineSales.DataAnnotations;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
@@ -37,6 +38,100 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][like]=.*est&query=q");
         result!.Count.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GetWithWhereEqualTest()
+    {
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var bulkEntitiesList = new List<Order>();
+
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "Test1 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test2 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test3 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Tes|t4 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("5", tc => tc.AffiliateName = "Test1 Test2 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+
+        App.PopulateBulkData(bulkEntitiesList);
+        await SyncElasticSearch();
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][eq]=null&query=q");
+        result!.Count.Should().Be(5);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][neq]=null&query=q");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q&query=q");
+        result!.Count.Should().Be(1);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test5 q|Test6 q&query=q");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q|Test2 q|Test3 q|Tes\\|t4 q&query=q");
+        result!.Count.Should().Be(4);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q|Test2 q&query=q");
+        result!.Count.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetWithWhereDateComparisonTest()
+    {
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var bulkEntitiesList = new List<Order>();
+
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "Test1 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+
+        App.PopulateBulkData(bulkEntitiesList);
+        await SyncElasticSearch();
+
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt]=&query=q", HttpStatusCode.BadRequest);
+        result.Should().BeNull();
+
+        var now = DateTime.UtcNow;
+        var timeStr = now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
+
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][gt]=" + timeStr + "&query=q");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][lt]=" + timeStr + "&query=q");
+        result!.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetWithWhereContainTest()
+    {
+        var fkItem = CreateFKItem().Result;
+        var fkId = fkItem.Item1;
+
+        var bulkEntitiesList = new List<Order>();
+
+        var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "1 Test q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test 2 z q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test 3 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+        bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te*st 3 q", fkId);
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
+
+        App.PopulateBulkData(bulkEntitiesList);
+        await SyncElasticSearch();
+                
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Te\\*st*&query=q");
+        result!.Count.Should().Be(1);        
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=Test&query=q");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Test*&query=q");
+        result!.Count.Should().Be(3);        
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=Test*&query=q");
+        result!.Count.Should().Be(2);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Test q");
+        result!.Count.Should().Be(1);
     }
 
     [Fact]

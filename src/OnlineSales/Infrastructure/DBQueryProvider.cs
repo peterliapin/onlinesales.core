@@ -4,11 +4,13 @@
 
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using AutoMapper;
 using AutoMapper.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Newtonsoft.Json.Linq;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
@@ -201,16 +203,47 @@ namespace OnlineSales.Infrastructure
 
         private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryParseData<T>.WhereUnitData cmd)
         {
-            object parsedValue = cmd.ParseValue();
-            var valueParameterExpression = Expression.Constant(parsedValue, cmd.Property.PropertyType);
+            Expression outputExpression;
             var parameterPropertyExpression = Expression.Property(expressionParameter, cmd.Property.Name);
 
-            Expression outputExpression;
+            Expression CreateEqualExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            {
+                Expression orExpression = Expression.Constant(false);
+                var stringValues = cmd.ParseStringValues();
+                var parsedValues = cmd.ParseValues(stringValues);
 
-            Expression? CreateCompareExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter, Expression value)
+                foreach (var value in parsedValues)
+                {
+                    var valueParameterExpression = Expression.Constant(value, cmd.Property.PropertyType);
+                    var eqExpression = Expression.Equal(parameter, valueParameterExpression);
+                    orExpression = Expression.Or(orExpression, eqExpression);
+                }
+
+                return orExpression;
+            }
+
+            Expression CreateNEqualExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            {
+                Expression andExpression = Expression.Constant(true);
+                var stringValues = cmd.ParseStringValues();
+                var parsedValues = cmd.ParseValues(stringValues);
+
+                foreach (var value in parsedValues)
+                {
+                    var valueParameterExpression = Expression.Constant(value, cmd.Property.PropertyType);
+                    var eqExpression = Expression.NotEqual(parameter, valueParameterExpression);
+                    andExpression = Expression.And(andExpression, eqExpression);
+                }
+
+                return andExpression;
+            }
+
+            Expression? CreateCompareExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
+                var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
 
+                Expression value = Expression.Constant(parsedValue, cmd.Property.PropertyType);
                 Expression pEx = parameter;
                 Expression vEx = value;
 
@@ -241,10 +274,13 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateLikeExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter, Expression value)
+            Expression? CreateLikeExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
             {
+                var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
+
+                Expression value = Expression.Constant(parsedValue, cmd.Property.PropertyType);
                 Expression? res = null;
-                
+
                 var matchOperation = typeof(Regex).GetMethod("IsMatch", BindingFlags.Static | BindingFlags.Public, new[] { typeof(string), typeof(string), typeof(RegexOptions) });
                 var trueConstant = Expression.Constant(true);
                 var falseConstant = Expression.Constant(false);
@@ -262,29 +298,74 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
+            Expression? CreateContainExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            {
+                Expression? res = null;
+
+                var matchOperation = typeof(Regex).GetMethod("IsMatch", BindingFlags.Static | BindingFlags.Public, new[] { typeof(string), typeof(string), typeof(RegexOptions) });
+                var trueConstant = Expression.Constant(true);
+                var falseConstant = Expression.Constant(false);
+                var regexOptionExpression = Expression.Constant(RegexOptions.Compiled);
+
+                var data = cmd.ParseContainValue(cmd.StringValue);
+                var sb = new StringBuilder();
+
+                sb.Append('^');
+                foreach (var d in data)
+                {
+                    if (d.Item1 == QueryParseData<T>.WhereUnitData.ContainsType.MatchAll)
+                    {
+                        sb.Append("(.*)");
+                    }
+                    else if (d.Item1 == QueryParseData<T>.WhereUnitData.ContainsType.Substring)
+                    {
+                        sb.Append(Regex.Escape(d.Item2));
+                    }
+                }
+
+                sb.Append('$');
+
+                var valueParameterExpression = Expression.Constant(sb.ToString(), typeof(string));
+
+                if (cmd.Operation == WOperand.Contains)
+                {
+                    res = Expression.Equal(Expression.Call(matchOperation!, parameter, valueParameterExpression, regexOptionExpression), trueConstant);
+                }
+                else if (cmd.Operation == WOperand.NContains)
+                {
+                    res = Expression.Equal(Expression.Call(matchOperation!, parameter, valueParameterExpression, regexOptionExpression), falseConstant);
+                }
+
+                return res;
+            }
+
             try
             {
                 switch (cmd.Operation)
-                {
+                {                    
                     case WOperand.Equal:
-                        outputExpression = Expression.Equal(parameterPropertyExpression, valueParameterExpression);
+                        outputExpression = CreateEqualExpression(cmd, parameterPropertyExpression);
                         break;
                     case WOperand.NotEqual:
-                        outputExpression = Expression.NotEqual(parameterPropertyExpression, valueParameterExpression);
-                        break;
+                        outputExpression = CreateNEqualExpression(cmd, parameterPropertyExpression);
+                        break;                    
                     case WOperand.GreaterThan:
                     case WOperand.GreaterThanOrEqualTo:
                     case WOperand.LessThan:
                     case WOperand.LessThanOrEqualTo:
-                        outputExpression = CreateCompareExpression(cmd, parameterPropertyExpression, valueParameterExpression) !;
-                        break;
+                        outputExpression = CreateCompareExpression(cmd, parameterPropertyExpression) !;
+                        break;                    
                     case WOperand.Like:
                     case WOperand.NLike:
-                        outputExpression = CreateLikeExpression(cmd, parameterPropertyExpression, valueParameterExpression) !;
+                        outputExpression = CreateLikeExpression(cmd, parameterPropertyExpression) !;
+                        break;
+                    case WOperand.Contains:
+                    case WOperand.NContains:
+                        outputExpression = CreateContainExpression(cmd, parameterPropertyExpression) !;
                         break;
                     default:
                         throw new QueryException(cmd.Cmd.Source, $"No such operand '{cmd.Operation}'");
-                }                
+                }
             }
             catch (Exception ex)
             {
