@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230419093438_IdentityCore")]
+    partial class IdentityCore
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("roles", (string)null);
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -83,7 +86,7 @@ namespace OnlineSales.Migrations
                     b.HasIndex("RoleId")
                         .HasDatabaseName("ix_role_claims_role_id");
 
-                    b.ToTable("role_claims", (string)null);
+                    b.ToTable("RoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -114,7 +117,7 @@ namespace OnlineSales.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_claims_user_id");
 
-                    b.ToTable("user_claims", (string)null);
+                    b.ToTable("UserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -142,7 +145,7 @@ namespace OnlineSales.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_logins_user_id");
 
-                    b.ToTable("user_logins", (string)null);
+                    b.ToTable("UserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -161,7 +164,7 @@ namespace OnlineSales.Migrations
                     b.HasIndex("RoleId")
                         .HasDatabaseName("ix_user_roles_role_id");
 
-                    b.ToTable("user_roles", (string)null);
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -185,7 +188,7 @@ namespace OnlineSales.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name")
                         .HasName("pk_user_tokens");
 
-                    b.ToTable("user_tokens", (string)null);
+                    b.ToTable("UserTokens", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Account", b =>
@@ -228,10 +231,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("EmployeesRange")
                         .HasColumnType("text")
                         .HasColumnName("employees_range");
-
-                    b.Property<string>("LogoUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("logo_url");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -382,6 +381,10 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Approved")
+                        .HasColumnType("integer")
+                        .HasColumnName("approved");
+
                     b.Property<string>("AuthorEmail")
                         .IsRequired()
                         .HasColumnType("text")
@@ -396,10 +399,6 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("body");
-
-                    b.Property<int>("ContactId")
-                        .HasColumnType("integer")
-                        .HasColumnName("contact_id");
 
                     b.Property<int>("ContentId")
                         .HasColumnType("integer")
@@ -422,11 +421,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("key");
 
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("language");
-
                     b.Property<int?>("ParentId")
                         .HasColumnType("integer")
                         .HasColumnName("parent_id");
@@ -434,10 +428,6 @@ namespace OnlineSales.Migrations
                     b.Property<string>("Source")
                         .HasColumnType("text")
                         .HasColumnName("source");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -453,9 +443,6 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_comment");
-
-                    b.HasIndex("ContactId")
-                        .HasDatabaseName("ix_comment_contact_id");
 
                     b.HasIndex("ContentId")
                         .HasDatabaseName("ix_comment_content_id");
@@ -767,10 +754,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("account_id");
 
-                    b.Property<int>("AccountStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("account_status");
-
                     b.Property<bool?>("CatchAll")
                         .HasColumnType("boolean")
                         .HasColumnName("catch_all");
@@ -794,10 +777,6 @@ namespace OnlineSales.Migrations
                     b.Property<List<DnsRecord>>("DnsRecords")
                         .HasColumnType("jsonb")
                         .HasColumnName("dns_records");
-
-                    b.Property<string>("FaviconUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("favicon_url");
 
                     b.Property<bool?>("Free")
                         .HasColumnType("boolean")
@@ -1700,7 +1679,7 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1762,13 +1741,6 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_comment_contact_contact_id");
-
                     b.HasOne("OnlineSales.Entities.Content", "Content")
                         .WithMany("Comments")
                         .HasForeignKey("ContentId")
@@ -1780,8 +1752,6 @@ namespace OnlineSales.Migrations
                         .WithMany()
                         .HasForeignKey("ParentId")
                         .HasConstraintName("fk_comment_comment_parent_id");
-
-                    b.Navigation("Contact");
 
                     b.Navigation("Content");
 
