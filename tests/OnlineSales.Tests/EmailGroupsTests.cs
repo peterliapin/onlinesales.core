@@ -58,7 +58,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         bulkList = TestData.GenerateAndPopulateAttributes<TestEmailGroup>("5", tc => tc.Name = "Test1 Test2");
         bulkEntitiesList.Add(mapper.Map<EmailGroup>(bulkList));
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(bulkEntitiesList);
 
         var result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][eq]=null");
         result!.Count.Should().Be(5);
@@ -97,7 +97,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         bulkList = TestData.GenerateAndPopulateAttributes<TestEmailGroup>("4", tc => tc.Name = "Te*st 3");
         bulkEntitiesList.Add(mapper.Map<EmailGroup>(bulkList));
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(bulkEntitiesList);
 
         var result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][contains]=Test", HttpStatusCode.BadRequest);
         result.Should().BeNull();
@@ -123,7 +123,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestEmailGroup>("1");
         bulkEntitiesList.Add(mapper.Map<EmailGroup>(bulkList));
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(bulkEntitiesList);
 
         var result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt]=", HttpStatusCode.BadRequest);
         result.Should().BeNull();
