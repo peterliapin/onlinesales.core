@@ -438,7 +438,7 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var sv in input)
                 {
-                    if (IsNullableProperty() && sv == "null" && GetUnderlyingPropertyType() != typeof(string))
+                    if (sv == "null" && GetUnderlyingPropertyType() != typeof(string))
                     {
                         result.Add(null);
                     }
@@ -514,6 +514,13 @@ namespace OnlineSales.Infrastructure
                 return result;
             }
 
+            public bool IsNullableProperty()
+            {
+                var context = new NullabilityInfoContext();
+                var info = context.Create(Property);
+                return info.WriteState == NullabilityState.Nullable;
+            }
+
             private static PropertyInfo ParseProperty(string? propertyName, QueryCommand cmd)
             {
                 if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
@@ -530,14 +537,7 @@ namespace OnlineSales.Infrastructure
                 }
 
                 return property;
-            }
-
-            private bool IsNullableProperty()
-            {
-                var context = new NullabilityInfoContext();
-                var info = context.Create(Property);
-                return info.WriteState == NullabilityState.Nullable;
-            }
+            }          
 
             private Type GetUnderlyingPropertyType()
             {
