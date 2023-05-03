@@ -20,6 +20,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Dictionary<string, string>?, Dictionary<string, string>>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<DateTime?, DateTime>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<CommentStatus?, CommentStatus>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()
@@ -124,6 +125,13 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<AccountDetailsInfo, Account>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<User, UserCreateDto>().ReverseMap();
+        CreateMap<User, UserUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<UserUpdateDto, User>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<User, UserDetailsDto>();
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)

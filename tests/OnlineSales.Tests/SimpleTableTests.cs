@@ -11,10 +11,11 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     where T : BaseEntityWithId
     where TC : class
     where TU : new()
+    where TS : ISaveService<T>
 {
     protected readonly string itemsUrl;
     protected readonly string itemsUrlNotFound;
@@ -68,7 +69,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
 
         var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
 
-        item.Should().BeEquivalentTo(createAndUpdateItems.testCreateItem.Item1);
+        MustBeEquivalent(createAndUpdateItems.testCreateItem.Item1, item);
     }
 
     [Fact]
@@ -132,7 +133,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         response.Should().NotBeNull();
 
         var totalCountHeader = response.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault();
-        totalCountHeader.Should().BeEquivalentTo($"{totalCount}");
+        totalCountHeader.Should().Be($"{totalCount}");
         var content = await response.Content.ReadAsStringAsync();
         var payload = JsonSerializer.Deserialize<List<T>>(content);
         payload.Should().NotBeNull();
@@ -290,11 +291,16 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount, resultDiff);
     }
 
-    protected virtual async Task<(TC, string)> CreateItem()
+    protected virtual void MustBeEquivalent(object? expected, object? result)
+    {
+        result.Should().BeEquivalentTo(expected);
+    }
+
+    protected virtual async Task<(TC, string)> CreateItem(string authToken = "Success")
     {
         var testCreateItem = TestData.Generate<TC>();
 
-        var newItemUrl = await PostTest(itemsUrl, testCreateItem);
+        var newItemUrl = await PostTest(itemsUrl, testCreateItem, HttpStatusCode.Created, authToken);
 
         return (testCreateItem, newItemUrl);
     }
@@ -304,7 +310,7 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         var bulkList = TestData.GenerateAndPopulateAttributes<TC>(dataCount, populateAttributes);
         var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
 
-        App.PopulateBulkData(bulkEntitiesList);
+        App.PopulateBulkData<T, TS>(bulkEntitiesList);
     }
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
@@ -319,13 +325,13 @@ public abstract class SimpleTableTests<T, TC, TU> : BaseTest
         items!.Count.Should().Be(numberOfItems);
     }
 
-    protected async Task CreateAndGetItemWithAuthentification(string getAuthToken = "Success")
+    protected async Task CreateAndGetItemWithAuthentification(string authToken = "Success")
     {
         var testCreateItem = await CreateItem();
 
-        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, getAuthToken);
+        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, authToken);
 
-        item.Should().BeEquivalentTo(testCreateItem.Item1);
+        MustBeEquivalent(testCreateItem.Item1, item);        
     }
 
     protected abstract TU UpdateItem(TC createdItem);

@@ -40,13 +40,13 @@ public abstract class PluginDbContextBase : PgDbContext
         return context;
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
         if (ExcludeBaseEntitiesFromMigrations)
         {
-            var items = modelBuilder.Model.GetEntityTypes();
+            var items = builder.Model.GetEntityTypes();
 
             foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(PgDbContext).Assembly))
             {

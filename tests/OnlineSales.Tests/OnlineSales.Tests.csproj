@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-    <ReleaseVersion>1.2.2-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.3-pre</ReleaseVersion>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
@@ -25,7 +25,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.5" />
-    <PackageReference Include="FluentAssertions" Version="6.10.0" />
+    <PackageReference Include="FluentAssertions" Version="6.11.0" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 
@@ -36,6 +36,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Environment\" />
+    <Folder Include="Resources\Comments\" />
+    <Folder Include="Resources\Contacts\" />
+    <Folder Include="Resources\Orders\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="xunit.runner.json">
@@ -47,53 +50,53 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsWithOldParentKey.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsWithParentKey.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\ordersNoFK.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsNoFKHasUKeyUpdate.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsNoFKHasUKey.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\contactsToUpdate.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\contactBase.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\contacts.json" />
-    <EmbeddedResource Include="Resources\ImportFiles\orderItemsNoRef.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\orderItemsNoRef.json" />
-    <EmbeddedResource Include="Resources\ImportFiles\orderItems.json" />
-    <EmbeddedResource Include="Resources\ImportFiles\orderItems.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsFull.json" />
-    <EmbeddedResource Include="Resources\ImportFiles\commentsFull.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsBasic.csv">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\commentsBasic.json" />
     <EmbeddedResource Include="Resources\wavepoint.png" />
     <EmbeddedResource Include="Resources\wavepointModified.png" />
-    <EmbeddedResource Include="Resources\ImportFiles\commentsWithKey.csv" />
-    <EmbeddedResource Include="Resources\ImportFiles\commentsWithKeyUpdate.csv" />
-    <EmbeddedResource Include="Resources\ImportFiles\commentsWithKeyUpdateWithErrors.csv" />
-    <EmbeddedResource Include="Resources\ImportFiles\contactsWithDuplicates.csv">
+    <EmbeddedResource Include="Resources\Comments\commentsBasic.csv">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\ImportFiles\contactsWithDuplicatesUpdate.csv">
+    <EmbeddedResource Include="Resources\Comments\commentsBasic.json" />
+    <EmbeddedResource Include="Resources\Comments\commentsFull.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Comments\commentsFull.json" />
+    <EmbeddedResource Include="Resources\Comments\commentsNoFKHasUKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Comments\commentsNoFKHasUKeyUpdate.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Comments\commentsWithKey.csv" />
+    <EmbeddedResource Include="Resources\Comments\commentsWithKeyUpdate.csv" />
+    <EmbeddedResource Include="Resources\Comments\commentsWithKeyUpdateWithErrors.csv" />
+    <EmbeddedResource Include="Resources\Comments\commentsWithOldParentKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Comments\commentsWithParentKey.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Contacts\contactBase.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Contacts\contacts.json" />
+    <EmbeddedResource Include="Resources\Contacts\contactsToUpdate.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Contacts\contactsWithDuplicates.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Contacts\contactsWithDuplicatesUpdate.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Orders\orderItems.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Orders\orderItems.json" />
+    <EmbeddedResource Include="Resources\Orders\orderItemsNoRef.csv">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Orders\orderItemsNoRef.json" />
+    <EmbeddedResource Include="Resources\Orders\ordersNoFK.csv">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

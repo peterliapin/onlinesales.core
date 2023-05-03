@@ -4,14 +4,13 @@
 
 using System.Net.Mail;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
 using OnlineSales.Data;
 using OnlineSales.Entities;
-using OnlineSales.Interfaces; 
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services
 {
@@ -24,11 +23,11 @@ namespace OnlineSales.Services
         private readonly PgDbContext pgDbContext;
 
         private readonly LookupClient lookupClient;
-        // private readonly IMxVerifyService mxVerifyService;
+        private readonly IMxVerifyService mxVerifyService;
 
         public DomainService(PgDbContext pgDbContext, IMxVerifyService mxVerifyService)
         {
-            // this.mxVerifyService = mxVerifyService;
+            this.mxVerifyService = mxVerifyService;
 
             this.pgDbContext = pgDbContext;
 
@@ -41,6 +40,8 @@ namespace OnlineSales.Services
 
         public async Task Verify(Domain domain)
         {
+            VerifyFreeAndDisposable(domain);
+
             if (domain.DnsCheck == null)
             {
                 await VerifyDns(domain);
@@ -53,10 +54,10 @@ namespace OnlineSales.Services
                     await VerifyHttp(domain);
                 }
 
-                // if (domain.MxCheck == null)
-                // {
-                //     await VerifyMX(domain);
-                // }       
+                if (domain.MxCheck == null)
+                {
+                    await VerifyMX(domain);
+                }
             }
             else
             {
@@ -199,7 +200,6 @@ namespace OnlineSales.Services
             }
         }
 
-        /*
         private async Task VerifyMX(Domain domain)
         {
             domain.MxCheck = false;
@@ -222,7 +222,6 @@ namespace OnlineSales.Services
                 }
             }
         }
-        */
 
         private async Task VerifyDns(Domain domain)
         {
@@ -296,7 +295,7 @@ namespace OnlineSales.Services
 
         private async Task<HttpResponseMessage?> GetRequest(string url)
         {
-            HttpClient client = new HttpClient();
+            var client = new HttpClient();
 
             try
             {

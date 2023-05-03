@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, ISaveService<EmailTemplate>>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")
@@ -20,11 +20,11 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
         return (emailTemplate, emailTemplateUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem()
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
     {
         var fkItemCreate = new TestEmailGroup();
 
-        var fkUrl = await PostTest("/api/email-groups", fkItemCreate);
+        var fkUrl = await PostTest("/api/email-groups", fkItemCreate, HttpStatusCode.Created, authToken);
 
         var fkItem = await GetTest<EmailGroup>(fkUrl);
 

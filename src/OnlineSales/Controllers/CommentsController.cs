@@ -10,6 +10,8 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
@@ -17,9 +19,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
-    public CommentsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
+    private readonly ICommentService commentService;
+
+    public CommentsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, ICommentService commentService, EsDbContext esDbContext)
         : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
+        this.commentService = commentService;
     }
 
     [HttpGet]
@@ -27,9 +32,27 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string? query)
+    public override async Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string? query)
     {
-        return base.Get(query);
+        var returnedItems = (await base.Get(query)).Result;
+
+        var items = (List<CommentDetailsDto>)((ObjectResult)returnedItems!).Value!;
+
+        items.ForEach(c =>
+        {
+            c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.AuthorEmail);
+        });
+
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return Ok(items);
+        }
+        else
+        {
+            var commentsForAnonymous = mapper.Map<List<AnonymousCommentDetailsDto>>(items);
+
+            return Ok(commentsForAnonymous);
+        }        
     }
 
     // GET api/{entity}s/5
@@ -38,9 +61,24 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<CommentDetailsDto>> GetOne(int id)
+    public override async Task<ActionResult<CommentDetailsDto>> GetOne(int id)
     {
-        return base.GetOne(id);
+        var result = (await base.GetOne(id)).Result;
+
+        var commentDetails = (CommentDetailsDto)((ObjectResult)result!).Value!;
+
+        commentDetails!.AvatarUrl = GravatarHelper.EmailToGravatarUrl(commentDetails.AuthorEmail);
+
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return Ok(commentDetails!);
+        }
+        else
+        {
+            var commentForAnonymous = mapper.Map<AnonymousCommentDetailsDto>(commentDetails);
+
+            return Ok(commentForAnonymous!);
+        }            
     }
 
     // POST api/{entity}s
@@ -50,8 +88,21 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
+    public override async Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
     {
-        return base.Post(value);
+        var comment = mapper.Map<Comment>(value);
+
+        await commentService.SaveAsync(comment);
+
+        await dbContext.SaveChangesAsync();
+
+        var returnedValue = mapper.Map<CommentDetailsDto>(comment);
+
+        return CreatedAtAction(nameof(GetOne), new { id = comment.Id }, returnedValue);
+    }
+
+    protected override async Task SaveRangeAsync(List<Comment> comments)
+    {
+        await commentService.SaveRangeAsync(comments);
     }
 }

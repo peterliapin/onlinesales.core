@@ -9,7 +9,7 @@ public class TestComment : CommentCreateDto
     public TestComment(string uid = "", int contentId = 0)
     {
         AuthorName = $"Test Author{uid}";
-        AuthorEmail = $"author{uid}@test.email";
+        AuthorEmail = $"contact{uid}@test{uid}.net";
         Body = $"Test Comment{uid}";
         ContentId = contentId;
     }

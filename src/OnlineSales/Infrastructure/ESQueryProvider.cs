@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reflection;
+using System.Text;
 using Nest;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -12,6 +13,8 @@ namespace OnlineSales.Infrastructure
     public class ESQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
+        private readonly char[] regExSymbols = { '.', '?', '+', '*', '|', '{', '}', '[', ']', '(', ')', '"', '\\', '#', '@', '&', '<', '>', '~' };
+
         private readonly ElasticClient elasticClient;
         private readonly List<QueryContainer> andQueries = new List<QueryContainer>();
         private readonly List<QueryContainer> orQueries = new List<QueryContainer>();
@@ -19,7 +22,7 @@ namespace OnlineSales.Infrastructure
         private readonly string indexName;
         private readonly PropertyInfo[] searchableTextProperties;
         private readonly PropertyInfo[] searchableNonTextProperties;
-        private readonly int maxResultWindow = 10000;
+        private readonly int maxResultWindow = 10000;       
 
         public ESQueryProvider(ElasticClient elasticClient, QueryParseData<T> parseData, string indexPrefix)
         {
@@ -33,6 +36,11 @@ namespace OnlineSales.Infrastructure
 
         public async Task<QueryResult<T>> GetResult()
         {
+            if (!elasticClient.Indices.Exists(indexName).Exists)
+            {
+                return new QueryResult<T>(new List<T>(), 0);
+            }
+
             AddWhereCommands();
             AddSearchCommands();
 
@@ -200,7 +208,14 @@ namespace OnlineSales.Infrastructure
         {
             if (!sr.IsValid)
             {
-                throw sr.OriginalException;
+                if (sr.OriginalException != null)
+                {
+                    throw sr.OriginalException;
+                }
+                else
+                {
+                    throw new QueryException(string.Empty, "Invalid elastic search Responce. Reason: " + sr.DebugInformation);
+                }
             }
         }
 
@@ -210,10 +225,10 @@ namespace OnlineSales.Infrastructure
         }
 
         private void AddWhereCommands()
-        {
+        {            
             QueryContainer CreateQueryComparison(QueryParseData<T>.WhereUnitData cmd)
             {
-                object value = cmd.ParseValue();
+                object value = cmd.ParseValues(new string[] { cmd.StringValue }).FirstOrDefault() !;
 
                 TermRangeQuery CreateTermRangeQuery(QueryParseData<T>.WhereUnitData cmd)
                 {
@@ -240,7 +255,7 @@ namespace OnlineSales.Infrastructure
                 else if (cmd.Property.PropertyType == typeof(DateTime))
                 {
                     var res = new DateRangeQuery { Field = cmd.Property, };
-                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, value);
+                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, DateMath.Anchored((DateTime)value));
                     return res;
                 }
                 else
@@ -251,21 +266,65 @@ namespace OnlineSales.Infrastructure
 
             QueryContainer CreateQuery(QueryParseData<T>.WhereUnitData cmd)
             {
-                TermQuery CreateTermQuery(QueryParseData<T>.WhereUnitData cmd)
+                BoolQuery CreateTermQuery(QueryParseData<T>.WhereUnitData cmd)
                 {
-                    if (cmd.Property.PropertyType == typeof(string))
+                    var stringValues = cmd.ParseStringValues().ToList();
+                    var parsedValues = cmd.ParseValues(stringValues);
+
+                    var resQueries = new List<QueryContainer>();
+
+                    for (int i = 0; i < parsedValues.Count; ++i)
                     {
-                        return new TermQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = cmd.StringValue };
+                        if (cmd.Property.PropertyType == typeof(string))
+                        {
+                            resQueries.Add(new TermQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = stringValues[i] });
+                        }
+                        else
+                        {
+                            if (parsedValues[i] == null)
+                            {
+                                resQueries.Add(new BoolQuery() { MustNot = new QueryContainer[] { new ExistsQuery { Field = new Field(cmd.Property) } } });
+                            }
+                            else
+                            {
+                                resQueries.Add(new TermQuery { Field = new Field(cmd.Property), Value = stringValues[i] });
+                            }
+                        }
                     }
-                    else
-                    {
-                        return new TermQuery { Field = new Field(cmd.Property), Value = cmd.StringValue };
-                    }
+
+                    var res = new BoolQuery() { Should = resQueries.ToArray() };
+                    return res;
                 }
 
                 RegexpQuery CreateRegExpQuery(QueryParseData<T>.WhereUnitData cmd)
                 {
-                    return new RegexpQuery { Field = new Field(cmd.Property), Value = cmd.StringValue };
+                    if (cmd.Operation == WOperand.Like)
+                    {
+                        return new RegexpQuery { Field = new Field(cmd.Property), Value = cmd.StringValue };
+                    }
+                    else if (cmd.Operation == WOperand.Contains)
+                    {
+                        var data = cmd.ParseContainValue(cmd.StringValue);
+                        var sb = new StringBuilder();
+
+                        foreach (var d in data)
+                        {
+                            if (d.Item1 == QueryParseData<T>.WhereUnitData.ContainsType.MatchAll)
+                            {
+                                sb.Append(".*");
+                            }
+                            else if (d.Item1 == QueryParseData<T>.WhereUnitData.ContainsType.Substring)
+                            {
+                                sb.Append(Escape(d.Item2));
+                            }
+                        }
+
+                        return new RegexpQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = sb.ToString() };
+                    }
+                    else
+                    {
+                        throw new QueryException(cmd.StringValue, "Unexpected operand type");
+                    }
                 }
 
                 try
@@ -283,8 +342,10 @@ namespace OnlineSales.Infrastructure
                         case WOperand.LessThanOrEqualTo:
                             return CreateQueryComparison(cmd);
                         case WOperand.Like:
+                        case WOperand.Contains:
                             return CreateRegExpQuery(cmd);
                         case WOperand.NLike:
+                        case WOperand.NContains:
                             var req = CreateRegExpQuery(cmd);
                             return new BoolQuery { MustNot = new QueryContainer[] { req } };
                         default:
@@ -347,6 +408,23 @@ namespace OnlineSales.Infrastructure
             }
 
             andQueries.Add(new BoolQuery { Should = sq.ToArray() });
+        }
+
+        private string Escape(string value)
+        {
+            var sb = new StringBuilder();
+
+            foreach (var c in value)
+            {
+                if (regExSymbols.Contains(c))
+                {
+                    sb.Append('\\');
+                }
+
+                sb.Append(c);
+            }
+
+            return sb.ToString();
         }
     }
 }

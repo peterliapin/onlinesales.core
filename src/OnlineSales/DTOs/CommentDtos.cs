@@ -11,16 +11,32 @@ namespace OnlineSales.DTOs;
 
 public class CommentCreateDto
 {
-    public string AuthorName { get; set; } = string.Empty;
+    private string authorEmail = string.Empty;
 
+    [Required]
     [EmailAddress]
-    public string AuthorEmail { get; set; } = string.Empty;
+    public string AuthorEmail
+    {
+        get
+        {
+            return authorEmail;
+        }
+
+        set
+        {
+            authorEmail = value.ToLower();
+        }
+    }
+
+    public string AuthorName { get; set; } = string.Empty;
 
     [Required]
     public string Body { get; set; } = string.Empty;
 
     [Required]
     public int ContentId { get; set; }
+
+    public int? ContactId { get; set; }
 
     public int? ParentId { get; set; }
 
@@ -34,24 +50,68 @@ public class CommentUpdateDto
     public string Body { get; set; } = string.Empty;
 }
 
-public class CommentDetailsDto : CommentCreateDto
+public class AnonymousCommentDetailsDto
 {
     public int Id { get; set; }
+
+    public int? ParentId { get; set; }
+
+    public string AuthorName { get; set; } = string.Empty;
+
+    public string Body { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public int ContentId { get; set; }
+
+    public string AvatarUrl { get; set; } = string.Empty;
+}
+
+public class CommentDetailsDto : AnonymousCommentDetailsDto
+{
+    public string AuthorEmail { get; set; } = string.Empty;
+
+    public int? ContactId { get; set; }
+
+    public string? Source { get; set; }
 }
 
 public class CommentImportDto : BaseImportDto
 {
-    public string AuthorName { get; set; } = string.Empty;
+    private string? authorEmail;
 
+    [Optional]
+    public int? ContactId { get; set; }
+
+    [Optional]
+    public string? AuthorName { get; set; }
+
+    [Optional]
     [EmailAddress]
-    public string AuthorEmail { get; set; } = string.Empty;
+    [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
+    public string? AuthorEmail
+    {
+        get
+        {
+            return authorEmail;
+        }
 
-    [Required]
+        set
+        {
+            authorEmail = string.IsNullOrEmpty(value) ? null : value.ToLower();
+        }
+    }
+
+    [Optional]
     public string Body { get; set; } = string.Empty;
+
+    [Optional]
+    public CommentStatus? Status { get; set; }
+
+    [Optional]
+    public string? Language { get; set; }
 
     [Optional]
     public int? ContentId { get; set; }

@@ -20,7 +20,11 @@ public class CurrencyCodeAttribute : ValidationAttribute
             try
             {
                 var ri = new RegionInfo(c.Name);
-                sb.Append(ri.ISOCurrencySymbol);
+                if (ri.CurrencyNativeName.Length > 0)
+                {
+                    sb.Append(ri.ISOCurrencySymbol);
+                }
+
                 sb.Append("|");
             }
             catch

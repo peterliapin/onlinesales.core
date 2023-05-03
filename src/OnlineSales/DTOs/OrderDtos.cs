@@ -79,6 +79,7 @@ public class OrderImportDto : BaseImportDto
     public int? ContactId { get; set; }
 
     [Optional]
+    [EmailAddress]
     [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
     public string? ContactEmail { get; set; }
 
