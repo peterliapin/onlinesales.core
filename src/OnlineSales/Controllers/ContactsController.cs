@@ -13,6 +13,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -40,7 +41,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         var singleItem = (ContactDetailsDto)((ObjectResult)returnedSingleItem!).Value!;
 
-        singleItem!.AvatarUrl = EmailToGravatarUrl(singleItem.Email);
+        singleItem!.AvatarUrl = GravatarHelper.EmailToGravatarUrl(singleItem.Email);
 
         return Ok(singleItem!);
     }
@@ -58,7 +59,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         items.ForEach(c =>
         {
-            c.AvatarUrl = EmailToGravatarUrl(c.Email);
+            c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.Email);
         });
 
         return Ok(items);
@@ -79,7 +80,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         var returnedValue = mapper.Map<ContactDetailsDto>(contact);
 
-        returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
+        returnedValue.AvatarUrl = GravatarHelper.EmailToGravatarUrl(returnedValue.Email);
 
         return CreatedAtAction(nameof(GetOne), new { id = contact.Id }, returnedValue);
     }
@@ -106,7 +107,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         var returnedValue = mapper.Map<ContactDetailsDto>(existingContact);
 
-        returnedValue.AvatarUrl = EmailToGravatarUrl(returnedValue.Email);
+        returnedValue.AvatarUrl = GravatarHelper.EmailToGravatarUrl(returnedValue.Email);
 
         return Ok(returnedValue);
     }
@@ -114,13 +115,5 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     protected override async Task SaveRangeAsync(List<Contact> newRecords)
     {
         await contactService.SaveRangeAsync(newRecords);
-    }
-
-    private static string EmailToGravatarUrl(string email)
-    {
-        byte[] emailBytes = Encoding.ASCII.GetBytes(email);
-        byte[] emailHashCode = MD5.Create().ComputeHash(emailBytes);        
-
-        return "https://www.gravatar.com/avatar/" + Convert.ToHexString(emailHashCode).ToLower() + "?size=48&d=mp";
     }
 }
