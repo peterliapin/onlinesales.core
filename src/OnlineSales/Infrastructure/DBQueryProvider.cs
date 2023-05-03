@@ -214,9 +214,16 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var value in parsedValues)
                 {
-                    var valueParameterExpression = Expression.Constant(value, cmd.Property.PropertyType);
-                    var eqExpression = Expression.Equal(parameter, valueParameterExpression);
-                    orExpression = Expression.Or(orExpression, eqExpression);
+                    if (value == null && !cmd.IsNullableProperty())
+                    {
+                        return Expression.Constant(false);
+                    }
+                    else
+                    {
+                        var valueParameterExpression = Expression.Constant(value, cmd.Property.PropertyType);
+                        var eqExpression = Expression.Equal(parameter, valueParameterExpression);
+                        orExpression = Expression.Or(orExpression, eqExpression);
+                    }
                 }
 
                 return orExpression;
@@ -224,18 +231,8 @@ namespace OnlineSales.Infrastructure
 
             Expression CreateNEqualExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
             {
-                Expression andExpression = Expression.Constant(true);
-                var stringValues = cmd.ParseStringValues();
-                var parsedValues = cmd.ParseValues(stringValues);
-
-                foreach (var value in parsedValues)
-                {
-                    var valueParameterExpression = Expression.Constant(value, cmd.Property.PropertyType);
-                    var eqExpression = Expression.NotEqual(parameter, valueParameterExpression);
-                    andExpression = Expression.And(andExpression, eqExpression);
-                }
-
-                return andExpression;
+                var expression = CreateEqualExpression(cmd, parameter);
+                return Expression.Not(expression);
             }
 
             Expression? CreateCompareExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)

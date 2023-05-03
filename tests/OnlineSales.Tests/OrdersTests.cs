@@ -66,6 +66,10 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         result!.Count.Should().Be(5);
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][neq]=null&query=q");
         result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][eq]=null&query=q");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][neq]=null&query=q");
+        result!.Count.Should().Be(5);
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q&query=q");
         result!.Count.Should().Be(1);
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test5 q|Test6 q&query=q");
