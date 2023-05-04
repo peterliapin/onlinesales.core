@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.DataAnnotations;
 using OnlineSales.Infrastructure;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests;
 
@@ -62,9 +60,17 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
-        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][eq]=null&query=q");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][ContactIp][eq]=&query=q");
+        result!.Count.Should().Be(5);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][ContactIp][neq]=&query=q");
+        result!.Count.Should().Be(0); 
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][eq]=null&query=q");
         result!.Count.Should().Be(5);
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][neq]=null&query=q");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][eq]=&query=q");
+        result!.Count.Should().Be(5);
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][neq]=&query=q");
         result!.Count.Should().Be(0);
         result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][eq]=null&query=q");
         result!.Count.Should().Be(0);
@@ -94,7 +100,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
-        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt]=&query=q", HttpStatusCode.BadRequest);
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][gt]=&query=q", HttpStatusCode.BadRequest);
         result.Should().BeNull();
 
         var now = DateTime.UtcNow;

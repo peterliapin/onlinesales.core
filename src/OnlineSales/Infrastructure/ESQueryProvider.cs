@@ -4,6 +4,7 @@
 
 using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 using Nest;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -268,27 +269,26 @@ namespace OnlineSales.Infrastructure
             {
                 BoolQuery CreateTermQuery(QueryParseData<T>.WhereUnitData cmd)
                 {
-                    var stringValues = cmd.ParseStringValues().ToList();
-                    var parsedValues = cmd.ParseValues(stringValues);
+                    var parsedValues = cmd.ParseValues(cmd.ParseStringValues().ToList());
 
                     var resQueries = new List<QueryContainer>();
 
-                    for (int i = 0; i < parsedValues.Count; ++i)
+                    foreach (var parsedValue in parsedValues)
                     {
-                        if (cmd.Property.PropertyType == typeof(string))
+                        if (parsedValue != null)
                         {
-                            resQueries.Add(new TermQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = stringValues[i] });
-                        }
-                        else
-                        {
-                            if (parsedValues[i] == null)
+                            if (cmd.Property.PropertyType == typeof(string))
                             {
-                                resQueries.Add(new BoolQuery() { MustNot = new QueryContainer[] { new ExistsQuery { Field = new Field(cmd.Property) } } });
+                                resQueries.Add(new TermQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = parsedValue!.ToString() });
                             }
                             else
                             {
-                                resQueries.Add(new TermQuery { Field = new Field(cmd.Property), Value = stringValues[i] });
+                                resQueries.Add(new TermQuery { Field = new Field(cmd.Property), Value = parsedValue!.ToString() });
                             }
+                        }
+                        else
+                        {
+                            resQueries.Add(new BoolQuery() { MustNot = new QueryContainer[] { new ExistsQuery { Field = new Field(cmd.Property) } } });
                         }
                     }
 
