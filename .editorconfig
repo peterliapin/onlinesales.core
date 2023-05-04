@@ -6,6 +6,8 @@ root = true
 indent_style = space
 insert_final_newline = false
 trim_trailing_whitespace = true
+dotnet_diagnostic.SA1000.severity = silent
+dotnet_diagnostic.SA1009.severity = silent
 
 # Code files
 [*.{cs,csx,vb,vbx}]
