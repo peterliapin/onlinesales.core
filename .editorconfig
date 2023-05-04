@@ -13,6 +13,10 @@ dotnet_diagnostic.SA1009.severity = silent
 [*.{cs,csx,vb,vbx}]
 indent_size = 4
 dotnet_sort_system_directives_first = true
+dotnet_style_qualification_for_property = true:suggestion
+dotnet_style_qualification_for_field = true:suggestion
+dotnet_style_qualification_for_method = true:suggestion
+dotnet_style_qualification_for_event = true:suggestion
 
 # Xml project files
 [*.{xml,csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
@@ -29,3 +33,4 @@ indent_size = 2
 # YML files
 [*.yml]
 indent_size = 2
+
