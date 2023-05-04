@@ -61,6 +61,7 @@ public class OrderDetailsDto : OrderCreateDto
 public class OrderImportDto : BaseImportDto
 {
     [Optional]
+    [SwaggerUnique]
     public string? RefNo { get; set; } = string.Empty;
 
     [Optional]

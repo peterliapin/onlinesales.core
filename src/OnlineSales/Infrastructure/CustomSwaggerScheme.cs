@@ -35,6 +35,11 @@ namespace OnlineSales.Infrastructure
                             propertySchema.Value.Extensions.Add("x-hide", new OpenApiBoolean(true));
                         }
 
+                        if (property.GetCustomAttribute<SwaggerUniqueAttribute>() != null)
+                        {
+                            propertySchema.Value.Extensions.Add("x-unique", new OpenApiBoolean(true));
+                        }
+
                         if (GetTypeFromNullable(property.PropertyType).IsEnum)
                         {
                             propertySchema.Value.Example = new OpenApiString(Activator.CreateInstance(GetTypeFromNullable(property.PropertyType)) !.ToString());
