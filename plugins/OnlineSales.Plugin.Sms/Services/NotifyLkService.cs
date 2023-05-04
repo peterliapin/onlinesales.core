@@ -26,14 +26,14 @@ namespace OnlineSales.Plugin.Sms.Services
 
             var queryParams = new Dictionary<string, string>
             {
-                ["user_id"] = notifyLkConfig.UserId,
-                ["api_key"] = notifyLkConfig.ApiKey,
-                ["sender_id"] = notifyLkConfig.SenderId,
+                ["user_id"] = this.notifyLkConfig.UserId,
+                ["api_key"] = this.notifyLkConfig.ApiKey,
+                ["sender_id"] = this.notifyLkConfig.SenderId,
                 ["to"] = recipient.Substring(1, recipient.Length - 1),
                 ["message"] = message,
             };
 
-            var response = await client.GetAsync(QueryHelpers.AddQueryString(notifyLkConfig.ApiUrl, queryParams!));
+            var response = await client.GetAsync(QueryHelpers.AddQueryString(this.notifyLkConfig.ApiUrl, queryParams!));
 
             if (response.IsSuccessStatusCode)
             {
@@ -49,7 +49,7 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public string GetSender(string recipient)
         {
-            return notifyLkConfig.SenderId;
+            return this.notifyLkConfig.SenderId;
         }
     }
 }

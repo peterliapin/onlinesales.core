@@ -31,32 +31,32 @@ namespace OnlineSales.Services
 
             this.pgDbContext = pgDbContext;
 
-            lookupClient = new LookupClient(new LookupClientOptions
+            this.lookupClient = new LookupClient(new LookupClientOptions
             {
                 UseCache = true,
-                Timeout = new TimeSpan(0, 0, 60),                
+                Timeout = new TimeSpan(0, 0, 60),
             });
         }
 
         public async Task Verify(Domain domain)
         {
-            VerifyFreeAndDisposable(domain);
+            this.VerifyFreeAndDisposable(domain);
 
             if (domain.DnsCheck == null)
             {
-                await VerifyDns(domain);
-            }            
+                await this.VerifyDns(domain);
+            }
 
             if (domain.DnsCheck is true)
             {
                 if (domain.HttpCheck == null)
                 {
-                    await VerifyHttp(domain);
+                    await this.VerifyHttp(domain);
                 }
 
                 if (domain.MxCheck == null)
                 {
-                    await VerifyMX(domain);
+                    await this.VerifyMX(domain);
                 }
             }
             else
@@ -71,21 +71,21 @@ namespace OnlineSales.Services
 
         public async Task SaveAsync(Domain domain)
         {
-            VerifyFreeAndDisposable(domain);
+            this.VerifyFreeAndDisposable(domain);
 
             if (domain.Id > 0)
             {
-                pgDbContext.Domains !.Update(domain);
+                this.pgDbContext.Domains!.Update(domain);
             }
             else
             {
-                await pgDbContext.Domains !.AddAsync(domain);
+                await this.pgDbContext.Domains!.AddAsync(domain);
             }
         }
 
         public async Task SaveRangeAsync(List<Domain> domains)
         {
-            domains.ForEach(d => VerifyFreeAndDisposable(d));
+            domains.ForEach(d => this.VerifyFreeAndDisposable(d));
 
             var sortedDomains = domains.GroupBy(d => d.Id > 0);
 
@@ -93,11 +93,11 @@ namespace OnlineSales.Services
             {
                 if (group.Key)
                 {
-                    pgDbContext.UpdateRange(group.ToList());
+                    this.pgDbContext.UpdateRange(group.ToList());
                 }
                 else
                 {
-                    await pgDbContext.AddRangeAsync(group.ToList());
+                    await this.pgDbContext.AddRangeAsync(group.ToList());
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace OnlineSales.Services
                     {
                         string? line = null;
                         while ((line = sRdr.ReadLine()) != null)
-                        {                            
+                        {
                             res.Add(line);
                         }
                     }
@@ -179,7 +179,7 @@ namespace OnlineSales.Services
 
             foreach (var url in urls)
             {
-                var responce = await GetRequest(url);
+                var responce = await this.GetRequest(url);
 
                 if (responce != null && responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
                 {
@@ -191,8 +191,8 @@ namespace OnlineSales.Services
 
                     if (htmlDoc != null)
                     {
-                        domain.Title = GetTitle(htmlDoc);
-                        domain.Description = GetDescription(htmlDoc);
+                        domain.Title = this.GetTitle(htmlDoc);
+                        domain.Description = this.GetDescription(htmlDoc);
                     }
 
                     break;
@@ -204,7 +204,7 @@ namespace OnlineSales.Services
         {
             domain.MxCheck = false;
 
-            var mxRecords = await lookupClient.QueryAsync(domain.Name, QueryType.MX);
+            var mxRecords = await this.lookupClient.QueryAsync(domain.Name, QueryType.MX);
 
             var orderedMxRecordValues = from r in mxRecords.AllRecords
                                         where r is MxRecord
@@ -213,7 +213,7 @@ namespace OnlineSales.Services
 
             foreach (var mxRecordValue in orderedMxRecordValues)
             {
-                var mxVerify = await mxVerifyService.Verify(mxRecordValue);
+                var mxVerify = await this.mxVerifyService.Verify(mxRecordValue);
 
                 if (mxVerify)
                 {
@@ -227,10 +227,10 @@ namespace OnlineSales.Services
         {
             domain.DnsRecords = null;
             domain.DnsCheck = false;
-                     
-            var result = await lookupClient.QueryAsync(domain.Name, QueryType.ANY);
 
-            var dnsRecords = GetDnsRecords(result, domain);
+            var result = await this.lookupClient.QueryAsync(domain.Name, QueryType.ANY);
+
+            var dnsRecords = this.GetDnsRecords(result, domain);
 
             if (dnsRecords.Count > 0)
             {
@@ -318,7 +318,7 @@ namespace OnlineSales.Services
                 return htmlNode.InnerText;
             }
 
-            var title = GetNodeContentByAttr(htmlDoc, "title");
+            var title = this.GetNodeContentByAttr(htmlDoc, "title");
 
             if (!string.IsNullOrEmpty(title))
             {
@@ -337,15 +337,15 @@ namespace OnlineSales.Services
 
         private string? GetDescription(HtmlDocument htmlDoc)
         {
-            return GetNodeContentByAttr(htmlDoc, "description");
+            return this.GetNodeContentByAttr(htmlDoc, "description");
         }
 
         private string? GetNodeContentByAttr(HtmlDocument htmlDoc, string value)
         {
-            var result = GetNodeContentByAttr(htmlDoc, "name", value);
+            var result = this.GetNodeContentByAttr(htmlDoc, "name", value);
             if (result == null)
             {
-                result = GetNodeContentByAttr(htmlDoc, "property", value);
+                result = this.GetNodeContentByAttr(htmlDoc, "property", value);
             }
 
             return result;

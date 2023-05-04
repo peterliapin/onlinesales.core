@@ -11,7 +11,7 @@ namespace OnlineSales.Infrastructure
     {
         public static Type CompileTypeForSelectStatement(PropertyInfo[] types)
         {
-            TypeBuilder tb = GetTypeBuilder();
+            var tb = GetTypeBuilder();
             // ConstructorBuilder constructor = tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
             // NOTE: assuming your list contains Field objects with fields FieldName(string) and FieldType(Type)

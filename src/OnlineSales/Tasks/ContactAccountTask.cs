@@ -32,11 +32,11 @@ public class ContactAccountTask : BaseTask
         this.accountExternalService = accountExternalService;
         this.mapper = mapper;
 
-        var config = configuration.GetSection(ConfigKey) !.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(ConfigKey)!.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {
-            batchSize = config.BatchSize;
+            this.batchSize = config.BatchSize;
         }
         else
         {
@@ -46,23 +46,23 @@ public class ContactAccountTask : BaseTask
 
     public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        try   
+        try
         {
-            var domainsToHandle = dbContext.Domains!.Where(d => d.AccountStatus == AccountSyncStatus.NotInitialized);
-            int totalSize = domainsToHandle.Count();
-            for (int start = 0; start < totalSize; start += batchSize)
+            var domainsToHandle = this.dbContext.Domains!.Where(d => d.AccountStatus == AccountSyncStatus.NotInitialized);
+            var totalSize = domainsToHandle.Count();
+            for (var start = 0; start < totalSize; start += this.batchSize)
             {
-                var batch = domainsToHandle.Skip(start).Take(batchSize).ToList();
-                await SetDomainsAccounts(batch);
+                var batch = domainsToHandle.Skip(start).Take(this.batchSize).ToList();
+                await this.SetDomainsAccounts(batch);
                 var domainIdDictionary = batch.ToDictionary(d => d.Id, d => d);
-                var contacts = dbContext.Contacts!.Where(c => domainIdDictionary.Keys.Contains(c.DomainId));
+                var contacts = this.dbContext.Contacts!.Where(c => domainIdDictionary.Keys.Contains(c.DomainId));
                 foreach (var c in contacts)
                 {
                     c.AccountId = null;
                     c.Account = domainIdDictionary[c.DomainId].Account;
                 }
 
-                await dbContext.SaveChangesAsync();
+                await this.dbContext.SaveChangesAsync();
             }
         }
         catch (Exception ex)
@@ -87,7 +87,7 @@ public class ContactAccountTask : BaseTask
                     continue;
                 }
 
-                var accInfo = await accountExternalService.GetAccountDetails(domain.Name);
+                var accInfo = await this.accountExternalService.GetAccountDetails(domain.Name);
                 if (accInfo == null)
                 {
                     accInfo = new AccountDetailsInfo() { Name = domain.Name };
@@ -98,7 +98,7 @@ public class ContactAccountTask : BaseTask
                     domain.AccountStatus = AccountSyncStatus.Successful;
                 }
 
-                var existingAccount = dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
+                var existingAccount = this.dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
                 if (existingAccount == null)
                 {
                     existingAccount = newAccounts.FirstOrDefault(a => a.Name == accInfo.Name);
@@ -110,7 +110,7 @@ public class ContactAccountTask : BaseTask
                 }
                 else
                 {
-                    var account = mapper.Map<Account>(accInfo);
+                    var account = this.mapper.Map<Account>(accInfo);
                     newAccounts.Add(account);
                     domain.Account = account;
                 }
@@ -121,6 +121,6 @@ public class ContactAccountTask : BaseTask
             }
         }
 
-        await dbContext.Accounts!.AddRangeAsync(newAccounts);
+        await this.dbContext.Accounts!.AddRangeAsync(newAccounts);
     }
 }

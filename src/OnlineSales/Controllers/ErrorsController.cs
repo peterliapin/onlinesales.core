@@ -16,7 +16,7 @@ public class ErrorsController : Controller
     [Route("/error")]
     public IActionResult HandleError()
     {
-        var exceptionHandlerFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();
+        var exceptionHandlerFeature = this.HttpContext.Features.Get<IExceptionHandlerFeature>();
         var error = exceptionHandlerFeature!.Error;
 
         ProblemDetails problemDetails;
@@ -26,8 +26,8 @@ public class ErrorsController : Controller
         switch (error)
         {
             case InvalidModelStateException exception:
-                problemDetails = ProblemDetailsFactory.CreateValidationProblemDetails(
-                    HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateValidationProblemDetails(
+                    this.HttpContext,
                     exception.ModelState!,
                     StatusCodes.Status422UnprocessableEntity);
 
@@ -35,8 +35,8 @@ public class ErrorsController : Controller
 
             case TaskNotFoundException taskNotFoundException:
 
-                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
-                    HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateProblemDetails(
+                    this.HttpContext,
                     StatusCodes.Status404NotFound);
 
                 problemDetails.Extensions["taskName"] = taskNotFoundException.TaskName;
@@ -45,8 +45,8 @@ public class ErrorsController : Controller
 
             case EntityNotFoundException entityNotFoundError:
 
-                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
-                    HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateProblemDetails(
+                    this.HttpContext,
                     StatusCodes.Status404NotFound);
 
                 problemDetails.Extensions["entityType"] = entityNotFoundError.EntityType;
@@ -54,8 +54,8 @@ public class ErrorsController : Controller
 
                 break;
             case QueryException queryException:
-                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
-                HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateProblemDetails(
+                this.HttpContext,
                 StatusCodes.Status400BadRequest);
                 queryException.FailedCommands.ForEach(cmd =>
                 {
@@ -66,21 +66,21 @@ public class ErrorsController : Controller
             case DbUpdateException dbUpdateException:
                 var dbError = dbUpdateException.InnerException ?? dbUpdateException;
 
-                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
-                    HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateProblemDetails(
+                    this.HttpContext,
                     StatusCodes.Status422UnprocessableEntity,
                     dbError.Message);
 
                 break;
             case IdentityException identityException:
-                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
-                    HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateProblemDetails(
+                    this.HttpContext,
                     StatusCodes.Status400BadRequest,
                     identityException.ErrorMessage);
                 break;
             default:
-                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
-                    HttpContext,
+                problemDetails = this.ProblemDetailsFactory.CreateProblemDetails(
+                    this.HttpContext,
                     StatusCodes.Status500InternalServerError,
                     error.Message);
 
@@ -88,5 +88,5 @@ public class ErrorsController : Controller
         }
 
         return new ObjectResult(problemDetails);
-    }    
+    }
 }

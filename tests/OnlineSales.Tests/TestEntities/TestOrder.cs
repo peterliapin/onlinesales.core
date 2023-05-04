@@ -10,10 +10,10 @@ public class TestOrder : OrderCreateDto
 {
     public TestOrder(string uid = "", int contactId = 0)
     {
-        RefNo = $"1000{uid}";
-        Currency = "USD";
-        ExchangeRate = 1.234M;
-        ContactId = contactId;
+        this.RefNo = $"1000{uid}";
+        this.Currency = "USD";
+        this.ExchangeRate = 1.234M;
+        this.ContactId = contactId;
     }
 }
 

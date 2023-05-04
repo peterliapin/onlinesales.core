@@ -28,7 +28,7 @@ public class ContactScheduledEmailTask : BaseTask
         try
         {
             // Load all the contact schedules in ContactEmailSchedule table by pending status
-            var schedules = dbContext.ContactEmailSchedules!
+            var schedules = this.dbContext.ContactEmailSchedules!
                 .Include(c => c.Schedule)
                 .Include(c => c.Contact)
                 .Where(s => s.Status == ScheduleStatus.Pending).ToList();
@@ -38,18 +38,18 @@ public class ContactScheduledEmailTask : BaseTask
                 EmailTemplate? nextEmailTemplateToSend;
                 var retryDelay = 0;
 
-                var lastEmailLog = dbContext.EmailLogs!.Where(
+                var lastEmailLog = this.dbContext.EmailLogs!.Where(
                         e => e.ScheduleId == schedule.ScheduleId &&
                         e.ContactId == schedule.ContactId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
 
                 var lastEmailTemplate = lastEmailLog is not null
-                    ? dbContext.EmailTemplates!.FirstOrDefault(e => e.Id == lastEmailLog!.TemplateId)
+                    ? this.dbContext.EmailTemplates!.FirstOrDefault(e => e.Id == lastEmailLog!.TemplateId)
                     : null;
 
                 // Retry logic if the last email is not sent
                 if (lastEmailLog is not null && lastEmailLog!.Status is EmailStatus.NotSent)
                 {
-                    var emailNotSentCount = dbContext.EmailLogs!.Count(
+                    var emailNotSentCount = this.dbContext.EmailLogs!.Count(
                             e => e.ScheduleId == schedule.ScheduleId
                             && e.ContactId == schedule.ContactId
                             && e.TemplateId == lastEmailLog.TemplateId
@@ -58,40 +58,40 @@ public class ContactScheduledEmailTask : BaseTask
                     // If all retry attempts completed, get the next email template to send.
                     if (emailNotSentCount > lastEmailTemplate!.RetryCount)
                     {
-                        nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate, schedule.Schedule!.GroupId);
+                        nextEmailTemplateToSend = this.GetNextEmailTemplateToSend(lastEmailTemplate, schedule.Schedule!.GroupId);
                     }
                     else
                     {
                         // Retry attempt available. sending the same email template.
-                        nextEmailTemplateToSend = dbContext.EmailTemplates!.FirstOrDefault(t => t.Id == lastEmailTemplate.Id);
+                        nextEmailTemplateToSend = this.dbContext.EmailTemplates!.FirstOrDefault(t => t.Id == lastEmailTemplate.Id);
                         retryDelay = lastEmailTemplate!.RetryInterval;
                     }
                 }
                 else
                 {
-                    nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate!, schedule.Schedule!.GroupId);
+                    nextEmailTemplateToSend = this.GetNextEmailTemplateToSend(lastEmailTemplate!, schedule.Schedule!.GroupId);
                 }
 
                 // All emails in the schedule are sent for the given contact.
                 if (nextEmailTemplateToSend is null)
                 {
-                    var contactSchedule = dbContext.ContactEmailSchedules!.FirstOrDefault(c => c.Id == schedule.Id);
+                    var contactSchedule = this.dbContext.ContactEmailSchedules!.FirstOrDefault(c => c.Id == schedule.Id);
                     contactSchedule!.Status = ScheduleStatus.Completed;
-                    await dbContext.SaveChangesAsync();
+                    await this.dbContext.SaveChangesAsync();
 
                     break;
                 }
 
-                var nextExecutionTime = GetNextExecutionTime(schedule, retryDelay, lastEmailLog);
+                var nextExecutionTime = this.GetNextExecutionTime(schedule, retryDelay, lastEmailLog);
 
                 if (nextExecutionTime is not null)
                 {
                     // check IsRightTimeToExecute()
-                    var executeNow = IsRightTimeToExecute(nextExecutionTime.Value);
+                    var executeNow = this.IsRightTimeToExecute(nextExecutionTime.Value);
 
                     if (executeNow)
                     {
-                        await emailFromTemplateService.SendToContactAsync(schedule.ContactId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                        await this.emailFromTemplateService.SendToContactAsync(schedule.ContactId, nextEmailTemplateToSend!.Name, this.GetTemplateArguments(), null, schedule.ScheduleId);
                     }
                 }
             }
@@ -107,7 +107,7 @@ public class ContactScheduledEmailTask : BaseTask
 
     private EmailTemplate? GetNextEmailTemplateToSend(EmailTemplate lastEmailTemplate, int groupId)
     {
-        var emailsOfGroup = dbContext.EmailTemplates!.Where(t => t.GroupId == groupId).OrderBy(t => t.Id).ToList();
+        var emailsOfGroup = this.dbContext.EmailTemplates!.Where(t => t.GroupId == groupId).OrderBy(t => t.Id).ToList();
 
         var indexOfLastEmail = lastEmailTemplate is not null
             ? emailsOfGroup.IndexOf(lastEmailTemplate)
@@ -156,7 +156,7 @@ public class ContactScheduledEmailTask : BaseTask
         // Evaluate CRON based schedule
         if (!string.IsNullOrEmpty(contactSchedule!.Cron))
         {
-            Quartz.CronExpression expression = new Quartz.CronExpression(contactSchedule.Cron);
+            var expression = new Quartz.CronExpression(contactSchedule.Cron);
 
             var nextRunTimeForUser = expression.GetNextValidTimeAfter(lastRunTime.AddMinutes(-userToServerTimeZoneOffset));
             var nextRunTime = nextRunTimeForUser!.Value.AddMinutes(userToServerTimeZoneOffset);
@@ -169,7 +169,7 @@ public class ContactScheduledEmailTask : BaseTask
 
             var days = contactSchedule.Day!.Split(',').Select(int.Parse).ToArray();
 
-            var emailSentCount = dbContext.EmailLogs!.Count(
+            var emailSentCount = this.dbContext.EmailLogs!.Count(
                             e => e.ScheduleId == schedule.ScheduleId
                             && e.ContactId == schedule.ContactId
                             && e.Status == EmailStatus.Sent);

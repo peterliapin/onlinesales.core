@@ -16,7 +16,7 @@ public static class CsvClassMapHelper
         var mapType = typeof(DefaultClassMap<>);
         var constructedMapType = mapType.MakeGenericType(itemType!);
 
-        var map = (ClassMap)Activator.CreateInstance(constructedMapType) !;
+        var map = (ClassMap)Activator.CreateInstance(constructedMapType)!;
         map.AutoMap(CultureInfo.InvariantCulture);
 
         foreach (var memberMapData in map.MemberMaps.Select(m => m.Data))

@@ -33,12 +33,12 @@ public class Domain : BaseEntityWithIdAndDates
     {
         get
         {
-            return name;
+            return this.name;
         }
 
         set
         {
-            name = value.ToLower();
+            this.name = value.ToLower();
         }
     }
 
@@ -69,7 +69,7 @@ public class Domain : BaseEntityWithIdAndDates
     public bool? MxCheck { get; set; }
 
     public int? AccountId { get; set; }
-    
+
     [JsonIgnore]
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]

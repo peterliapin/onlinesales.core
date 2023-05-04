@@ -15,7 +15,7 @@ public static class EnumHelper
         var descriptions = new Dictionary<string, string>();
         foreach (TEnum value in Enum.GetValues(typeof(TEnum)))
         {
-            var descriptionAttribute = value.GetType().GetField(value.ToString()) !
+            var descriptionAttribute = value.GetType().GetField(value.ToString())!
                 .GetCustomAttribute<DescriptionAttribute>();
 
             var description = descriptionAttribute?.Description ?? value.ToString();

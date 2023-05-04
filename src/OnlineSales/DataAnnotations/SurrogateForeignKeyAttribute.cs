@@ -9,9 +9,9 @@ namespace OnlineSales.DataAnnotations
     {
         public SurrogateForeignKeyAttribute(Type relatedType, string relatedTypeUniqeIndex, string sourceForeignKey)
         {
-            RelatedType = relatedType;
-            RelatedTypeUniqeIndex = relatedTypeUniqeIndex;
-            SourceForeignKey = sourceForeignKey;
+            this.RelatedType = relatedType;
+            this.RelatedTypeUniqeIndex = relatedTypeUniqeIndex;
+            this.SourceForeignKey = sourceForeignKey;
         }
 
         public Type RelatedType { get; set; }

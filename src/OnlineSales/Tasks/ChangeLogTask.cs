@@ -12,7 +12,7 @@ using OnlineSales.Services;
 namespace OnlineSales.Tasks;
 
 public abstract class ChangeLogTask : BaseTask
-{    
+{
     protected readonly PgDbContext dbContext;
 
     protected readonly IEnumerable<PluginDbContextBase> pluginDbContexts;
@@ -24,13 +24,13 @@ public abstract class ChangeLogTask : BaseTask
     {
         this.dbContext = dbContext;
         this.pluginDbContexts = pluginDbContexts;
-        this.loggedTypes = GetTypes(dbContext);
+        this.loggedTypes = this.GetTypes(dbContext);
 
-        var config = configuration.GetSection(configKey) !.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {
-            ChangeLogBatchSize = config.BatchSize;
+            this.ChangeLogBatchSize = config.BatchSize;
         }
         else
         {
@@ -39,41 +39,41 @@ public abstract class ChangeLogTask : BaseTask
 
         foreach (var pt in pluginDbContexts)
         {
-            var lt = GetTypes(pt);
+            var lt = this.GetTypes(pt);
             this.loggedTypes.UnionWith(lt);
         }
-    }    
+    }
 
     public int ChangeLogBatchSize { get; private set; }
 
     public override Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        foreach (var typeName in loggedTypes.Select(type => type.Name))
+        foreach (var typeName in this.loggedTypes.Select(type => type.Name))
         {
-            var taskAndEntity = Name + "_" + typeName;
+            var taskAndEntity = this.Name + "_" + typeName;
 
-            if (IsPreviousTaskInProgress(taskAndEntity))
+            if (this.IsPreviousTaskInProgress(taskAndEntity))
             {
                 return Task.FromResult(true);
             }
 
-            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, typeName);
+            var changeLogBatch = this.GetNextOrFailedChangeLogBatch(taskAndEntity, typeName);
 
             if (changeLogBatch is not null && changeLogBatch!.Any())
             {
-                var taskLog = AddChangeLogTaskLogRecord(taskAndEntity, changeLogBatch!.First().Id, changeLogBatch!.Last().Id);
+                var taskLog = this.AddChangeLogTaskLogRecord(taskAndEntity, changeLogBatch!.First().Id, changeLogBatch!.Last().Id);
 
                 try
                 {
-                    ExecuteLogTask(changeLogBatch!);
+                    this.ExecuteLogTask(changeLogBatch!);
 
-                    UpdateChangeLogTaskLogRecord(taskLog, changeLogBatch!.Count, TaskExecutionState.Completed);
+                    this.UpdateChangeLogTaskLogRecord(taskLog, changeLogBatch!.Count, TaskExecutionState.Completed);
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, $"Error occurred when executing task {Name}");
+                    Log.Error(ex, $"Error occurred when executing task {this.Name}");
 
-                    UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
+                    this.UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
                     throw;
                 }
             }
@@ -89,10 +89,10 @@ public abstract class ChangeLogTask : BaseTask
         var res = new HashSet<Type>();
 
         var types = context.Model.GetEntityTypes();
-        
+
         foreach (var type in types.Select(type => type.ClrType))
         {
-            if (type != null && IsChangeLogAttribute(type) && IsTypeSupported(type))
+            if (type != null && this.IsChangeLogAttribute(type) && this.IsTypeSupported(type))
             {
                 res.Add(type);
             }
@@ -110,7 +110,7 @@ public abstract class ChangeLogTask : BaseTask
 
     private bool IsPreviousTaskInProgress(string name)
     {
-        var inProgressCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
+        var inProgressCount = this.dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == name && c.State == TaskExecutionState.InProgress);
 
         return inProgressCount > 0;
     }
@@ -121,7 +121,7 @@ public abstract class ChangeLogTask : BaseTask
         taskLog.State = state;
         taskLog.End = DateTime.UtcNow;
 
-        dbContext.SaveChanges();
+        this.dbContext.SaveChanges();
     }
 
     private ChangeLogTaskLog AddChangeLogTaskLogRecord(string taskName, int minLogId, int maxLogId)
@@ -135,8 +135,8 @@ public abstract class ChangeLogTask : BaseTask
             ChangeLogIdMax = maxLogId,
         };
 
-        dbContext.ChangeLogTaskLogs!.Add(changeLogTaskLogEntry);
-        dbContext.SaveChanges();
+        this.dbContext.ChangeLogTaskLogs!.Add(changeLogTaskLogEntry);
+        this.dbContext.SaveChanges();
 
         return changeLogTaskLogEntry;
     }
@@ -145,12 +145,12 @@ public abstract class ChangeLogTask : BaseTask
     {
         var minLogId = 1;
 
-        var lastProcessedTask = dbContext.ChangeLogTaskLogs!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
+        var lastProcessedTask = this.dbContext.ChangeLogTaskLogs!.Where(c => c.TaskName == taskName).OrderByDescending(t => t.Id).FirstOrDefault();
 
         if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Failed)
         {
-            var failedTaskCount = dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
-            if (failedTaskCount > 0 && failedTaskCount <= RetryCount)
+            var failedTaskCount = this.dbContext.ChangeLogTaskLogs!.Count(c => c.TaskName == taskName && c.ChangeLogIdMin == lastProcessedTask.ChangeLogIdMin);
+            if (failedTaskCount > 0 && failedTaskCount <= this.RetryCount)
             {
                 // If this is a retry, get the same minId of last processed task to re-execute the same batch.
                 minLogId = lastProcessedTask.ChangeLogIdMin;
@@ -169,7 +169,7 @@ public abstract class ChangeLogTask : BaseTask
         }
 
         // 3000000 - tests show that limit of 3 millions records is optimal to split change_log table into the parts with acceptable performance
-        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + 3000000 && c.ObjectType == entity).OrderBy(b => b.Id).Take(ChangeLogBatchSize).ToList();
+        var changeLogList = this.dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + 3000000 && c.ObjectType == entity).OrderBy(b => b.Id).Take(this.ChangeLogBatchSize).ToList();
 
         return changeLogList;
     }

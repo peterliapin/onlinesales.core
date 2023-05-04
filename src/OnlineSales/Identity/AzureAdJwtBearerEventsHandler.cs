@@ -12,14 +12,14 @@ public class AzureAdJwtBearerEventsHandler : JwtBearerEvents
 {
     public override async Task TokenValidated(TokenValidatedContext context)
     {
-        var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>() !;
-        var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>() !;
+        var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>()!;
+        var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>()!;
 
         var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(userEmail))
         {
-            await AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
+            await this.AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
             return;
         }
 

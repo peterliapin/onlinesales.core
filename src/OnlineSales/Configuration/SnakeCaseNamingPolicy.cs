@@ -12,7 +12,7 @@ namespace OnlineSales.Configuration
 
         public override string ConvertName(string name)
         {
-            return ToSnakeCase(name);
+            return this.ToSnakeCase(name);
         }
 
         public string ToSnakeCase(string str)

@@ -13,6 +13,6 @@ public class LogTests : BaseTest
     [Fact]
     public async Task GetLogsTest()
     {
-        await GetTest("/api/logs");
+        await this.GetTest("/api/logs");
     }
 }

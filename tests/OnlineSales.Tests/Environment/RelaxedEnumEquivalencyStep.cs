@@ -18,11 +18,11 @@ internal class RelaxedEnumEquivalencyStep : IEquivalencyStep
                 .ForCondition(subject == comparands.Expectation.ToString())
                 .FailWith(() =>
                 {
-                    decimal? subjectsUnderlyingValue = ExtractDecimal(comparands.Subject);
-                    decimal? expectationsUnderlyingValue = ExtractDecimal(comparands.Expectation);
+                    var subjectsUnderlyingValue = ExtractDecimal(comparands.Subject);
+                    var expectationsUnderlyingValue = ExtractDecimal(comparands.Expectation);
 
-                    string subjectsName = GetDisplayNameForEnumComparison(comparands.Subject, subjectsUnderlyingValue);
-                    string expectationName = GetDisplayNameForEnumComparison(comparands.Expectation, expectationsUnderlyingValue);
+                    var subjectsName = GetDisplayNameForEnumComparison(comparands.Subject, subjectsUnderlyingValue);
+                    var expectationName = GetDisplayNameForEnumComparison(comparands.Expectation, expectationsUnderlyingValue);
                     return new FailReason(
                             $"Expected {{context:string}} to be equivalent to {expectationName}{{reason}}, but found {subjectsName}.");
                 });
@@ -36,11 +36,11 @@ internal class RelaxedEnumEquivalencyStep : IEquivalencyStep
                 .ForCondition(comparands.Subject.ToString() == expectation)
                 .FailWith(() =>
                 {
-                    decimal? subjectsUnderlyingValue = ExtractDecimal(comparands.Subject);
-                    decimal? expectationsUnderlyingValue = ExtractDecimal(comparands.Expectation);
+                    var subjectsUnderlyingValue = ExtractDecimal(comparands.Subject);
+                    var expectationsUnderlyingValue = ExtractDecimal(comparands.Expectation);
 
-                    string subjectsName = GetDisplayNameForEnumComparison(comparands.Subject, subjectsUnderlyingValue);
-                    string expectationName = GetDisplayNameForEnumComparison(comparands.Expectation, expectationsUnderlyingValue);
+                    var subjectsName = GetDisplayNameForEnumComparison(comparands.Subject, subjectsUnderlyingValue);
+                    var expectationName = GetDisplayNameForEnumComparison(comparands.Expectation, expectationsUnderlyingValue);
                     return new FailReason(
                             $"Expected {{context:enum}} to be equivalent to {expectationName}{{reason}}, but found {subjectsName}.");
                 });
@@ -63,9 +63,9 @@ internal class RelaxedEnumEquivalencyStep : IEquivalencyStep
             return '\"' + o.ToString() + '\"';
         }
 
-        string typePart = o.GetType().Name;
-        string namePart = o.ToString() !.Replace(", ", "|", StringComparison.Ordinal);
-        string valuePart = v.Value.ToString(CultureInfo.InvariantCulture);
+        var typePart = o.GetType().Name;
+        var namePart = o.ToString()!.Replace(", ", "|", StringComparison.Ordinal);
+        var valuePart = v.Value.ToString(CultureInfo.InvariantCulture);
         return $"{typePart}.{namePart} {{{{value: {valuePart}}}}}";
     }
 

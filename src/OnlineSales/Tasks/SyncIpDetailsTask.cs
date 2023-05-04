@@ -24,8 +24,8 @@ public class SyncIpDetailsTask : ChangeLogTask
     protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
         var ipDetailsCollection = new List<IpDetails>();
-        var ipList = GetDistinctIps(nextBatch);
-        var newIpCollection = GetNewIps(ipList!);
+        var ipList = this.GetDistinctIps(nextBatch);
+        var newIpCollection = this.GetNewIps(ipList!);
 
         foreach (var ip in newIpCollection)
         {
@@ -34,7 +34,7 @@ public class SyncIpDetailsTask : ChangeLogTask
                 continue;
             }
 
-            var geoIpDetails = ipDetailsService.GetIpDetails(ip).Result;
+            var geoIpDetails = this.ipDetailsService.GetIpDetails(ip).Result;
 
             if (geoIpDetails == null)
             {
@@ -48,17 +48,17 @@ public class SyncIpDetailsTask : ChangeLogTask
                 CityName = geoIpDetails!.City,
                 CountryCode = Enum.TryParse<Country>(geoIpDetails!.CountryCode2, out var countryCode) ? countryCode : Country.ZZ,
                 ContinentCode = Enum.TryParse<Continent>(geoIpDetails!.ContinentCode, out var continentCode) ? continentCode : Continent.ZZ,
-                Latitude = double.TryParse(geoIpDetails!.Latitude, out double resultLatitiude) ? resultLatitiude : 0,
-                Longitude = double.TryParse(geoIpDetails!.Longitude, out double resultLongitude) ? resultLongitude : 0,
+                Latitude = double.TryParse(geoIpDetails!.Latitude, out var resultLatitiude) ? resultLatitiude : 0,
+                Longitude = double.TryParse(geoIpDetails!.Longitude, out var resultLongitude) ? resultLongitude : 0,
             };
 
-            ipDetailsCollection.Add(ipDetails); 
+            ipDetailsCollection.Add(ipDetails);
         }
 
         if (ipDetailsCollection.Any())
         {
-            dbContext.IpDetails!.AddRange(ipDetailsCollection);
-            dbContext.SaveChanges(); 
+            this.dbContext.IpDetails!.AddRange(ipDetailsCollection);
+            this.dbContext.SaveChanges();
         }
     }
 
@@ -83,9 +83,9 @@ public class SyncIpDetailsTask : ChangeLogTask
     private List<string> GetNewIps(List<string> ips)
     {
         var dbResults = (from i in ips
-                 join di in dbContext.IpDetails! on i equals di.Ip into ps
-                 from di in ps.DefaultIfEmpty()
-                 select new { NewIp = i, Ip = di?.Ip ?? string.Empty }).ToList();
+                         join di in this.dbContext.IpDetails! on i equals di.Ip into ps
+                         from di in ps.DefaultIfEmpty()
+                         select new { NewIp = i, Ip = di?.Ip ?? string.Empty }).ToList();
 
         var newIps = (from dr in dbResults where dr.Ip == string.Empty select dr.NewIp).ToList();
 

@@ -21,24 +21,24 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         // posted contacts marked as notInitialized and the details of their accounts should be retrieved
         var item = TestData.Generate<TestContact>();
         item.Email = notinitializedEmail;
-        await PostTest(itemsUrl, item);
+        await this.PostTest(this.itemsUrl, item);
 
         // imported contacts marked as notIntended and the details of their accounts shouldn't be retrieved
-        await PostImportTest(itemsUrl, "contacts.json");
+        await this.PostImportTest(this.itemsUrl, "contacts.json");
 
-        HttpResponseMessage executeResponce = await GetRequest("/api/tasks/execute/ContactAccountTask");
+        var executeResponce = await this.GetRequest("/api/tasks/execute/ContactAccountTask");
         executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var contacts = App.GetDbContext() !.Contacts!.ToList();
+        var contacts = App.GetDbContext()!.Contacts!.ToList();
         contacts.Count.Should().BeGreaterThan(1);
 
         foreach (var contact in contacts)
         {
-            var domain = App.GetDbContext() !.Domains!.Where(d => d.Id == contact!.DomainId).FirstOrDefault();
+            var domain = App.GetDbContext()!.Domains!.Where(d => d.Id == contact!.DomainId).FirstOrDefault();
             domain.Should().NotBeNull();
             if (contact.Email == notinitializedEmail)
             {
-                domain !.AccountStatus.Should().Be(AccountSyncStatus.Successful);
+                domain!.AccountStatus.Should().Be(AccountSyncStatus.Successful);
                 domain.AccountId.Should().NotBeNull();
             }
             else
@@ -54,9 +54,9 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     [Fact]
     public async Task CheckInsertedItemDomain()
     {
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
-        var returnedDomain = DomainChecker(testCreateItem.Item1.Email);
+        var returnedDomain = this.DomainChecker(testCreateItem.Item1.Email);
         returnedDomain.Should().NotBeNull();
     }
 
@@ -64,20 +64,20 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     [InlineData("contacts.json")]
     public async Task ImportFileAddCheckDomain(string fileName)
     {
-        await PostImportTest(itemsUrl, fileName);
+        await this.PostImportTest(this.itemsUrl, fileName);
 
-        var newContact = await GetTest<Contact>($"{itemsUrl}/2");
+        var newContact = await this.GetTest<Contact>($"{this.itemsUrl}/2");
         newContact.Should().NotBeNull();
 
-        var returnedDomain = DomainChecker(newContact!.Email);
+        var returnedDomain = this.DomainChecker(newContact!.Email);
         returnedDomain.Should().NotBeNull();
     }
 
     [Fact]
     public async Task ImportFileUpdateByIndexTest()
     {
-        await PostImportTest(itemsUrl, "contactBase.csv");
-        var allContactsResponse = await GetTest(itemsUrl);
+        await this.PostImportTest(this.itemsUrl, "contactBase.csv");
+        var allContactsResponse = await this.GetTest(this.itemsUrl);
         allContactsResponse.Should().NotBeNull();
 
         var content = await allContactsResponse.Content.ReadAsStringAsync();
@@ -85,18 +85,18 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         allContacts.Should().NotBeNull();
         allContacts!.Count.Should().Be(4);
 
-        await PostImportTest(itemsUrl, "contactsToUpdate.csv");
-        var contact1 = App.GetDbContext() !.Contacts!.First(c => c.Id == 1);
+        await this.PostImportTest(this.itemsUrl, "contactsToUpdate.csv");
+        var contact1 = App.GetDbContext()!.Contacts!.First(c => c.Id == 1);
         contact1.Should().NotBeNull();
         // contact1 updated by Id
         contact1.LastName.Should().Be("adam_parker");
 
-        var contact2 = App.GetDbContext() !.Contacts!.First(c => c.Id == 2);
+        var contact2 = App.GetDbContext()!.Contacts!.First(c => c.Id == 2);
         contact2.Should().NotBeNull();
         // contact2 no id provided, updated by Email
         contact2.LastName.Should().Be("garry_bolt");
 
-        var contact3 = App.GetDbContext() !.Contacts!.First(c => c.Id == 3);
+        var contact3 = App.GetDbContext()!.Contacts!.First(c => c.Id == 3);
         contact3.Should().NotBeNull();
         // contact3 no id provided, updated by Email
         contact3.LastName.Should().Be("Siri_Tom");
@@ -105,23 +105,23 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     [Fact]
     public async Task ParentDeletionRestrictWithChildren()
     {
-        int contactId = 0;
+        var contactId = 0;
 
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
         contactId = Convert.ToInt32(testCreateItem.Item2.Split("/").Last());
 
         var dbContext = App.GetDbContext();
         var dbDomainId = dbContext!.Contacts!.Where(contactsDb => contactsDb.Id == contactId).Select(contact => contact.DomainId).FirstOrDefault();
 
-        await DeleteTest($"/api/domains/{dbDomainId}");
+        await this.DeleteTest($"/api/domains/{dbDomainId}");
     }
 
     [Fact]
     public async Task DuplicatedRecordsImportTest()
     {
         // first attempt to import records with some duplicates
-        var importResult = await PostImportTest(itemsUrl, "contactsWithDuplicates.csv");
+        var importResult = await this.PostImportTest(this.itemsUrl, "contactsWithDuplicates.csv");
 
         importResult.Added.Should().Be(2);
         importResult.Updated.Should().Be(0);
@@ -131,7 +131,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         importResult.Errors!.Count.Should().Be(2);
 
         // second attempt to import records with some duplicates
-        importResult = await PostImportTest(itemsUrl, "contactsWithDuplicatesUpdate.csv");
+        importResult = await this.PostImportTest(this.itemsUrl, "contactsWithDuplicatesUpdate.csv");
 
         importResult.Added.Should().Be(0);
         importResult.Updated.Should().Be(2);
@@ -141,7 +141,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         importResult.Errors!.Count.Should().Be(2);
 
         // third attempt to import records with some duplicates
-        importResult = await PostImportTest(itemsUrl, "contactsWithDuplicatesUpdate.csv");
+        importResult = await this.PostImportTest(this.itemsUrl, "contactsWithDuplicatesUpdate.csv");
 
         importResult.Added.Should().Be(0);
         importResult.Updated.Should().Be(0);
@@ -162,7 +162,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     {
         var contacts = new List<Contact>();
 
-        for (int i = 0; i < dataCount; i++)
+        for (var i = 0; i < dataCount; i++)
         {
             var contact = new Contact();
             contact.Email = $"contact{i}@test{i}.net";

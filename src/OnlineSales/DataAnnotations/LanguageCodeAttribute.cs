@@ -18,7 +18,7 @@ public class LanguageCodeAttribute : ValidationAttribute
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (nullAllowed && value == null)
+        if (this.nullAllowed && value == null)
         {
             return ValidationResult.Success;
         }

@@ -34,10 +34,10 @@ namespace OnlineSales.SendGrid.Tasks
         {
             this.sgDbContext = dbContext;
             this.logService = logService;
-            var config = configuration.GetSection(this.configKey) !.Get<TaskWithBatchConfig>();
+            var config = configuration.GetSection(this.configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
             {
-                batchSize = config.BatchSize;
+                this.batchSize = config.BatchSize;
             }
             else
             {
@@ -49,9 +49,9 @@ namespace OnlineSales.SendGrid.Tasks
         {
             try
             {
-                var maxId = await logService.GetMaxId(SourceName);
-                var events = sgDbContext.SendgridEvents!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
-                var res = await logService.AddActivityRecords(events);
+                var maxId = await this.logService.GetMaxId(SourceName);
+                var events = this.sgDbContext.SendgridEvents!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(this.batchSize).Select(e => Convert(e)).ToList();
+                var res = await this.logService.AddActivityRecords(events);
                 if (!res)
                 {
                     throw new SendGridApiException("Cannot log sendgrid events");

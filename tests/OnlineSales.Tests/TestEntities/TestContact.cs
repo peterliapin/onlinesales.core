@@ -8,6 +8,6 @@ public class TestContact : ContactCreateDto
 {
     public TestContact(string uid = "")
     {
-        Email = $"contact{uid}@test{uid}.net";
+        this.Email = $"contact{uid}@test{uid}.net";
     }
 }

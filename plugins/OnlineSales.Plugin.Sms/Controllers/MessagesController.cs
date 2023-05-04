@@ -44,40 +44,40 @@ public class MessagesController : Controller
                 return new UnauthorizedResult();
             }
 
-            string recipient = string.Empty;
+            var recipient = string.Empty;
 
             try
             {
-                var phoneNumber = phoneNumberUtil.Parse(smsDetails.Recipient, string.Empty);
+                var phoneNumber = this.phoneNumberUtil.Parse(smsDetails.Recipient, string.Empty);
 
-                recipient = phoneNumberUtil.Format(phoneNumber, PhoneNumberFormat.E164);
+                recipient = this.phoneNumberUtil.Format(phoneNumber, PhoneNumberFormat.E164);
             }
             catch (NumberParseException npex)
             {
-                ModelState.AddModelError(npex.ErrorType.ToString(), npex.Message);
+                this.ModelState.AddModelError(npex.ErrorType.ToString(), npex.Message);
             }
 
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                throw new InvalidModelStateException(ModelState);
+                throw new InvalidModelStateException(this.ModelState);
             }
 
             var smsLog = new SmsLog
             {
-                Sender = smsService.GetSender(recipient),
+                Sender = this.smsService.GetSender(recipient),
                 Recipient = smsDetails.Recipient,
                 Message = smsDetails.Message,
                 Status = Entities.SmsLog.SmsStatus.NotSent,
             };
 
-            dbContext.SmsLogs!.Add(smsLog);
-            await dbContext.SaveChangesAsync();
+            this.dbContext.SmsLogs!.Add(smsLog);
+            await this.dbContext.SaveChangesAsync();
 
-            await smsService.SendAsync(recipient, smsDetails.Message);
+            await this.smsService.SendAsync(recipient, smsDetails.Message);
 
             smsLog.Status = SmsLog.SmsStatus.Sent;
 
-            return Ok();
+            return this.Ok();
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ public class MessagesController : Controller
         }
         finally
         {
-            await dbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
         }
     }
 }

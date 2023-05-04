@@ -17,17 +17,17 @@ public class IdentityException : Exception
             builder.AppendLine($"Code: {error.Code} Description: {error.Description}");
         }
 
-        ErrorMessage = builder.ToString();
+        this.ErrorMessage = builder.ToString();
     }
 
     public IdentityException(IdentityError error)
     {
-        ErrorMessage = $"Code: {error.Code} Description: {error.Description}";
+        this.ErrorMessage = $"Code: {error.Code} Description: {error.Description}";
     }
 
     public IdentityException(string error)
     {
-        ErrorMessage = error;
+        this.ErrorMessage = error;
     }
 
     public string ErrorMessage { get; set; }
