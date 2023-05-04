@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Interfaces;
 
@@ -48,7 +49,7 @@ public abstract class PluginDbContextBase : PgDbContext
         {
             var items = builder.Model.GetEntityTypes();
 
-            foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(PgDbContext).Assembly))
+            foreach (var item in items.Where(item => item.ClrType.Assembly == typeof(PgDbContext).Assembly || item.ClrType.Assembly == typeof(IdentityRole).Assembly))
             {
                 item.SetIsTableExcludedFromMigrations(true);
             }

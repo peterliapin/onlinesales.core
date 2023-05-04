@@ -64,6 +64,10 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         result!.Count.Should().Be(5);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][neq]=null");
         result!.Count.Should().Be(0);
+        result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt][eq]=null");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt][neq]=null");
+        result!.Count.Should().Be(5);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][Name][eq]=Test1|Test2");
         result!.Count.Should().Be(2);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][Name][neq]=Test1|Test2");

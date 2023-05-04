@@ -10,6 +10,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -31,9 +32,27 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string? query)
+    public override async Task<ActionResult<List<CommentDetailsDto>>> Get([FromQuery] string? query)
     {
-        return base.Get(query);
+        var returnedItems = (await base.Get(query)).Result;
+
+        var items = (List<CommentDetailsDto>)((ObjectResult)returnedItems!).Value!;
+
+        items.ForEach(c =>
+        {
+            c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.AuthorEmail);
+        });
+
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return Ok(items);
+        }
+        else
+        {
+            var commentsForAnonymous = mapper.Map<List<AnonymousCommentDetailsDto>>(items);
+
+            return Ok(commentsForAnonymous);
+        }        
     }
 
     // GET api/{entity}s/5
@@ -42,9 +61,24 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public override Task<ActionResult<CommentDetailsDto>> GetOne(int id)
+    public override async Task<ActionResult<CommentDetailsDto>> GetOne(int id)
     {
-        return base.GetOne(id);
+        var result = (await base.GetOne(id)).Result;
+
+        var commentDetails = (CommentDetailsDto)((ObjectResult)result!).Value!;
+
+        commentDetails!.AvatarUrl = GravatarHelper.EmailToGravatarUrl(commentDetails.AuthorEmail);
+
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            return Ok(commentDetails!);
+        }
+        else
+        {
+            var commentForAnonymous = mapper.Map<AnonymousCommentDetailsDto>(commentDetails);
+
+            return Ok(commentForAnonymous!);
+        }            
     }
 
     // POST api/{entity}s
