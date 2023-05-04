@@ -3,7 +3,6 @@
 // </copyright>
 
 using OnlineSales.DataAnnotations;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests;
 public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto, ISaveService<EmailGroup>>
@@ -62,12 +61,18 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
 
         var result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][eq]=null");
         result!.Count.Should().Be(5);
+        result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][eq]=");
+        result!.Count.Should().Be(5);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][neq]=null");
+        result!.Count.Should().Be(0);
+        result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][UpdatedAt][neq]=");
         result!.Count.Should().Be(0);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt][eq]=null");
         result!.Count.Should().Be(0);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt][neq]=null");
         result!.Count.Should().Be(5);
+        result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][Name][eq]=");
+        result!.Count.Should().Be(0);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][Name][eq]=Test1|Test2");
         result!.Count.Should().Be(2);
         result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][Name][neq]=Test1|Test2");
@@ -129,7 +134,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         bulkEntitiesList.Add(mapper.Map<EmailGroup>(bulkList));
         App.PopulateBulkData<EmailGroup, ISaveService<EmailGroup>>(bulkEntitiesList);
 
-        var result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt]=", HttpStatusCode.BadRequest);
+        var result = await GetTest<List<EmailGroup>>(itemsUrl + "?filter[where][CreatedAt][gt]=", HttpStatusCode.BadRequest);
         result.Should().BeNull();
 
         var now = DateTime.UtcNow;

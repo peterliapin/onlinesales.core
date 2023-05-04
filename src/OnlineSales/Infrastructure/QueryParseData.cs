@@ -438,7 +438,7 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var sv in input)
                 {
-                    if (sv == "null" && GetUnderlyingPropertyType() != typeof(string))
+                    if ((sv == "null" || sv == string.Empty) && GetUnderlyingPropertyType() != typeof(string))
                     {
                         result.Add(null);
                     }
@@ -471,6 +471,10 @@ namespace OnlineSales.Infrastructure
                         else if (GetUnderlyingPropertyType() == typeof(string))
                         {
                             result.Add(sv);
+                            if (sv == string.Empty)
+                            {
+                                result.Add(null);
+                            }
                         }
                         else
                         {
