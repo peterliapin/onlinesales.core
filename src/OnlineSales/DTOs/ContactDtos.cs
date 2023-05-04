@@ -100,6 +100,7 @@ public class ContactImportDto : BaseImportDto
 
     [Optional]
     [EmailAddress]
+    [SwaggerUnique]
     public string? Email
     {
         get
