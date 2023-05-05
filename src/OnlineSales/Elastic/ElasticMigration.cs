@@ -17,14 +17,14 @@ public class ElasticMigration
         var assembly = Assembly.GetExecutingAssembly();
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
 
-        ProductVersion = fileVersionInfo.ProductVersion!;
+        this.ProductVersion = fileVersionInfo.ProductVersion!;
 
-        var elasticMigrationAttribute = GetType().GetCustomAttributes(typeof(ElasticMigrationAttribute), true).FirstOrDefault() as ElasticMigrationAttribute;
+        var elasticMigrationAttribute = this.GetType().GetCustomAttributes(typeof(ElasticMigrationAttribute), true).FirstOrDefault() as ElasticMigrationAttribute;
 
-        if (elasticMigrationAttribute != null)            
+        if (elasticMigrationAttribute != null)
         {
-            MigrationId = elasticMigrationAttribute.Id;
-        }        
+            this.MigrationId = elasticMigrationAttribute.Id;
+        }
     }
 
     public string MigrationId { get; set; } = string.Empty;
@@ -43,7 +43,7 @@ public class ElasticMigrationAttribute : Attribute
 {
     public ElasticMigrationAttribute(string id)
     {
-        Id = id;
+        this.Id = id;
     }
 
     public string Id { get; set; }

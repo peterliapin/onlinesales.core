@@ -42,7 +42,7 @@ namespace OnlineSales.Infrastructure
 
                         if (GetTypeFromNullable(property.PropertyType).IsEnum)
                         {
-                            propertySchema.Value.Example = new OpenApiString(Activator.CreateInstance(GetTypeFromNullable(property.PropertyType)) !.ToString());
+                            propertySchema.Value.Example = new OpenApiString(Activator.CreateInstance(GetTypeFromNullable(property.PropertyType))!.ToString());
                         }
                         else if (property.PropertyType == typeof(int) || property.PropertyType == typeof(int?))
                         {
@@ -60,7 +60,7 @@ namespace OnlineSales.Infrastructure
                                 propertySchema.Value.Pattern = CurrencySymbolsRegex;
                                 SetStringExample(property, propertySchema.Value, "USD");
                             }
-                            else 
+                            else
                             {
                                 SetStringExample(property, propertySchema.Value);
                             }
@@ -85,7 +85,7 @@ namespace OnlineSales.Infrastructure
                         {
                             SetStringExample(property, propertySchema.Value, new DateTime(2023, 04, 18, 12, 0, 0, DateTimeKind.Utc).ToString("O"));
                             propertySchema.Value.Pattern = @"^(\d{4})-(1[0-2]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(2[0-4]|1[0-9]|0[1-9]):(2[0-4]|1[0-9]|0[1-9]):([1-5]?0[0-9]).(\d{7})Z$";
-                        }                            
+                        }
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace OnlineSales.Infrastructure
 
         private static Type GetTypeFromNullable(Type type)
         {
-            return type.IsNullableType() ? Nullable.GetUnderlyingType(type) ! : type;
+            return type.IsNullableType() ? Nullable.GetUnderlyingType(type)! : type;
         }
 
         private static void SetIntegerExample(PropertyInfo property, OpenApiSchema schema)
@@ -140,7 +140,7 @@ namespace OnlineSales.Infrastructure
         {
             var attr = property.GetCustomAttribute<SwaggerExampleAttribute<string[]>>();
             var array = new OpenApiArray();
-            array.AddRange(attr != null ? attr.Value.Select(s => new OpenApiString(s)) : new List<OpenApiString>() { new OpenApiString("string1"), new OpenApiString("string2") });            
+            array.AddRange(attr != null ? attr.Value.Select(s => new OpenApiString(s)) : new List<OpenApiString>() { new OpenApiString("string1"), new OpenApiString("string2") });
             schema.Example = array;
         }
 
@@ -159,9 +159,9 @@ namespace OnlineSales.Infrastructure
                 return string.Empty;
             }
 
-            StringBuilder newText = new StringBuilder(name.Length * 2);
+            var newText = new StringBuilder(name.Length * 2);
             newText.Append(char.ToUpper(name[0]));
-            for (int i = 1; i < name.Length; i++)
+            for (var i = 1; i < name.Length; i++)
             {
                 if (char.IsUpper(name[i]))
                 {

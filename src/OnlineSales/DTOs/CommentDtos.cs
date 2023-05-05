@@ -19,12 +19,12 @@ public class CommentCreateDto
     {
         get
         {
-            return authorEmail;
+            return this.authorEmail;
         }
 
         set
         {
-            authorEmail = value.ToLower();
+            this.authorEmail = value.ToLower();
         }
     }
 
@@ -95,12 +95,12 @@ public class CommentImportDto : BaseImportDto
     {
         get
         {
-            return authorEmail;
+            return this.authorEmail;
         }
 
         set
         {
-            authorEmail = string.IsNullOrEmpty(value) ? null : value.ToLower();
+            this.authorEmail = string.IsNullOrEmpty(value) ? null : value.ToLower();
         }
     }
 

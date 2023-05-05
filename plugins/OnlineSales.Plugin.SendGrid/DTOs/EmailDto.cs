@@ -12,12 +12,12 @@ public class EmailDto
     {
         get
         {
-            return email;
+            return this.email;
         }
 
         set
         {
-            email = value.ToLower();
+            this.email = value.ToLower();
         }
     }
 }

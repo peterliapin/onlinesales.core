@@ -23,46 +23,46 @@ public class EsDbContext : ElasticDbContext
 
     public EsDbContext(IConfiguration configuration)
     {
-        elasticConfig = configuration.GetSection("Elastic").Get<ElasticConfig>();
+        this.elasticConfig = configuration.GetSection("Elastic").Get<ElasticConfig>();
 
-        if (elasticConfig == null)
+        if (this.elasticConfig == null)
         {
             throw new MissingConfigurationException("Elastic configuration is mandatory.");
         }
 
-        var connectionSettings = new ConnectionSettings(new Uri(elasticConfig.Url));
+        var connectionSettings = new ConnectionSettings(new Uri(this.elasticConfig.Url));
 
         connectionSettings.DefaultMappingFor<LogRecord>(m => m
-            .IndexName($"{elasticConfig!.IndexPrefix}-logs"));
+            .IndexName($"{this.elasticConfig!.IndexPrefix}-logs"));
 
-        Assembly assembly = typeof(EsDbContext).Assembly;
+        var assembly = typeof(EsDbContext).Assembly;
 
-        entityTypes =
+        this.entityTypes =
             (from t in assembly.GetTypes().AsParallel()
              let attributes = t.GetCustomAttributes(typeof(SupportsElasticAttribute), true)
              where attributes != null && attributes.Length > 0
              select t).ToList();
 
-        var migrationsIndexName = ElasticHelper.GetIndexName(elasticConfig!.IndexPrefix, typeof(ElasticMigration));
+        var migrationsIndexName = ElasticHelper.GetIndexName(this.elasticConfig!.IndexPrefix, typeof(ElasticMigration));
 
         connectionSettings.DefaultMappingFor<ElasticMigration>(m => m
             .IndexName(migrationsIndexName));
 
-        foreach (var entityType in entityTypes)
+        foreach (var entityType in this.entityTypes)
         {
-            var indexName = ElasticHelper.GetIndexName(elasticConfig!.IndexPrefix, entityType);
+            var indexName = ElasticHelper.GetIndexName(this.elasticConfig!.IndexPrefix, entityType);
 
             connectionSettings.DefaultMappingFor(entityType, m => m
                 .IndexName(indexName));
         }
 
-        elasticClient = new ElasticClient(connectionSettings);
+        this.elasticClient = new ElasticClient(connectionSettings);
     }
 
-    public override ElasticClient ElasticClient => elasticClient;
+    public override ElasticClient ElasticClient => this.elasticClient;
 
-    public override string IndexPrefix => elasticConfig!.IndexPrefix;
+    public override string IndexPrefix => this.elasticConfig!.IndexPrefix;
 
-    protected override List<Type> EntityTypes => entityTypes;    
+    protected override List<Type> EntityTypes => this.entityTypes;
 }
 

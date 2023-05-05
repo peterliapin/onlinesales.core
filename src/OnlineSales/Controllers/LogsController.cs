@@ -29,10 +29,10 @@ public class LogsController : Controller
     public virtual async Task<ActionResult<List<LogRecord>>> GetAll()
     {
         var logRecords = (
-                await esDbContext.ElasticClient.SearchAsync<LogRecord>(
+                await this.esDbContext.ElasticClient.SearchAsync<LogRecord>(
                     s => s.Size(20).Skip(10)))
             .Documents.ToList();
 
-        return Ok(logRecords);
+        return this.Ok(logRecords);
     }
 }

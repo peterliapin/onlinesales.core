@@ -4,23 +4,23 @@
 
 namespace OnlineSales.Services;
 
-public class TaskStatusService 
+public class TaskStatusService
 {
     private readonly Dictionary<string, bool> taskStatusByName = new Dictionary<string, bool>();
 
     public void SetInitialState(string name, bool running)
     {
-        if (!taskStatusByName.ContainsKey(name))
+        if (!this.taskStatusByName.ContainsKey(name))
         {
-            taskStatusByName[name] = running;
+            this.taskStatusByName[name] = running;
         }
     }
 
     public bool IsRunning(string name)
     {
-        if (taskStatusByName.ContainsKey(name))
+        if (this.taskStatusByName.ContainsKey(name))
         {
-            return taskStatusByName[name];
+            return this.taskStatusByName[name];
         }
         else
         {
@@ -30,7 +30,7 @@ public class TaskStatusService
 
     public void SetRunning(string name, bool running)
     {
-        taskStatusByName[name] = running;
+        this.taskStatusByName[name] = running;
     }
 }
 

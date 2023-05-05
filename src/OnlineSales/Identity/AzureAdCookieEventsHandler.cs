@@ -12,14 +12,14 @@ public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
 {
     public override async Task SigningIn(CookieSigningInContext context)
     {
-        var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>() !;
-        var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>() !;
+        var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>()!;
+        var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>()!;
 
         var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(userEmail))
         {
-            await RedirectToAccessDenied(((PropertiesContext<CookieAuthenticationOptions>)context as RedirectContext<CookieAuthenticationOptions>) !);
+            await this.RedirectToAccessDenied(((PropertiesContext<CookieAuthenticationOptions>)context as RedirectContext<CookieAuthenticationOptions>)!);
             return;
         }
 

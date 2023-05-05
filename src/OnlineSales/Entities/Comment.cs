@@ -36,12 +36,12 @@ public class Comment : BaseEntity
     {
         get
         {
-            return authorEmail;
+            return this.authorEmail;
         }
 
         set
         {
-            authorEmail = value.ToLower();
+            this.authorEmail = value.ToLower();
         }
     }
 

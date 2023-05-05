@@ -28,8 +28,8 @@ namespace OnlineSales.Infrastructure
 
             if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
             {
-                #pragma warning disable S3010
-                primaryNodeStatus = GetPrimaryStatus();
+#pragma warning disable S3010
+                primaryNodeStatus = this.GetPrimaryStatus();
             }
 
             Log.Information("This node: " + (IsPrimaryNode() ? "is primary" : "isn't primary"));
@@ -50,11 +50,11 @@ namespace OnlineSales.Infrastructure
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
-                }                    
+                }
 
-                foreach (var task in tasks.Where(t => t.IsRunning))
+                foreach (var task in this.tasks.Where(t => t.IsRunning))
                 {
-                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !).Item1;
+                    var taskLock = LockManager.GetNoWaitLock(task.Name, this.dbContext.Database.GetConnectionString()!).Item1;
 
                     if (taskLock is null)
                     {
@@ -64,13 +64,13 @@ namespace OnlineSales.Infrastructure
 
                     using (taskLock)
                     {
-                        var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+                        var currentJob = await this.AddOrGetPendingTaskExecutionLog(task);
 
-                        if (IsRightTimeToExecute(currentJob, task))
+                        if (this.IsRightTimeToExecute(currentJob, task))
                         {
                             var isCompleted = await task.Execute(currentJob);
 
-                            await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                            await this.UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
                         }
                     }
                 }
@@ -79,7 +79,7 @@ namespace OnlineSales.Infrastructure
             {
                 Log.Error(ex, "Error executing task runner");
             }
-        }             
+        }
 
         public async Task<bool> ExecuteTask(ITask task)
         {
@@ -88,7 +88,7 @@ namespace OnlineSales.Infrastructure
                 throw new NonPrimaryNodeException();
             }
 
-            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !).Item1;
+            var taskLock = LockManager.GetNoWaitLock(task.Name, this.dbContext.Database.GetConnectionString()!).Item1;
 
             if (taskLock is null)
             {
@@ -97,11 +97,11 @@ namespace OnlineSales.Infrastructure
 
             using (taskLock)
             {
-                var currentJob = await AddOrGetPendingTaskExecutionLog(task);
+                var currentJob = await this.AddOrGetPendingTaskExecutionLog(task);
 
                 var isCompleted = await task.Execute(currentJob);
 
-                await UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
+                await this.UpdateTaskExecutionLog(currentJob, isCompleted ? TaskExecutionStatus.Completed : TaskExecutionStatus.Pending);
 
                 return isCompleted;
             }
@@ -124,7 +124,7 @@ namespace OnlineSales.Infrastructure
 
         private (PostgresDistributedLockHandle?, PrimaryNodeStatus) GetPrimaryStatus()
         {
-            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString() !);
+            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, this.dbContext.Database.GetConnectionString()!);
             if (primaryNodeLockData.Item2)
             {
                 return (primaryNodeLockData.Item1, (primaryNodeLockData.Item1 != null) ? PrimaryNodeStatus.Primary : PrimaryNodeStatus.NonPrimary);
@@ -137,7 +137,7 @@ namespace OnlineSales.Infrastructure
 
         private async Task<TaskExecutionLog> AddOrGetPendingTaskExecutionLog(ITask task)
         {
-            var pendingTask = await dbContext.TaskExecutionLogs!.
+            var pendingTask = await this.dbContext.TaskExecutionLogs!.
                 FirstOrDefaultAsync(taskLog => taskLog.Status == TaskExecutionStatus.Pending && taskLog.TaskName == task.Name);
 
             if (pendingTask is not null)
@@ -148,13 +148,13 @@ namespace OnlineSales.Infrastructure
             pendingTask = new TaskExecutionLog()
             {
                 TaskName = task.Name,
-                ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
+                ScheduledExecutionTime = this.GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
                 Status = TaskExecutionStatus.Pending,
                 RetryCount = null,
             };
 
-            await dbContext.TaskExecutionLogs!.AddAsync(pendingTask);
-            await dbContext.SaveChangesAsync();
+            await this.dbContext.TaskExecutionLogs!.AddAsync(pendingTask);
+            await this.dbContext.SaveChangesAsync();
 
             return pendingTask;
         }
@@ -169,8 +169,8 @@ namespace OnlineSales.Infrastructure
                 job.RetryCount = ++job.RetryCount;
             }
 
-            dbContext!.TaskExecutionLogs!.Update(job);
-            await dbContext.SaveChangesAsync();
+            this.dbContext!.TaskExecutionLogs!.Update(job);
+            await this.dbContext.SaveChangesAsync();
         }
 
         private bool IsRightTimeToExecute(TaskExecutionLog job, ITask task)

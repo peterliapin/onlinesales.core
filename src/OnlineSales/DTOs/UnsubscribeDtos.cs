@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.DTOs;
 
 public class UnsubscribeDto
-{   
+{
     public int ContactId { get; set; }
 
     public string Reason { get; set; } = string.Empty;

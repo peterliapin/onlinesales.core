@@ -21,7 +21,7 @@ public class MxVerifyService : IMxVerifyService
     /// </summary>
     private const int TimeOutSeconds = 60;
     private const string SenderSourceHostName = "waveaccess.global";
-    private static readonly SemaphoreSlim SemaphoreSlim = new (1, 1);
+    private static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
 
     public async Task<bool> Verify(string mxValue)
     {
@@ -264,22 +264,22 @@ public class MxCheckResult
 {
     public MxCheckResult(string? mxhost, string? email, int code, string? value, bool success)
     {
-        TimeStamp = DateTime.Now;
-        MxHost = mxhost;
-        Email = email;
-        StatusCode = (MxResultCode)code;
-        StatusValue = value;
-        Successfull = success;
+        this.TimeStamp = DateTime.Now;
+        this.MxHost = mxhost;
+        this.Email = email;
+        this.StatusCode = (MxResultCode)code;
+        this.StatusValue = value;
+        this.Successfull = success;
     }
 
     public MxCheckResult(string? mxhost, string? email, MxResultCode code, string? value, bool success)
     {
-        TimeStamp = DateTime.Now;
-        MxHost = mxhost;
-        Email = email;
-        StatusCode = code;
-        StatusValue = value;
-        Successfull = success;
+        this.TimeStamp = DateTime.Now;
+        this.MxHost = mxhost;
+        this.Email = email;
+        this.StatusCode = code;
+        this.StatusValue = value;
+        this.Successfull = success;
     }
 
     public DateTime TimeStamp { get; set; }
@@ -296,7 +296,7 @@ public class MxCheckResult
 
     public override string ToString()
     {
-        return $"[{(Successfull ? "ok" : "FAIL")}] {MxHost} - {StatusCode} :: {StatusValue}";
+        return $"[{(this.Successfull ? "ok" : "FAIL")}] {this.MxHost} - {this.StatusCode} :: {this.StatusValue}";
     }
 }
 

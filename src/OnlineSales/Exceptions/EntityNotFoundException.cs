@@ -11,8 +11,8 @@ public class EntityNotFoundException : Exception
 {
     public EntityNotFoundException(string entityType, string entityUid)
     {
-        EntityType = entityType;
-        EntityUid = entityUid;
+        this.EntityType = entityType;
+        this.EntityUid = entityUid;
     }
 
     public EntityNotFoundException(string? message)

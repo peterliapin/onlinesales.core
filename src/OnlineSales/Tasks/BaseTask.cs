@@ -20,15 +20,15 @@ public abstract class BaseTask : ITask
         this.configKey = configKey;
         this.taskStatusService = taskStatusService;
 
-        var config = configuration.GetSection(configKey) !.Get<TaskConfig>();
+        var config = configuration.GetSection(configKey)!.Get<TaskConfig>();
 
         if (config is not null)
         {
-            CronSchedule = config.CronSchedule;
-            RetryCount = config.RetryCount;
-            RetryInterval = config.RetryInterval;
+            this.CronSchedule = config.CronSchedule;
+            this.RetryCount = config.RetryCount;
+            this.RetryInterval = config.RetryInterval;
 
-            taskStatusService.SetInitialState(Name, config.Enable);
+            taskStatusService.SetInitialState(this.Name, config.Enable);
         }
         else
         {
@@ -54,13 +54,13 @@ public abstract class BaseTask : ITask
     {
         get
         {
-            return taskStatusService.IsRunning(Name);
+            return this.taskStatusService.IsRunning(this.Name);
         }
     }
 
     public void SetRunning(bool running)
     {
-        taskStatusService.SetRunning(Name, running);
+        this.taskStatusService.SetRunning(this.Name, running);
     }
 
     public abstract Task<bool> Execute(TaskExecutionLog currentJob);

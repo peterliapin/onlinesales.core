@@ -11,7 +11,7 @@ public class TestAccountExternalService : IAccountExternalService
 {
     public Task<AccountDetailsInfo?> GetAccountDetails(string domain)
     {
-        AccountDetailsInfo account = new AccountDetailsInfo()
+        var account = new AccountDetailsInfo()
         {
             CityName = "Colombo",
             CountryCode = Country.LK,

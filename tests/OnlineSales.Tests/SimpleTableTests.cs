@@ -22,42 +22,42 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
     protected SimpleTableTests(string url)
     {
-        itemsUrl = url;
-        itemsUrlNotFound = url + "/404";
+        this.itemsUrl = url;
+        this.itemsUrlNotFound = url + "/404";
     }
 
     [Fact]
     public async Task GetAllTest()
     {
-        await GetAllWithAuthentification();
+        await this.GetAllWithAuthentification();
     }
 
     [Fact]
     public async Task GetItemNotFoundTest()
     {
-        await GetTest(itemsUrlNotFound, HttpStatusCode.NotFound);
+        await this.GetTest(this.itemsUrlNotFound, HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        await CreateAndGetItemWithAuthentification();
+        await this.CreateAndGetItemWithAuthentification();
     }
 
     [Fact]
     public virtual async Task UpdateItemNotFoundTest()
     {
-        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.NotFound);
+        await this.PatchTest(this.itemsUrlNotFound, new TU(), HttpStatusCode.NotFound);
     }
 
     [Fact]
     public virtual async Task CreateAndCheckEntityState_ChangeLog()
     {
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
-        var item = await GetTest<T>(testCreateItem.Item2);
+        var item = await this.GetTest<T>(testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added) !;
+        var result = App.GetDbContext()!.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added)!;
 
         result.Should().NotBeNull();
     }
@@ -65,21 +65,21 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [Fact]
     public async Task CreateAndUpdateItemTest()
     {
-        var createAndUpdateItems = await CreateAndUpdateItem();
+        var createAndUpdateItems = await this.CreateAndUpdateItem();
 
-        var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
+        var item = await this.GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
 
-        MustBeEquivalent(createAndUpdateItems.testCreateItem.Item1, item);
+        this.MustBeEquivalent(createAndUpdateItems.testCreateItem.Item1, item);
     }
 
     [Fact]
     public virtual async Task CreateAndUpdateCheckEntityState_ChangeLog()
     {
-        var createAndUpdateItems = await CreateAndUpdateItem();
+        var createAndUpdateItems = await this.CreateAndUpdateItem();
 
-        var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
+        var item = await this.GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified) !;
+        var result = App.GetDbContext()!.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified)!;
 
         result.Should().NotBeNull();
     }
@@ -87,29 +87,29 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [Fact]
     public async Task DeleteItemNotFoundTest()
     {
-        await DeleteTest(itemsUrlNotFound, HttpStatusCode.NotFound);
+        await this.DeleteTest(this.itemsUrlNotFound, HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task CreateAndDeleteItemTest()
     {
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
-        await DeleteTest(testCreateItem.Item2);
+        await this.DeleteTest(testCreateItem.Item2);
 
-        await GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
+        await this.GetTest(testCreateItem.Item2, HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task CreateAndDeleteCheckEntityState_ChangeLog()
     {
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
-        var item = await GetTest<T>(testCreateItem.Item2);
+        var item = await this.GetTest<T>(testCreateItem.Item2);
 
-        await DeleteTest(testCreateItem.Item2);
+        await this.DeleteTest(testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted) !;
+        var result = App.GetDbContext()!.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted)!;
 
         result.Should().NotBeNull();
     }
@@ -126,10 +126,10 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     {
         if (createTestItem)
         {
-            await CreateItem();
+            await this.CreateItem();
         }
 
-        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        var response = await this.GetTest($"{this.itemsUrl}?{filter}");
         response.Should().NotBeNull();
 
         var totalCountHeader = response.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault();
@@ -146,16 +146,16 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [InlineData("filter[limit]=10&filter[skip]=0", 150, 100)]
     public async Task LimitLists(string filter, int dataCount, int limitPerRequest)
     {
-        GenerateBulkRecords(dataCount);
+        this.GenerateBulkRecords(dataCount);
 
-        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        var response = await this.GetTest($"{this.itemsUrl}?{filter}");
         response.Should().NotBeNull();
 
         var json = await response.Content.ReadAsStringAsync();
 
         var deserialized = JsonSerializer.Deserialize<List<T>>(json!);
 
-        int returendCount = deserialized!.Count!;
+        var returendCount = deserialized!.Count!;
 
         Assert.True(returendCount <= limitPerRequest);
     }
@@ -164,9 +164,9 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [InlineData("filter[limit]=15001", 150)]
     public async Task InvalidLimit(string filter, int dataCount)
     {
-        GenerateBulkRecords(dataCount);
+        this.GenerateBulkRecords(dataCount);
 
-        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.BadRequest);
+        await this.GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.BadRequest);
     }
 
     [Theory]
@@ -191,7 +191,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [InlineData("filter[order]=5555incorrectfield777", HttpStatusCode.BadRequest)]
     public async Task InvalidQueryParameter(string filter, HttpStatusCode code)
     {
-        await GetTest($"{this.itemsUrl}?{filter}", code);
+        await this.GetTest($"{this.itemsUrl}?{filter}", code);
     }
 
     [Theory]
@@ -202,7 +202,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [InlineData("filter[limit]=5", HttpStatusCode.OK)]
     public async Task ValidQueryParameter(string filter, HttpStatusCode code)
     {
-        await GetTest($"{this.itemsUrl}?{filter}", code);
+        await this.GetTest($"{this.itemsUrl}?{filter}", code);
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         }
 
         query = query.Substring(0, query.Length - 1); // Remove latest '&'
-        await GetTest($"{this.itemsUrl}?{query}", HttpStatusCode.OK);
+        await this.GetTest($"{this.itemsUrl}?{query}", HttpStatusCode.OK);
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         var queryCmds = query.Split('&').Select(s => HttpUtility.UrlDecode(s)).ToList();
         var queryCmdsCount = queryCmds.Count;
 
-        var result = await GetTestRawContentSerialize<ProblemDetails>($"{this.itemsUrl}?{query}", HttpStatusCode.BadRequest);
+        var result = await this.GetTestRawContentSerialize<ProblemDetails>($"{this.itemsUrl}?{query}", HttpStatusCode.BadRequest);
         result.Should().NotBeNull();
         var resultDiff = queryCmds.Except(result!.Extensions.Keys).Aggregate(string.Empty, (acc, value) => $"{acc} \n {value}");
         result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount, resultDiff);
@@ -300,7 +300,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     {
         var testCreateItem = TestData.Generate<TC>();
 
-        var newItemUrl = await PostTest(itemsUrl, testCreateItem, HttpStatusCode.Created, authToken);
+        var newItemUrl = await this.PostTest(this.itemsUrl, testCreateItem, HttpStatusCode.Created, authToken);
 
         return (testCreateItem, newItemUrl);
     }
@@ -308,18 +308,18 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     protected virtual void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
     {
         var bulkList = TestData.GenerateAndPopulateAttributes<TC>(dataCount, populateAttributes);
-        var bulkEntitiesList = mapper.Map<List<T>>(bulkList);
+        var bulkEntitiesList = this.mapper.Map<List<T>>(bulkList);
 
         App.PopulateBulkData<T, TS>(bulkEntitiesList);
     }
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
     {
-        const int numberOfItems = 10;               
+        const int numberOfItems = 10;
 
-        GenerateBulkRecords(numberOfItems);
+        this.GenerateBulkRecords(numberOfItems);
 
-        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+        var items = await this.GetTest<List<T>>(this.itemsUrl, HttpStatusCode.OK, getAuthToken);
 
         items.Should().NotBeNull();
         items!.Count.Should().Be(numberOfItems);
@@ -327,22 +327,22 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
     protected async Task CreateAndGetItemWithAuthentification(string authToken = "Success")
     {
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
-        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, authToken);
+        var item = await this.GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, authToken);
 
-        MustBeEquivalent(testCreateItem.Item1, item);        
+        this.MustBeEquivalent(testCreateItem.Item1, item);
     }
 
     protected abstract TU UpdateItem(TC createdItem);
 
     private async Task<((TC, string) testCreateItem, TU? testUpdateItem)> CreateAndUpdateItem()
     {
-        var testCreateItem = await CreateItem();
+        var testCreateItem = await this.CreateItem();
 
-        var testUpdateItem = UpdateItem(testCreateItem.Item1);
+        var testUpdateItem = this.UpdateItem(testCreateItem.Item1);
 
-        await PatchTest(testCreateItem.Item2, testUpdateItem!);
+        await this.PatchTest(testCreateItem.Item2, testUpdateItem!);
 
         return (testCreateItem, testUpdateItem);
     }
@@ -350,7 +350,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
     where TRet : class
     {
-        var response = await GetTest(url, expectedCode, authToken);
+        var response = await this.GetTest(url, expectedCode, authToken);
 
         var content = await response.Content.ReadAsStringAsync();
 

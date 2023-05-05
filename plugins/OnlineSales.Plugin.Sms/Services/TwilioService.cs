@@ -35,14 +35,14 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public string GetSender(string recipient)
         {
-            return twilioConfig.SenderId;
+            return this.twilioConfig.SenderId;
         }
 
         public async Task SendAsync(string recipient, string message)
         {
             var options = new CreateMessageOptions(new PhoneNumber(recipient))
             {
-                From = new PhoneNumber(twilioConfig.SenderId),
+                From = new PhoneNumber(this.twilioConfig.SenderId),
                 Body = message,
             };
 

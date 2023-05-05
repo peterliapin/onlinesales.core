@@ -18,12 +18,12 @@ namespace OnlineSales.Infrastructure
 
         public HttpRequest Request => this.httpContextAccessor?.HttpContext?.Request!;
 
-        public string? IpAddress => httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        public string? IpAddress => this.httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
-        public string? UserAgent => httpContextAccessor?.HttpContext?.Request?.Headers[HeaderNames.UserAgent];
+        public string? UserAgent => this.httpContextAccessor?.HttpContext?.Request?.Headers[HeaderNames.UserAgent];
 
-        public string? IpAddressV4 => httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.MapToIPv4().ToString();
+        public string? IpAddressV4 => this.httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.MapToIPv4().ToString();
 
-        public string? IpAddressV6 => httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.MapToIPv6().ToString();
+        public string? IpAddressV6 => this.httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.MapToIPv6().ToString();
     }
 }
