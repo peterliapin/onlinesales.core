@@ -48,18 +48,18 @@ public class VstoPlugin : IPlugin, IPluginApplication, IDisposable
         application.UseStaticFiles(new StaticFileOptions
         {
             RequestPath = Configuration.Vsto.RequestPath,
-            FileProvider = new VstoFileProvider(VstoLocalPath, httpContextHelper, services!),
+            FileProvider = new VstoFileProvider(VstoLocalPath, httpContextHelper, this.services!),
             ServeUnknownFileTypes = true,
         });
 
-        localLinksWatcher = new VstoLocalLinksWatcher(VstoLocalPath, Configuration.Vsto.RequestPath, services!);
+        this.localLinksWatcher = new VstoLocalLinksWatcher(VstoLocalPath, Configuration.Vsto.RequestPath, this.services!);
     }
 
     public void Dispose()
     {
-        if (localLinksWatcher != null)
+        if (this.localLinksWatcher != null)
         {
-            localLinksWatcher.Dispose();
+            this.localLinksWatcher.Dispose();
         }
     }
 }

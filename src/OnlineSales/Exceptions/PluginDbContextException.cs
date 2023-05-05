@@ -16,13 +16,13 @@ public class PluginDbContextException : Exception
     public PluginDbContextException(string? message, Type? unregisteredDbContext)
         : base(message)
     {
-        UnregisteredDbContext = unregisteredDbContext;
+        this.UnregisteredDbContext = unregisteredDbContext;
     }
 
     public PluginDbContextException(string? message, Type? unregisteredDbContext, Exception? innerException)
         : base(message, innerException)
     {
-        UnregisteredDbContext = unregisteredDbContext;
+        this.UnregisteredDbContext = unregisteredDbContext;
     }
 
     protected PluginDbContextException(SerializationInfo info, StreamingContext context)

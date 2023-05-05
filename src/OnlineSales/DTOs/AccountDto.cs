@@ -117,6 +117,7 @@ public class AccountDetailsDto : AccountCreateDto
 public class AccountImportDto : BaseImportDto
 {
     [Optional]
+    [SwaggerUnique]
     public string Name { get; set; } = string.Empty;
 
     [Optional]

@@ -35,25 +35,25 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
     {
         var existOrder = await (from order in this.dbContext.Orders
-                                    where order.Id == value.OrderId
-                                    select order).FirstOrDefaultAsync();
+                                where order.Id == value.OrderId
+                                select order).FirstOrDefaultAsync();
 
         if (existOrder == null)
         {
-            ModelState.AddModelError("OrderId", "The referenced order was not found");
+            this.ModelState.AddModelError("OrderId", "The referenced order was not found");
 
-            throw new InvalidModelStateException(ModelState);
+            throw new InvalidModelStateException(this.ModelState);
         }
 
-        var orderItem = mapper.Map<OrderItem>(value);
+        var orderItem = this.mapper.Map<OrderItem>(value);
 
-        await orderItemService.AddAsync(existOrder, orderItem);
+        await this.orderItemService.AddAsync(existOrder, orderItem);
 
-        await dbContext.SaveChangesAsync();
+        await this.dbContext.SaveChangesAsync();
 
-        var returnedValue = mapper.Map<OrderItemDetailsDto>(orderItem);
+        var returnedValue = this.mapper.Map<OrderItemDetailsDto>(orderItem);
 
-        return CreatedAtAction(nameof(GetOne), new { id = orderItem.Id }, returnedValue);
+        return this.CreatedAtAction(nameof(GetOne), new { id = orderItem.Id }, returnedValue);
     }
 
     [HttpPatch("{id}")]
@@ -63,26 +63,26 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Patch(int id, [FromBody] OrderItemUpdateDto value)
     {
-        var orderItem = await FindOrThrowNotFound(id);
+        var orderItem = await this.FindOrThrowNotFound(id);
 
-        var order = await (from o in dbContext.Orders
-                                where o.Id == orderItem.OrderId
-                                select o).FirstOrDefaultAsync();
+        var order = await (from o in this.dbContext.Orders
+                           where o.Id == orderItem.OrderId
+                           select o).FirstOrDefaultAsync();
 
         if (order == null)
         {
-            ModelState.AddModelError("OrderId", "The referenced order was not found");
+            this.ModelState.AddModelError("OrderId", "The referenced order was not found");
 
-            throw new InvalidModelStateException(ModelState);
+            throw new InvalidModelStateException(this.ModelState);
         }
 
-        mapper.Map(value, orderItem);
+        this.mapper.Map(value, orderItem);
 
-        orderItemService.Update(order!, orderItem);
+        this.orderItemService.Update(order!, orderItem);
 
-        await dbContext.SaveChangesAsync();
+        await this.dbContext.SaveChangesAsync();
 
-        return mapper.Map<OrderItemDetailsDto>(orderItem);
+        return this.mapper.Map<OrderItemDetailsDto>(orderItem);
     }
 
     [HttpDelete("{id}")]
@@ -92,14 +92,14 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult> Delete(int id)
     {
-        var existingEntity = await FindOrThrowNotFound(id);
+        var existingEntity = await this.FindOrThrowNotFound(id);
 
         var existingOrder = await (from order in this.dbContext.Orders
                                    where order.Id == existingEntity.OrderId
                                    select order).FirstOrDefaultAsync();
 
-        await orderItemService.DeleteAsync(existingOrder!, existingEntity);
+        await this.orderItemService.DeleteAsync(existingOrder!, existingEntity);
 
-        return NoContent();
+        return this.NoContent();
     }
 }

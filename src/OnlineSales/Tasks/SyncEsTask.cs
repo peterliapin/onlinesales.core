@@ -26,30 +26,30 @@ namespace OnlineSales.Tasks
 
             if (!string.IsNullOrEmpty(elasticPrefix))
             {
-                prefix = elasticPrefix + "-";
+                this.prefix = elasticPrefix + "-";
             }
 
             this.esDbContext = esDbContext;
-        }        
+        }
 
         protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {
             var bulkPayload = new StringBuilder();
-            
+
             foreach (var item in nextBatch)
             {
                 var entityState = item.EntityState;
 
                 if (entityState == EntityState.Added || entityState == EntityState.Modified)
                 {
-                    var createItem = new { index = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
+                    var createItem = new { index = new { _index = this.prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
                     bulkPayload.AppendLine(JsonHelper.Serialize(createItem));
                     bulkPayload.AppendLine(item.Data);
                 }
 
                 if (entityState == EntityState.Deleted)
                 {
-                    var deleteItem = new { delete = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
+                    var deleteItem = new { delete = new { _index = this.prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
                     bulkPayload.AppendLine(JsonHelper.Serialize(deleteItem));
                 }
             }
@@ -57,7 +57,7 @@ namespace OnlineSales.Tasks
             var bulkRequestParameters = new BulkRequestParameters();
             bulkRequestParameters.Refresh = Refresh.WaitFor;
 
-            var bulkResponse = esDbContext.ElasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString(), bulkRequestParameters);
+            var bulkResponse = this.esDbContext.ElasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString(), bulkRequestParameters);
 
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
         }

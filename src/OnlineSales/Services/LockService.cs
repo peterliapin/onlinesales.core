@@ -21,7 +21,7 @@ public class LockService : ILockService
             throw new MissingConfigurationException("Postgres configuration is mandatory.");
         }
 
-        connectionSting = postgresConfig.ConnectionString;
+        this.connectionSting = postgresConfig.ConnectionString;
     }
 
     public ILockHolder Lock(string key)
@@ -31,7 +31,7 @@ public class LockService : ILockService
 
     public ILockHolder? TryLock(string key)
     {
-        var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(key, true), connectionSting);
+        var secondaryLock = new PostgresDistributedLock(new PostgresAdvisoryLockKey(key, true), this.connectionSting);
 
         var postgresDistributedLock = secondaryLock.TryAcquire();
 

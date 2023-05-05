@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests.TestEntities;
 
-public static class TestData    
+public static class TestData
 {
     public static List<T> Generate<T>(int count, params object[] args)
     {
@@ -36,7 +36,7 @@ public static class TestData
         argsList.Add(uid);
         argsList.AddRange(args);
 
-        var instance = (T)Activator.CreateInstance(typeof(T), argsList.ToArray()) !;
+        var instance = (T)Activator.CreateInstance(typeof(T), argsList.ToArray())!;
 
         if (populateAttributes != null)
         {

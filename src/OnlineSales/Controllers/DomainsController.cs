@@ -27,7 +27,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
     }
 
     // GET api/domains/names/gmail.com
-    [HttpGet("verify/{name}")]    
+    [HttpGet("verify/{name}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -41,20 +41,20 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         if (domain == null)
         {
             domain = new Domain() { Name = name };
-            await domainService.SaveAsync(domain);
+            await this.domainService.SaveAsync(domain);
         }
 
-        await domainService.Verify(domain);
-        await dbContext.SaveChangesAsync();
+        await this.domainService.Verify(domain);
+        await this.dbContext.SaveChangesAsync();
 
-        var resultConverted = mapper.Map<DomainDetailsDto>(domain);
+        var resultConverted = this.mapper.Map<DomainDetailsDto>(domain);
 
-        return Ok(resultConverted);
+        return this.Ok(resultConverted);
     }
 
     protected override async Task SaveRangeAsync(List<Domain> newRecords)
     {
-        await domainService.SaveRangeAsync(newRecords);
+        await this.domainService.SaveRangeAsync(newRecords);
     }
 }
 

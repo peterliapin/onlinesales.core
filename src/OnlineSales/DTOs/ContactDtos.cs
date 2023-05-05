@@ -52,12 +52,12 @@ public class ContactCreateDto : BaseContactDto
     {
         get
         {
-            return email;
+            return this.email;
         }
 
         set
         {
-            email = value.ToLower();
+            this.email = value.ToLower();
         }
     }
 }
@@ -71,12 +71,12 @@ public class ContactUpdateDto : BaseContactDto
     {
         get
         {
-            return email;
+            return this.email;
         }
 
         set
         {
-            email = value == null ? null : value.ToLower();
+            this.email = value == null ? null : value.ToLower();
         }
     }
 }
@@ -111,16 +111,17 @@ public class ContactImportDto : BaseImportDto
 
     [Optional]
     [EmailAddress]
+    [SwaggerUnique]
     public string? Email
     {
         get
         {
-            return email;
+            return this.email;
         }
 
         set
         {
-            email = value == null ? null : value.ToLower();
+            this.email = value == null ? null : value.ToLower();
         }
     }
 

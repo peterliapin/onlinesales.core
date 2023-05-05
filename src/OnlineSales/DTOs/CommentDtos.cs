@@ -19,12 +19,12 @@ public class CommentCreateDto
     {
         get
         {
-            return authorEmail;
+            return this.authorEmail;
         }
 
         set
         {
-            authorEmail = value.ToLower();
+            this.authorEmail = value.ToLower();
         }
     }
 
@@ -50,13 +50,23 @@ public class CommentUpdateDto
     public string Body { get; set; } = string.Empty;
 }
 
-public class CommentDetailsDto : CommentCreateDto
+public class AnonymousCommentDetailsDto
 {
     public int Id { get; set; }
+
+    public int? ParentId { get; set; }
+
+    public string AuthorName { get; set; } = string.Empty;
+
+    public string Body { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public int ContentId { get; set; }
+
+    public string AvatarUrl { get; set; } = string.Empty;
 
     [Ignore]
     public ContentDetailsDto? Content { get; set; }
@@ -65,32 +75,46 @@ public class CommentDetailsDto : CommentCreateDto
     public CommentDetailsDto? Parent { get; set; }
 }
 
+public class CommentDetailsDto : AnonymousCommentDetailsDto
+{
+    public string AuthorEmail { get; set; } = string.Empty;
+
+    public int? ContactId { get; set; }
+
+    public string? Source { get; set; }
+
+    [Ignore]
+
+    public ContactDetailsDto? Contact { get; set; }
+}
+
 public class CommentImportDto : BaseImportDto
 {
-    private string authorEmail = string.Empty;
+    private string? authorEmail;
 
     [Optional]
     public int? ContactId { get; set; }
 
-    public string AuthorName { get; set; } = string.Empty;
+    [Optional]
+    public string? AuthorName { get; set; }
 
-    [Required]
+    [Optional]
     [EmailAddress]
     [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
-    public string AuthorEmail
+    public string? AuthorEmail
     {
         get
         {
-            return authorEmail;
+            return this.authorEmail;
         }
 
         set
         {
-            authorEmail = value.ToLower();
+            this.authorEmail = string.IsNullOrEmpty(value) ? null : value.ToLower();
         }
     }
 
-    [Required]
+    [Optional]
     public string Body { get; set; } = string.Empty;
 
     [Optional]

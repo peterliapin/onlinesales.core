@@ -88,6 +88,7 @@ public class DomainDetailsDto : DomainCreateDto
 public class DomainImportDto : BaseImportDtoWithDates
 {
     [Required]
+    [SwaggerUnique]
     public string? Name { get; set; } = string.Empty;
 
     [Optional]

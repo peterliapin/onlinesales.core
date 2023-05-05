@@ -16,6 +16,8 @@ FROM build AS publish
 RUN dotnet publish "OnlineSales.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+RUN apk add --no-cache icu-libs
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
 COPY --from=publish /app/publish .
 HEALTHCHECK --interval=1m --timeout=10s --retries=3 CMD wget --spider --tries=1 --no-verbose http://localhost:80/api/version || exit 1

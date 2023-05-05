@@ -33,11 +33,11 @@ public class IpDetailsService
 
         var queryParams = new Dictionary<string, string>
         {
-            ["apiKey"] = options.Value.AuthKey,
+            ["apiKey"] = this.options.Value.AuthKey,
             ["ip"] = ip,
         };
 
-        var response = await client.GetAsync(QueryHelpers.AddQueryString(options.Value.Url, queryParams!));
+        var response = await client.GetAsync(QueryHelpers.AddQueryString(this.options.Value.Url, queryParams!));
 
         if (response.IsSuccessStatusCode)
         {

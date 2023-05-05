@@ -25,22 +25,22 @@ public class VstoLocalLinksWatcher : IDisposable
 
     public VstoLocalLinksWatcher(string vstoLocalPath, string vstoRequestPath, IServiceCollection services)
     {
-        VstoLocalPath = vstoLocalPath;
+        this.VstoLocalPath = vstoLocalPath;
         this.services = services;
-        VstoRequestPath = vstoRequestPath;
-        Init();
+        this.VstoRequestPath = vstoRequestPath;
+        this.Init();
 
         if (Directory.Exists(vstoLocalPath))
         {
-            exeWatcher = new FileSystemWatcher(vstoLocalPath);
-            exeWatcher.NotifyFilter = NotifyFilters.FileName;
-            exeWatcher.IncludeSubdirectories = true;
-            exeWatcher.Filter = "*.exe";
-            exeWatcher.Created += HandleChanged;
-            exeWatcher.Deleted += HandleChanged;
-            exeWatcher.Renamed += HandleRenamed;
+            this.exeWatcher = new FileSystemWatcher(vstoLocalPath);
+            this.exeWatcher.NotifyFilter = NotifyFilters.FileName;
+            this.exeWatcher.IncludeSubdirectories = true;
+            this.exeWatcher.Filter = "*.exe";
+            this.exeWatcher.Created += this.HandleChanged;
+            this.exeWatcher.Deleted += this.HandleChanged;
+            this.exeWatcher.Renamed += this.HandleRenamed;
 
-            exeWatcher.EnableRaisingEvents = true;
+            this.exeWatcher.EnableRaisingEvents = true;
         }
         else
         {
@@ -50,19 +50,19 @@ public class VstoLocalLinksWatcher : IDisposable
 
     public void Dispose()
     {
-        if (exeWatcher != null)
+        if (this.exeWatcher != null)
         {
-            exeWatcher.Dispose();
-        }        
+            this.exeWatcher.Dispose();
+        }
     }
 
     private void HandleRenamed(object sender, RenamedEventArgs e)
     {
-        var ed = DictionaryExtensions.TryGetAndReturn(exeDirs, e.OldFullPath);
+        var ed = DictionaryExtensions.TryGetAndReturn(this.exeDirs, e.OldFullPath);
         if (ed != null)
-        {            
-            exeDirs.Remove(e.OldFullPath);
-            exeDirs.Add(e.FullPath, ed);
+        {
+            this.exeDirs.Remove(e.OldFullPath);
+            this.exeDirs.Add(e.FullPath, ed);
         }
     }
 
@@ -73,16 +73,16 @@ public class VstoLocalLinksWatcher : IDisposable
             var parentDir = Directory.GetParent(e.FullPath);
             if (parentDir != null)
             {
-                exeDirs.Add(e.FullPath, new ExeDirectory(this, parentDir));
+                this.exeDirs.Add(e.FullPath, new ExeDirectory(this, parentDir));
             }
         }
         else if (e.ChangeType == WatcherChangeTypes.Deleted)
         {
-            var ed = DictionaryExtensions.TryGetAndReturn(exeDirs, e.FullPath);
+            var ed = DictionaryExtensions.TryGetAndReturn(this.exeDirs, e.FullPath);
             if (ed != null)
             {
                 ed.StopAndClear();
-                exeDirs.Remove(e.FullPath);
+                this.exeDirs.Remove(e.FullPath);
             }
         }
     }
@@ -90,25 +90,25 @@ public class VstoLocalLinksWatcher : IDisposable
     private void Init()
     {
         var exeFiles = Array.Empty<string>();
-        if (Directory.Exists(VstoLocalPath))
+        if (Directory.Exists(this.VstoLocalPath))
         {
-            exeFiles = Directory.GetFiles(VstoLocalPath, "*.exe", SearchOption.AllDirectories);
+            exeFiles = Directory.GetFiles(this.VstoLocalPath, "*.exe", SearchOption.AllDirectories);
         }
 
         var allLinks = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
         foreach (var exeFile in exeFiles)
-        {            
+        {
             var parentDir = Directory.GetParent(exeFile);
             if (parentDir != null)
             {
                 var exeDir = new ExeDirectory(this, parentDir);
-                exeDirs.Add(exeFile, exeDir);
+                this.exeDirs.Add(exeFile, exeDir);
                 var links = exeDir.GetLinks();
                 allLinks.UnionWith(links);
             }
         }
 
-        using (var serviceProvider = services!.BuildServiceProvider())
+        using (var serviceProvider = this.services!.BuildServiceProvider())
         {
             using (var scope = serviceProvider.CreateScope())
             {
@@ -124,14 +124,14 @@ public class VstoLocalLinksWatcher : IDisposable
                     }
 
                     dbContext.SaveChangesAsync().Wait();
-                }                
+                }
             }
         }
     }
 
     private void RemoveLinks(HashSet<OnlineSales.Entities.Link> removedLinks)
     {
-        using (var serviceProvider = services!.BuildServiceProvider())
+        using (var serviceProvider = this.services!.BuildServiceProvider())
         {
             using (var scope = serviceProvider.CreateScope())
             {
@@ -151,7 +151,7 @@ public class VstoLocalLinksWatcher : IDisposable
 
     private void AddLinks(HashSet<OnlineSales.Entities.Link> addedLinks)
     {
-        using (var serviceProvider = services!.BuildServiceProvider())
+        using (var serviceProvider = this.services!.BuildServiceProvider())
         {
             using (var scope = serviceProvider.CreateScope())
             {
@@ -187,7 +187,7 @@ public class VstoLocalLinksWatcher : IDisposable
             else
             {
                 return l1.Uid == l2.Uid;
-            }            
+            }
         }
 
         public int GetHashCode(OnlineSales.Entities.Link obj)
@@ -214,59 +214,59 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private FileInfo? vstoFile;
 
-        private DirectoryInfo? appDir;               
+        private DirectoryInfo? appDir;
 
         public ExeDirectory(VstoLocalLinksWatcher linksWatcher, DirectoryInfo di)
         {
             this.linksWatcher = linksWatcher;
-            parenDir = di;
+            this.parenDir = di;
 
-            CheckAndInit();
+            this.CheckAndInit();
 
-            links = CreateLinks();
+            this.links = this.CreateLinks();
 
-            this.linksWatcher.AddLinks(links);
+            this.linksWatcher.AddLinks(this.links);
 
-            watcher = new FileSystemWatcher(parenDir.FullName);
-            watcher.NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName;
-            watcher.Filter = "*";
-            watcher.IncludeSubdirectories = true;
+            this.watcher = new FileSystemWatcher(this.parenDir.FullName);
+            this.watcher.NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName;
+            this.watcher.Filter = "*";
+            this.watcher.IncludeSubdirectories = true;
 
-            watcher.Created += HandleChanged;
-            watcher.Deleted += HandleChanged;
-            watcher.Renamed += HandleChanged;
+            this.watcher.Created += this.HandleChanged;
+            this.watcher.Deleted += this.HandleChanged;
+            this.watcher.Renamed += this.HandleChanged;
 
-            watcher.EnableRaisingEvents = true;
+            this.watcher.EnableRaisingEvents = true;
         }
 
         public HashSet<OnlineSales.Entities.Link> GetLinks()
         {
-            return links;
+            return this.links;
         }
 
         public void StopAndClear()
         {
-            linksMutex.WaitOne();
+            this.linksMutex.WaitOne();
             try
             {
-                watcher.EnableRaisingEvents = false;
-                linksWatcher.RemoveLinks(links);
+                this.watcher.EnableRaisingEvents = false;
+                this.linksWatcher.RemoveLinks(this.links);
             }
             finally
             {
-                linksMutex.ReleaseMutex();  
+                this.linksMutex.ReleaseMutex();
             }
         }
 
         private HashSet<OnlineSales.Entities.Link> CreateLinks()
         {
-            HashSet<OnlineSales.Entities.Link> result = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
+            var result = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
 
-            if (valid)
+            if (this.valid)
             {
-                var resourceName = Path.GetFileNameWithoutExtension(vstoFile!.Name) + "_";
-                var relPath = Path.GetRelativePath(linksWatcher.VstoLocalPath, parenDir.FullName).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                var versionDirs = GetVersionDirs(resourceName);
+                var resourceName = Path.GetFileNameWithoutExtension(this.vstoFile!.Name) + "_";
+                var relPath = Path.GetRelativePath(this.linksWatcher.VstoLocalPath, this.parenDir.FullName).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                var versionDirs = this.GetVersionDirs(resourceName);
                 foreach (var versionDir in versionDirs)
                 {
                     if (versionDir != null)
@@ -277,7 +277,7 @@ public class VstoLocalLinksWatcher : IDisposable
                         result.Add(new OnlineSales.Entities.Link
                         {
                             Uid = name,
-                            Destination = Path.Combine(linksWatcher.VstoRequestPath, relPath, exeFile!.Name).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + "?=" + version,
+                            Destination = Path.Combine(this.linksWatcher.VstoRequestPath, relPath, this.exeFile!.Name).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + "?=" + version,
                             Name = name,
                         });
                     }
@@ -290,11 +290,11 @@ public class VstoLocalLinksWatcher : IDisposable
         private DirectoryInfo[] GetVersionDirs(string resourceName)
         {
             var result = new DirectoryInfo[0];
-            if (appDir != null)
+            if (this.appDir != null)
             {
                 try
                 {
-                    return appDir!.GetDirectories(resourceName + "*");
+                    return this.appDir!.GetDirectories(resourceName + "*");
                 }
                 catch
                 {
@@ -307,50 +307,50 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private void HandleChanged(object sender, FileSystemEventArgs e)
         {
-            linksMutex.WaitOne();
+            this.linksMutex.WaitOne();
             try
             {
-                if (valid)
+                if (this.valid)
                 {
-                    CheckAndInit();
-                    if (!valid)
+                    this.CheckAndInit();
+                    if (!this.valid)
                     {
-                        linksWatcher.RemoveLinks(links);
-                        links.Clear();
+                        this.linksWatcher.RemoveLinks(this.links);
+                        this.links.Clear();
                     }
                     else
                     {
-                        var newLinks = CreateLinks();
-                        if (!links.SetEquals(newLinks))
+                        var newLinks = this.CreateLinks();
+                        if (!this.links.SetEquals(newLinks))
                         {
-                            linksWatcher.RemoveLinks(links);
-                            links = newLinks;
-                            linksWatcher.AddLinks(links);
+                            this.linksWatcher.RemoveLinks(this.links);
+                            this.links = newLinks;
+                            this.linksWatcher.AddLinks(this.links);
                         }
                     }
                 }
                 else
                 {
-                    CheckAndInit();
-                    if (valid)
+                    this.CheckAndInit();
+                    if (this.valid)
                     {
-                        links = CreateLinks();
-                        linksWatcher.AddLinks(links);
+                        this.links = this.CreateLinks();
+                        this.linksWatcher.AddLinks(this.links);
                     }
                 }
             }
             finally
             {
-                linksMutex.ReleaseMutex();
+                this.linksMutex.ReleaseMutex();
             }
-        }               
+        }
 
         private bool CheckAndInitExeFile()
         {
-            var exeFiles = parenDir.GetFiles("*.exe", SearchOption.AllDirectories);
+            var exeFiles = this.parenDir.GetFiles("*.exe", SearchOption.AllDirectories);
             if (exeFiles.Length == 1)
             {
-                exeFile = exeFiles[0];
+                this.exeFile = exeFiles[0];
                 return true;
             }
 
@@ -359,10 +359,10 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private bool CheckAndInitVstoFile()
         {
-            var vstoFiles = parenDir.GetFiles("*.vsto", SearchOption.TopDirectoryOnly);
+            var vstoFiles = this.parenDir.GetFiles("*.vsto", SearchOption.TopDirectoryOnly);
             if (vstoFiles.Length == 1)
             {
-                vstoFile = vstoFiles[0];
+                this.vstoFile = vstoFiles[0];
                 return true;
             }
 
@@ -371,10 +371,10 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private bool CheckAndInitAppDir()
         {
-            var appDirs = parenDir.GetDirectories("Application Files");
+            var appDirs = this.parenDir.GetDirectories("Application Files");
             if (appDirs.Length == 1)
             {
-                appDir = appDirs[0];
+                this.appDir = appDirs[0];
                 return true;
             }
 
@@ -383,7 +383,7 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private void CheckAndInit()
         {
-            valid = CheckAndInitExeFile() && CheckAndInitVstoFile() && CheckAndInitAppDir();
+            this.valid = this.CheckAndInitExeFile() && this.CheckAndInitVstoFile() && this.CheckAndInitAppDir();
         }
     }
 }

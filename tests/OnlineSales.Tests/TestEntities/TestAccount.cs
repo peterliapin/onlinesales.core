@@ -10,15 +10,15 @@ public class TestAccount : AccountCreateDto
 {
     public TestAccount(string uid = "")
     {
-        Name = $"WaveAccess {uid}";
-        EmployeesRange = "500 - 1000";
-        CountryCode = Country.LK;
-        SocialMedia = new Dictionary<string, string>()
+        this.Name = $"WaveAccess {uid}";
+        this.EmployeesRange = "500 - 1000";
+        this.CountryCode = Country.LK;
+        this.SocialMedia = new Dictionary<string, string>()
         {
             { "Facebook", "https://fb.com/waveaccess" },
             { "Instagram", "https://www.instagram.com//waveaccess" },
         };
 
-        Tags = new string[] { "Information technology", "App Development" };
+        this.Tags = new string[] { "Information technology", "App Development" };
     }
 }

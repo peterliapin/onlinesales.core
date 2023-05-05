@@ -8,17 +8,17 @@ public class TestContent : ContentCreateDto
 {
     public TestContent(string uid = "")
     {
-        Slug = $"test-slug{uid}";
-        Type = "Test Template";
-        Author = "Peter Liapin";
-        Title = $"Test Title (via test suit){uid}";
-        Description = $"This is a sample test description{uid}";
-        Body = $"This is a sample Content{uid}";
-        CoverImageUrl = $"/api/images/{Slug}/cover.png";
-        CoverImageAlt = $"This is a sample Cover alt{uid}";
-        Language = "en-US";
-        Category = "Product";
-        Tags = new string[] { "Tag1" };
-        AllowComments = true;
+        this.Slug = $"test-slug{uid}";
+        this.Type = "Test Template";
+        this.Author = "Peter Liapin";
+        this.Title = $"Test Title (via test suit){uid}";
+        this.Description = $"This is a sample test description{uid}";
+        this.Body = $"This is a sample Content{uid}";
+        this.CoverImageUrl = $"/api/images/{this.Slug}/cover.png";
+        this.CoverImageAlt = $"This is a sample Cover alt{uid}";
+        this.Language = "en-US";
+        this.Category = "Product";
+        this.Tags = new string[] { "Tag1" };
+        this.AllowComments = true;
     }
 }

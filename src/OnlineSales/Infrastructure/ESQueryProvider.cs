@@ -4,6 +4,7 @@
 
 using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 using Nest;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -22,61 +23,61 @@ namespace OnlineSales.Infrastructure
         private readonly string indexName;
         private readonly PropertyInfo[] searchableTextProperties;
         private readonly PropertyInfo[] searchableNonTextProperties;
-        private readonly int maxResultWindow = 10000;       
+        private readonly int maxResultWindow = 10000;
 
         public ESQueryProvider(ElasticClient elasticClient, QueryData<T> parseData, string indexPrefix)
         {
-            indexName = indexPrefix + "-" + typeof(T).Name.ToLower();
+            this.indexName = indexPrefix + "-" + typeof(T).Name.ToLower();
             this.elasticClient = elasticClient;
             this.parseData = parseData;
-            searchableTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType == typeof(string)).ToArray();
-            searchableNonTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType != typeof(string)).ToArray();
-            elasticClient.Indices.UpdateSettings(indexName, s => s.IndexSettings(i => i.Setting(UpdatableIndexSettings.MaxResultWindow, maxResultWindow)));
+            this.searchableTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType == typeof(string)).ToArray();
+            this.searchableNonTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType != typeof(string)).ToArray();
+            elasticClient.Indices.UpdateSettings(this.indexName, s => s.IndexSettings(i => i.Setting(UpdatableIndexSettings.MaxResultWindow, this.maxResultWindow)));
         }
 
         public async Task<QueryResult<T>> GetResult()
         {
-            if (!elasticClient.Indices.Exists(indexName).Exists)
+            if (!this.elasticClient.Indices.Exists(this.indexName).Exists)
             {
                 return new QueryResult<T>(new List<T>(), 0);
             }
 
-            AddWhereCommands();
-            AddSearchCommands();
+            this.AddWhereCommands();
+            this.AddSearchCommands();
 
-            if (andQueries.Count > 0)
+            if (this.andQueries.Count > 0)
             {
-                orQueries.Add(new BoolQuery
+                this.orQueries.Add(new BoolQuery
                 {
-                    Must = andQueries.ToArray(),
+                    Must = this.andQueries.ToArray(),
                 });
             }
 
-            var pit = elasticClient.OpenPointInTime(new OpenPointInTimeRequest(indexName) { KeepAlive = "2m" });
+            var pit = this.elasticClient.OpenPointInTime(new OpenPointInTimeRequest(this.indexName) { KeepAlive = "2m" });
             try
             {
-                var count = Count();
+                var count = this.Count();
 
-                var sr = new SearchRequest<T>(indexName);
+                var sr = new SearchRequest<T>(this.indexName);
 
-                sr.Query = (orQueries.Count > 0) ? new BoolQuery { Should = orQueries.ToArray(), } : new MatchAllQuery();
+                sr.Query = (this.orQueries.Count > 0) ? new BoolQuery { Should = this.orQueries.ToArray(), } : new MatchAllQuery();
 
-                AddSortConditions(sr);
+                this.AddSortConditions(sr);
 
-                if (parseData.Skip >= 0)
+                if (this.parseData.Skip >= 0)
                 {
-                    sr.From = parseData.Skip;
+                    sr.From = this.parseData.Skip;
                 }
 
-                if (parseData.Limit >= 0)
+                if (this.parseData.Limit >= 0)
                 {
-                    sr.Size = parseData.Limit;
+                    sr.Size = this.parseData.Limit;
                 }
 
-                if (parseData.SelectData.IsSelect)
+                if (this.parseData.SelectData.IsSelect)
                 {
                     var fields = new List<Field>();
-                    foreach (var sp in parseData.SelectData.SelectedProperties)
+                    foreach (var sp in this.parseData.SelectData.SelectedProperties)
                     {
                         fields.Add(sp);
                     }
@@ -84,11 +85,11 @@ namespace OnlineSales.Infrastructure
                     sr.Source = new SourceFilter { Includes = fields.ToArray(), };
                 }
 
-                return await Query(sr, count, pit.Id);
+                return await this.Query(sr, count, pit.Id);
             }
             finally
             {
-                elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
+                this.elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
             }
         }
 
@@ -96,13 +97,13 @@ namespace OnlineSales.Infrastructure
         {
             var sortedConditions = new List<ISort>();
 
-            if (parseData.OrderData.Count > 0)
+            if (this.parseData.OrderData.Count > 0)
             {
-                foreach (var orderCmd in parseData.OrderData)
+                foreach (var orderCmd in this.parseData.OrderData)
                 {
                     var sortOrder = orderCmd.Ascending ? Nest.SortOrder.Ascending : Nest.SortOrder.Descending;
 
-                    var field = orderCmd.Property.PropertyType == typeof(string) ? new Field(GetElasticKeywordName(orderCmd.Property)) : new Field(orderCmd.Property);
+                    var field = orderCmd.Property.PropertyType == typeof(string) ? new Field(this.GetElasticKeywordName(orderCmd.Property)) : new Field(orderCmd.Property);
                     sortedConditions.Add(new FieldSort { Field = field, Order = sortOrder, UnmappedType = FieldType.Long });
                 }
             }
@@ -115,23 +116,23 @@ namespace OnlineSales.Infrastructure
         }
 
         private async Task<QueryResult<T>> Query(SearchRequest<T> sr, long count, string pitId)
-        {            
+        {
             List<object> CreateSearchAfterObjects(T lastObject)
             {
                 var res = new List<object>();
 
-                foreach (var p in parseData.OrderData)
+                foreach (var p in this.parseData.OrderData)
                 {
-                    res.Add(p.Property.GetValue(lastObject) !);
+                    res.Add(p.Property.GetValue(lastObject)!);
                 }
 
                 return res;
             }
 
-            if ((parseData.Skip >= 0 || parseData.Limit >= 0) && (parseData.Skip + parseData.Limit <= maxResultWindow))
+            if ((this.parseData.Skip >= 0 || this.parseData.Limit >= 0) && (this.parseData.Skip + this.parseData.Limit <= this.maxResultWindow))
             {
-                var res = await elasticClient.SearchAsync<T>(sr);
-                CheckSearchRequestResult(res);
+                var res = await this.elasticClient.SearchAsync<T>(sr);
+                this.CheckSearchRequestResult(res);
                 return new QueryResult<T>(res.Documents.ToList(), count);
             }
             else
@@ -139,13 +140,13 @@ namespace OnlineSales.Infrastructure
                 var result = new List<T>();
 
                 sr.From = null;
-                sr.Size = maxResultWindow;
+                sr.Size = this.maxResultWindow;
                 sr.PointInTime = new PointInTime(pitId, "2m");
-                int total = 0;
-                while (total <= parseData.Skip + parseData.Limit)
+                var total = 0;
+                while (total <= this.parseData.Skip + this.parseData.Limit)
                 {
-                    var res = await elasticClient.SearchAsync<T>(sr);
-                    CheckSearchRequestResult(res);
+                    var res = await this.elasticClient.SearchAsync<T>(sr);
+                    this.CheckSearchRequestResult(res);
                     var ds = res.Documents.ToList();
                     var newTotal = total + ds.Count;
                     if (ds.Count == 0)
@@ -153,28 +154,28 @@ namespace OnlineSales.Infrastructure
                         break;
                     }
 
-                    if (newTotal >= parseData.Skip)
+                    if (newTotal >= this.parseData.Skip)
                     {
-                        if (total <= parseData.Skip)
+                        if (total <= this.parseData.Skip)
                         {
-                            if (newTotal <= parseData.Skip + parseData.Limit)
+                            if (newTotal <= this.parseData.Skip + this.parseData.Limit)
                             {
-                                result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, ds.Count)));
+                                result.AddRange(res.Documents.Take(new Range(this.parseData.Skip - total, ds.Count)));
                             }
                             else
                             {
-                                result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, parseData.Skip + parseData.Limit - total)));
+                                result.AddRange(res.Documents.Take(new Range(this.parseData.Skip - total, this.parseData.Skip + this.parseData.Limit - total)));
                             }
                         }
                         else
                         {
-                            if (newTotal <= parseData.Skip + parseData.Limit)
+                            if (newTotal <= this.parseData.Skip + this.parseData.Limit)
                             {
                                 result.AddRange(res.Documents.Take(new Range(0, ds.Count)));
                             }
                             else
                             {
-                                result.AddRange(res.Documents.Take(new Range(0, parseData.Skip + parseData.Limit - total)));
+                                result.AddRange(res.Documents.Take(new Range(0, this.parseData.Skip + this.parseData.Limit - total)));
                             }
                         }
                     }
@@ -190,18 +191,18 @@ namespace OnlineSales.Infrastructure
         private long Count()
         {
             var countDescriptor = new CountDescriptor<T>();
-            countDescriptor.Index(indexName);
+            countDescriptor.Index(this.indexName);
 
-            if (orQueries.Count > 0)
+            if (this.orQueries.Count > 0)
             {
-                countDescriptor = countDescriptor.Query(q => q.Bool(b => b.Should(orQueries.ToArray())));
+                countDescriptor = countDescriptor.Query(q => q.Bool(b => b.Should(this.orQueries.ToArray())));
             }
             else
             {
                 countDescriptor = countDescriptor.Query(q => q.MatchAll());
             }
 
-            return elasticClient.Count(countDescriptor).Count;
+            return this.elasticClient.Count(countDescriptor).Count;
         }
 
         private void CheckSearchRequestResult(ISearchResponse<T> sr)
@@ -225,37 +226,37 @@ namespace OnlineSales.Infrastructure
         }
 
         private void AddWhereCommands()
-        {            
+        {
             QueryContainer CreateQueryComparison(QueryData<T>.WhereUnitData cmd)
             {
-                object value = cmd.ParseValues(new string[] { cmd.StringValue }).FirstOrDefault() !;
+                var value = cmd.ParseValues(new string[] { cmd.StringValue }).FirstOrDefault()!;
 
                 TermRangeQuery CreateTermRangeQuery(QueryData<T>.WhereUnitData cmd)
                 {
                     TermRangeQuery res;
                     if (cmd.Property.PropertyType == typeof(string))
                     {
-                        res = new TermRangeQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), };
+                        res = new TermRangeQuery { Field = new Field(this.GetElasticKeywordName(cmd.Property)), };
                     }
                     else
                     {
                         res = new TermRangeQuery { Field = new Field(cmd.Property), };
                     }
 
-                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, value.ToString());
+                    res.GetType().GetProperty(cmd.Operation.ToString())!.SetValue(res, value.ToString());
                     return res;
                 }
 
                 if (double.TryParse(cmd.StringValue, out _))
                 {
                     var res = new NumericRangeQuery { Field = cmd.Property, };
-                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, Convert.ChangeType(value, typeof(double)));
+                    res.GetType().GetProperty(cmd.Operation.ToString())!.SetValue(res, Convert.ChangeType(value, typeof(double)));
                     return res;
                 }
                 else if (cmd.Property.PropertyType == typeof(DateTime))
                 {
                     var res = new DateRangeQuery { Field = cmd.Property, };
-                    res.GetType().GetProperty(cmd.Operation.ToString()) !.SetValue(res, DateMath.Anchored((DateTime)value));
+                    res.GetType().GetProperty(cmd.Operation.ToString())!.SetValue(res, DateMath.Anchored((DateTime)value));
                     return res;
                 }
                 else
@@ -268,27 +269,26 @@ namespace OnlineSales.Infrastructure
             {
                 BoolQuery CreateTermQuery(QueryData<T>.WhereUnitData cmd)
                 {
-                    var stringValues = cmd.ParseStringValues().ToList();
-                    var parsedValues = cmd.ParseValues(stringValues);
+                    var parsedValues = cmd.ParseValues(cmd.ParseStringValues().ToList());
 
                     var resQueries = new List<QueryContainer>();
 
-                    for (int i = 0; i < parsedValues.Count; ++i)
+                    foreach (var parsedValue in parsedValues)
                     {
-                        if (cmd.Property.PropertyType == typeof(string))
+                        if (parsedValue != null)
                         {
-                            resQueries.Add(new TermQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = stringValues[i] });
-                        }
-                        else
-                        {
-                            if (parsedValues[i] == null)
+                            if (cmd.Property.PropertyType == typeof(string))
                             {
-                                resQueries.Add(new BoolQuery() { MustNot = new QueryContainer[] { new ExistsQuery { Field = new Field(cmd.Property) } } });
+                                resQueries.Add(new TermQuery { Field = new Field(this.GetElasticKeywordName(cmd.Property)), Value = parsedValue!.ToString() });
                             }
                             else
                             {
-                                resQueries.Add(new TermQuery { Field = new Field(cmd.Property), Value = stringValues[i] });
+                                resQueries.Add(new TermQuery { Field = new Field(cmd.Property), Value = parsedValue!.ToString() });
                             }
+                        }
+                        else
+                        {
+                            resQueries.Add(new BoolQuery() { MustNot = new QueryContainer[] { new ExistsQuery { Field = new Field(cmd.Property) } } });
                         }
                     }
 
@@ -315,11 +315,11 @@ namespace OnlineSales.Infrastructure
                             }
                             else if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.Substring)
                             {
-                                sb.Append(Escape(d.Item2));
+                                sb.Append(this.Escape(d.Item2));
                             }
                         }
 
-                        return new RegexpQuery { Field = new Field(GetElasticKeywordName(cmd.Property)), Value = sb.ToString() };
+                        return new RegexpQuery { Field = new Field(this.GetElasticKeywordName(cmd.Property)), Value = sb.ToString() };
                     }
                     else
                     {
@@ -358,14 +358,14 @@ namespace OnlineSales.Infrastructure
                 }
             }
 
-            foreach (var cmds in parseData.WhereData)
+            foreach (var cmds in this.parseData.WhereData)
             {
                 if (cmds.OrOperation)
                 {
                     foreach (var cmd in cmds.Data)
                     {
                         var mq = CreateQuery(cmd);
-                        orQueries.Add(mq);
+                        this.orQueries.Add(mq);
                     }
                 }
                 else
@@ -373,7 +373,7 @@ namespace OnlineSales.Infrastructure
                     foreach (var cmd in cmds.Data)
                     {
                         var mq = CreateQuery(cmd);
-                        andQueries.Add(mq);
+                        this.andQueries.Add(mq);
                     }
                 }
             }
@@ -381,13 +381,13 @@ namespace OnlineSales.Infrastructure
 
         private void AddSearchCommands()
         {
-            List<QueryContainer> sq = new List<QueryContainer>();            
+            var sq = new List<QueryContainer>();
 
-            if (parseData.SearchData.Count > 0)
+            if (this.parseData.SearchData.Count > 0)
             {
                 var tQ = new MultiMatchQuery
                 {
-                    Query = string.Join(" ", parseData.SearchData),
+                    Query = string.Join(" ", this.parseData.SearchData),
                     Fields = searchableTextProperties,
                     Lenient = true,
                     Fuzziness = Fuzziness.Auto,
@@ -398,7 +398,7 @@ namespace OnlineSales.Infrastructure
 
                 var ntQ = new MultiMatchQuery
                 {
-                    Query = string.Join(" ", parseData.SearchData),
+                    Query = string.Join(" ", this.parseData.SearchData),
                     Fields = searchableNonTextProperties,
                     Lenient = true,
                     Operator = Operator.Or,
@@ -407,7 +407,7 @@ namespace OnlineSales.Infrastructure
                 sq.Add(ntQ);
             }
 
-            andQueries.Add(new BoolQuery { Should = sq.ToArray() });
+            this.andQueries.Add(new BoolQuery { Should = sq.ToArray() });
         }
 
         private string Escape(string value)
@@ -416,7 +416,7 @@ namespace OnlineSales.Infrastructure
 
             foreach (var c in value)
             {
-                if (regExSymbols.Contains(c))
+                if (this.regExSymbols.Contains(c))
                 {
                     sb.Append('\\');
                 }

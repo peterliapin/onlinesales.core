@@ -24,7 +24,7 @@ public class Contact : BaseEntity
     public string? LastName { get; set; }
 
     [Searchable]
-    public string? FirstName { get; set; }    
+    public string? FirstName { get; set; }
 
     [Required]
     [Searchable]
@@ -32,12 +32,12 @@ public class Contact : BaseEntity
     {
         get
         {
-            return email;
+            return this.email;
         }
 
         set
         {
-            email = value.ToLower();
+            this.email = value.ToLower();
         }
     }
 

@@ -38,12 +38,12 @@ public sealed class VstoFileProvider : IFileProvider
     public IFileInfo GetFileInfo(string subpath)
     {
         var result = new VstoFileInfo(
-            vstoRootPath,
+            this.vstoRootPath,
             subpath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
 
-        if (ParseContext(out var fileType, out var ipAddress, out var version, out var subfolder, subpath))
+        if (this.ParseContext(out var fileType, out var ipAddress, out var version, out var subfolder, subpath))
         {
-            using (var serviceProvider = services!.BuildServiceProvider())
+            using (var serviceProvider = this.services!.BuildServiceProvider())
             {
                 using (var scope = serviceProvider.CreateScope())
                 {
@@ -51,17 +51,17 @@ public sealed class VstoFileProvider : IFileProvider
 
                     if (fileType == VstoFileType.Exe)
                     {
-                        HandleExeRequest(ipAddress, version, subfolder, db!);
+                        this.HandleExeRequest(ipAddress, version, subfolder, db!);
                     }
                     else if (fileType == VstoFileType.Vsto)
                     {
-                        HandleManifestRequest(ipAddress, subpath, db!, ref result);
+                        this.HandleManifestRequest(ipAddress, subpath, db!, ref result);
                     }
                 }
             }
         }
 
-        return result.Exists ? result as IFileInfo : new NotFoundFileInfo(subpath);
+        return result.Exists ? result : new NotFoundFileInfo(subpath);
     }
 
     public IChangeToken Watch(string filter)
@@ -76,7 +76,7 @@ public sealed class VstoFileProvider : IFileProvider
             fileType = VstoFileType.None;
         }
 
-        ipAddress = httpContextHelper.IpAddress!;
+        ipAddress = this.httpContextHelper.IpAddress!;
         version = string.Empty;
         subfolder = string.Empty;
 
@@ -89,7 +89,7 @@ public sealed class VstoFileProvider : IFileProvider
                 subfolder = subfolder.Substring(1);
             }
 
-            var request = httpContextHelper.Request;
+            var request = this.httpContextHelper.Request;
 
             string[] verQuery = { "version", "ver", "v" };
             foreach (var verVariant in verQuery)
@@ -149,7 +149,7 @@ public sealed class VstoFileProvider : IFileProvider
             }
 
             manifestPath = Path.Join(manifestPath, subpath);
-            result = new VstoFileInfo(vstoRootPath, manifestPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+            result = new VstoFileInfo(this.vstoRootPath, manifestPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
         }
     }
 }

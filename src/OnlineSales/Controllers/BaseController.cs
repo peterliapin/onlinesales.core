@@ -48,11 +48,11 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<TD>> GetOne(int id)
         {
-            var result = await FindOrThrowNotFound(id);
+            var result = await this.FindOrThrowNotFound(id);
 
-            var resultConverted = mapper.Map<TD>(result);
+            var resultConverted = this.mapper.Map<TD>(result);
 
-            return Ok(resultConverted);
+            return this.Ok(resultConverted);
         }
 
         // POST api/{entity}s
@@ -63,13 +63,13 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<TD>> Post([FromBody] TC value)
         {
-            var newValue = mapper.Map<T>(value);
-            var result = await dbSet.AddAsync(newValue);
-            await dbContext.SaveChangesAsync();
+            var newValue = this.mapper.Map<T>(value);
+            var result = await this.dbSet.AddAsync(newValue);
+            await this.dbContext.SaveChangesAsync();
 
-            var resultsToClient = mapper.Map<TD>(newValue);
+            var resultsToClient = this.mapper.Map<TD>(newValue);
 
-            return CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, resultsToClient);
+            return this.CreatedAtAction(nameof(GetOne), new { id = result.Entity.Id }, resultsToClient);
         }
 
         // PUT api/{entity}s/5
@@ -80,14 +80,14 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<TD>> Patch(int id, [FromBody] TU value)
         {
-            var existingEntity = await FindOrThrowNotFound(id);
+            var existingEntity = await this.FindOrThrowNotFound(id);
 
-            mapper.Map(value, existingEntity);
-            await dbContext.SaveChangesAsync();
+            this.mapper.Map(value, existingEntity);
+            await this.dbContext.SaveChangesAsync();
 
-            var resultsToClient = mapper.Map<TD>(existingEntity);
+            var resultsToClient = this.mapper.Map<TD>(existingEntity);
 
-            return Ok(resultsToClient);
+            return this.Ok(resultsToClient);
         }
 
         // DELETE api/{entity}s/5
@@ -98,13 +98,13 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult> Delete(int id)
         {
-            var existingEntity = await FindOrThrowNotFound(id);
+            var existingEntity = await this.FindOrThrowNotFound(id);
 
-            dbContext.Remove(existingEntity);
+            this.dbContext.Remove(existingEntity);
 
-            await dbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
 
-            return NoContent();
+            return this.NoContent();
         }
 
         [HttpGet]
@@ -113,9 +113,9 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
-            int limit = apiSettingsConfig.Value.MaxListSize;
+            var limit = this.apiSettingsConfig.Value.MaxListSize;
 
-            var qp = BuildQueryProvider(limit);
+            var qp = this.BuildQueryProvider(limit);
 
             var result = await qp.GetResult();
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -131,7 +131,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
         {
-            var qp = BuildQueryProvider(int.MaxValue);
+            var qp = this.BuildQueryProvider(int.MaxValue);
 
             var result = await qp.GetResult();
             this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -197,8 +197,8 @@ namespace OnlineSales.Controllers
 
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
             {
-                var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                return new MixedQueryProvider<T>(queryData, this.dbSet!.AsQueryable<T>(), elasticClient, indexPrefix!);
+                var indexPrefix = this.dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
+                return new MixedQueryProvider<T>(queryData, this.dbSet!.AsQueryable<T>(), this.elasticClient, indexPrefix!);
             }
             else
             {

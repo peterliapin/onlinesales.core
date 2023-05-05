@@ -15,7 +15,7 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
     {
         var emailTemplate = new TestEmailTemplate(uid, fkId);
 
-        var emailTemplateUrl = await PostTest(itemsUrl, emailTemplate);
+        var emailTemplateUrl = await this.PostTest(this.itemsUrl, emailTemplate);
 
         return (emailTemplate, emailTemplateUrl);
     }
@@ -24,9 +24,9 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
     {
         var fkItemCreate = new TestEmailGroup();
 
-        var fkUrl = await PostTest("/api/email-groups", fkItemCreate, HttpStatusCode.Created, authToken);
+        var fkUrl = await this.PostTest("/api/email-groups", fkItemCreate, HttpStatusCode.Created, authToken);
 
-        var fkItem = await GetTest<EmailGroup>(fkUrl);
+        var fkItem = await this.GetTest<EmailGroup>(fkUrl);
 
         fkItem.Should().NotBeNull();
 

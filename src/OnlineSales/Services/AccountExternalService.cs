@@ -30,8 +30,8 @@ namespace OnlineSales.Services
 
         public async Task<AccountDetailsInfo?> GetAccountDetails(string domain)
         {
-            var apiUrl = accountDetailsApiConfig.Value.Url;
-            var accessToken = accountDetailsApiConfig.Value.ApiKey;
+            var apiUrl = this.accountDetailsApiConfig.Value.Url;
+            var accessToken = this.accountDetailsApiConfig.Value.ApiKey;
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -58,10 +58,10 @@ namespace OnlineSales.Services
                         {
                             companybasicDetails = JsonSerializer.Deserialize<AccountDetailsInfo>(company, SerializeOptions);
                         }
-                        catch (Exception ex) 
+                        catch (Exception ex)
                         {
                             Log.Error("Cannot deserialize AccountDetailsInfo. Reason: " + ex.Message);
-                        }                        
+                        }
                     }
 
                     if (companybasicDetails == null)

@@ -43,11 +43,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         var newRecords = new List<T>();
         var duplicates = new Dictionary<TI, object>();
 
-        dbContext.IsImportRequest = true;
+        this.dbContext.IsImportRequest = true;
 
-        var typeIdentifiersMap = BuildTypeIdentifiersMap(importRecords);
+        var typeIdentifiersMap = this.BuildTypeIdentifiersMap(importRecords);
 
-        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords, duplicates);
+        var relatedObjectsMap = this.BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords, duplicates);
 
         var relatedTObjectsMap = relatedObjectsMap[typeof(T)];
 
@@ -55,7 +55,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         {
             var importRecord = importRecords[i];
 
-            if (duplicates.TryGetValue(importRecord, out object? identifierValue))
+            if (duplicates.TryGetValue(importRecord, out var identifierValue))
             {
                 result.AddError(i, $"Row number {i} has a duplicate indentification value {identifierValue} and will be skipped. Please ensure that each record has a unique key to avoid data loss.");
                 continue;
@@ -65,29 +65,29 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             foreach (var identifierProperty in relatedTObjectsMap.IdentifierPropertyNames)
             {
-                var identifierPropertyInfo = importRecord.GetType().GetProperty(identifierProperty) !;
+                var identifierPropertyInfo = importRecord.GetType().GetProperty(identifierProperty)!;
 
                 var propertyValue = identifierPropertyInfo.GetValue(importRecord);
 
                 if (propertyValue != null && relatedTObjectsMap[identifierProperty].TryGetValue(propertyValue, out dbRecord))
                 {
-                    mapper.Map(importRecord, dbRecord);
-                    FixDateKindIfNeeded((T)dbRecord!);
+                    this.mapper.Map(importRecord, dbRecord);
+                    this.FixDateKindIfNeeded((T)dbRecord!);
                     break;
                 }
             }
 
             if (dbRecord == null)
             {
-                dbRecord = mapper.Map<T>(importRecord);
-                FixDateKindIfNeeded((T)dbRecord!);
+                dbRecord = this.mapper.Map<T>(importRecord);
+                this.FixDateKindIfNeeded((T)dbRecord!);
                 newRecords.Add((T)dbRecord!);
             }
 
             for (var j = 0; j < relatedTObjectsMap.SurrogateKeyPropertyNames.Count; j++)
             {
                 var surrogateKeyAttribute = relatedTObjectsMap.SurrogateKeyPropertyAttributes[j];
-                var surrogateKeyPropertyInfo = importRecord.GetType().GetProperty(relatedTObjectsMap.SurrogateKeyPropertyNames[j]) !;
+                var surrogateKeyPropertyInfo = importRecord.GetType().GetProperty(relatedTObjectsMap.SurrogateKeyPropertyNames[j])!;
 
                 var surrogateKeyValue = surrogateKeyPropertyInfo.GetValue(importRecord);
 
@@ -116,16 +116,16 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                         if (newRecords.Contains((T)dbRecord))
                         {
-                            newRecords.Remove((T)dbRecord);                            
+                            newRecords.Remove((T)dbRecord);
                         }
                     }
                 }
             }
         }
 
-        await SaveRangeAsync(newRecords);
+        await this.SaveRangeAsync(newRecords);
 
-        var entriesByState = dbContext.ChangeTracker
+        var entriesByState = this.dbContext.ChangeTracker
             .Entries()
             .Where(e => e.Entity is T && (
                 e.State == EntityState.Added
@@ -135,26 +135,26 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         result.Skipped = importRecords.Count - result.Failed;
 
-        if (entriesByState.TryGetValue(EntityState.Added, out List<EntityEntry>? added))
+        if (entriesByState.TryGetValue(EntityState.Added, out var added))
         {
             result.Added = added.Count;
             result.Skipped -= result.Added;
         }
 
-        if (entriesByState.TryGetValue(EntityState.Modified, out List<EntityEntry>? modified))
+        if (entriesByState.TryGetValue(EntityState.Modified, out var modified))
         {
             result.Updated = modified.Count;
             result.Skipped -= result.Updated;
         }
 
-        await dbContext.SaveChangesAsync();
+        await this.dbContext.SaveChangesAsync();
 
-        return Ok(result);
+        return this.Ok(result);
     }
 
     protected virtual async Task SaveRangeAsync(List<T> newRecords)
     {
-        await dbSet.AddRangeAsync(newRecords);
+        await this.dbSet.AddRangeAsync(newRecords);
     }
 
     private void FixDateKindIfNeeded(T record)
@@ -193,16 +193,16 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
             foreach (var propertyName in identifierValues.Keys)
             {
-                var existingRecordsProperty = type.GetProperty(propertyName) !;
-                var importRecordsProperty = typeof(TI).GetProperty(propertyName) !;
+                var existingRecordsProperty = type.GetProperty(propertyName)!;
+                var importRecordsProperty = typeof(TI).GetProperty(propertyName)!;
 
                 var propertyValues = identifierValues[propertyName];
 
-                var predicate = BuildPropertyValuesPredicate(type, propertyName, propertyValues);
+                var predicate = this.BuildPropertyValuesPredicate(type, propertyName, propertyValues);
 
-                var existingObjectsDict = dbContext.SetDbEntity(type)
+                var existingObjectsDict = this.dbContext.SetDbEntity(type)
                                         .Where(predicate).AsQueryable()
-                                        .ToDictionary(x => existingRecordsProperty.GetValue(x) !, x => x);
+                                        .ToDictionary(x => existingRecordsProperty.GetValue(x)!, x => x);
 
                 Dictionary<object, TI>? importRecordsDict = null;
 
@@ -219,19 +219,19 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                                         .Where(g => g.Count() > 1)
                                         .SelectMany(g => g.Skip(1))
                                         .ToDictionary(x => x.Record, x => x.Identifier!));
-                }                
+                }
 
                 relatedObjectsMap[propertyName] = propertyValues
                        .Select(uid =>
                         {
-                            existingObjectsDict.TryGetValue(uid, out object? record);
+                            existingObjectsDict.TryGetValue(uid, out var record);
 
-                            if (type == typeof(T) && importRecordsDict!.TryGetValue(uid, out TI? importRecord))
+                            if (type == typeof(T) && importRecordsDict!.TryGetValue(uid, out var importRecord))
                             {
                                 if (record == null && !mappedObjectsCash.TryGetValue(importRecord, out record))
                                 {
-                                    record = mapper.Map<T>(importRecord);
-                                    FixDateKindIfNeeded((T)record);
+                                    record = this.mapper.Map<T>(importRecord);
+                                    this.FixDateKindIfNeeded((T)record);
                                     newRecords.Add((T)record);
                                 }
 
@@ -268,14 +268,14 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             typeIdentifiersMap[typeof(T)].IdentifierPropertyNames.Add("Id");
         }
 
-        var uniqueIndexPropertyName = FindAlternateKeyPropertyName();
+        var uniqueIndexPropertyName = this.FindAlternateKeyPropertyName();
 
         if (uniqueIndexPropertyName != null)
         {
-            var property = typeof(TI).GetProperty(uniqueIndexPropertyName) !;
+            var property = typeof(TI).GetProperty(uniqueIndexPropertyName)!;
 
             var uniqueValues = importRecords
-                                   .Where(r => property.GetValue(r) != null && property.GetValue(r) !.ToString() != string.Empty)
+                                   .Where(r => property.GetValue(r) != null && property.GetValue(r)!.ToString() != string.Empty)
                                    .Select(r => property.GetValue(r))
                                    .Distinct()
                                    .ToList();
@@ -303,7 +303,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             var identifierName = surrpogateForeignKeyAttribute.RelatedTypeUniqeIndex;
 
             var identifierValues = importRecords
-                                   .Where(r => property.GetValue(r) != null && property.GetValue(r) !.ToString() != string.Empty)
+                                   .Where(r => property.GetValue(r) != null && property.GetValue(r)!.ToString() != string.Empty)
                                    .Select(r => property.GetValue(r))
                                    .Distinct()
                                    .ToList();
@@ -396,10 +396,10 @@ public class ImportResult
 
     public void AddError(int row, string message)
     {
-        Failed++;
-        Errors = Errors ?? new List<ImportError>();
+        this.Failed++;
+        this.Errors = this.Errors ?? new List<ImportError>();
 
-        Errors.Add(new ImportError
+        this.Errors.Add(new ImportError
         {
             Row = row,
             Message = message,

@@ -24,17 +24,17 @@ public class SmscService : ISmsService
     {
         var responseString = string.Empty;
         var args =
-            $"login={HttpUtility.UrlEncode(smscConfig.Login)}" +
-            $"&psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
+            $"login={HttpUtility.UrlEncode(this.smscConfig.Login)}" +
+            $"&psw={HttpUtility.UrlEncode(this.smscConfig.Password)}" +
             $"&phones={HttpUtility.UrlEncode(recipient)}" +
             $"&mes={HttpUtility.UrlEncode(message)}" +
-            $"&sender={HttpUtility.UrlEncode(smscConfig.SenderId)}" +
+            $"&sender={HttpUtility.UrlEncode(this.smscConfig.SenderId)}" +
             "&fmt=3" + // Use JSON return format
             "&charset=utf-8";
 
         using (var httpClient = new HttpClient())
         {
-            var response = await httpClient.GetAsync(smscConfig.ApiUrl + "?" + args);
+            var response = await httpClient.GetAsync(this.smscConfig.ApiUrl + "?" + args);
             responseString = await response.Content.ReadAsStringAsync();
         }
 
@@ -47,6 +47,6 @@ public class SmscService : ISmsService
 
     public string GetSender(string recipient)
     {
-        return smscConfig.SenderId;
+        return this.smscConfig.SenderId;
     }
 }
