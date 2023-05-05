@@ -109,6 +109,7 @@ public class ContentImportDto : BaseImportDto
     public string? CoverImageAlt { get; set; }
 
     [Optional]
+    [SwaggerUnique]
     public string? Slug { get; set; } = string.Empty;
 
     [Optional]

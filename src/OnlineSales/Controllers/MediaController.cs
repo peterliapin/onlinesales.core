@@ -40,29 +40,29 @@ namespace OnlineSales.Controllers
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                ModelState.AddModelError("FileName", "Unsupported MIME type");
+                this.ModelState.AddModelError("FileName", "Unsupported MIME type");
 
-                throw new InvalidModelStateException(ModelState);
+                throw new InvalidModelStateException(this.ModelState);
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
             var imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
 
-            var scopeAndFileExists = from i in pgDbContext!.Media!
-                                        where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
-                                        select i;
+            var scopeAndFileExists = from i in this.pgDbContext!.Media!
+                                     where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
+                                     select i;
             if (scopeAndFileExists.Any())
             {
                 var uploadedImage = scopeAndFileExists!.FirstOrDefault();
                 uploadedImage!.Data = imageInBytes;
                 uploadedImage!.Size = incomingFileSize;
 
-                pgDbContext.Media!.Update(uploadedImage);
+                this.pgDbContext.Media!.Update(uploadedImage);
             }
             else
             {
-                Media uploadedMedia = new ()
+                Media uploadedMedia = new()
                 {
                     Name = incomingFileName,
                     Size = incomingFileSize,
@@ -72,10 +72,10 @@ namespace OnlineSales.Controllers
                     Extension = incomingFileExtension,
                 };
 
-                await pgDbContext.Media!.AddAsync(uploadedMedia);
+                await this.pgDbContext.Media!.AddAsync(uploadedMedia);
             }
 
-            await pgDbContext.SaveChangesAsync();
+            await this.pgDbContext.SaveChangesAsync();
 
             Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
             Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
@@ -84,26 +84,26 @@ namespace OnlineSales.Controllers
             {
                 Location = Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
             };
-            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
+            return this.CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
 
         [HttpGet]
         [AllowAnonymous]
         [Route("{scopeUid}/{fileName}")]
-        [ResponseCache(CacheProfileName = "ImageResponse")]        
+        [ResponseCache(CacheProfileName = "ImageResponse")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            var uploadedImageData = await (from upi in pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            var uploadedImageData = await (from upi in this.pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
                 throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}");
             }
 
-            return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
+            return this.File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
         }
     }
 }

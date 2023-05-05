@@ -18,17 +18,17 @@ namespace OnlineSales.Tests.TestEntities
         public TestMedia(string fileName, int length)
         {
             var buffer = new byte[length];
-            DataBuffer = new MemoryStream(buffer);
+            this.DataBuffer = new MemoryStream(buffer);
 
             new FileExtensionContentTypeProvider().TryGetContentType(fileName, out var contentType);
 
-            Image = new FormFile(DataBuffer, 0, DataBuffer.Length, fileName, fileName)
+            this.Image = new FormFile(this.DataBuffer, 0, this.DataBuffer.Length, fileName, fileName)
             {
                 Headers = new HeaderDictionary(),
                 ContentType = contentType!,
             };
-            FilePath = fileName;
-            ScopeUid = Scope;
+            this.FilePath = fileName;
+            this.ScopeUid = Scope;
         }
     }
 }

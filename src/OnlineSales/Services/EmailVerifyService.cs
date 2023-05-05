@@ -24,9 +24,9 @@ namespace OnlineSales.Services
 
         public async Task<Domain> Verify(string email)
         {
-            var domainName = domainService.GetDomainNameByEmail(email);
-            
-            var domain = await (from d in pgContext.Domains
+            var domainName = this.domainService.GetDomainNameByEmail(email);
+
+            var domain = await (from d in this.pgContext.Domains
                                 where d.Name == domainName
                                 select d).FirstOrDefaultAsync();
 
@@ -39,12 +39,12 @@ namespace OnlineSales.Services
                 if (domain is null)
                 {
                     domain = new Domain() { Name = domainName, Source = email };
-                    await domainService.SaveAsync(domain);
+                    await this.domainService.SaveAsync(domain);
                 }
 
-                await domainService.Verify(domain!);
-                await VerifyDomain(email, domain);
-                await pgContext.SaveChangesAsync();
+                await this.domainService.Verify(domain!);
+                await this.VerifyDomain(email, domain);
+                await this.pgContext.SaveChangesAsync();
 
                 return domain;
             }
@@ -52,7 +52,7 @@ namespace OnlineSales.Services
 
         public async Task VerifyDomain(string email, Domain domain)
         {
-            var emailVerify = await emailValidationExternalService.Validate(email);
+            var emailVerify = await this.emailValidationExternalService.Validate(email);
             domain.CatchAll = emailVerify.CatchAllCheck;
         }
     }

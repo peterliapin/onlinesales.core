@@ -23,13 +23,13 @@ public class GetshoutoutService : ISmsService
     public async Task SendAsync(string recipient, string message)
     {
         var client = new HttpClient();
-        client.BaseAddress = new Uri(getshoutoutConfig.ApiUrl);
+        client.BaseAddress = new Uri(this.getshoutoutConfig.ApiUrl);
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        client.DefaultRequestHeaders.Add("Authorization", "Apikey " + getshoutoutConfig.ApiKey);
+        client.DefaultRequestHeaders.Add("Authorization", "Apikey " + this.getshoutoutConfig.ApiKey);
 
         var messageDto = new GetshoutoutMessageDto
         {
-            Source = getshoutoutConfig.SenderId,
+            Source = this.getshoutoutConfig.SenderId,
             Content = new Content
             {
                 Sms = message,
@@ -59,6 +59,6 @@ public class GetshoutoutService : ISmsService
 
     public string GetSender(string recipient)
     {
-        return getshoutoutConfig.SenderId;
+        return this.getshoutoutConfig.SenderId;
     }
 }

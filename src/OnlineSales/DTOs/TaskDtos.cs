@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
-public class TaskDetailsDto 
+public class TaskDetailsDto
 {
     public string Name { get; set; } = string.Empty;
 

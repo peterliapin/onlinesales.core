@@ -45,7 +45,7 @@ public abstract class PluginDbContextBase : PgDbContext
     {
         base.OnModelCreating(builder);
 
-        if (ExcludeBaseEntitiesFromMigrations)
+        if (this.ExcludeBaseEntitiesFromMigrations)
         {
             var items = builder.Model.GetEntityTypes();
 

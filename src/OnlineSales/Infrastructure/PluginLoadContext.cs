@@ -13,22 +13,22 @@ internal sealed class PluginLoadContext : AssemblyLoadContext
 
     public PluginLoadContext(string pluginPath)
     {
-        resolver = new AssemblyDependencyResolver(pluginPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+        this.resolver = new AssemblyDependencyResolver(pluginPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
     }
 
     protected override Assembly Load(AssemblyName assemblyName)
     {
-        var assemblyPath = resolver.ResolveAssemblyToPath(assemblyName);
+        var assemblyPath = this.resolver.ResolveAssemblyToPath(assemblyName);
         return assemblyPath != null
-            ? LoadFromAssemblyPath(assemblyPath)
+            ? this.LoadFromAssemblyPath(assemblyPath)
             : null!;
     }
 
     protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
     {
-        var libraryPath = resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+        var libraryPath = this.resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
         return libraryPath != null
-            ? LoadUnmanagedDllFromPath(libraryPath)
+            ? this.LoadUnmanagedDllFromPath(libraryPath)
             : nint.Zero;
     }
 }

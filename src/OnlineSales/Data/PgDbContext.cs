@@ -98,10 +98,10 @@ public class PgDbContext : IdentityDbContext<User>
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        int result = 0;
+        var result = 0;
         var changes = new Dictionary<EntityEntry, ChangeLog>();
 
-        var entries = ChangeTracker
+        var entries = this.ChangeTracker
            .Entries()
            .Where(e => e.Entity is BaseEntityWithId && (
                    e.State == EntityState.Added
@@ -118,15 +118,15 @@ public class PgDbContext : IdentityDbContext<User>
 
                     if (createdAtEntity is not null)
                     {
-                        createdAtEntity.CreatedAt = createdAtEntity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : GetDateWithKind(createdAtEntity.CreatedAt);
+                        createdAtEntity.CreatedAt = createdAtEntity.CreatedAt == DateTime.MinValue ? DateTime.UtcNow : this.GetDateWithKind(createdAtEntity.CreatedAt);
                     }
 
                     var createdByEntity = entityEntry.Entity as IHasCreatedBy;
 
                     if (createdByEntity is not null)
                     {
-                        createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? httpContextHelper!.IpAddressV4 : createdByEntity.CreatedByIp;
-                        createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : createdByEntity.CreatedByUserAgent;
+                        createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? this.httpContextHelper!.IpAddressV4 : createdByEntity.CreatedByIp;
+                        createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? this.httpContextHelper!.UserAgent : createdByEntity.CreatedByUserAgent;
                     }
                 }
 
@@ -136,15 +136,15 @@ public class PgDbContext : IdentityDbContext<User>
 
                     if (updatedAtEntity is not null)
                     {
-                        updatedAtEntity.UpdatedAt = IsImportRequest && updatedAtEntity.UpdatedAt is not null ? GetDateWithKind(updatedAtEntity.UpdatedAt.Value) : DateTime.UtcNow;
+                        updatedAtEntity.UpdatedAt = this.IsImportRequest && updatedAtEntity.UpdatedAt is not null ? this.GetDateWithKind(updatedAtEntity.UpdatedAt.Value) : DateTime.UtcNow;
                     }
 
                     var updatedByEntity = entityEntry.Entity as IHasUpdatedBy;
 
                     if (updatedByEntity is not null)
                     {
-                        updatedByEntity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : httpContextHelper!.IpAddressV4;
-                        updatedByEntity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
+                        updatedByEntity.UpdatedByIp = this.IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : this.httpContextHelper!.IpAddressV4;
+                        updatedByEntity.UpdatedByUserAgent = this.IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : this.httpContextHelper!.UserAgent;
                     }
                 }
 
@@ -175,7 +175,7 @@ public class PgDbContext : IdentityDbContext<User>
                 change.Value.Data = JsonHelper.Serialize(change.Key.Entity);
             }
 
-            ChangeLogs!.AddRange(changes.Values);
+            this.ChangeLogs!.AddRange(changes.Values);
         }
 
         return result + await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
@@ -187,7 +187,7 @@ public class PgDbContext : IdentityDbContext<User>
         {
             Console.WriteLine("Configuring PgDbContext...");
 
-            var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
+            var postgresConfig = this.Configuration.GetSection("Postgres").Get<PostgresConfig>();
 
             if (postgresConfig == null)
             {

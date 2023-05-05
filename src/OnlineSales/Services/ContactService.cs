@@ -23,23 +23,23 @@ namespace OnlineSales.Services
 
         public async Task SaveAsync(Contact contact)
         {
-            await EnrichWithDomainId(contact);
-            EnrichWithAccountId(contact);
+            await this.EnrichWithDomainId(contact);
+            this.EnrichWithAccountId(contact);
 
             if (contact.Id > 0)
             {
-                pgDbContext.Contacts!.Update(contact);
+                this.pgDbContext.Contacts!.Update(contact);
             }
             else
             {
-                await pgDbContext.Contacts!.AddAsync(contact);
+                await this.pgDbContext.Contacts!.AddAsync(contact);
             }
         }
 
         public async Task SaveRangeAsync(List<Contact> contacts)
         {
-            await EnrichWithDomainIdAsync(contacts);
-            EnrichWithAccountId(contacts);
+            await this.EnrichWithDomainIdAsync(contacts);
+            this.EnrichWithAccountId(contacts);
 
             var sortedContacts = contacts.GroupBy(c => c.Id > 0);
 
@@ -47,18 +47,18 @@ namespace OnlineSales.Services
             {
                 if (group.Key)
                 {
-                    pgDbContext.UpdateRange(group.ToList());
+                    this.pgDbContext.UpdateRange(group.ToList());
                 }
                 else
                 {
-                    await pgDbContext.AddRangeAsync(group.ToList());
+                    await this.pgDbContext.AddRangeAsync(group.ToList());
                 }
             }
         }
 
         public async Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip)
         {
-            var contact = (from u in pgDbContext.Contacts
+            var contact = (from u in this.pgDbContext.Contacts
                            where u.Email == email
                            select u).FirstOrDefault();
 
@@ -73,17 +73,17 @@ namespace OnlineSales.Services
                     CreatedAt = createdAt,
                 };
 
-                await pgDbContext.Unsubscribes!.AddAsync(unsubscribe);
+                await this.pgDbContext.Unsubscribes!.AddAsync(unsubscribe);
 
                 contact.Unsubscribe = unsubscribe;
-            }            
+            }
         }
 
         private async Task EnrichWithDomainId(Contact contact)
         {
-            var domainName = domainService.GetDomainNameByEmail(contact.Email);
+            var domainName = this.domainService.GetDomainNameByEmail(contact.Email);
 
-            var domainsQueryResult = await pgDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefaultAsync();
+            var domainsQueryResult = await this.pgDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefaultAsync();
 
             if (domainsQueryResult != null)
             {
@@ -93,7 +93,7 @@ namespace OnlineSales.Services
             else
             {
                 contact.Domain = new Domain() { Name = domainName, AccountStatus = AccountSyncStatus.NotInitialized };
-                await domainService.SaveAsync(contact.Domain);
+                await this.domainService.SaveAsync(contact.Domain);
             }
         }
 
@@ -105,13 +105,13 @@ namespace OnlineSales.Services
                                      select new
                                      {
                                          Contact = contact,
-                                         DomainName = domainService.GetDomainNameByEmail(contact.Email),
+                                         DomainName = this.domainService.GetDomainNameByEmail(contact.Email),
                                      };
 
             try
             {
                 var contactsWithDomainInfo = (from contactWithDomain in contactsWithDomain
-                                              join domain in pgDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
+                                              join domain in this.pgDbContext.Domains! on contactWithDomain.DomainName equals domain.Name into domainTemp
                                               from domain in domainTemp.DefaultIfEmpty()
                                               select new
                                               {
@@ -143,7 +143,7 @@ namespace OnlineSales.Services
                             };
 
                             newDomains.Add(domain.Name, domain);
-                            await pgDbContext.AddAsync(domain);
+                            await this.pgDbContext.AddAsync(domain);
                             contactWithDomainInfo.Contact.Domain = domain;
                         }
                         else
@@ -177,7 +177,7 @@ namespace OnlineSales.Services
             var domain = contact.Domain;
             if (domain != null)
             {
-                contact.AccountId = domain.AccountId;   
+                contact.AccountId = domain.AccountId;
             }
         }
     }

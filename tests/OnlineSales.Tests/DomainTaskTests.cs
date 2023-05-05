@@ -7,7 +7,7 @@ using OnlineSales.Helpers;
 namespace OnlineSales.Tests;
 
 public class DomainTaskTests : BaseTest
-{   
+{
     private readonly string tasksUrl = "/api/tasks";
 
     private readonly string domainsUrl = "/api/domains";
@@ -38,28 +38,28 @@ public class DomainTaskTests : BaseTest
             DnsCheck = false,
         };
 
-        var validDomainLocation = await PostTest(domainsUrl, validDomain);
+        var validDomainLocation = await this.PostTest(this.domainsUrl, validDomain);
 
-        var invalidDomainLocation = await PostTest(domainsUrl, invalidDomain);
+        var invalidDomainLocation = await this.PostTest(this.domainsUrl, invalidDomain);
 
-        var filledDomainLocation = await PostTest(domainsUrl, filledDomain);
+        var filledDomainLocation = await this.PostTest(this.domainsUrl, filledDomain);
 
-        var validDomainAdded = await GetTest<Domain>(validDomainLocation);
-        validDomainAdded.Should().NotBeNull();   
+        var validDomainAdded = await this.GetTest<Domain>(validDomainLocation);
+        validDomainAdded.Should().NotBeNull();
         validDomainAdded!.HttpCheck.Should().BeNull();
         validDomainAdded!.DnsCheck.Should().BeNull();
 
-        var invalidDomainAdded = await GetTest<Domain>(invalidDomainLocation);
+        var invalidDomainAdded = await this.GetTest<Domain>(invalidDomainLocation);
         invalidDomainAdded.Should().NotBeNull();
         invalidDomainAdded!.HttpCheck.Should().BeNull();
         invalidDomainAdded!.DnsCheck.Should().BeNull();
 
-        var filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
+        var filledDomainAdded = await this.GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
 
-        await Execute();
+        await this.Execute();
 
-        validDomainAdded = await GetTest<Domain>(validDomainLocation);
+        validDomainAdded = await this.GetTest<Domain>(validDomainLocation);
         validDomainAdded.Should().NotBeNull();
         validDomainAdded!.HttpCheck.Should().BeTrue();
         validDomainAdded!.Url.Should().NotBeNull();
@@ -68,7 +68,7 @@ public class DomainTaskTests : BaseTest
         validDomainAdded!.DnsCheck.Should().BeTrue();
         validDomainAdded!.DnsRecords.Should().NotBeNull();
 
-        invalidDomainAdded = await GetTest<Domain>(invalidDomainLocation);
+        invalidDomainAdded = await this.GetTest<Domain>(invalidDomainLocation);
         invalidDomainAdded.Should().NotBeNull();
         invalidDomainAdded!.HttpCheck.Should().BeFalse();
         invalidDomainAdded!.Url.Should().BeNull();
@@ -77,13 +77,13 @@ public class DomainTaskTests : BaseTest
         invalidDomainAdded!.DnsCheck.Should().BeFalse();
         invalidDomainAdded!.DnsRecords.Should().BeNull();
 
-        filledDomainAdded = await GetTest<Domain>(filledDomainLocation);
+        filledDomainAdded = await this.GetTest<Domain>(filledDomainLocation);
         filledDomainAdded.Should().BeEquivalentTo(filledDomain);
     }
 
     private async Task Execute()
     {
-        HttpResponseMessage executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
+        var executeResponce = await this.GetRequest(this.tasksUrl + "/execute/" + this.taskName);
 
         executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -91,7 +91,7 @@ public class DomainTaskTests : BaseTest
         var taskStatus = JsonHelper.Deserialize<TaskExecutionDto>(content);
 
         taskStatus.Should().NotBeNull();
-        taskStatus!.Name.Should().Be(taskName);
+        taskStatus!.Name.Should().Be(this.taskName);
         taskStatus!.Completed.Should().BeTrue();
     }
 }

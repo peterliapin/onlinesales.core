@@ -25,7 +25,7 @@ namespace OnlineSales.Plugin.SendGrid.Controllers;
 [Route("api/[controller]")]
 public class SendgridController : ControllerBase
 {
-    private static readonly int BatchSize = 500;    
+    private static readonly int BatchSize = 500;
 
     private readonly SendgridDbContext dbContext;
 
@@ -45,7 +45,7 @@ public class SendgridController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Import([FromBody] List<MessageEventDto> records)
     {
-        return await AddEvents(records);
+        return await this.AddEvents(records);
     }
 
     [HttpPost]
@@ -56,11 +56,11 @@ public class SendgridController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> AddMessageEvents()
     {
-        var signature = Request.Headers[RequestValidator.SIGNATURE_HEADER].First();
-        var timestamp = Request.Headers[RequestValidator.TIMESTAMP_HEADER].First();
-        var body = await GetRequestBody(HttpContext.Request.Body);
+        var signature = this.Request.Headers[RequestValidator.SIGNATURE_HEADER].First();
+        var timestamp = this.Request.Headers[RequestValidator.TIMESTAMP_HEADER].First();
+        var body = await this.GetRequestBody(this.HttpContext.Request.Body);
 
-        if (signature == null || timestamp == null || !Verify(body, signature, timestamp))
+        if (signature == null || timestamp == null || !this.Verify(body, signature, timestamp))
         {
             throw new SendGridApiException("Webhook event can't be verified");
         }
@@ -72,7 +72,7 @@ public class SendgridController : ControllerBase
             throw new SendGridApiException("Webhook event body can't be deserialized");
         }
 
-        return await AddEvents(records);
+        return await this.AddEvents(records);
     }
 
     private async Task<Dictionary<Contact, List<T>>> CreateNonExistedContacts<T>(IEnumerable<IGrouping<string, T>> emailAndRecords)
@@ -80,12 +80,12 @@ public class SendgridController : ControllerBase
         var contactRecords = new Dictionary<Contact, List<T>>();
         var nonExistedContacts = new List<Contact>();
 
-        int position = 0;
+        var position = 0;
 
         while (position < emailAndRecords.Count())
         {
             var batch = emailAndRecords.Skip(position).Take(BatchSize);
-            var existedContacts = dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToDictionary(c => c.Email, c => c);
+            var existedContacts = this.dbContext.Contacts!.Where(c => batch.Select(b => b.Key).Contains(c.Email)).ToDictionary(c => c.Email, c => c);
             foreach (var b in batch)
             {
                 var isExists = existedContacts.TryGetValue(b.Key, out var contact);
@@ -101,32 +101,32 @@ public class SendgridController : ControllerBase
             position += BatchSize;
         }
 
-        await contactService.SaveRangeAsync(nonExistedContacts);
+        await this.contactService.SaveRangeAsync(nonExistedContacts);
 
         return contactRecords;
     }
 
     private async Task AddEventRecords<T>(Dictionary<Contact, List<T>> contactsAndRecords)
     {
-        int position = 0;
+        var position = 0;
         while (position < contactsAndRecords.Count)
         {
             var batch = contactsAndRecords.Skip(position).Take(BatchSize);
-            var existingRecords = dbContext.SendgridEvents!.Where(e => batch.Select(b => b.Key).Contains(e.Contact)).ToList();
+            var existingRecords = this.dbContext.SendgridEvents!.Where(e => batch.Select(b => b.Key).Contains(e.Contact)).ToList();
             foreach (var contactAndRecords in batch)
             {
                 foreach (var record in contactAndRecords.Value)
                 {
-                    var sgevent = Convert<T>(record, contactAndRecords.Key);
+                    var sgevent = this.Convert(record, contactAndRecords.Key);
                     var existingRecord = existingRecords.FirstOrDefault(e => e.Contact!.Email == sgevent.Contact!.Email && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt);
                     if (existingRecord == null)
-                    {                        
+                    {
                         if (sgevent.Contact != null && sgevent.Contact.DomainId > 0)
                         {
                             sgevent.Contact.Domain = null;
                         }
 
-                        await dbContext.SendgridEvents!.AddAsync(sgevent);
+                        await this.dbContext.SendgridEvents!.AddAsync(sgevent);
                     }
                 }
             }
@@ -140,15 +140,15 @@ public class SendgridController : ControllerBase
     {
         try
         {
-            var emailRecords = records.GroupBy(r => r.Email); 
+            var emailRecords = records.GroupBy(r => r.Email);
 
-            var contactRecords = await CreateNonExistedContacts(emailRecords);
+            var contactRecords = await this.CreateNonExistedContacts(emailRecords);
 
-            await AddEventRecords(contactRecords);
+            await this.AddEventRecords(contactRecords);
 
-            await dbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
 
-            return Ok();
+            return this.Ok();
         }
         catch (Exception e)
         {
@@ -161,11 +161,11 @@ public class SendgridController : ControllerBase
     {
         if (record is MessageEventDto me)
         {
-            return Convert(me, contact);
+            return this.Convert(me, contact);
         }
         else if (record is WebhookEventDto we)
         {
-            return Convert(we, contact);
+            return this.Convert(we, contact);
         }
         else
         {
@@ -177,8 +177,8 @@ public class SendgridController : ControllerBase
     {
         return new SendgridEvent()
         {
-            CreatedAt = GetDateTime(me.Processed),
-            Event = GetEvent(me),
+            CreatedAt = this.GetDateTime(me.Processed),
+            Event = this.GetEvent(me),
             MessageId = me.SendGridMessageId,
             Reason = me.Reason ?? string.Empty,
             Ip = me.OriginatingIp,
@@ -191,7 +191,7 @@ public class SendgridController : ControllerBase
         return new SendgridEvent()
         {
             CreatedAt = DateTimeHelper.GetDateTime(we.Timestamp),
-            Event = GetEvent(we),
+            Event = this.GetEvent(we),
             MessageId = we.SendGridMessageId,
             Reason = we.Reason,
             Ip = we.Ip,

@@ -56,16 +56,16 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
-        builder.Services.AddTransient<IDomainService, DomainService>();        
+        builder.Services.AddTransient<IDomainService, DomainService>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
-        builder.Services.AddTransient<ICommentService, CommentService>();        
+        builder.Services.AddTransient<ICommentService, CommentService>();
         builder.Services.AddScoped<IVariablesService, VariablesService>();
         builder.Services.AddSingleton<IpDetailsService, IpDetailsService>();
         builder.Services.AddSingleton<ILockService, LockService>();
         builder.Services.AddScoped<IEmailVerifyService, EmailVerifyService>();
         builder.Services.AddScoped<IEmailValidationExternalService, EmailValidationExternalService>();
-        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();        
+        builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
         builder.Services.AddSingleton<ActivityLogService, ActivityLogService>();
 
@@ -194,7 +194,7 @@ public class Program
         {
             AutoRegisterTemplate = true,
             AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
-            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",            
+            IndexFormat = $"{elasticConfig.IndexPrefix}-logs",
         };
     }
 
@@ -208,7 +208,7 @@ public class Program
             {
                 var context = scope.ServiceProvider.GetRequiredService<PgDbContext>();
 
-                using (LockManager.GetWaitLock("MigrationWaitLock", context.Database.GetConnectionString() !))
+                using (LockManager.GetWaitLock("MigrationWaitLock", context.Database.GetConnectionString()!))
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<PgDbContext>();
                     dbContext.Database.Migrate();
@@ -355,7 +355,7 @@ public class Program
                             Type = ReferenceType.SecurityScheme,
                             Id = "Bearer",
                         },
-                        Scheme = "oauth2",  
+                        Scheme = "oauth2",
                         Name = "Bearer",
                         In = ParameterLocation.Header,
                     },
@@ -375,7 +375,7 @@ public class Program
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
     {
-        var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule") !;
+        var taskRunnerSchedule = builder.Configuration.GetValue<string>("TaskRunner:CronSchedule")!;
 
         builder.Services.AddQuartz(q =>
         {

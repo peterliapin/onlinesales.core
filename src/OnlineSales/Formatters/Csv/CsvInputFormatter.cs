@@ -18,7 +18,7 @@ public class CsvInputFormatter : InputFormatter
 {
     public CsvInputFormatter()
     {
-        SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
+        this.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
     }
 
     public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context)
@@ -27,13 +27,13 @@ public class CsvInputFormatter : InputFormatter
         var request = context.HttpContext.Request;
         MediaTypeHeaderValue.TryParse(request.ContentType, out var requestContentType);
 
-        var result = await ReadStreamAsync(type, request.Body);
+        var result = await this.ReadStreamAsync(type, request.Body);
         return await InputFormatterResult.SuccessAsync(result);
     }
 
     protected override bool CanReadType(Type type)
     {
-        return IsTypeOfIEnumerable(type);
+        return this.IsTypeOfIEnumerable(type);
     }
 
     protected async Task<object> ReadStreamAsync(Type type, Stream stream)
@@ -78,9 +78,9 @@ public class CsvInputFormatter : InputFormatter
 
         if (typeIsArray)
         {
-            Array array = Array.CreateInstance(itemType!, list!.Count);
+            var array = Array.CreateInstance(itemType!, list!.Count);
 
-            for (int t = 0; t < list.Count; t++)
+            for (var t = 0; t < list.Count; t++)
             {
                 array.SetValue(list[t], t);
             }
@@ -93,7 +93,7 @@ public class CsvInputFormatter : InputFormatter
 
     private bool IsTypeOfIEnumerable(Type type)
     {
-        foreach (Type interfaceType in type.GetInterfaces())
+        foreach (var interfaceType in type.GetInterfaces())
         {
             if (interfaceType == typeof(IList))
             {

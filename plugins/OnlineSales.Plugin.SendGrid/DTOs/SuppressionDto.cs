@@ -12,12 +12,12 @@ public class SuppressionDto
     {
         get
         {
-            return DateTimeHelper.GetTimeStamp(CreatedAt);
+            return DateTimeHelper.GetTimeStamp(this.CreatedAt);
         }
 
         set
         {
-            CreatedAt = DateTimeHelper.GetDateTime(value);
+            this.CreatedAt = DateTimeHelper.GetDateTime(value);
         }
     }
 
@@ -39,7 +39,7 @@ public class BlockOrBounceDto : SuppressionDto
 
     public override string GetReason()
     {
-        return $"{Status} - {Reason}";
+        return $"{this.Status} - {this.Reason}";
     }
 }
 

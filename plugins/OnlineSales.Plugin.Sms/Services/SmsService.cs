@@ -19,14 +19,14 @@ public class SmsService : ISmsService
 
         if (settings != null)
         {
-            pluginSettings = settings;
-            InitGateways();
+            this.pluginSettings = settings;
+            this.InitGateways();
         }
     }
 
     public Task SendAsync(string recipient, string message)
     {
-        var smsService = GetSmsService(recipient);
+        var smsService = this.GetSmsService(recipient);
 
         if (smsService == null)
         {
@@ -38,21 +38,21 @@ public class SmsService : ISmsService
 
     public string GetSender(string recipient)
     {
-        var smsService = GetSmsService(recipient);
+        var smsService = this.GetSmsService(recipient);
 
         return smsService != null ? smsService.GetSender(recipient) : string.Empty;
     }
 
     private ISmsService? GetSmsService(string recipient)
     {
-        var key = countrySmsServices.Keys.FirstOrDefault(key => recipient.StartsWith(key));
+        var key = this.countrySmsServices.Keys.FirstOrDefault(key => recipient.StartsWith(key));
 
         if (key != null)
         {
-            return countrySmsServices[key];
+            return this.countrySmsServices[key];
         }
 
-        if (countrySmsServices.TryGetValue("default", out ISmsService? smsService))
+        if (this.countrySmsServices.TryGetValue("default", out var smsService))
         {
             return smsService;
         }
@@ -62,7 +62,7 @@ public class SmsService : ISmsService
 
     private void InitGateways()
     {
-        foreach (var countryGateway in pluginSettings.SmsCountryGateways)
+        foreach (var countryGateway in this.pluginSettings.SmsCountryGateways)
         {
             ISmsService? gatewayService = null;
 
@@ -71,28 +71,28 @@ public class SmsService : ISmsService
             switch (gatewayName)
             {
                 case "Smsc":
-                    gatewayService = new SmscService(pluginSettings.SmsGateways.Smsc);
+                    gatewayService = new SmscService(this.pluginSettings.SmsGateways.Smsc);
                     break;
                 case "SmscKz":
-                    gatewayService = new SmscService(pluginSettings.SmsGateways.SmscKz);
+                    gatewayService = new SmscService(this.pluginSettings.SmsGateways.SmscKz);
                     break;
                 case "NotifyLk":
-                    gatewayService = new NotifyLkService(pluginSettings.SmsGateways.NotifyLk);
+                    gatewayService = new NotifyLkService(this.pluginSettings.SmsGateways.NotifyLk);
                     break;
                 case "Getshoutout":
-                    gatewayService = new GetshoutoutService(pluginSettings.SmsGateways.Getshoutout);
+                    gatewayService = new GetshoutoutService(this.pluginSettings.SmsGateways.Getshoutout);
                     break;
                 case "AmazonSns":
-                    gatewayService = new AmazonSnsGatewayService(pluginSettings.SmsGateways.AmazonSns);
+                    gatewayService = new AmazonSnsGatewayService(this.pluginSettings.SmsGateways.AmazonSns);
                     break;
                 case "Twilio":
-                    gatewayService = new TwilioService(pluginSettings.SmsGateways.Twilio);
+                    gatewayService = new TwilioService(this.pluginSettings.SmsGateways.Twilio);
                     break;
             }
 
             if (gatewayService != null)
             {
-                countrySmsServices[countryGateway.Code] = gatewayService;
+                this.countrySmsServices[countryGateway.Code] = gatewayService;
             }
         }
     }

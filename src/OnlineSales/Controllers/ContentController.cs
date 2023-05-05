@@ -54,7 +54,7 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
     public async Task<ActionResult<string[]>> GetTags()
     {
         var tags = (await this.dbSet.Select(c => c.Tags).ToArrayAsync()).SelectMany(z => z).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
-        return Ok(tags);
+        return this.Ok(tags);
     }
 
     [HttpGet("categories")]
@@ -66,6 +66,6 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
     public async Task<ActionResult<string[]>> GetCategories()
     {
         var categories = (await this.dbSet.Select(c => c.Category).ToArrayAsync()).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
-        return Ok(categories);
+        return this.Ok(categories);
     }
 }

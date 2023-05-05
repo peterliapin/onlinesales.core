@@ -41,7 +41,7 @@ public class JsonHelper
         {
             options.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
         }
-        
+
         options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
         options.Converters.Add(new JsonStringEnumConverter());
     }
@@ -60,7 +60,7 @@ public class JsonHelper
         else
         {
             return JsonSerializer.Deserialize<T>(data, SerializeOptions);
-        }            
+        }
     }
 
     public class BooleanConverter : JsonConverter<bool>

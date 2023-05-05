@@ -23,13 +23,13 @@ namespace OnlineSales.Infrastructure
 
         public QueryParseData(string[] cmds, int maxLimitSize)
         {
-            var commands = Parse(cmds);
-            Limit = ParseLimitCommands(commands, maxLimitSize);
-            Skip = ParseSkipCommands(commands);
-            SearchData = ParseSearchCommands(commands);
-            WhereData = ParseWhereCommands(commands);
-            OrderData = ParseOrderCommands(commands);
-            SelectData = ParseSelectCommands(commands);
+            var commands = this.Parse(cmds);
+            this.Limit = this.ParseLimitCommands(commands, maxLimitSize);
+            this.Skip = this.ParseSkipCommands(commands);
+            this.SearchData = this.ParseSearchCommands(commands);
+            this.WhereData = this.ParseWhereCommands(commands);
+            this.OrderData = this.ParseOrderCommands(commands);
+            this.SelectData = this.ParseSelectCommands(commands);
         }
 
         private QueryCommand[] Parse(string[] query)
@@ -284,8 +284,8 @@ namespace OnlineSales.Infrastructure
         {
             public OrderCommandData(string propertyName)
             {
-                Property = InitProperty(propertyName);
-                Ascending = true;
+                this.Property = this.InitProperty(propertyName);
+                this.Ascending = true;
             }
 
             public OrderCommandData(QueryCommand cmd)
@@ -293,7 +293,7 @@ namespace OnlineSales.Infrastructure
                 var valueProps = cmd.Value.Split(' ');
 
                 var propertyName = string.Empty;
-                Ascending = true;
+                this.Ascending = true;
 
                 switch (valueProps.Length)
                 {
@@ -305,13 +305,13 @@ namespace OnlineSales.Infrastructure
                         break;
                     case 2:
                         propertyName = valueProps.First();
-                        Ascending = valueProps.ElementAt(1).ToLowerInvariant() != "desc";
+                        this.Ascending = valueProps.ElementAt(1).ToLowerInvariant() != "desc";
                         break;
                     default:
                         throw new QueryException(cmd.Source, "Failed to parse. Check syntax.");
                 }
 
-                Property = InitProperty(propertyName);
+                this.Property = this.InitProperty(propertyName);
             }
 
             public PropertyInfo Property { get; set; }
@@ -351,7 +351,7 @@ namespace OnlineSales.Infrastructure
             public WhereUnitData(QueryCommand cmd)
             {
                 this.Cmd = cmd;
-                StringValue = cmd.Value;
+                this.StringValue = cmd.Value;
 
                 var fProp = cmd.Props.ElementAtOrDefault(0);
 
@@ -360,7 +360,7 @@ namespace OnlineSales.Infrastructure
                     throw new QueryException(cmd.Source, "Property field not found");
                 }
 
-                int indexOffset = 0;
+                var indexOffset = 0;
                 if (fProp == "or")
                 {
                     if (cmd.Props.Length == 1)
@@ -369,17 +369,17 @@ namespace OnlineSales.Infrastructure
                     }
 
                     indexOffset = 1;
-                    OrOperation = true;
+                    this.OrOperation = true;
                 }
                 else
                 {
-                    OrOperation = false;
+                    this.OrOperation = false;
                 }
 
                 var propertyName = cmd.Props.ElementAtOrDefault(indexOffset);
                 var rawOperation = cmd.Props.ElementAtOrDefault(indexOffset + 1);
-                Property = ParseProperty(propertyName, cmd);
-                Operation = ParseOperation(rawOperation, cmd);
+                this.Property = ParseProperty(propertyName, cmd);
+                this.Operation = this.ParseOperation(rawOperation, cmd);
             }
 
             public enum ContainsType
@@ -392,13 +392,13 @@ namespace OnlineSales.Infrastructure
             {
                 if (value.Length == 0)
                 {
-                    throw new QueryException(Cmd.Source, "Empty contain query argument");
+                    throw new QueryException(this.Cmd.Source, "Empty contain query argument");
                 }
 
                 var result = new List<Tuple<ContainsType, string>>();
                 var sb = new StringBuilder();
 
-                for (int i = 0; i < value.Length; ++i)
+                for (var i = 0; i < value.Length; ++i)
                 {
                     if (value[i] == '*')
                     {
@@ -438,43 +438,47 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var sv in input)
                 {
-                    if (sv == "null" && GetUnderlyingPropertyType() != typeof(string))
+                    if ((sv == "null" || sv == string.Empty) && this.GetUnderlyingPropertyType() != typeof(string))
                     {
                         result.Add(null);
                     }
                     else
                     {
-                        if (GetUnderlyingPropertyType() == typeof(DateTime) && DateTime.TryParseExact(sv, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var date))
+                        if (this.GetUnderlyingPropertyType() == typeof(DateTime) && DateTime.TryParseExact(sv, "yyyy-MM-dd'T'HH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var date))
                         {
                             result.Add(date);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(decimal) && decimal.TryParse(sv, out var decimalValue))
+                        else if (this.GetUnderlyingPropertyType() == typeof(decimal) && decimal.TryParse(sv, out var decimalValue))
                         {
                             result.Add(decimalValue);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(double) && double.TryParse(sv, out var doubleValue))
+                        else if (this.GetUnderlyingPropertyType() == typeof(double) && double.TryParse(sv, out var doubleValue))
                         {
                             result.Add(doubleValue);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(int) && int.TryParse(sv, out int intValue))
+                        else if (this.GetUnderlyingPropertyType() == typeof(int) && int.TryParse(sv, out var intValue))
                         {
                             result.Add(intValue);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(bool) && bool.TryParse(sv, out bool boolValue))
+                        else if (this.GetUnderlyingPropertyType() == typeof(bool) && bool.TryParse(sv, out var boolValue))
                         {
                             result.Add(boolValue);
                         }
-                        else if (GetUnderlyingPropertyType().IsEnum && !int.TryParse(sv, out _) && Enum.TryParse(GetUnderlyingPropertyType(), sv, true, out var enumValue))
+                        else if (this.GetUnderlyingPropertyType().IsEnum && !int.TryParse(sv, out _) && Enum.TryParse(this.GetUnderlyingPropertyType(), sv, true, out var enumValue))
                         {
                             result.Add(enumValue);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(string))
+                        else if (this.GetUnderlyingPropertyType() == typeof(string))
                         {
                             result.Add(sv);
+                            if (sv == string.Empty)
+                            {
+                                result.Add(null);
+                            }
                         }
                         else
                         {
-                            throw new QueryException(Cmd.Source, "Property type and provided type value do not match");
+                            throw new QueryException(this.Cmd.Source, "Property type and provided type value do not match");
                         }
                     }
                 }
@@ -488,11 +492,11 @@ namespace OnlineSales.Infrastructure
 
                 var sb = new StringBuilder();
 
-                for (int i = 0; i < StringValue.Length; ++i)
+                for (var i = 0; i < this.StringValue.Length; ++i)
                 {
-                    if (StringValue[i] == '|')
+                    if (this.StringValue[i] == '|')
                     {
-                        if (i == 0 || StringValue[i - 1] != '\\')
+                        if (i == 0 || this.StringValue[i - 1] != '\\')
                         {
                             result.Add(sb.ToString());
                             sb.Clear();
@@ -505,7 +509,7 @@ namespace OnlineSales.Infrastructure
                     }
                     else
                     {
-                        sb.Append(StringValue[i]);
+                        sb.Append(this.StringValue[i]);
                     }
                 }
 
@@ -517,7 +521,7 @@ namespace OnlineSales.Infrastructure
             public bool IsNullableProperty()
             {
                 var context = new NullabilityInfoContext();
-                var info = context.Create(Property);
+                var info = context.Create(this.Property);
                 return info.WriteState == NullabilityState.Nullable;
             }
 
@@ -537,12 +541,12 @@ namespace OnlineSales.Infrastructure
                 }
 
                 return property;
-            }          
+            }
 
             private Type GetUnderlyingPropertyType()
             {
-                var nt = Nullable.GetUnderlyingType(Property.PropertyType);
-                return nt == null ? Property.PropertyType : nt!;
+                var nt = Nullable.GetUnderlyingType(this.Property.PropertyType);
+                return nt == null ? this.Property.PropertyType : nt!;
             }
 
             private WOperand ParseOperation(string? rawOperation, QueryCommand cmd)

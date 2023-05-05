@@ -36,11 +36,11 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<UserDetailsDto[]>> GetAll()
     {
-        var allUsers = await userManager.Users.ToListAsync();
-        var resultsToClient = mapper.Map<UserDetailsDto[]>(allUsers).ToArray();
+        var allUsers = await this.userManager.Users.ToListAsync();
+        var resultsToClient = this.mapper.Map<UserDetailsDto[]>(allUsers).ToArray();
         this.Response.Headers.Add(ResponseHeaderNames.TotalCount, resultsToClient.Count().ToString());
         this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
-        return Ok(resultsToClient);
+        return this.Ok(resultsToClient);
     }
 
     // GET api/user/me
@@ -51,8 +51,8 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<UserDetailsDto>> GetSelf()
     {
-        var user = await UserHelper.GetCurrentUserAsync(userManager, this.User);
-        return Ok(mapper.Map<UserDetailsDto>(user));
+        var user = await UserHelper.GetCurrentUserAsync(this.userManager, this.User);
+        return this.Ok(this.mapper.Map<UserDetailsDto>(user));
     }
 
     // GET api/user/5
@@ -63,13 +63,13 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<UserDetailsDto>> GetSpecific(string id)
     {
-        var existingEntity = await userManager.FindByIdAsync(id);
+        var existingEntity = await this.userManager.FindByIdAsync(id);
         if (existingEntity == null)
         {
             throw new EntityNotFoundException(typeof(User).Name, id);
         }
 
-        return Ok(mapper.Map<UserDetailsDto>(existingEntity));
+        return this.Ok(this.mapper.Map<UserDetailsDto>(existingEntity));
     }
 
     // PATCH api/user/5
@@ -80,22 +80,22 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<UserDetailsDto>> Patch(string id, [FromBody] UserUpdateDto value)
     {
-        var existingEntity = await userManager.FindByIdAsync(id);
+        var existingEntity = await this.userManager.FindByIdAsync(id);
         if (existingEntity == null)
         {
             throw new EntityNotFoundException(typeof(User).Name, id);
         }
 
-        mapper.Map(value, existingEntity);
-        var result = await userManager.UpdateAsync(existingEntity);
+        this.mapper.Map(value, existingEntity);
+        var result = await this.userManager.UpdateAsync(existingEntity);
         if (result.Errors.Any())
         {
             throw new IdentityException(result.Errors);
         }
 
-        var resultsToClient = mapper.Map<UserDetailsDto>(existingEntity);
+        var resultsToClient = this.mapper.Map<UserDetailsDto>(existingEntity);
 
-        return Ok(resultsToClient);
+        return this.Ok(resultsToClient);
     }
 
     // DELETE api/user/5
@@ -105,19 +105,19 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult> Delete(string id)
     {
-        var existingEntity = await userManager.FindByIdAsync(id);
+        var existingEntity = await this.userManager.FindByIdAsync(id);
         if (existingEntity == null)
         {
             throw new EntityNotFoundException(typeof(User).Name, id);
         }
 
-        var result = await userManager.DeleteAsync(existingEntity);
+        var result = await this.userManager.DeleteAsync(existingEntity);
         if (result.Errors.Any())
         {
             throw new IdentityException(result.Errors);
         }
 
-        return NoContent();
+        return this.NoContent();
     }
 
     // POST api/{entity}s
@@ -128,15 +128,15 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<UserDetailsDto>> Post([FromBody] UserCreateDto value)
     {
-        var newValue = mapper.Map<User>(value);
-        var result = await userManager.CreateAsync(newValue);
+        var newValue = this.mapper.Map<User>(value);
+        var result = await this.userManager.CreateAsync(newValue);
         if (result.Errors.Any())
         {
             throw new IdentityException(result.Errors);
         }
 
-        var createdUser = await userManager.FindByNameAsync(value.UserName);
+        var createdUser = await this.userManager.FindByNameAsync(value.UserName);
 
-        return CreatedAtAction(nameof(GetSpecific), new { id = createdUser!.Id }, createdUser);
+        return this.CreatedAtAction(nameof(GetSpecific), new { id = createdUser!.Id }, createdUser);
     }
 }
