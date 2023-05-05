@@ -13,8 +13,6 @@ namespace OnlineSales.Services
 {
     public class EmailFromTemplateService : IEmailFromTemplateService
     {
-        private const string DefaultLanguage = "en";
-
         private readonly IEmailWithLogService emailWithLogService;
         private readonly PgDbContext pgDbContext;
 
@@ -44,7 +42,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
-            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(language));
+            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
 
             return template!;
         }
@@ -53,21 +51,9 @@ namespace OnlineSales.Services
         {
             var contactLanguage = pgDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId) !.Language;
 
-            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == GetSupportedLanguage(contactLanguage));
+            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == contactLanguage);
 
             return template!;
-        }
-
-        private string GetSupportedLanguage(string? language)
-        {
-            var supportedLanguages = pgDbContext.EmailTemplates!.Select(e => e.Language).Distinct().ToArray();
-
-            if (supportedLanguages.Contains(language, StringComparer.OrdinalIgnoreCase))
-            {
-                return language!.ToLower();
-            }
-
-            return DefaultLanguage;
         }
 
         private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string>? templateArguments)
