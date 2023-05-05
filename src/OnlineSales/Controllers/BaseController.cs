@@ -221,7 +221,7 @@ namespace OnlineSales.Controllers
 
                 bool IsDto(Type type)
                 {
-                    return type.IsClass && type.Namespace.StartsWith("OnlineSales.DTOs");
+                    return type.IsClass && type.Namespace != null && type.Namespace!.StartsWith("OnlineSales.DTOs");
                 }
 
                 bool IsNeedToSave(PropertyInfo pi)
