@@ -46,7 +46,7 @@ namespace OnlineSales.Infrastructure
                 identityOptions =>
                 {
                     ConfigureIdentityAuthOptions(builder, identityOptions);
-                    identityOptions.CallbackPath = "/api/Identity/callback";
+                    identityOptions.CallbackPath = "/api/identity/callback";
                     identityOptions.SkipUnrecognizedRequests = true;
                 }, cookieOptions =>
                 {
