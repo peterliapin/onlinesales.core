@@ -23,4 +23,3 @@ public class Link : BaseEntity
     [Required]
     public string Name { get; set; } = string.Empty;
 }
-

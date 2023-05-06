@@ -13,4 +13,3 @@ public class TestLink : LinkCreateDto
         Name = "Google Link";
     }
 }
-

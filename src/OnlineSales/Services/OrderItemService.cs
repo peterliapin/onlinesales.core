@@ -28,7 +28,7 @@ namespace OnlineSales.Services
 
             order.CurrencyTotal = totals.currencyTotal;
             order.Total = totals.total;
-            order.Quantity = totals.quantity;            
+            order.Quantity = totals.quantity;
         }
 
         public async Task DeleteAsync(Order order, OrderItem orderItem)
@@ -79,8 +79,8 @@ namespace OnlineSales.Services
         {
             decimal currencyTotal = 0;
             decimal total = 0;
-            int quantity = 0;
-            
+            var quantity = 0;
+
             var orderItems = patchId == 0
                 ? (from ordItem in pgDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId select ordItem).ToList()
                 : (from ordItem in pgDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId && ordItem.Id != patchId select ordItem).ToList();

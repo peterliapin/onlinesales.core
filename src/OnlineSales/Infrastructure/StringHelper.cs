@@ -16,14 +16,14 @@ public static class StringHelper
     public static long? GetSizeInBytesFromString(string size)
     {
         long? convertedSize = null;
-        string pattern = @"(\d+)(\D+)";
+        var pattern = @"(\d+)(\D+)";
 
         var match = Regex.Match(size, pattern);
 
         if (match.Success)
         {
-            long value = long.Parse(match.Groups[1].Value);
-            string unit = match.Groups[2].Value;
+            var value = long.Parse(match.Groups[1].Value);
+            var unit = match.Groups[2].Value;
 
             switch (unit.ToUpper())
             {

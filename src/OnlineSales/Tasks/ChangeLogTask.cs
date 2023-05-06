@@ -12,7 +12,7 @@ using OnlineSales.Services;
 namespace OnlineSales.Tasks;
 
 public abstract class ChangeLogTask : BaseTask
-{    
+{
     protected readonly PgDbContext dbContext;
 
     protected readonly IEnumerable<PluginDbContextBase> pluginDbContexts;
@@ -24,9 +24,9 @@ public abstract class ChangeLogTask : BaseTask
     {
         this.dbContext = dbContext;
         this.pluginDbContexts = pluginDbContexts;
-        this.loggedTypes = GetTypes(dbContext);
+        loggedTypes = GetTypes(dbContext);
 
-        var config = configuration.GetSection(configKey) !.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {
@@ -40,9 +40,9 @@ public abstract class ChangeLogTask : BaseTask
         foreach (var pt in pluginDbContexts)
         {
             var lt = GetTypes(pt);
-            this.loggedTypes.UnionWith(lt);
+            loggedTypes.UnionWith(lt);
         }
-    }    
+    }
 
     public int ChangeLogBatchSize { get; private set; }
 
@@ -89,7 +89,7 @@ public abstract class ChangeLogTask : BaseTask
         var res = new HashSet<Type>();
 
         var types = context.Model.GetEntityTypes();
-        
+
         foreach (var type in types.Select(type => type.ClrType))
         {
             if (type != null && IsChangeLogAttribute(type) && IsTypeSupported(type))

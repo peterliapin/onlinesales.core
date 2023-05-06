@@ -13,9 +13,9 @@ namespace OnlineSales.Entities
         NotSent = 0,
         Sent = 1,
     }
-    
+
     [SupportsElastic]
-    [SupportsChangeLog]    
+    [SupportsChangeLog]
     [Table("email_log")]
     public class EmailLog : BaseEntity
     {

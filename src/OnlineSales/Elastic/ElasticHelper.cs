@@ -65,7 +65,7 @@ public class ElasticHelper
                 throw reindexResponse.OriginalException;
             }
 
-            elasticClient.Indices.Delete(oldMigrationIndexName);            
+            elasticClient.Indices.Delete(oldMigrationIndexName);
             elasticClient.Indices.PutAlias(new PutAliasDescriptor(newMigrationIndexName, indexName));
         }
     }
@@ -84,4 +84,3 @@ public class ElasticHelper
         }
     }
 }
-

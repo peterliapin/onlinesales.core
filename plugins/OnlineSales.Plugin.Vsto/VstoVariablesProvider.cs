@@ -23,4 +23,3 @@ public class VstoVariablesProvider : IVariablesProvider
         return variables;
     }
 }
-

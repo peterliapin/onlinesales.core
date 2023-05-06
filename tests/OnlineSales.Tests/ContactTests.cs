@@ -26,19 +26,19 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         // imported contacts marked as notIntended and the details of their accounts shouldn't be retrieved
         await PostImportTest(itemsUrl, "contacts.json");
 
-        HttpResponseMessage executeResponce = await GetRequest("/api/tasks/execute/ContactAccountTask");
+        var executeResponce = await GetRequest("/api/tasks/execute/ContactAccountTask");
         executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var contacts = App.GetDbContext() !.Contacts!.ToList();
+        var contacts = App.GetDbContext()!.Contacts!.ToList();
         contacts.Count.Should().BeGreaterThan(1);
 
         foreach (var contact in contacts)
         {
-            var domain = App.GetDbContext() !.Domains!.Where(d => d.Id == contact!.DomainId).FirstOrDefault();
+            var domain = App.GetDbContext()!.Domains!.Where(d => d.Id == contact!.DomainId).FirstOrDefault();
             domain.Should().NotBeNull();
             if (contact.Email == notinitializedEmail)
             {
-                domain !.AccountStatus.Should().Be(AccountSyncStatus.Successful);
+                domain!.AccountStatus.Should().Be(AccountSyncStatus.Successful);
                 domain.AccountId.Should().NotBeNull();
             }
             else
@@ -86,17 +86,17 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         allContacts!.Count.Should().Be(4);
 
         await PostImportTest(itemsUrl, "contactsToUpdate.csv");
-        var contact1 = App.GetDbContext() !.Contacts!.First(c => c.Id == 1);
+        var contact1 = App.GetDbContext()!.Contacts!.First(c => c.Id == 1);
         contact1.Should().NotBeNull();
         // contact1 updated by Id
         contact1.LastName.Should().Be("adam_parker");
 
-        var contact2 = App.GetDbContext() !.Contacts!.First(c => c.Id == 2);
+        var contact2 = App.GetDbContext()!.Contacts!.First(c => c.Id == 2);
         contact2.Should().NotBeNull();
         // contact2 no id provided, updated by Email
         contact2.LastName.Should().Be("garry_bolt");
 
-        var contact3 = App.GetDbContext() !.Contacts!.First(c => c.Id == 3);
+        var contact3 = App.GetDbContext()!.Contacts!.First(c => c.Id == 3);
         contact3.Should().NotBeNull();
         // contact3 no id provided, updated by Email
         contact3.LastName.Should().Be("Siri_Tom");
@@ -105,7 +105,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     [Fact]
     public async Task ParentDeletionRestrictWithChildren()
     {
-        int contactId = 0;
+        var contactId = 0;
 
         var testCreateItem = await CreateItem();
 
@@ -162,7 +162,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     {
         var contacts = new List<Contact>();
 
-        for (int i = 0; i < dataCount; i++)
+        for (var i = 0; i < dataCount; i++)
         {
             var contact = new Contact();
             contact.Email = $"contact{i}@test{i}.net";

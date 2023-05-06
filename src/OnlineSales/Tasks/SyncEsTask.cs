@@ -30,12 +30,12 @@ namespace OnlineSales.Tasks
             }
 
             this.esDbContext = esDbContext;
-        }        
+        }
 
         protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
         {
             var bulkPayload = new StringBuilder();
-            
+
             foreach (var item in nextBatch)
             {
                 var entityState = item.EntityState;

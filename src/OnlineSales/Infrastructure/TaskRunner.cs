@@ -28,7 +28,7 @@ namespace OnlineSales.Infrastructure
 
             if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
             {
-                #pragma warning disable S3010
+#pragma warning disable S3010
                 primaryNodeStatus = GetPrimaryStatus();
             }
 
@@ -50,11 +50,11 @@ namespace OnlineSales.Infrastructure
                 {
                     Log.Information("This is not the current primary node for task execution");
                     return;
-                }                    
+                }
 
                 foreach (var task in tasks.Where(t => t.IsRunning))
                 {
-                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !).Item1;
+                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString()!).Item1;
 
                     if (taskLock is null)
                     {
@@ -79,7 +79,7 @@ namespace OnlineSales.Infrastructure
             {
                 Log.Error(ex, "Error executing task runner");
             }
-        }             
+        }
 
         public async Task<bool> ExecuteTask(ITask task)
         {
@@ -88,7 +88,7 @@ namespace OnlineSales.Infrastructure
                 throw new NonPrimaryNodeException();
             }
 
-            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString() !).Item1;
+            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString()!).Item1;
 
             if (taskLock is null)
             {
@@ -124,7 +124,7 @@ namespace OnlineSales.Infrastructure
 
         private (PostgresDistributedLockHandle?, PrimaryNodeStatus) GetPrimaryStatus()
         {
-            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString() !);
+            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString()!);
             if (primaryNodeLockData.Item2)
             {
                 return (primaryNodeLockData.Item1, (primaryNodeLockData.Item1 != null) ? PrimaryNodeStatus.Primary : PrimaryNodeStatus.NonPrimary);

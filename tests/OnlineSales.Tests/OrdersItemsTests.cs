@@ -18,10 +18,10 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     {
         var orderDetails = await CreateFKItem();
 
-        int numberOfOrderItems = 10;
+        var numberOfOrderItems = 10;
 
-        int sumQuantity = 0;
-        string[] orderItemsUrls = new string[numberOfOrderItems];
+        var sumQuantity = 0;
+        var orderItemsUrls = new string[numberOfOrderItems];
 
         for (var i = 0; i < numberOfOrderItems; i++)
         {
@@ -74,9 +74,9 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     {
         var orderDetails = await CreateFKItem();
 
-        int numberOfOrderItems = 10;
+        var numberOfOrderItems = 10;
 
-        string[] orderItemsUrls = new string[numberOfOrderItems];
+        var orderItemsUrls = new string[numberOfOrderItems];
 
         for (var i = 0; i < numberOfOrderItems; ++i)
         {
@@ -91,7 +91,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         async Task CompareTotals()
         {
-            decimal total = 0m;
+            var total = 0m;
             foreach (var url in orderItemsUrls)
             {
                 var orderItem = await GetTest<OrderItemDetailsDto>(url);

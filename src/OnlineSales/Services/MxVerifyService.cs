@@ -21,7 +21,7 @@ public class MxVerifyService : IMxVerifyService
     /// </summary>
     private const int TimeOutSeconds = 60;
     private const string SenderSourceHostName = "waveaccess.global";
-    private static readonly SemaphoreSlim SemaphoreSlim = new (1, 1);
+    private static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
 
     public async Task<bool> Verify(string mxValue)
     {

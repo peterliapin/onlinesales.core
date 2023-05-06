@@ -7,7 +7,7 @@ using OnlineSales.Helpers;
 namespace OnlineSales.Tests;
 
 public class DomainTaskTests : BaseTest
-{   
+{
     private readonly string tasksUrl = "/api/tasks";
 
     private readonly string domainsUrl = "/api/domains";
@@ -45,7 +45,7 @@ public class DomainTaskTests : BaseTest
         var filledDomainLocation = await PostTest(domainsUrl, filledDomain);
 
         var validDomainAdded = await GetTest<Domain>(validDomainLocation);
-        validDomainAdded.Should().NotBeNull();   
+        validDomainAdded.Should().NotBeNull();
         validDomainAdded!.HttpCheck.Should().BeNull();
         validDomainAdded!.DnsCheck.Should().BeNull();
 
@@ -83,7 +83,7 @@ public class DomainTaskTests : BaseTest
 
     private async Task Execute()
     {
-        HttpResponseMessage executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
+        var executeResponce = await GetRequest(tasksUrl + "/execute/" + taskName);
 
         executeResponce.StatusCode.Should().Be(HttpStatusCode.OK);
 

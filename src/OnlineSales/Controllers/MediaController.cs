@@ -50,8 +50,8 @@ namespace OnlineSales.Controllers
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
 
             var scopeAndFileExists = from i in pgDbContext!.Media!
-                                        where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
-                                        select i;
+                                     where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
+                                     select i;
             if (scopeAndFileExists.Any())
             {
                 var uploadedImage = scopeAndFileExists!.FirstOrDefault();
@@ -62,7 +62,7 @@ namespace OnlineSales.Controllers
             }
             else
             {
-                Media uploadedMedia = new ()
+                Media uploadedMedia = new()
                 {
                     Name = incomingFileName,
                     Size = incomingFileSize,
@@ -77,12 +77,12 @@ namespace OnlineSales.Controllers
 
             await pgDbContext.SaveChangesAsync();
 
-            Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
-            Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
+            Log.Information("Request scheme {0}", HttpContext.Request.Scheme);
+            Log.Information("Request host {0}", HttpContext.Request.Host.Value);
 
             var fileData = new MediaDetailsDto()
             {
-                Location = Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
+                Location = Path.Combine(HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
             };
             return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
@@ -90,7 +90,7 @@ namespace OnlineSales.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("{scopeUid}/{fileName}")]
-        [ResponseCache(CacheProfileName = "ImageResponse")]        
+        [ResponseCache(CacheProfileName = "ImageResponse")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]

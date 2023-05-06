@@ -56,7 +56,7 @@ public class TestApplication : WebApplicationFactory<Program>
             {
                 dataContaxt.AddRange(bulkItems);
             }
-            
+
             dataContaxt.SaveChangesAsync().Wait();
         }
     }
@@ -72,7 +72,7 @@ public class TestApplication : WebApplicationFactory<Program>
     {
         using (var serviceScope = Services.CreateScope())
         {
-            return serviceScope.ServiceProvider.GetService<IMapper>() !;
+            return serviceScope.ServiceProvider.GetService<IMapper>()!;
         }
     }
 

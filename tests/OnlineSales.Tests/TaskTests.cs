@@ -7,7 +7,7 @@ using OnlineSales.Helpers;
 namespace OnlineSales.Tests;
 
 public class TaskTests : BaseTest
-{   
+{
     private readonly string tasksUrl = "api/tasks";
 
     [Fact]

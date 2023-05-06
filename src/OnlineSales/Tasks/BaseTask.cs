@@ -20,7 +20,7 @@ public abstract class BaseTask : ITask
         this.configKey = configKey;
         this.taskStatusService = taskStatusService;
 
-        var config = configuration.GetSection(configKey) !.Get<TaskConfig>();
+        var config = configuration.GetSection(configKey)!.Get<TaskConfig>();
 
         if (config is not null)
         {
@@ -40,7 +40,7 @@ public abstract class BaseTask : ITask
     {
         get
         {
-            return this.GetType().Name;
+            return GetType().Name;
         }
     }
 

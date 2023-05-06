@@ -30,9 +30,9 @@ public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, 
 
         var fkItemId = fkItem.Item1;
 
-        int numberOfItems = 10;
+        var numberOfItems = 10;
 
-        string[] itemsUrls = new string[numberOfItems];
+        var itemsUrls = new string[numberOfItems];
 
         for (var i = 0; i < numberOfItems; ++i)
         {
@@ -60,7 +60,7 @@ public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, 
         return await CreateItem(string.Empty, fkId);
     }
 
-    protected override void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)        
+    protected override void GenerateBulkRecords(int dataCount, Action<TC>? populateAttributes = null)
     {
         var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;

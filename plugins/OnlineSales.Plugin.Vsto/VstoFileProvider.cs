@@ -61,7 +61,7 @@ public sealed class VstoFileProvider : IFileProvider
             }
         }
 
-        return result.Exists ? result as IFileInfo : new NotFoundFileInfo(subpath);
+        return result.Exists ? result : new NotFoundFileInfo(subpath);
     }
 
     public IChangeToken Watch(string filter)

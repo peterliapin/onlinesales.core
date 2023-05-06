@@ -32,7 +32,7 @@ public class PgDbContext : IdentityDbContext<User>
         {
             Console.WriteLine("Initializing PgDbContext...");
 
-            this.Configuration = new ConfigurationBuilder()
+            Configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", false)
                 .AddEnvironmentVariables()
                 .AddUserSecrets(typeof(Program).Assembly)
@@ -50,7 +50,7 @@ public class PgDbContext : IdentityDbContext<User>
     public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options)
     {
-        this.Configuration = configuration;
+        Configuration = configuration;
         this.httpContextHelper = httpContextHelper;
     }
 
@@ -98,7 +98,7 @@ public class PgDbContext : IdentityDbContext<User>
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        int result = 0;
+        var result = 0;
         var changes = new Dictionary<EntityEntry, ChangeLog>();
 
         var entries = ChangeTracker

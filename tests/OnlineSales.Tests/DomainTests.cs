@@ -9,7 +9,7 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto,
         : base("/api/domains")
     {
     }
-                
+
     [Fact]
     public async Task CreateAndGetItemByNameTest()
     {

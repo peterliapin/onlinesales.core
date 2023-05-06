@@ -49,7 +49,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, int contactId)
         {
-            var contactLanguage = pgDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId) !.Language;
+            var contactLanguage = pgDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId)!.Language;
 
             var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == contactLanguage);
 

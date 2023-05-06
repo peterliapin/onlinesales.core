@@ -350,7 +350,7 @@ namespace OnlineSales.Infrastructure
 
             public WhereUnitData(QueryCommand cmd)
             {
-                this.Cmd = cmd;
+                Cmd = cmd;
                 StringValue = cmd.Value;
 
                 var fProp = cmd.Props.ElementAtOrDefault(0);
@@ -360,7 +360,7 @@ namespace OnlineSales.Infrastructure
                     throw new QueryException(cmd.Source, "Property field not found");
                 }
 
-                int indexOffset = 0;
+                var indexOffset = 0;
                 if (fProp == "or")
                 {
                     if (cmd.Props.Length == 1)
@@ -398,7 +398,7 @@ namespace OnlineSales.Infrastructure
                 var result = new List<Tuple<ContainsType, string>>();
                 var sb = new StringBuilder();
 
-                for (int i = 0; i < value.Length; ++i)
+                for (var i = 0; i < value.Length; ++i)
                 {
                     if (value[i] == '*')
                     {
@@ -438,7 +438,7 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var sv in input)
                 {
-                    if (sv == "null" && GetUnderlyingPropertyType() != typeof(string))
+                    if ((sv == "null" || sv == string.Empty) && GetUnderlyingPropertyType() != typeof(string))
                     {
                         result.Add(null);
                     }
@@ -456,11 +456,11 @@ namespace OnlineSales.Infrastructure
                         {
                             result.Add(doubleValue);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(int) && int.TryParse(sv, out int intValue))
+                        else if (GetUnderlyingPropertyType() == typeof(int) && int.TryParse(sv, out var intValue))
                         {
                             result.Add(intValue);
                         }
-                        else if (GetUnderlyingPropertyType() == typeof(bool) && bool.TryParse(sv, out bool boolValue))
+                        else if (GetUnderlyingPropertyType() == typeof(bool) && bool.TryParse(sv, out var boolValue))
                         {
                             result.Add(boolValue);
                         }
@@ -471,6 +471,10 @@ namespace OnlineSales.Infrastructure
                         else if (GetUnderlyingPropertyType() == typeof(string))
                         {
                             result.Add(sv);
+                            if (sv == string.Empty)
+                            {
+                                result.Add(null);
+                            }
                         }
                         else
                         {
@@ -488,7 +492,7 @@ namespace OnlineSales.Infrastructure
 
                 var sb = new StringBuilder();
 
-                for (int i = 0; i < StringValue.Length; ++i)
+                for (var i = 0; i < StringValue.Length; ++i)
                 {
                     if (StringValue[i] == '|')
                     {
@@ -537,7 +541,7 @@ namespace OnlineSales.Infrastructure
                 }
 
                 return property;
-            }          
+            }
 
             private Type GetUnderlyingPropertyType()
             {

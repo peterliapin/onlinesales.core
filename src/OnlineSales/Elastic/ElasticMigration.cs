@@ -21,10 +21,10 @@ public class ElasticMigration
 
         var elasticMigrationAttribute = GetType().GetCustomAttributes(typeof(ElasticMigrationAttribute), true).FirstOrDefault() as ElasticMigrationAttribute;
 
-        if (elasticMigrationAttribute != null)            
+        if (elasticMigrationAttribute != null)
         {
             MigrationId = elasticMigrationAttribute.Id;
-        }        
+        }
     }
 
     public string MigrationId { get; set; } = string.Empty;

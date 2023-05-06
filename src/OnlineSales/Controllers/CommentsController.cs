@@ -52,7 +52,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
             var commentsForAnonymous = mapper.Map<List<AnonymousCommentDetailsDto>>(items);
 
             return Ok(commentsForAnonymous);
-        }        
+        }
     }
 
     // GET api/{entity}s/5
@@ -78,7 +78,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
             var commentForAnonymous = mapper.Map<AnonymousCommentDetailsDto>(commentDetails);
 
             return Ok(commentForAnonymous!);
-        }            
+        }
     }
 
     // POST api/{entity}s

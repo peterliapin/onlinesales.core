@@ -24,7 +24,7 @@ public class DomainVerificationTask : BaseTask
         this.dbContext = dbContext;
         this.domainService = domainService;
 
-        var config = configuration.GetSection(ConfigKey) !.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(ConfigKey)!.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {
@@ -41,16 +41,16 @@ public class DomainVerificationTask : BaseTask
         try
         {
             var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null /*|| d.MxCheck == null*/);
-            int totalSize = domains.Count();
+            var totalSize = domains.Count();
 
-            for (int start = 0; start < totalSize; start += batchSize)
+            for (var start = 0; start < totalSize; start += batchSize)
             {
                 domains.Skip(start).Take(batchSize).AsParallel().ForAll(domain =>
                 {
                     domainService.Verify(domain).Wait();
                 });
 
-                await dbContext.SaveChangesAsync(); 
+                await dbContext.SaveChangesAsync();
             }
         }
         catch (Exception ex)

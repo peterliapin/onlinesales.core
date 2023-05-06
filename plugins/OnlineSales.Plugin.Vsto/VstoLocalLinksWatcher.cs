@@ -53,14 +53,14 @@ public class VstoLocalLinksWatcher : IDisposable
         if (exeWatcher != null)
         {
             exeWatcher.Dispose();
-        }        
+        }
     }
 
     private void HandleRenamed(object sender, RenamedEventArgs e)
     {
         var ed = DictionaryExtensions.TryGetAndReturn(exeDirs, e.OldFullPath);
         if (ed != null)
-        {            
+        {
             exeDirs.Remove(e.OldFullPath);
             exeDirs.Add(e.FullPath, ed);
         }
@@ -97,7 +97,7 @@ public class VstoLocalLinksWatcher : IDisposable
 
         var allLinks = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
         foreach (var exeFile in exeFiles)
-        {            
+        {
             var parentDir = Directory.GetParent(exeFile);
             if (parentDir != null)
             {
@@ -124,7 +124,7 @@ public class VstoLocalLinksWatcher : IDisposable
                     }
 
                     dbContext.SaveChangesAsync().Wait();
-                }                
+                }
             }
         }
     }
@@ -187,7 +187,7 @@ public class VstoLocalLinksWatcher : IDisposable
             else
             {
                 return l1.Uid == l2.Uid;
-            }            
+            }
         }
 
         public int GetHashCode(OnlineSales.Entities.Link obj)
@@ -214,7 +214,7 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private FileInfo? vstoFile;
 
-        private DirectoryInfo? appDir;               
+        private DirectoryInfo? appDir;
 
         public ExeDirectory(VstoLocalLinksWatcher linksWatcher, DirectoryInfo di)
         {
@@ -254,13 +254,13 @@ public class VstoLocalLinksWatcher : IDisposable
             }
             finally
             {
-                linksMutex.ReleaseMutex();  
+                linksMutex.ReleaseMutex();
             }
         }
 
         private HashSet<OnlineSales.Entities.Link> CreateLinks()
         {
-            HashSet<OnlineSales.Entities.Link> result = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
+            var result = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
 
             if (valid)
             {
@@ -343,7 +343,7 @@ public class VstoLocalLinksWatcher : IDisposable
             {
                 linksMutex.ReleaseMutex();
             }
-        }               
+        }
 
         private bool CheckAndInitExeFile()
         {

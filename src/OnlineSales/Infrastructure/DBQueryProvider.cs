@@ -59,7 +59,7 @@ namespace OnlineSales.Infrastructure
             }
             else
             {
-                bool moreThanOne = false;
+                var moreThanOne = false;
                 foreach (var orderCmd in parseData.OrderData)
                 {
                     var expressionParameter = Expression.Parameter(typeof(T));
@@ -68,7 +68,7 @@ namespace OnlineSales.Infrastructure
                     var orderDelegateType = typeof(Func<,>).MakeGenericType(typeof(T), orderPropertyType);
                     var orderLambda = Expression.Lambda(orderDelegateType, orderPropertyExpression, expressionParameter);
                     var methodName = string.Empty;
-                    
+
                     if (orderCmd.Ascending)
                     {
                         methodName = moreThanOne ? "ThenBy" : "OrderBy";
@@ -84,7 +84,7 @@ namespace OnlineSales.Infrastructure
                                                                         m => m.Name == methodName &&
                                                                         m.GetGenericArguments().Length == 2 &&
                                                                         m.GetParameters().Length == 2).MakeGenericMethod(typeof(T), orderPropertyType);
-                    query = (IOrderedQueryable<T>)orderMethod.Invoke(null, new object?[] { query, orderLambda }) !;
+                    query = (IOrderedQueryable<T>)orderMethod.Invoke(null, new object?[] { query, orderLambda })!;
                 }
             }
         }
@@ -107,7 +107,7 @@ namespace OnlineSales.Infrastructure
 
         private void AddSearchCommands()
         {
-            foreach (string cmdValue in parseData.SearchData)
+            foreach (var cmdValue in parseData.SearchData)
             {
                 var props = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false));
 
@@ -154,7 +154,7 @@ namespace OnlineSales.Infrastructure
             {
                 var expressionParameter = Expression.Parameter(typeof(T));
                 Expression andExpression = Expression.Constant(true);
-                bool andExpressionExist = false;
+                var andExpressionExist = false;
                 Expression orExpression = Expression.Constant(false);
                 var errorList = new List<QueryException>();
 
@@ -241,8 +241,8 @@ namespace OnlineSales.Infrastructure
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
 
                 Expression value = Expression.Constant(parsedValue, cmd.Property.PropertyType);
-                Expression pEx = parameter;
-                Expression vEx = value;
+                var pEx = parameter;
+                var vEx = value;
 
                 if (cmd.Property.PropertyType == typeof(string))
                 {
@@ -339,26 +339,26 @@ namespace OnlineSales.Infrastructure
             try
             {
                 switch (cmd.Operation)
-                {                    
+                {
                     case WOperand.Equal:
                         outputExpression = CreateEqualExpression(cmd, parameterPropertyExpression);
                         break;
                     case WOperand.NotEqual:
                         outputExpression = CreateNEqualExpression(cmd, parameterPropertyExpression);
-                        break;                    
+                        break;
                     case WOperand.GreaterThan:
                     case WOperand.GreaterThanOrEqualTo:
                     case WOperand.LessThan:
                     case WOperand.LessThanOrEqualTo:
-                        outputExpression = CreateCompareExpression(cmd, parameterPropertyExpression) !;
-                        break;                    
+                        outputExpression = CreateCompareExpression(cmd, parameterPropertyExpression)!;
+                        break;
                     case WOperand.Like:
                     case WOperand.NLike:
-                        outputExpression = CreateLikeExpression(cmd, parameterPropertyExpression) !;
+                        outputExpression = CreateLikeExpression(cmd, parameterPropertyExpression)!;
                         break;
                     case WOperand.Contains:
                     case WOperand.NContains:
-                        outputExpression = CreateContainExpression(cmd, parameterPropertyExpression) !;
+                        outputExpression = CreateContainExpression(cmd, parameterPropertyExpression)!;
                         break;
                     default:
                         throw new QueryException(cmd.Cmd.Source, $"No such operand '{cmd.Operation}'");
@@ -371,7 +371,7 @@ namespace OnlineSales.Infrastructure
 
             return outputExpression;
         }
-        
+
         private async Task<IList<T>?> GetSelectResult()
         {
             if (parseData.SelectData.SelectedProperties.Any())
@@ -390,15 +390,15 @@ namespace OnlineSales.Infrastructure
                 var expressionCreateArray = Expression.MemberInit(createOutputTypeExpression, expressionSelectedProperties);
                 dynamic lambda = Expression.Lambda(delegateType, expressionCreateArray, expressionParameter);
 
-                var queryMethod = typeof(Queryable).GetMethods().FirstOrDefault(m => m.Name == "Select" && m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2) !.MakeGenericMethod(typeof(T), outputType);
+                var queryMethod = typeof(Queryable).GetMethods().FirstOrDefault(m => m.Name == "Select" && m.GetParameters()[1].ParameterType.GetGenericArguments()[0].GetGenericArguments().Length == 2)!.MakeGenericMethod(typeof(T), outputType);
 
-                var toArrayAsyncMethod = typeof(EntityFrameworkQueryableExtensions).GetMethod("ToArrayAsync") !.MakeGenericMethod(outputType);
+                var toArrayAsyncMethod = typeof(EntityFrameworkQueryableExtensions).GetMethod("ToArrayAsync")!.MakeGenericMethod(outputType);
 
                 var selectQueryable = queryMethod!.Invoke(query, new object[] { query, lambda });
 
                 var outputTypeTaskResultProp = typeof(Task<>).MakeGenericType(outputType.MakeArrayType()).GetProperty("Result");
 
-                var selectResult = (Task)toArrayAsyncMethod.Invoke(selectQueryable, new object?[] { selectQueryable!, null }) !;
+                var selectResult = (Task)toArrayAsyncMethod.Invoke(selectQueryable, new object?[] { selectQueryable!, null })!;
                 await selectResult;
                 var taskResult = outputTypeTaskResultProp!.GetValue(selectResult);
                 return taskResult as IList<T>;

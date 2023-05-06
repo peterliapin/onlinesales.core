@@ -76,7 +76,7 @@ namespace OnlineSales.Services
                 await pgDbContext.Unsubscribes!.AddAsync(unsubscribe);
 
                 contact.Unsubscribe = unsubscribe;
-            }            
+            }
         }
 
         private async Task EnrichWithDomainId(Contact contact)
@@ -177,7 +177,7 @@ namespace OnlineSales.Services
             var domain = contact.Domain;
             if (domain != null)
             {
-                contact.AccountId = domain.AccountId;   
+                contact.AccountId = domain.AccountId;
             }
         }
     }

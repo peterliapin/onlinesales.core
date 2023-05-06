@@ -21,4 +21,3 @@ public static class DateTimeHelper
         return (int)dateTime.Subtract(UnixTimestampZeroDate).TotalSeconds;
     }
 }
-

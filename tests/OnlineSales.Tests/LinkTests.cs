@@ -20,7 +20,7 @@ public class LinkTests : BaseTest
         var destination = response.Headers?.Location?.AbsoluteUri ?? string.Empty;
 
         destination.Should().Be(link.Destination);
-        var dbContext = App.GetDbContext() !;
+        var dbContext = App.GetDbContext()!;
 
         var linkLog = dbContext!.LinkLogs!.FirstOrDefault();
 
@@ -28,4 +28,3 @@ public class LinkTests : BaseTest
         linkLog!.Destination.Should().Be(link.Destination);
     }
 }
-

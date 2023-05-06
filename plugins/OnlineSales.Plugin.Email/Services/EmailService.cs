@@ -71,7 +71,7 @@ public class EmailService : IEmailService
 
     private static async Task<MimeMessage> GenerateEmailBody(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments)
     {
-        MimeMessage message = new MimeMessage();
+        var message = new MimeMessage();
 
         message.Subject = subject;
 

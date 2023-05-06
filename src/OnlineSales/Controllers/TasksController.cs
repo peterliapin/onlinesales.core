@@ -47,7 +47,7 @@ public class TasksController : ControllerBase
         }
         else
         {
-            return CreateTaskDetailsDto(result.First()); 
+            return CreateTaskDetailsDto(result.First());
         }
     }
 
@@ -120,4 +120,3 @@ public class TasksController : ControllerBase
         };
     }
 }
-

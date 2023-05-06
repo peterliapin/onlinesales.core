@@ -22,7 +22,7 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public TwilioService(TwilioConfig twilioCfg)
         {
-            this.twilioConfig = twilioCfg;
+            twilioConfig = twilioCfg;
             try
             {
                 TwilioClient.Init(twilioCfg.AccountSid, twilioCfg.AuthToken);

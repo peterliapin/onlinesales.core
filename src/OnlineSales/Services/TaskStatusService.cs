@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Services;
 
-public class TaskStatusService 
+public class TaskStatusService
 {
     private readonly Dictionary<string, bool> taskStatusByName = new Dictionary<string, bool>();
 
@@ -33,4 +33,3 @@ public class TaskStatusService
         taskStatusByName[name] = running;
     }
 }
-

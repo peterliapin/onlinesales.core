@@ -35,7 +35,7 @@ public class EsDbContext : ElasticDbContext
         connectionSettings.DefaultMappingFor<LogRecord>(m => m
             .IndexName($"{elasticConfig!.IndexPrefix}-logs"));
 
-        Assembly assembly = typeof(EsDbContext).Assembly;
+        var assembly = typeof(EsDbContext).Assembly;
 
         entityTypes =
             (from t in assembly.GetTypes().AsParallel()
@@ -63,6 +63,5 @@ public class EsDbContext : ElasticDbContext
 
     public override string IndexPrefix => elasticConfig!.IndexPrefix;
 
-    protected override List<Type> EntityTypes => entityTypes;    
+    protected override List<Type> EntityTypes => entityTypes;
 }
-

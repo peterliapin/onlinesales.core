@@ -88,5 +88,5 @@ public class ErrorsController : Controller
         }
 
         return new ObjectResult(problemDetails);
-    }    
+    }
 }

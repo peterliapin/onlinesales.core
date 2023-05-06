@@ -30,7 +30,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, SchemeName);
 
-            result = AuthenticateResult.Success(ticket);            
+            result = AuthenticateResult.Success(ticket);
         }
         else
         {

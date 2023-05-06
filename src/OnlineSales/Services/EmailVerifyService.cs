@@ -17,7 +17,7 @@ namespace OnlineSales.Services
 
         public EmailVerifyService(PgDbContext pgDbContext, IDomainService domainService, IEmailValidationExternalService emailValidationExternalService)
         {
-            this.pgContext = pgDbContext;
+            pgContext = pgDbContext;
             this.domainService = domainService;
             this.emailValidationExternalService = emailValidationExternalService;
         }
@@ -25,7 +25,7 @@ namespace OnlineSales.Services
         public async Task<Domain> Verify(string email)
         {
             var domainName = domainService.GetDomainNameByEmail(email);
-            
+
             var domain = await (from d in pgContext.Domains
                                 where d.Name == domainName
                                 select d).FirstOrDefaultAsync();

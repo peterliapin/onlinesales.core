@@ -15,4 +15,3 @@ public class InvalidModelStateException : Exception
 
     public ModelStateDictionary? ModelState { get; init; }
 }
-

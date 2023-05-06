@@ -31,10 +31,11 @@ namespace OnlineSales.Controllers
         public BaseController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
         {
             this.dbContext = dbContext;
-            this.dbSet = dbContext.Set<T>();
             this.mapper = mapper;
             this.apiSettingsConfig = apiSettingsConfig;
-            this.elasticClient = esDbContext.ElasticClient;
+
+            dbSet = dbContext.Set<T>();
+            elasticClient = esDbContext.ElasticClient;
         }
 
         // GET api/{entity}s/5
@@ -111,13 +112,13 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
-            int limit = apiSettingsConfig.Value.MaxListSize;
+            var limit = apiSettingsConfig.Value.MaxListSize;
 
             var qp = BuildQueryProvider(limit);
 
             var result = await qp.GetResult();
-            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
-            this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+            Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
+            Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
             return Ok(mapper.Map<List<TD>>(result.Records));
         }
 
@@ -130,15 +131,15 @@ namespace OnlineSales.Controllers
             var qp = BuildQueryProvider(int.MaxValue);
 
             var result = await qp.GetResult();
-            this.Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
-            this.Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+            Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
+            Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
 
             return Ok(mapper.Map<List<TD>>(result.Records));
         }
 
         protected async Task<T> FindOrThrowNotFound(int id)
         {
-            var existingEntity = await (from p in this.dbSet
+            var existingEntity = await (from p in dbSet
                                         where p.Id == id
                                         select p).FirstOrDefaultAsync();
 
@@ -152,7 +153,7 @@ namespace OnlineSales.Controllers
 
         private IQueryProvider<T> BuildQueryProvider(int maxLimitSize)
         {
-            var queryCommands = this.Request.QueryString.HasValue ? HttpUtility.UrlDecode(this.Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
+            var queryCommands = Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
             var parseData = new QueryParseData<T>(queryCommands, maxLimitSize);
 
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && parseData.SearchData.Count > 0)
@@ -162,7 +163,7 @@ namespace OnlineSales.Controllers
             }
             else
             {
-                return new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), parseData);
+                return new DBQueryProvider<T>(dbSet!.AsQueryable<T>(), parseData);
             }
         }
     }

@@ -25,7 +25,7 @@ namespace OnlineSales.Plugin.SendGrid.Controllers;
 [Route("api/[controller]")]
 public class SendgridController : ControllerBase
 {
-    private static readonly int BatchSize = 500;    
+    private static readonly int BatchSize = 500;
 
     private readonly SendgridDbContext dbContext;
 
@@ -80,7 +80,7 @@ public class SendgridController : ControllerBase
         var contactRecords = new Dictionary<Contact, List<T>>();
         var nonExistedContacts = new List<Contact>();
 
-        int position = 0;
+        var position = 0;
 
         while (position < emailAndRecords.Count())
         {
@@ -108,7 +108,7 @@ public class SendgridController : ControllerBase
 
     private async Task AddEventRecords<T>(Dictionary<Contact, List<T>> contactsAndRecords)
     {
-        int position = 0;
+        var position = 0;
         while (position < contactsAndRecords.Count)
         {
             var batch = contactsAndRecords.Skip(position).Take(BatchSize);
@@ -117,10 +117,10 @@ public class SendgridController : ControllerBase
             {
                 foreach (var record in contactAndRecords.Value)
                 {
-                    var sgevent = Convert<T>(record, contactAndRecords.Key);
+                    var sgevent = Convert(record, contactAndRecords.Key);
                     var existingRecord = existingRecords.FirstOrDefault(e => e.Contact!.Email == sgevent.Contact!.Email && e.Event == sgevent.Event && e.CreatedAt == sgevent.CreatedAt);
                     if (existingRecord == null)
-                    {                        
+                    {
                         if (sgevent.Contact != null && sgevent.Contact.DomainId > 0)
                         {
                             sgevent.Contact.Domain = null;
@@ -140,7 +140,7 @@ public class SendgridController : ControllerBase
     {
         try
         {
-            var emailRecords = records.GroupBy(r => r.Email); 
+            var emailRecords = records.GroupBy(r => r.Email);
 
             var contactRecords = await CreateNonExistedContacts(emailRecords);
 

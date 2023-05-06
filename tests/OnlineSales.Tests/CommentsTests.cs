@@ -37,7 +37,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsBasic.csv", 2)]
     [InlineData("commentsBasic.json", 2)]
     public async Task ImportFileAddUpdateBasicTest(string fileName, int expectedCount)
-    {        
+    {
         await CreateFKItemsWithUid();
         await CreateItem();
 
@@ -68,14 +68,14 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var updatedComment = await GetTest<Comment>($"{itemsUrl}/1");
         updatedComment.Should().NotBeNull();
 
-        updatedComment!.ContentId.Should().Be(1);        
+        updatedComment!.ContentId.Should().Be(1);
         updatedComment!.ContactId.Should().NotBe(0);
         updatedComment!.AuthorName.Should().Be("Author Name 1");
 
         var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
-        newComment!.ContentId.Should().Be(1);        
+        newComment!.ContentId.Should().Be(1);
         newComment!.ContactId.Should().NotBe(0);
         newComment!.AuthorName.Should().Be("Author Name 2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
@@ -91,7 +91,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
         await PostImportTest(itemsUrl, fileName);
 
-        var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        var updatedComment = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
 
         updatedComment!.ContentId.Should().Be(1);
@@ -104,7 +104,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         updatedComment!.CreatedByUserAgent.Should().Be("TestAgent1");
         updatedComment!.UpdatedByUserAgent.Should().Be("TestAgent3");
 
-        var newComment = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        var newComment = App.GetDbContext()!.Comments!.First(c => c.Id == 2);
         newComment.Should().NotBeNull();
 
         newComment!.ContentId.Should().Be(1);
@@ -122,16 +122,16 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         await CreateFKItemsWithUid();
         await PostImportTest(itemsUrl, "commentsNoFKHasUKey.csv");
 
-        var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        var addedComment1 = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         addedComment1.Should().NotBeNull();
         addedComment1.ContentId.Should().Be(1);
 
-        var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        var addedComment2 = App.GetDbContext()!.Comments!.First(c => c.Id == 2);
         addedComment2.Should().NotBeNull();
         addedComment2.ContentId.Should().Be(2);
 
         await PostImportTest(itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
-        var updatedComment = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        var updatedComment = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
         updatedComment.ContentId.Should().Be(2);
     }
@@ -142,28 +142,28 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         await CreateFKItemsWithUid(6);
         await PostImportTest(itemsUrl, "commentsWithParentKey.csv");
 
-        var addedComment1 = App.GetDbContext() !.Comments!.First(c => c.Id == 1);
+        var addedComment1 = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         addedComment1.Should().NotBeNull();
 
-        var addedComment2 = App.GetDbContext() !.Comments!.First(c => c.Id == 2);
+        var addedComment2 = App.GetDbContext()!.Comments!.First(c => c.Id == 2);
         addedComment2.Should().NotBeNull();
         addedComment2.ParentId.Should().Be(1);
 
-        var addedComment3 = App.GetDbContext() !.Comments!.First(c => c.Id == 3);
+        var addedComment3 = App.GetDbContext()!.Comments!.First(c => c.Id == 3);
         addedComment3.Should().NotBeNull();
         addedComment3.ParentId.Should().Be(1);
 
         await PostImportTest(itemsUrl, "commentsWithOldParentKey.csv");
 
-        var addedComment4 = App.GetDbContext() !.Comments!.First(c => c.Id == 4);
+        var addedComment4 = App.GetDbContext()!.Comments!.First(c => c.Id == 4);
         addedComment4.Should().NotBeNull();
         addedComment4.ParentId.Should().Be(1);
 
-        var addedComment5 = App.GetDbContext() !.Comments!.First(c => c.Id == 5);
+        var addedComment5 = App.GetDbContext()!.Comments!.First(c => c.Id == 5);
         addedComment5.Should().NotBeNull();
         addedComment5.ParentId.Should().Be(2);
 
-        var addedComment6 = App.GetDbContext() !.Comments!.First(c => c.Id == 6);
+        var addedComment6 = App.GetDbContext()!.Comments!.First(c => c.Id == 6);
         addedComment6.Should().NotBeNull();
         addedComment6.ParentId.Should().Be(4);
     }

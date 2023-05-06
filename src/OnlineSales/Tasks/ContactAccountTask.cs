@@ -32,7 +32,7 @@ public class ContactAccountTask : BaseTask
         this.accountExternalService = accountExternalService;
         this.mapper = mapper;
 
-        var config = configuration.GetSection(ConfigKey) !.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(ConfigKey)!.Get<TaskWithBatchConfig>();
 
         if (config is not null)
         {
@@ -46,11 +46,11 @@ public class ContactAccountTask : BaseTask
 
     public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        try   
+        try
         {
             var domainsToHandle = dbContext.Domains!.Where(d => d.AccountStatus == AccountSyncStatus.NotInitialized);
-            int totalSize = domainsToHandle.Count();
-            for (int start = 0; start < totalSize; start += batchSize)
+            var totalSize = domainsToHandle.Count();
+            for (var start = 0; start < totalSize; start += batchSize)
             {
                 var batch = domainsToHandle.Skip(start).Take(batchSize).ToList();
                 await SetDomainsAccounts(batch);

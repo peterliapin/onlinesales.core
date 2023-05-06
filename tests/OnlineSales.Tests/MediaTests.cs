@@ -46,7 +46,7 @@ public class MediaTests : BaseTest
         var testMedia = new TestMedia("test1.png", 1024);
         await PostTest("/api/media", testMedia, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
     }
-  
+
     [Fact]
     public async Task GetImageAnonymousTest()
     {
@@ -86,7 +86,7 @@ public class MediaTests : BaseTest
         {
             s1.Position = 0;
             s2.Position = 0;
-            int data = 0;
+            var data = 0;
             while (data != -1)
             {
                 data = s1.ReadByte();

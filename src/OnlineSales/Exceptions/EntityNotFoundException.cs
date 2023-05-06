@@ -34,4 +34,3 @@ public class EntityNotFoundException : Exception
 
     public string EntityUid { get; init; } = string.Empty;
 }
-

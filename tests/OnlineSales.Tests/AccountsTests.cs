@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests;
 
-public class AccountsTests : SimpleTableTests<Account, TestAccount, AccountUpdateDto, ISaveService<Account>> 
+public class AccountsTests : SimpleTableTests<Account, TestAccount, AccountUpdateDto, ISaveService<Account>>
 {
     public AccountsTests()
         : base("/api/accounts")

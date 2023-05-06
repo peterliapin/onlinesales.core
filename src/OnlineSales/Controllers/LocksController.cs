@@ -38,4 +38,3 @@ public class LocksController : ControllerBase
         return Ok();
     }
 }
-

@@ -11,7 +11,7 @@ public abstract class ElasticDbContext
 {
     public abstract ElasticClient ElasticClient { get; }
 
-    public abstract string IndexPrefix { get; }    
+    public abstract string IndexPrefix { get; }
 
     protected abstract List<Type> EntityTypes { get; }
 
@@ -19,7 +19,7 @@ public abstract class ElasticDbContext
     {
         ElasticHelper.CreateMissingIndeces(this);
 
-        var allMigrationsTypes = Assembly.GetAssembly(typeof(ElasticMigration)) !.GetTypes()
+        var allMigrationsTypes = Assembly.GetAssembly(typeof(ElasticMigration))!.GetTypes()
                                     .Where(
                                         myType => myType.IsClass
                                         && !myType.IsAbstract
@@ -31,13 +31,13 @@ public abstract class ElasticDbContext
 
         foreach (var type in allMigrationsTypes)
         {
-            var migration = (ElasticMigration)Activator.CreateInstance(type) !;
+            var migration = (ElasticMigration)Activator.CreateInstance(type)!;
 
             if (pastMigrationIds.Contains(migration.MigrationId) is false)
             {
                 migration.Up(this).Wait();
                 ElasticClient.Index<ElasticMigration>(migration, s => s);
             }
-        }        
+        }
     }
 }

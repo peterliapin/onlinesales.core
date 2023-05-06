@@ -156,7 +156,7 @@ public class ContactScheduledEmailTask : BaseTask
         // Evaluate CRON based schedule
         if (!string.IsNullOrEmpty(contactSchedule!.Cron))
         {
-            Quartz.CronExpression expression = new Quartz.CronExpression(contactSchedule.Cron);
+            var expression = new Quartz.CronExpression(contactSchedule.Cron);
 
             var nextRunTimeForUser = expression.GetNextValidTimeAfter(lastRunTime.AddMinutes(-userToServerTimeZoneOffset));
             var nextRunTime = nextRunTimeForUser!.Value.AddMinutes(userToServerTimeZoneOffset);

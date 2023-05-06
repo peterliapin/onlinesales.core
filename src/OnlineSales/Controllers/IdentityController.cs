@@ -14,7 +14,7 @@ public class IdentityController : ControllerBase
 {
     private readonly SignInManager<User> signInManager;
 
-    public IdentityController(SignInManager<User> signInManager) 
+    public IdentityController(SignInManager<User> signInManager)
     {
         this.signInManager = signInManager;
     }

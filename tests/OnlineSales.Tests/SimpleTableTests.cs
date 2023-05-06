@@ -57,7 +57,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
         var item = await GetTest<T>(testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added) !;
+        var result = App.GetDbContext()!.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Added)!;
 
         result.Should().NotBeNull();
     }
@@ -79,7 +79,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
         var item = await GetTest<T>(createAndUpdateItems.testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified) !;
+        var result = App.GetDbContext()!.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Modified)!;
 
         result.Should().NotBeNull();
     }
@@ -109,7 +109,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
         await DeleteTest(testCreateItem.Item2);
 
-        var result = App.GetDbContext() !.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted) !;
+        var result = App.GetDbContext()!.ChangeLogs!.FirstOrDefault(c => c.ObjectId == item!.Id && c.ObjectType == typeof(T).Name && c.EntityState == EntityState.Deleted)!;
 
         result.Should().NotBeNull();
     }
@@ -129,7 +129,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
             await CreateItem();
         }
 
-        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        var response = await GetTest($"{itemsUrl}?{filter}");
         response.Should().NotBeNull();
 
         var totalCountHeader = response.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault();
@@ -148,14 +148,14 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     {
         GenerateBulkRecords(dataCount);
 
-        var response = await GetTest($"{this.itemsUrl}?{filter}");
+        var response = await GetTest($"{itemsUrl}?{filter}");
         response.Should().NotBeNull();
 
         var json = await response.Content.ReadAsStringAsync();
 
         var deserialized = JsonSerializer.Deserialize<List<T>>(json!);
 
-        int returendCount = deserialized!.Count!;
+        var returendCount = deserialized!.Count!;
 
         Assert.True(returendCount <= limitPerRequest);
     }
@@ -166,7 +166,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     {
         GenerateBulkRecords(dataCount);
 
-        await GetTest($"{this.itemsUrl}?{filter}", HttpStatusCode.BadRequest);
+        await GetTest($"{itemsUrl}?{filter}", HttpStatusCode.BadRequest);
     }
 
     [Theory]
@@ -191,7 +191,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [InlineData("filter[order]=5555incorrectfield777", HttpStatusCode.BadRequest)]
     public async Task InvalidQueryParameter(string filter, HttpStatusCode code)
     {
-        await GetTest($"{this.itemsUrl}?{filter}", code);
+        await GetTest($"{itemsUrl}?{filter}", code);
     }
 
     [Theory]
@@ -202,7 +202,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [InlineData("filter[limit]=5", HttpStatusCode.OK)]
     public async Task ValidQueryParameter(string filter, HttpStatusCode code)
     {
-        await GetTest($"{this.itemsUrl}?{filter}", code);
+        await GetTest($"{itemsUrl}?{filter}", code);
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         }
 
         query = query.Substring(0, query.Length - 1); // Remove latest '&'
-        await GetTest($"{this.itemsUrl}?{query}", HttpStatusCode.OK);
+        await GetTest($"{itemsUrl}?{query}", HttpStatusCode.OK);
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         var queryCmds = query.Split('&').Select(s => HttpUtility.UrlDecode(s)).ToList();
         var queryCmdsCount = queryCmds.Count;
 
-        var result = await GetTestRawContentSerialize<ProblemDetails>($"{this.itemsUrl}?{query}", HttpStatusCode.BadRequest);
+        var result = await GetTestRawContentSerialize<ProblemDetails>($"{itemsUrl}?{query}", HttpStatusCode.BadRequest);
         result.Should().NotBeNull();
         var resultDiff = queryCmds.Except(result!.Extensions.Keys).Aggregate(string.Empty, (acc, value) => $"{acc} \n {value}");
         result!.Extensions.Count(pair => pair.Key.ToLowerInvariant() != "traceid").Should().Be(queryCmdsCount, resultDiff);
@@ -315,7 +315,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
     protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
     {
-        const int numberOfItems = 10;               
+        const int numberOfItems = 10;
 
         GenerateBulkRecords(numberOfItems);
 
@@ -331,7 +331,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
 
         var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, authToken);
 
-        MustBeEquivalent(testCreateItem.Item1, item);        
+        MustBeEquivalent(testCreateItem.Item1, item);
     }
 
     protected abstract TU UpdateItem(TC createdItem);

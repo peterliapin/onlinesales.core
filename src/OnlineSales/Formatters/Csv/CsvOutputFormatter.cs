@@ -27,7 +27,7 @@ public class CsvOutputFormatter : OutputFormatter
     {
         var response = context.HttpContext.Response;
 
-        Type type = context.Object!.GetType();
+        var type = context.Object!.GetType();
         Type itemType;
 
         if (type.GetGenericArguments().Length > 0)
@@ -36,7 +36,7 @@ public class CsvOutputFormatter : OutputFormatter
         }
         else
         {
-            itemType = type.GetElementType() !;
+            itemType = type.GetElementType()!;
         }
 
         var streamWriter = new StreamWriter(response.Body, Encoding.Default);
@@ -80,7 +80,7 @@ public class JsonStyleDateTimeConverter : ITypeConverter
 
     public object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
-        if (DateTime.TryParse(text, out DateTime result))
+        if (DateTime.TryParse(text, out var result))
         {
             return result;
         }

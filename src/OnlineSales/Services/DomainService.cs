@@ -34,7 +34,7 @@ namespace OnlineSales.Services
             lookupClient = new LookupClient(new LookupClientOptions
             {
                 UseCache = true,
-                Timeout = new TimeSpan(0, 0, 60),                
+                Timeout = new TimeSpan(0, 0, 60),
             });
         }
 
@@ -45,7 +45,7 @@ namespace OnlineSales.Services
             if (domain.DnsCheck == null)
             {
                 await VerifyDns(domain);
-            }            
+            }
 
             if (domain.DnsCheck is true)
             {
@@ -75,11 +75,11 @@ namespace OnlineSales.Services
 
             if (domain.Id > 0)
             {
-                pgDbContext.Domains !.Update(domain);
+                pgDbContext.Domains!.Update(domain);
             }
             else
             {
-                await pgDbContext.Domains !.AddAsync(domain);
+                await pgDbContext.Domains!.AddAsync(domain);
             }
         }
 
@@ -145,7 +145,7 @@ namespace OnlineSales.Services
                     {
                         string? line = null;
                         while ((line = sRdr.ReadLine()) != null)
-                        {                            
+                        {
                             res.Add(line);
                         }
                     }
@@ -227,7 +227,7 @@ namespace OnlineSales.Services
         {
             domain.DnsRecords = null;
             domain.DnsCheck = false;
-                     
+
             var result = await lookupClient.QueryAsync(domain.Name, QueryType.ANY);
 
             var dnsRecords = GetDnsRecords(result, domain);

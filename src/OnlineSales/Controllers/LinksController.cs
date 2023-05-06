@@ -43,8 +43,8 @@ public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto
     public async Task<ActionResult> Follow(string uid)
     {
         var link = await (from l in dbContext.Links
-                    where l.Uid == uid
-                    select l).FirstOrDefaultAsync();
+                          where l.Uid == uid
+                          select l).FirstOrDefaultAsync();
 
         if (link == null)
         {
@@ -64,4 +64,3 @@ public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto
         return new RedirectResult(linkLog.Destination, false, true);
     }
 }
-

@@ -52,7 +52,7 @@ public class SmsService : ISmsService
             return countrySmsServices[key];
         }
 
-        if (countrySmsServices.TryGetValue("default", out ISmsService? smsService))
+        if (countrySmsServices.TryGetValue("default", out var smsService))
         {
             return smsService;
         }

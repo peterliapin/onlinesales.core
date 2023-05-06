@@ -34,9 +34,9 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
     {
-        var existOrder = await (from order in this.dbContext.Orders
-                                    where order.Id == value.OrderId
-                                    select order).FirstOrDefaultAsync();
+        var existOrder = await (from order in dbContext.Orders
+                                where order.Id == value.OrderId
+                                select order).FirstOrDefaultAsync();
 
         if (existOrder == null)
         {
@@ -66,8 +66,8 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
         var orderItem = await FindOrThrowNotFound(id);
 
         var order = await (from o in dbContext.Orders
-                                where o.Id == orderItem.OrderId
-                                select o).FirstOrDefaultAsync();
+                           where o.Id == orderItem.OrderId
+                           select o).FirstOrDefaultAsync();
 
         if (order == null)
         {
@@ -94,7 +94,7 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     {
         var existingEntity = await FindOrThrowNotFound(id);
 
-        var existingOrder = await (from order in this.dbContext.Orders
+        var existingOrder = await (from order in dbContext.Orders
                                    where order.Id == existingEntity.OrderId
                                    select order).FirstOrDefaultAsync();
 

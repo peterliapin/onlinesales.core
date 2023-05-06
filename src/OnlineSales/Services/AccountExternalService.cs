@@ -58,10 +58,10 @@ namespace OnlineSales.Services
                         {
                             companybasicDetails = JsonSerializer.Deserialize<AccountDetailsInfo>(company, SerializeOptions);
                         }
-                        catch (Exception ex) 
+                        catch (Exception ex)
                         {
                             Log.Error("Cannot deserialize AccountDetailsInfo. Reason: " + ex.Message);
-                        }                        
+                        }
                     }
 
                     if (companybasicDetails == null)

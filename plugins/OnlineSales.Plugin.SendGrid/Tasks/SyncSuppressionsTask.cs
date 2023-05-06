@@ -33,7 +33,7 @@ public class SyncSuppressionsTask : BaseTask
         await Unsubscribe<BlockOrBounceDto>("bounces");
         await Unsubscribe<BlockOrBounceDto>("blocks");
         await Unsubscribe<SpamReportDto>("spam_reports");
-        await Unsubscribe<SuppressionDto>("unsubscribes");       
+        await Unsubscribe<SuppressionDto>("unsubscribes");
         return true;
     }
 
@@ -49,7 +49,7 @@ public class SyncSuppressionsTask : BaseTask
 
         sourceAndKeyDictionary.Add(CreateSourceString(primaryApiKeyName, suppressionType), SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey);
 
-        for (int i = 0; i < SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys.Count; ++i)
+        for (var i = 0; i < SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys.Count; ++i)
         {
             sourceAndKeyDictionary.Add(CreateSourceString($"SecondaryApiKey{i}", suppressionType), SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys[i]);
         }
@@ -94,7 +94,6 @@ public class SyncSuppressionsTask : BaseTask
             throw new SendGridApiException("Invalid result returned from SendGrid API: " + result);
         }
 
-        return JsonHelper.Deserialize<List<T>>(result) !;
+        return JsonHelper.Deserialize<List<T>>(result)!;
     }
 }
-

@@ -22,4 +22,3 @@ namespace OnlineSales.Entities
         public DateTime CreatedAt { get; set; }
     }
 }
-

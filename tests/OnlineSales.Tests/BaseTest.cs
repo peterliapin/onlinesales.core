@@ -139,7 +139,7 @@ public class BaseTest : IDisposable
     }
 
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Success")
-    {        
+    {
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
         response.StatusCode.Should().Be(expectedCode);
@@ -168,7 +168,7 @@ public class BaseTest : IDisposable
 
         var content = await response.Content.ReadAsStringAsync();
 
-        return JsonHelper.Deserialize<ImportResult>(content) !;
+        return JsonHelper.Deserialize<ImportResult>(content)!;
     }
 
     protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
@@ -211,7 +211,7 @@ public class BaseTest : IDisposable
 
         if (stream != null)
         {
-            using (StreamReader reader = new StreamReader(stream))
+            using (var reader = new StreamReader(stream))
             {
                 return reader.ReadToEnd();
             }
@@ -222,23 +222,23 @@ public class BaseTest : IDisposable
 
     private void CheckForRedundantProperties(string content)
     {
-        bool isCollection = content.StartsWith("[");
+        var isCollection = content.StartsWith("[");
 
         if (isCollection)
         {
-            var resultCollection = JsonHelper.Deserialize<List<BaseEntity>>(content) !;
+            var resultCollection = JsonHelper.Deserialize<List<BaseEntity>>(content)!;
             resultCollection.Should().NotBeNull();
             if (resultCollection.Count > 0)
             {
                 resultCollection[0].CreatedByIp.Should().BeNull();
                 resultCollection[0].UpdatedByIp.Should().BeNull();
                 resultCollection[0].CreatedByUserAgent.Should().BeNull();
-                resultCollection[0].UpdatedByUserAgent.Should().BeNull(); 
+                resultCollection[0].UpdatedByUserAgent.Should().BeNull();
             }
         }
         else
         {
-            var result = JsonHelper.Deserialize<BaseEntity>(content) !;
+            var result = JsonHelper.Deserialize<BaseEntity>(content)!;
             result.Should().NotBeNull();
             result.CreatedByIp.Should().BeNull();
             result.UpdatedByIp.Should().BeNull();
@@ -255,9 +255,9 @@ public class BaseTest : IDisposable
 
         var textContent = GetResouceFileTextContent(importFileName);
 
-        if (Path.GetExtension(importFileName) !.ToLower() == ".csv")
+        if (Path.GetExtension(importFileName)!.ToLower() == ".csv")
         {
-            content = new StringContent(textContent, Encoding.UTF8, "text/csv"); 
+            content = new StringContent(textContent, Encoding.UTF8, "text/csv");
         }
         else
         {

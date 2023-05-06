@@ -28,14 +28,14 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
     }
 
     // GET api/domains/names/gmail.com
-    [HttpGet("verify/{name}")]    
+    [HttpGet("verify/{name}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<DomainDetailsDto>> Verify(string name)
     {
-        var domain = (from d in this.dbSet
+        var domain = (from d in dbSet
                       where d.Name == name
                       select d).FirstOrDefault();
 
@@ -58,4 +58,3 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         await domainService.SaveRangeAsync(newRecords);
     }
 }
-

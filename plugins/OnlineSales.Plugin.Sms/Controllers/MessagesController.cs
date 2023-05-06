@@ -44,7 +44,7 @@ public class MessagesController : Controller
                 return new UnauthorizedResult();
             }
 
-            string recipient = string.Empty;
+            var recipient = string.Empty;
 
             try
             {

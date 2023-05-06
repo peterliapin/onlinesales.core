@@ -6,11 +6,17 @@ root = true
 indent_style = space
 insert_final_newline = false
 trim_trailing_whitespace = true
+dotnet_diagnostic.SA1000.severity = silent
+dotnet_diagnostic.SA1009.severity = silent
 
 # Code files
 [*.{cs,csx,vb,vbx}]
 indent_size = 4
 dotnet_sort_system_directives_first = true
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
 
 # Xml project files
 [*.{xml,csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
@@ -27,3 +33,4 @@ indent_size = 2
 # YML files
 [*.yml]
 indent_size = 2
+

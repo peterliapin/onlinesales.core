@@ -14,4 +14,3 @@ public class SurrogateIdentityAttribute : Attribute
 
     public string PropertyName { get; set; }
 }
-
