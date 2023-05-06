@@ -42,7 +42,7 @@ public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto
     [Route("/go/{uid}")]
     public async Task<ActionResult> Follow(string uid)
     {
-        var link = await (from l in this.dbContext.Links
+        var link = await (from l in dbContext.Links
                           where l.Uid == uid
                           select l).FirstOrDefaultAsync();
 
@@ -54,14 +54,13 @@ public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto
         var linkLog = new LinkLog
         {
             Destination = link.Destination,
-            Referrer = this.Request.Headers.Referer.ToString(),
+            Referrer = Request.Headers.Referer.ToString(),
             LinkId = link.Id,
         };
 
-        await this.dbContext.LinkLogs!.AddAsync(linkLog);
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.LinkLogs!.AddAsync(linkLog);
+        await dbContext.SaveChangesAsync();
 
         return new RedirectResult(linkLog.Destination, false, true);
     }
 }
-

@@ -40,16 +40,16 @@ namespace OnlineSales.Controllers
 
             if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
             {
-                this.ModelState.AddModelError("FileName", "Unsupported MIME type");
+                ModelState.AddModelError("FileName", "Unsupported MIME type");
 
-                throw new InvalidModelStateException(this.ModelState);
+                throw new InvalidModelStateException(ModelState);
             }
 
             using var fileStream = imageCreateDto.Image.OpenReadStream();
             var imageInBytes = new byte[incomingFileSize];
             fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
 
-            var scopeAndFileExists = from i in this.pgDbContext!.Media!
+            var scopeAndFileExists = from i in pgDbContext!.Media!
                                      where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
                                      select i;
             if (scopeAndFileExists.Any())
@@ -58,7 +58,7 @@ namespace OnlineSales.Controllers
                 uploadedImage!.Data = imageInBytes;
                 uploadedImage!.Size = incomingFileSize;
 
-                this.pgDbContext.Media!.Update(uploadedImage);
+                pgDbContext.Media!.Update(uploadedImage);
             }
             else
             {
@@ -72,19 +72,19 @@ namespace OnlineSales.Controllers
                     Extension = incomingFileExtension,
                 };
 
-                await this.pgDbContext.Media!.AddAsync(uploadedMedia);
+                await pgDbContext.Media!.AddAsync(uploadedMedia);
             }
 
-            await this.pgDbContext.SaveChangesAsync();
+            await pgDbContext.SaveChangesAsync();
 
-            Log.Information("Request scheme {0}", this.HttpContext.Request.Scheme);
-            Log.Information("Request host {0}", this.HttpContext.Request.Host.Value);
+            Log.Information("Request scheme {0}", HttpContext.Request.Scheme);
+            Log.Information("Request host {0}", HttpContext.Request.Host.Value);
 
             var fileData = new MediaDetailsDto()
             {
-                Location = Path.Combine(this.HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
+                Location = Path.Combine(HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
             };
-            return this.CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
+            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
         }
 
         [HttpGet]
@@ -96,14 +96,14 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            var uploadedImageData = await (from upi in this.pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            var uploadedImageData = await (from upi in pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
 
             if (uploadedImageData == null)
             {
                 throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}");
             }
 
-            return this.File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
+            return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
         }
     }
 }

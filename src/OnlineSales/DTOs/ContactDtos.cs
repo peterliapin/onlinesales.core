@@ -52,12 +52,12 @@ public class ContactCreateDto : BaseContactDto
     {
         get
         {
-            return this.email;
+            return email;
         }
 
         set
         {
-            this.email = value.ToLower();
+            email = value.ToLower();
         }
     }
 }
@@ -71,12 +71,12 @@ public class ContactUpdateDto : BaseContactDto
     {
         get
         {
-            return this.email;
+            return email;
         }
 
         set
         {
-            this.email = value == null ? null : value.ToLower();
+            email = value == null ? null : value.ToLower();
         }
     }
 }
@@ -105,12 +105,12 @@ public class ContactImportDto : BaseImportDto
     {
         get
         {
-            return this.email;
+            return email;
         }
 
         set
         {
-            this.email = value == null ? null : value.ToLower();
+            email = value == null ? null : value.ToLower();
         }
     }
 

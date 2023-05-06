@@ -43,7 +43,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 
         singleItem!.AvatarUrl = GravatarHelper.EmailToGravatarUrl(singleItem.Email);
 
-        return this.Ok(singleItem!);
+        return Ok(singleItem!);
     }
 
     [HttpGet]
@@ -62,7 +62,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
             c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.Email);
         });
 
-        return this.Ok(items);
+        return Ok(items);
     }
 
     [HttpPost]
@@ -72,17 +72,17 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<ContactDetailsDto>> Post([FromBody] ContactCreateDto value)
     {
-        var contact = this.mapper.Map<Contact>(value);
+        var contact = mapper.Map<Contact>(value);
 
-        await this.contactService.SaveAsync(contact);
+        await contactService.SaveAsync(contact);
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        var returnedValue = this.mapper.Map<ContactDetailsDto>(contact);
+        var returnedValue = mapper.Map<ContactDetailsDto>(contact);
 
         returnedValue.AvatarUrl = GravatarHelper.EmailToGravatarUrl(returnedValue.Email);
 
-        return this.CreatedAtAction(nameof(GetOne), new { id = contact.Id }, returnedValue);
+        return CreatedAtAction(nameof(GetOne), new { id = contact.Id }, returnedValue);
     }
 
     [HttpPatch("{id}")]
@@ -92,28 +92,28 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<ContactDetailsDto>> Patch(int id, [FromBody] ContactUpdateDto value)
     {
-        var existingContact = (from contact in this.dbContext.Contacts where contact.Id == id select contact).FirstOrDefault();
+        var existingContact = (from contact in dbContext.Contacts where contact.Id == id select contact).FirstOrDefault();
 
         if (existingContact == null)
         {
             throw new EntityNotFoundException("Contact", id.ToString());
         }
 
-        this.mapper.Map(value, existingContact);
+        mapper.Map(value, existingContact);
 
-        await this.contactService.SaveAsync(existingContact);
+        await contactService.SaveAsync(existingContact);
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        var returnedValue = this.mapper.Map<ContactDetailsDto>(existingContact);
+        var returnedValue = mapper.Map<ContactDetailsDto>(existingContact);
 
         returnedValue.AvatarUrl = GravatarHelper.EmailToGravatarUrl(returnedValue.Email);
 
-        return this.Ok(returnedValue);
+        return Ok(returnedValue);
     }
 
     protected override async Task SaveRangeAsync(List<Contact> newRecords)
     {
-        await this.contactService.SaveRangeAsync(newRecords);
+        await contactService.SaveRangeAsync(newRecords);
     }
 }

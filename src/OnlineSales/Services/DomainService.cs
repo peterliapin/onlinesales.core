@@ -31,7 +31,7 @@ namespace OnlineSales.Services
 
             this.pgDbContext = pgDbContext;
 
-            this.lookupClient = new LookupClient(new LookupClientOptions
+            lookupClient = new LookupClient(new LookupClientOptions
             {
                 UseCache = true,
                 Timeout = new TimeSpan(0, 0, 60),
@@ -40,23 +40,23 @@ namespace OnlineSales.Services
 
         public async Task Verify(Domain domain)
         {
-            this.VerifyFreeAndDisposable(domain);
+            VerifyFreeAndDisposable(domain);
 
             if (domain.DnsCheck == null)
             {
-                await this.VerifyDns(domain);
+                await VerifyDns(domain);
             }
 
             if (domain.DnsCheck is true)
             {
                 if (domain.HttpCheck == null)
                 {
-                    await this.VerifyHttp(domain);
+                    await VerifyHttp(domain);
                 }
 
                 if (domain.MxCheck == null)
                 {
-                    await this.VerifyMX(domain);
+                    await VerifyMX(domain);
                 }
             }
             else
@@ -71,21 +71,21 @@ namespace OnlineSales.Services
 
         public async Task SaveAsync(Domain domain)
         {
-            this.VerifyFreeAndDisposable(domain);
+            VerifyFreeAndDisposable(domain);
 
             if (domain.Id > 0)
             {
-                this.pgDbContext.Domains!.Update(domain);
+                pgDbContext.Domains!.Update(domain);
             }
             else
             {
-                await this.pgDbContext.Domains!.AddAsync(domain);
+                await pgDbContext.Domains!.AddAsync(domain);
             }
         }
 
         public async Task SaveRangeAsync(List<Domain> domains)
         {
-            domains.ForEach(d => this.VerifyFreeAndDisposable(d));
+            domains.ForEach(d => VerifyFreeAndDisposable(d));
 
             var sortedDomains = domains.GroupBy(d => d.Id > 0);
 
@@ -93,11 +93,11 @@ namespace OnlineSales.Services
             {
                 if (group.Key)
                 {
-                    this.pgDbContext.UpdateRange(group.ToList());
+                    pgDbContext.UpdateRange(group.ToList());
                 }
                 else
                 {
-                    await this.pgDbContext.AddRangeAsync(group.ToList());
+                    await pgDbContext.AddRangeAsync(group.ToList());
                 }
             }
         }
@@ -179,7 +179,7 @@ namespace OnlineSales.Services
 
             foreach (var url in urls)
             {
-                var responce = await this.GetRequest(url);
+                var responce = await GetRequest(url);
 
                 if (responce != null && responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
                 {
@@ -191,8 +191,8 @@ namespace OnlineSales.Services
 
                     if (htmlDoc != null)
                     {
-                        domain.Title = this.GetTitle(htmlDoc);
-                        domain.Description = this.GetDescription(htmlDoc);
+                        domain.Title = GetTitle(htmlDoc);
+                        domain.Description = GetDescription(htmlDoc);
                     }
 
                     break;
@@ -204,7 +204,7 @@ namespace OnlineSales.Services
         {
             domain.MxCheck = false;
 
-            var mxRecords = await this.lookupClient.QueryAsync(domain.Name, QueryType.MX);
+            var mxRecords = await lookupClient.QueryAsync(domain.Name, QueryType.MX);
 
             var orderedMxRecordValues = from r in mxRecords.AllRecords
                                         where r is MxRecord
@@ -213,7 +213,7 @@ namespace OnlineSales.Services
 
             foreach (var mxRecordValue in orderedMxRecordValues)
             {
-                var mxVerify = await this.mxVerifyService.Verify(mxRecordValue);
+                var mxVerify = await mxVerifyService.Verify(mxRecordValue);
 
                 if (mxVerify)
                 {
@@ -228,9 +228,9 @@ namespace OnlineSales.Services
             domain.DnsRecords = null;
             domain.DnsCheck = false;
 
-            var result = await this.lookupClient.QueryAsync(domain.Name, QueryType.ANY);
+            var result = await lookupClient.QueryAsync(domain.Name, QueryType.ANY);
 
-            var dnsRecords = this.GetDnsRecords(result, domain);
+            var dnsRecords = GetDnsRecords(result, domain);
 
             if (dnsRecords.Count > 0)
             {
@@ -318,7 +318,7 @@ namespace OnlineSales.Services
                 return htmlNode.InnerText;
             }
 
-            var title = this.GetNodeContentByAttr(htmlDoc, "title");
+            var title = GetNodeContentByAttr(htmlDoc, "title");
 
             if (!string.IsNullOrEmpty(title))
             {
@@ -337,15 +337,15 @@ namespace OnlineSales.Services
 
         private string? GetDescription(HtmlDocument htmlDoc)
         {
-            return this.GetNodeContentByAttr(htmlDoc, "description");
+            return GetNodeContentByAttr(htmlDoc, "description");
         }
 
         private string? GetNodeContentByAttr(HtmlDocument htmlDoc, string value)
         {
-            var result = this.GetNodeContentByAttr(htmlDoc, "name", value);
+            var result = GetNodeContentByAttr(htmlDoc, "name", value);
             if (result == null)
             {
-                result = this.GetNodeContentByAttr(htmlDoc, "property", value);
+                result = GetNodeContentByAttr(htmlDoc, "property", value);
             }
 
             return result;

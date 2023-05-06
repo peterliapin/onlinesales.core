@@ -20,7 +20,7 @@ public class VariablesService : IVariablesService
     {
         var variables = new Dictionary<string, string>();
 
-        foreach (var variableProvider in this.variableProviders)
+        foreach (var variableProvider in variableProviders)
         {
             variables.AddRangeIfNotExists(variableProvider.GetVariables(language));
         }

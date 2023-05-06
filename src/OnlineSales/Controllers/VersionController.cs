@@ -29,14 +29,14 @@ public class VersionController : ControllerBase
         var assembly = Assembly.GetExecutingAssembly();
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
 
-        return this.Ok(
+        return Ok(
             new
             {
                 Version = fileVersionInfo.ProductVersion!,
-                IP = this.httpContextHelper!.IpAddress,
-                IPv4 = this.httpContextHelper!.IpAddressV4,
-                IPv6 = this.httpContextHelper!.IpAddressV6,
-                Headers = this.HttpContext.Request.Headers,
+                IP = httpContextHelper!.IpAddress,
+                IPv4 = httpContextHelper!.IpAddressV4,
+                IPv6 = httpContextHelper!.IpAddressV6,
+                Headers = HttpContext.Request.Headers,
             });
     }
 }

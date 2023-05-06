@@ -17,9 +17,9 @@ public class VstoFileInfo : IFileInfo
         this.filePath = filePath;
     }
 
-    public string FullPath => Path.Join(this.basePath, this.filePath);
+    public string FullPath => Path.Join(basePath, filePath);
 
-    public bool Exists => File.Exists(this.FullPath);
+    public bool Exists => File.Exists(FullPath);
 
     public bool IsDirectory => false;
 
@@ -27,7 +27,7 @@ public class VstoFileInfo : IFileInfo
     {
         get
         {
-            return File.GetLastWriteTime(this.FullPath);
+            return File.GetLastWriteTime(FullPath);
         }
     }
 
@@ -35,16 +35,16 @@ public class VstoFileInfo : IFileInfo
     {
         get
         {
-            return File.ReadAllBytes(this.FullPath).Length;
+            return File.ReadAllBytes(FullPath).Length;
         }
     }
 
-    public string Name => Path.GetFileName(this.FullPath);
+    public string Name => Path.GetFileName(FullPath);
 
     public string PhysicalPath => string.Empty;
 
     public Stream CreateReadStream()
     {
-        return File.OpenRead(this.FullPath);
+        return File.OpenRead(FullPath);
     }
 }

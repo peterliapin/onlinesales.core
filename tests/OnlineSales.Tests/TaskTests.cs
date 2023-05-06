@@ -13,7 +13,7 @@ public class TaskTests : BaseTest
     [Fact]
     public async Task GetAllTasksTest()
     {
-        var responce = await this.GetRequest(this.tasksUrl);
+        var responce = await GetRequest(tasksUrl);
 
         var content = await responce.Content.ReadAsStringAsync();
 
@@ -25,7 +25,7 @@ public class TaskTests : BaseTest
     [Fact]
     public async Task GetByNameFailureTest()
     {
-        await this.GetTest(this.tasksUrl + "/SomeUnexistedTask", HttpStatusCode.NotFound, "Success");
+        await GetTest(tasksUrl + "/SomeUnexistedTask", HttpStatusCode.NotFound, "Success");
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class TaskTests : BaseTest
     {
         var name = "SyncEsTask";
 
-        var responce = await this.GetTest<TaskDetailsDto>(this.tasksUrl + "/" + name);
+        var responce = await GetTest<TaskDetailsDto>(tasksUrl + "/" + name);
 
         responce.Should().NotBeNull();
         responce!.Name.Should().Contain("SyncEsTask");
@@ -44,15 +44,15 @@ public class TaskTests : BaseTest
     {
         var name = "SyncEsTask";
 
-        var responce = await this.GetTest<TaskDetailsDto>(this.tasksUrl + "/" + name);
+        var responce = await GetTest<TaskDetailsDto>(tasksUrl + "/" + name);
         responce.Should().NotBeNull();
         responce!.IsRunning.Should().BeFalse();
 
-        responce = await this.GetTest<TaskDetailsDto>(this.tasksUrl + "/start/" + name);
+        responce = await GetTest<TaskDetailsDto>(tasksUrl + "/start/" + name);
         responce.Should().NotBeNull();
         responce!.IsRunning.Should().BeTrue();
 
-        responce = await this.GetTest<TaskDetailsDto>(this.tasksUrl + "/stop/" + name);
+        responce = await GetTest<TaskDetailsDto>(tasksUrl + "/stop/" + name);
         responce.Should().NotBeNull();
         responce!.IsRunning.Should().BeFalse();
     }

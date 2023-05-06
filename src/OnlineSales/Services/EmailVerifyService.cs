@@ -17,16 +17,16 @@ namespace OnlineSales.Services
 
         public EmailVerifyService(PgDbContext pgDbContext, IDomainService domainService, IEmailValidationExternalService emailValidationExternalService)
         {
-            this.pgContext = pgDbContext;
+            pgContext = pgDbContext;
             this.domainService = domainService;
             this.emailValidationExternalService = emailValidationExternalService;
         }
 
         public async Task<Domain> Verify(string email)
         {
-            var domainName = this.domainService.GetDomainNameByEmail(email);
+            var domainName = domainService.GetDomainNameByEmail(email);
 
-            var domain = await (from d in this.pgContext.Domains
+            var domain = await (from d in pgContext.Domains
                                 where d.Name == domainName
                                 select d).FirstOrDefaultAsync();
 
@@ -39,12 +39,12 @@ namespace OnlineSales.Services
                 if (domain is null)
                 {
                     domain = new Domain() { Name = domainName, Source = email };
-                    await this.domainService.SaveAsync(domain);
+                    await domainService.SaveAsync(domain);
                 }
 
-                await this.domainService.Verify(domain!);
-                await this.VerifyDomain(email, domain);
-                await this.pgContext.SaveChangesAsync();
+                await domainService.Verify(domain!);
+                await VerifyDomain(email, domain);
+                await pgContext.SaveChangesAsync();
 
                 return domain;
             }
@@ -52,7 +52,7 @@ namespace OnlineSales.Services
 
         public async Task VerifyDomain(string email, Domain domain)
         {
-            var emailVerify = await this.emailValidationExternalService.Validate(email);
+            var emailVerify = await emailValidationExternalService.Validate(email);
             domain.CatchAll = emailVerify.CatchAllCheck;
         }
     }

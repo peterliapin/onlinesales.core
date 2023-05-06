@@ -11,7 +11,7 @@ public class EmailTests : BaseTest
     {
         var email = "hello@wave-access.com";
         var url = "/api/email/verify/" + email;
-        var requestedData = await this.GetTest(url);
+        var requestedData = await GetTest(url);
 
         requestedData.Should().NotBeNull();
     }

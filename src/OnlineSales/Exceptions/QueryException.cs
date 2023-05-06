@@ -11,12 +11,12 @@ namespace OnlineSales.Exceptions
     {
         public QueryException(string failedCommand, string errorDescription)
         {
-            this.FailedCommands.Add(new KeyValuePair<string, string>(failedCommand, errorDescription));
+            FailedCommands.Add(new KeyValuePair<string, string>(failedCommand, errorDescription));
         }
 
         public QueryException(IEnumerable<QueryException> innerExceptions)
         {
-            this.FailedCommands = innerExceptions.SelectMany(e => e.FailedCommands).ToList();
+            FailedCommands = innerExceptions.SelectMany(e => e.FailedCommands).ToList();
         }
 
         protected QueryException(SerializationInfo info, StreamingContext context)

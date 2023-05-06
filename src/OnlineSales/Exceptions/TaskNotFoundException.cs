@@ -11,9 +11,8 @@ public class TaskNotFoundException : Exception
 {
     public TaskNotFoundException(string taskName)
     {
-        this.TaskName = taskName;
+        TaskName = taskName;
     }
 
     public string TaskName { get; }
 }
-

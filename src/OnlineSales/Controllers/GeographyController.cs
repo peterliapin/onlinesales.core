@@ -19,7 +19,7 @@ public class ContinentsController : ControllerBase
     {
         var result = EnumHelper.GetEnumDescriptions<Continent>();
 
-        return this.Ok(result);
+        return Ok(result);
     }
 }
 
@@ -34,6 +34,6 @@ public class CountriesController : ControllerBase
     {
         var result = EnumHelper.GetEnumDescriptions<Country>();
 
-        return this.Ok(result);
+        return Ok(result);
     }
 }

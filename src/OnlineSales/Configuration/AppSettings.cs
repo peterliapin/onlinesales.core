@@ -19,7 +19,7 @@ public class PostgresConfig : BaseServiceConfig
 {
     public string Database { get; set; } = string.Empty;
 
-    public string ConnectionString => $"User ID={this.UserName};Password={this.Password};Server={this.Server};Port={this.Port};Database={this.Database};Pooling=true;";
+    public string ConnectionString => $"User ID={UserName};Password={Password};Server={Server};Port={Port};Database={Database};Pooling=true;";
 }
 
 public class ElasticConfig : BaseServiceConfig
@@ -28,7 +28,7 @@ public class ElasticConfig : BaseServiceConfig
 
     public string IndexPrefix { get; set; } = string.Empty;
 
-    public string Url => $"http{(this.UseHttps ? "s" : string.Empty)}://{this.Server}:{this.Port}";
+    public string Url => $"http{(UseHttps ? "s" : string.Empty)}://{Server}:{Port}";
 }
 
 public class SmtpServerConfig : BaseServiceConfig

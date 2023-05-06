@@ -32,16 +32,16 @@ namespace OnlineSales.SendGrid.Tasks
         public SyncActivityLogTask(IConfiguration configuration, SendgridDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
             : base("Tasks:SyncActivityLogTask", configuration, taskStatusService)
         {
-            this.sgDbContext = dbContext;
+            sgDbContext = dbContext;
             this.logService = logService;
-            var config = configuration.GetSection(this.configKey)!.Get<TaskWithBatchConfig>();
+            var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
             {
-                this.batchSize = config.BatchSize;
+                batchSize = config.BatchSize;
             }
             else
             {
-                throw new MissingConfigurationException($"The specified configuration section for the provided configKey {this.configKey} could not be found in the settings file.");
+                throw new MissingConfigurationException($"The specified configuration section for the provided configKey {configKey} could not be found in the settings file.");
             }
         }
 
@@ -49,9 +49,9 @@ namespace OnlineSales.SendGrid.Tasks
         {
             try
             {
-                var maxId = await this.logService.GetMaxId(SourceName);
-                var events = this.sgDbContext.SendgridEvents!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(this.batchSize).Select(e => Convert(e)).ToList();
-                var res = await this.logService.AddActivityRecords(events);
+                var maxId = await logService.GetMaxId(SourceName);
+                var events = sgDbContext.SendgridEvents!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
+                var res = await logService.AddActivityRecords(events);
                 if (!res)
                 {
                     throw new SendGridApiException("Cannot log sendgrid events");

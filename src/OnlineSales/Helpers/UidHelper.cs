@@ -26,4 +26,3 @@ public static class UidHelper
         return sb.ToString();
     }
 }
-

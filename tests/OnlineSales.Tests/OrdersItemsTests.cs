@@ -16,7 +16,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     [Fact]
     public async Task OrderQuantityTest()
     {
-        var orderDetails = await this.CreateFKItem();
+        var orderDetails = await CreateFKItem();
 
         var numberOfOrderItems = 10;
 
@@ -33,12 +33,12 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
                 Quantity = quantity,
             };
 
-            var newUrl = await this.PostTest(this.itemsUrl, testOrderItem);
+            var newUrl = await PostTest(itemsUrl, testOrderItem);
 
             orderItemsUrls[i] = newUrl;
         }
 
-        var updatedOrder = await this.GetTest<OrderDetailsDto>(orderDetails.Item2);
+        var updatedOrder = await GetTest<OrderDetailsDto>(orderDetails.Item2);
 
         updatedOrder.Should().NotBeNull();
 
@@ -47,7 +47,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             (updatedOrder.Quantity == sumQuantity).Should().BeTrue();
         }
 
-        var addedOrderItem = await this.GetTest<OrderItem>(orderItemsUrls[0]);
+        var addedOrderItem = await GetTest<OrderItem>(orderItemsUrls[0]);
         addedOrderItem.Should().NotBeNull();
 
         if (addedOrderItem != null)
@@ -57,9 +57,9 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
                 Quantity = addedOrderItem.Quantity + 999,
             };
 
-            await this.PatchTest(orderItemsUrls[0], orderItem);
+            await PatchTest(orderItemsUrls[0], orderItem);
 
-            updatedOrder = await this.GetTest<OrderDetailsDto>(orderDetails.Item2);
+            updatedOrder = await GetTest<OrderDetailsDto>(orderDetails.Item2);
             updatedOrder.Should().NotBeNull();
 
             if (updatedOrder != null)
@@ -72,7 +72,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     [Fact]
     public async Task OrderTotalTest()
     {
-        var orderDetails = await this.CreateFKItem();
+        var orderDetails = await CreateFKItem();
 
         var numberOfOrderItems = 10;
 
@@ -85,7 +85,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
                 Quantity = i + 1,
             };
 
-            var orderItemUrl = await this.PostTest(this.itemsUrl, orderItem);
+            var orderItemUrl = await PostTest(itemsUrl, orderItem);
             orderItemsUrls[i] = orderItemUrl;
         }
 
@@ -94,7 +94,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             var total = 0m;
             foreach (var url in orderItemsUrls)
             {
-                var orderItem = await this.GetTest<OrderItemDetailsDto>(url);
+                var orderItem = await GetTest<OrderItemDetailsDto>(url);
                 orderItem.Should().NotBeNull();
 
                 if (orderItem != null)
@@ -103,7 +103,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
                 }
             }
 
-            var updatedOrder = await this.GetTest<OrderDetailsDto>(orderDetails.Item2);
+            var updatedOrder = await GetTest<OrderDetailsDto>(orderDetails.Item2);
             updatedOrder.Should().NotBeNull();
 
             if (updatedOrder != null)
@@ -114,7 +114,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         await CompareTotals();
 
-        var addedOrderItem = await this.GetTest<OrderItemDetailsDto>(orderItemsUrls[0]);
+        var addedOrderItem = await GetTest<OrderItemDetailsDto>(orderItemsUrls[0]);
         addedOrderItem.Should().NotBeNull();
 
         var updatedOrderItem = new OrderItemUpdateDto();
@@ -124,10 +124,10 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             updatedOrderItem.Quantity = addedOrderItem.Quantity + 999;
         }
 
-        await this.PatchTest(orderItemsUrls[0], updatedOrderItem);
+        await PatchTest(orderItemsUrls[0], updatedOrderItem);
         await CompareTotals();
 
-        addedOrderItem = await this.GetTest<OrderItemDetailsDto>(orderItemsUrls[0]);
+        addedOrderItem = await GetTest<OrderItemDetailsDto>(orderItemsUrls[0]);
         addedOrderItem.Should().NotBeNull();
         updatedOrderItem = new OrderItemUpdateDto();
         if (addedOrderItem != null)
@@ -136,26 +136,26 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             updatedOrderItem.Quantity = addedOrderItem.Quantity;
         }
 
-        await this.PatchTest(orderItemsUrls[0], updatedOrderItem);
+        await PatchTest(orderItemsUrls[0], updatedOrderItem);
         await CompareTotals();
     }
 
     [Fact]
     public async Task OrderItemTotalTest()
     {
-        var orderDetails = await this.CreateFKItem();
+        var orderDetails = await CreateFKItem();
 
         var orderItem = new TestOrderItem(string.Empty, orderDetails.Item1);
 
-        var orderItemUrl = await this.PostTest(this.itemsUrl, orderItem);
+        var orderItemUrl = await PostTest(itemsUrl, orderItem);
 
-        var order = await this.GetTest<Order>(orderDetails.Item2);
+        var order = await GetTest<Order>(orderDetails.Item2);
 
         order.Should().NotBeNull();
 
         async Task CompareItems()
         {
-            var addedOrderItem = await this.GetTest<OrderItemDetailsDto>(orderItemUrl);
+            var addedOrderItem = await GetTest<OrderItemDetailsDto>(orderItemUrl);
             addedOrderItem.Should().NotBeNull();
 
             if (addedOrderItem != null)
@@ -167,7 +167,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         await CompareItems();
 
-        var addedOrderItem = await this.GetTest<OrderItemDetailsDto>(orderItemUrl);
+        var addedOrderItem = await GetTest<OrderItemDetailsDto>(orderItemUrl);
         addedOrderItem.Should().NotBeNull();
 
         var updatedOrderItem = new OrderItemUpdateDto();
@@ -178,10 +178,10 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             updatedOrderItem.UnitPrice = addedOrderItem.UnitPrice;
         }
 
-        await this.PatchTest(orderItemUrl, orderItem);
+        await PatchTest(orderItemUrl, orderItem);
         await CompareItems();
 
-        addedOrderItem = await this.GetTest<OrderItemDetailsDto>(orderItemUrl);
+        addedOrderItem = await GetTest<OrderItemDetailsDto>(orderItemUrl);
         addedOrderItem.Should().NotBeNull();
 
         updatedOrderItem = new OrderItemUpdateDto();
@@ -192,25 +192,25 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
             updatedOrderItem.UnitPrice = addedOrderItem.UnitPrice + new decimal(1.0);
         }
 
-        await this.PatchTest(orderItemUrl, orderItem);
+        await PatchTest(orderItemUrl, orderItem);
         await CompareItems();
     }
 
     [Fact]
     public async Task ShouldNotUpdateTotalsTest()
     {
-        var addedOrderItemDetails = await this.CreateItem();
+        var addedOrderItemDetails = await CreateItem();
         var orderItemUrl = addedOrderItemDetails.Item2;
-        var addedOrderItem = await this.GetTest<OrderItem>(orderItemUrl);
+        var addedOrderItem = await GetTest<OrderItem>(orderItemUrl);
         addedOrderItem.Should().NotBeNull();
 
         if (addedOrderItem != null)
         {
             var updateOrderItemT = new TestOrderItemUpdateWithTotal();
             updateOrderItemT.Total = addedOrderItem.Total + 1.0m;
-            await this.Patch(orderItemUrl, updateOrderItemT);
+            await Patch(orderItemUrl, updateOrderItemT);
 
-            var updatedOrderItem = await this.GetTest<OrderItem>(orderItemUrl);
+            var updatedOrderItem = await GetTest<OrderItem>(orderItemUrl);
             updatedOrderItem.Should().NotBeNull();
 
             if (updatedOrderItem != null)
@@ -220,9 +220,9 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
             var updateOrderItemCT = new TestOrderItemUpdateWithCurrencyTotal();
             updateOrderItemCT.CurrencyTotal = addedOrderItem.CurrencyTotal + 1.0m;
-            await this.Patch(orderItemUrl, updateOrderItemCT);
+            await Patch(orderItemUrl, updateOrderItemCT);
 
-            updatedOrderItem = await this.GetTest<OrderItem>(orderItemUrl);
+            updatedOrderItem = await GetTest<OrderItem>(orderItemUrl);
             updatedOrderItem.Should().NotBeNull();
 
             if (updatedOrderItem != null)
@@ -237,10 +237,10 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     [InlineData("orderItems.json", 3)]
     public async Task ImportFileAddUpdateTest(string fileName, int expectedCount)
     {
-        await this.CreateItem();
-        await this.PostImportTest(this.itemsUrl, fileName);
+        await CreateItem();
+        await PostImportTest(itemsUrl, fileName);
 
-        var allOrderItemsResponse = await this.GetTest(this.itemsUrl);
+        var allOrderItemsResponse = await GetTest(itemsUrl);
         allOrderItemsResponse.Should().NotBeNull();
 
         var content = await allOrderItemsResponse.Content.ReadAsStringAsync();
@@ -254,13 +254,13 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     [InlineData("orderItemsNoRef.json", 1)]
     public async Task ImportFileNoOrderRefNotFoundTest(string fileName, int expectedCount)
     {
-        await this.CreateItem();
-        var importResult = await this.PostImportTest(this.itemsUrl, fileName, HttpStatusCode.OK);
+        await CreateItem();
+        var importResult = await PostImportTest(itemsUrl, fileName, HttpStatusCode.OK);
 
         importResult.Added.Should().Be(0);
         importResult.Failed.Should().Be(1);
 
-        var allOrderItemsResponse = await this.GetTest(this.itemsUrl);
+        var allOrderItemsResponse = await GetTest(itemsUrl);
         allOrderItemsResponse.Should().NotBeNull();
 
         var content = await allOrderItemsResponse.Content.ReadAsStringAsync();
@@ -273,7 +273,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     {
         var testOrderItem = new TestOrderItem(uid, fkId);
 
-        var newUrl = await this.PostTest(this.itemsUrl, testOrderItem);
+        var newUrl = await PostTest(itemsUrl, testOrderItem);
 
         return (testOrderItem, newUrl);
     }
@@ -289,17 +289,17 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
     {
         var contactCreate = new TestContact();
 
-        var contactUrl = await this.PostTest("/api/contacts", contactCreate, HttpStatusCode.Created, authToken);
+        var contactUrl = await PostTest("/api/contacts", contactCreate, HttpStatusCode.Created, authToken);
 
-        var contact = await this.GetTest<Contact>(contactUrl);
+        var contact = await GetTest<Contact>(contactUrl);
 
         contact.Should().NotBeNull();
 
         var orderCreate = new TestOrder(string.Empty, contact!.Id);
 
-        var orderUrl = await this.PostTest("/api/orders", orderCreate, HttpStatusCode.Created, authToken);
+        var orderUrl = await PostTest("/api/orders", orderCreate, HttpStatusCode.Created, authToken);
 
-        var order = await this.GetTest<Order>(orderUrl);
+        var order = await GetTest<Order>(orderUrl);
 
         order.Should().NotBeNull();
 
