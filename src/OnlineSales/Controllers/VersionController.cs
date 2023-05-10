@@ -31,7 +31,7 @@ public class VersionController : ControllerBase
         var fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
 
         return Ok(
-            new
+            new VersionDto
             {
                 Version = fileVersionInfo.ProductVersion!,
                 IP = httpContextHelper!.IpAddress,
