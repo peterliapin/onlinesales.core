@@ -37,7 +37,7 @@ public class VersionController : ControllerBase
                 IP = httpContextHelper!.IpAddress,
                 IPv4 = httpContextHelper!.IpAddressV4,
                 IPv6 = httpContextHelper!.IpAddressV6,
-                Headers = HttpContext.Request.Headers,
+                Headers = HttpContext.Request.Headers.ToList(),
             });
     }
 }
