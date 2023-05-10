@@ -18,7 +18,7 @@ public class CsvInputFormatter : InputFormatter
 {
     public CsvInputFormatter()
     {
-        this.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
+        SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
     }
 
     public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context)
@@ -27,13 +27,13 @@ public class CsvInputFormatter : InputFormatter
         var request = context.HttpContext.Request;
         MediaTypeHeaderValue.TryParse(request.ContentType, out var requestContentType);
 
-        var result = await this.ReadStreamAsync(type, request.Body);
+        var result = await ReadStreamAsync(type, request.Body);
         return await InputFormatterResult.SuccessAsync(result);
     }
 
     protected override bool CanReadType(Type type)
     {
-        return this.IsTypeOfIEnumerable(type);
+        return IsTypeOfIEnumerable(type);
     }
 
     protected async Task<object> ReadStreamAsync(Type type, Stream stream)
@@ -139,4 +139,3 @@ public class NullableDateTimeToUtcConverter : NullableConverter
         }
     }
 }
-

@@ -26,7 +26,7 @@ public abstract class ElasticDbContext
                                         && myType.IsSubclassOf(typeof(ElasticMigration)))
                                     .OrderBy(type => type.Name);
 
-        var pastMigrationIds = this.ElasticClient.Search<ElasticMigration>(s => s.Size(10000)).Documents // 10000 is max possible amount of migrations
+        var pastMigrationIds = ElasticClient.Search<ElasticMigration>(s => s.Size(10000)).Documents // 10000 is max possible amount of migrations
                                 .Select(m => m.MigrationId).ToList();
 
         foreach (var type in allMigrationsTypes)
@@ -36,7 +36,7 @@ public abstract class ElasticDbContext
             if (pastMigrationIds.Contains(migration.MigrationId) is false)
             {
                 migration.Up(this).Wait();
-                this.ElasticClient.Index<ElasticMigration>(migration, s => s);
+                ElasticClient.Index<ElasticMigration>(migration, s => s);
             }
         }
     }

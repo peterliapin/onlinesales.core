@@ -8,9 +8,9 @@ public class TestComment : CommentCreateDto
 {
     public TestComment(string uid = "", int contentId = 0)
     {
-        this.AuthorName = $"Test Author{uid}";
-        this.AuthorEmail = $"contact{uid}@test{uid}.net";
-        this.Body = $"Test Comment{uid}";
-        this.ContentId = contentId;
+        AuthorName = $"Test Author{uid}";
+        AuthorEmail = $"contact{uid}@test{uid}.net";
+        Body = $"Test Comment{uid}";
+        ContentId = contentId;
     }
 }

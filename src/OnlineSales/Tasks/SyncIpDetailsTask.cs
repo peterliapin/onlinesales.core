@@ -24,8 +24,8 @@ public class SyncIpDetailsTask : ChangeLogTask
     protected override void ExecuteLogTask(List<ChangeLog> nextBatch)
     {
         var ipDetailsCollection = new List<IpDetails>();
-        var ipList = this.GetDistinctIps(nextBatch);
-        var newIpCollection = this.GetNewIps(ipList!);
+        var ipList = GetDistinctIps(nextBatch);
+        var newIpCollection = GetNewIps(ipList!);
 
         foreach (var ip in newIpCollection)
         {
@@ -34,7 +34,7 @@ public class SyncIpDetailsTask : ChangeLogTask
                 continue;
             }
 
-            var geoIpDetails = this.ipDetailsService.GetIpDetails(ip).Result;
+            var geoIpDetails = ipDetailsService.GetIpDetails(ip).Result;
 
             if (geoIpDetails == null)
             {
@@ -57,8 +57,8 @@ public class SyncIpDetailsTask : ChangeLogTask
 
         if (ipDetailsCollection.Any())
         {
-            this.dbContext.IpDetails!.AddRange(ipDetailsCollection);
-            this.dbContext.SaveChanges();
+            dbContext.IpDetails!.AddRange(ipDetailsCollection);
+            dbContext.SaveChanges();
         }
     }
 
@@ -83,7 +83,7 @@ public class SyncIpDetailsTask : ChangeLogTask
     private List<string> GetNewIps(List<string> ips)
     {
         var dbResults = (from i in ips
-                         join di in this.dbContext.IpDetails! on i equals di.Ip into ps
+                         join di in dbContext.IpDetails! on i equals di.Ip into ps
                          from di in ps.DefaultIfEmpty()
                          select new { NewIp = i, Ip = di?.Ip ?? string.Empty }).ToList();
 

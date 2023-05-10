@@ -21,7 +21,7 @@ namespace OnlineSales.DataAnnotations
         {
             string[] listOfExt;
 
-            if (this.type.Equals("Image"))
+            if (type.Equals("Image"))
             {
                 var configuration = (IOptions<MediaConfig>)validationContext!.GetService(typeof(IOptions<MediaConfig>))!;
                 listOfExt = configuration.Value.Extensions;

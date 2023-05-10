@@ -22,9 +22,9 @@ public class AmazonSnsGatewayService : ISmsService
 
     public async Task SendAsync(string recipient, string message)
     {
-        var accessKey = this.amazonSns.AccessKeyId;
-        var secretKey = this.amazonSns.SecretAccessKey;
-        var region = RegionEndpoint.GetBySystemName(this.amazonSns.DefaultRegion);
+        var accessKey = amazonSns.AccessKeyId;
+        var secretKey = amazonSns.SecretAccessKey;
+        var region = RegionEndpoint.GetBySystemName(amazonSns.DefaultRegion);
 
         var client = new AmazonSimpleNotificationServiceClient(accessKey, secretKey, region);
         var messageAttributes = new Dictionary<string, MessageAttributeValue>();
@@ -38,7 +38,7 @@ public class AmazonSnsGatewayService : ISmsService
         messageAttributes["AWS.SNS.SMS.SenderID"] = new MessageAttributeValue
         {
             DataType = "String",
-            StringValue = this.amazonSns.SenderId,
+            StringValue = amazonSns.SenderId,
         };
 
         var request = new PublishRequest
@@ -60,6 +60,6 @@ public class AmazonSnsGatewayService : ISmsService
 
     public string GetSender(string recipient)
     {
-        return this.amazonSns.SenderId;
+        return amazonSns.SenderId;
     }
 }

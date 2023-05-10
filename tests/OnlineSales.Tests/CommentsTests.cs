@@ -16,13 +16,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await this.GetAllWithAuthentification("Anonymous");
+        await GetAllWithAuthentification("Anonymous");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await this.CreateAndGetItemWithAuthentification("Anonymous");
+        await CreateAndGetItemWithAuthentification("Anonymous");
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     {
         var comment = new CommentUpdateDto();
         comment.Body = "Content";
-        await this.PatchTest(this.itemsUrlNotFound, comment, HttpStatusCode.NotFound);
+        await PatchTest(itemsUrlNotFound, comment, HttpStatusCode.NotFound);
     }
 
     [Theory]
@@ -38,15 +38,15 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsBasic.json", 2)]
     public async Task ImportFileAddUpdateBasicTest(string fileName, int expectedCount)
     {
-        await this.CreateFKItemsWithUid();
-        await this.CreateItem();
+        await CreateFKItemsWithUid();
+        await CreateItem();
 
-        await this.PostImportTest(this.itemsUrl, fileName);
+        await PostImportTest(itemsUrl, fileName);
 
-        var newComment = await this.GetTest<Comment>($"{this.itemsUrl}/2");
+        var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
-        var allCommentsResponse = await this.GetTest(this.itemsUrl);
+        var allCommentsResponse = await GetTest(itemsUrl);
         allCommentsResponse.Should().NotBeNull();
 
         var content = await allCommentsResponse.Content.ReadAsStringAsync();
@@ -60,19 +60,19 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsBasic.json")]
     public async Task ImportFileAddUpdateDataTest(string fileName)
     {
-        await this.CreateFKItemsWithUid();
-        await this.CreateItem();
+        await CreateFKItemsWithUid();
+        await CreateItem();
 
-        await this.PostImportTest(this.itemsUrl, fileName);
+        await PostImportTest(itemsUrl, fileName);
 
-        var updatedComment = await this.GetTest<Comment>($"{this.itemsUrl}/1");
+        var updatedComment = await GetTest<Comment>($"{itemsUrl}/1");
         updatedComment.Should().NotBeNull();
 
         updatedComment!.ContentId.Should().Be(1);
         updatedComment!.ContactId.Should().NotBe(0);
         updatedComment!.AuthorName.Should().Be("Author Name 1");
 
-        var newComment = await this.GetTest<Comment>($"{this.itemsUrl}/2");
+        var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
         newComment!.ContentId.Should().Be(1);
@@ -86,10 +86,10 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [InlineData("commentsFull.json")]
     public async Task ImportFileAddUpdateAllFieldsTest(string fileName)
     {
-        await this.CreateFKItemsWithUid();
-        await this.CreateItem();
+        await CreateFKItemsWithUid();
+        await CreateItem();
 
-        await this.PostImportTest(this.itemsUrl, fileName);
+        await PostImportTest(itemsUrl, fileName);
 
         var updatedComment = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
@@ -119,8 +119,8 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task ImportFileWithParentUniqueKeyTest()
     {
-        await this.CreateFKItemsWithUid();
-        await this.PostImportTest(this.itemsUrl, "commentsNoFKHasUKey.csv");
+        await CreateFKItemsWithUid();
+        await PostImportTest(itemsUrl, "commentsNoFKHasUKey.csv");
 
         var addedComment1 = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         addedComment1.Should().NotBeNull();
@@ -130,7 +130,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         addedComment2.Should().NotBeNull();
         addedComment2.ContentId.Should().Be(2);
 
-        await this.PostImportTest(this.itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
+        await PostImportTest(itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
         var updatedComment = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
         updatedComment.ContentId.Should().Be(2);
@@ -139,8 +139,8 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task ImportFileWithParentKeysTest()
     {
-        await this.CreateFKItemsWithUid(6);
-        await this.PostImportTest(this.itemsUrl, "commentsWithParentKey.csv");
+        await CreateFKItemsWithUid(6);
+        await PostImportTest(itemsUrl, "commentsWithParentKey.csv");
 
         var addedComment1 = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         addedComment1.Should().NotBeNull();
@@ -153,7 +153,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         addedComment3.Should().NotBeNull();
         addedComment3.ParentId.Should().Be(1);
 
-        await this.PostImportTest(this.itemsUrl, "commentsWithOldParentKey.csv");
+        await PostImportTest(itemsUrl, "commentsWithOldParentKey.csv");
 
         var addedComment4 = App.GetDbContext()!.Comments!.First(c => c.Id == 4);
         addedComment4.Should().NotBeNull();
@@ -171,30 +171,30 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task MultiIterationsImportTest()
     {
-        await this.CreateFKItemsWithUid(1);
+        await CreateFKItemsWithUid(1);
 
-        var importResult = await this.PostImportTest(this.itemsUrl, "commentsWithKey.csv");
+        var importResult = await PostImportTest(itemsUrl, "commentsWithKey.csv");
 
         importResult.Added.Should().Be(4);
         importResult.Updated.Should().Be(0);
         importResult.Failed.Should().Be(0);
         importResult.Skipped.Should().Be(0);
 
-        importResult = await this.PostImportTest(this.itemsUrl, "commentsWithKeyUpdate.csv");
+        importResult = await PostImportTest(itemsUrl, "commentsWithKeyUpdate.csv");
 
         importResult.Added.Should().Be(2);
         importResult.Updated.Should().Be(1);
         importResult.Failed.Should().Be(0);
         importResult.Skipped.Should().Be(3);
 
-        importResult = await this.PostImportTest(this.itemsUrl, "commentsWithKeyUpdate.csv");
+        importResult = await PostImportTest(itemsUrl, "commentsWithKeyUpdate.csv");
 
         importResult.Added.Should().Be(1);
         importResult.Updated.Should().Be(0);
         importResult.Failed.Should().Be(0);
         importResult.Skipped.Should().Be(5);
 
-        importResult = await this.PostImportTest(this.itemsUrl, "commentsWithKeyUpdateWithErrors.csv");
+        importResult = await PostImportTest(itemsUrl, "commentsWithKeyUpdateWithErrors.csv");
 
         importResult.Added.Should().Be(1);
         importResult.Updated.Should().Be(1);
@@ -212,7 +212,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     {
         var testComment = new TestComment(uid, fkId);
 
-        var newCommentUrl = await this.PostTest(this.itemsUrl, testComment);
+        var newCommentUrl = await PostTest(itemsUrl, testComment);
 
         return (testComment, newCommentUrl);
     }
@@ -221,9 +221,9 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     {
         var fkItemCreate = new TestContent();
 
-        var fkUrl = await this.PostTest("/api/content", fkItemCreate);
+        var fkUrl = await PostTest("/api/content", fkItemCreate);
 
-        var fkItem = await this.GetTest<Content>(fkUrl);
+        var fkItem = await GetTest<Content>(fkUrl);
 
         fkItem.Should().NotBeNull();
 
@@ -242,13 +242,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var fkItemCreate1 = new TestContent("100");
         var fkItemCreate2 = new TestContent("101");
 
-        await this.PostTest("/api/content", fkItemCreate1);
-        await this.PostTest("/api/content", fkItemCreate2);
+        await PostTest("/api/content", fkItemCreate1);
+        await PostTest("/api/content", fkItemCreate2);
 
         for (var i = 1; i <= contactsCount; i++)
         {
             var contact = new TestContact(i.ToString());
-            await this.PostTest("/api/contacts", contact);
+            await PostTest("/api/contacts", contact);
         }
     }
 }

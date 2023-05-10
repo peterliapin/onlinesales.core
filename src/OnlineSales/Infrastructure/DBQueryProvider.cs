@@ -30,22 +30,22 @@ namespace OnlineSales.Infrastructure
 
         public async Task<QueryResult<T>> GetResult()
         {
-            this.AddWhereCommands();
-            this.AddSearchCommands();
+            AddWhereCommands();
+            AddSearchCommands();
 
-            var totalCount = this.query.Count();
+            var totalCount = query.Count();
             IList<T>? records;
 
-            this.AddOrderCommands();
-            this.AddSkipCommand();
-            this.AddLimitCommand();
-            if (this.parseData.SelectData.IsSelect)
+            AddOrderCommands();
+            AddSkipCommand();
+            AddLimitCommand();
+            if (parseData.SelectData.IsSelect)
             {
-                records = await this.GetSelectResult();
+                records = await GetSelectResult();
             }
             else
             {
-                records = await this.query.ToListAsync();
+                records = await query.ToListAsync();
             }
 
             return new QueryResult<T>(records, totalCount);
@@ -53,14 +53,14 @@ namespace OnlineSales.Infrastructure
 
         private void AddOrderCommands()
         {
-            if (this.parseData.OrderData.Count == 0)
+            if (parseData.OrderData.Count == 0)
             {
-                this.query = this.query.OrderBy(t => t.Id);
+                query = query.OrderBy(t => t.Id);
             }
             else
             {
                 var moreThanOne = false;
-                foreach (var orderCmd in this.parseData.OrderData)
+                foreach (var orderCmd in parseData.OrderData)
                 {
                     var expressionParameter = Expression.Parameter(typeof(T));
                     var orderPropertyType = orderCmd.Property.PropertyType;
@@ -84,30 +84,30 @@ namespace OnlineSales.Infrastructure
                                                                         m => m.Name == methodName &&
                                                                         m.GetGenericArguments().Length == 2 &&
                                                                         m.GetParameters().Length == 2).MakeGenericMethod(typeof(T), orderPropertyType);
-                    this.query = (IOrderedQueryable<T>)orderMethod.Invoke(null, new object?[] { this.query, orderLambda })!;
+                    query = (IOrderedQueryable<T>)orderMethod.Invoke(null, new object?[] { query, orderLambda })!;
                 }
             }
         }
 
         private void AddSkipCommand()
         {
-            if (this.parseData.Skip > 0)
+            if (parseData.Skip > 0)
             {
-                this.query = this.query.Skip(this.parseData.Skip);
+                query = query.Skip(parseData.Skip);
             }
         }
 
         private void AddLimitCommand()
         {
-            if (this.parseData.Limit > 0)
+            if (parseData.Limit > 0)
             {
-                this.query = this.query.Take(this.parseData.Limit);
+                query = query.Take(parseData.Limit);
             }
         }
 
         private void AddSearchCommands()
         {
-            foreach (var cmdValue in this.parseData.SearchData)
+            foreach (var cmdValue in parseData.SearchData)
             {
                 var props = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false));
 
@@ -142,14 +142,14 @@ namespace OnlineSales.Infrastructure
                 if (!ExpressionEqualityComparer.Instance.Equals(orExpression, Expression.Constant(false)))
                 {
                     var predicate = Expression.Lambda<Func<T, bool>>(orExpression, paramExpr);
-                    this.query = this.query.Where(predicate);
+                    query = query.Where(predicate);
                 }
             }
         }
 
         private void AddWhereCommands()
         {
-            var commands = this.parseData.WhereData;
+            var commands = parseData.WhereData;
             if (commands.Count > 0)
             {
                 var expressionParameter = Expression.Parameter(typeof(T));
@@ -166,7 +166,7 @@ namespace OnlineSales.Infrastructure
                         {
                             foreach (var cmd in cmds.Data)
                             {
-                                var expression = this.ParseWhereCommand(expressionParameter, cmd);
+                                var expression = ParseWhereCommand(expressionParameter, cmd);
                                 orExpression = Expression.Or(orExpression, expression);
                             }
                         }
@@ -174,7 +174,7 @@ namespace OnlineSales.Infrastructure
                         {
                             foreach (var cmd in cmds.Data)
                             {
-                                var expression = this.ParseWhereCommand(expressionParameter, cmd);
+                                var expression = ParseWhereCommand(expressionParameter, cmd);
                                 andExpression = Expression.And(andExpression, expression);
                                 andExpressionExist = true;
                             }
@@ -197,7 +197,7 @@ namespace OnlineSales.Infrastructure
                 }
 
                 var resExpression = Expression.Or(andExpression, orExpression);
-                this.query = this.query.Where(Expression.Lambda<Func<T, bool>>(resExpression, expressionParameter));
+                query = query.Where(Expression.Lambda<Func<T, bool>>(resExpression, expressionParameter));
             }
         }
 
@@ -374,14 +374,14 @@ namespace OnlineSales.Infrastructure
 
         private async Task<IList<T>?> GetSelectResult()
         {
-            if (this.parseData.SelectData.SelectedProperties.Any())
+            if (parseData.SelectData.SelectedProperties.Any())
             {
                 var expressionParameter = Expression.Parameter(typeof(T));
-                var outputType = TypeHelper.CompileTypeForSelectStatement(this.parseData.SelectData.SelectedProperties.ToArray());
+                var outputType = TypeHelper.CompileTypeForSelectStatement(parseData.SelectData.SelectedProperties.ToArray());
                 var delegateType = typeof(Func<,>).MakeGenericType(typeof(T), outputType);
                 var createOutputTypeExpression = Expression.New(outputType);
 
-                var expressionSelectedProperties = this.parseData.SelectData.SelectedProperties.Select(p =>
+                var expressionSelectedProperties = parseData.SelectData.SelectedProperties.Select(p =>
                 {
                     var bindProp = outputType.GetProperty(p.Name);
                     var exprProp = Expression.Property(expressionParameter, p);
@@ -394,7 +394,7 @@ namespace OnlineSales.Infrastructure
 
                 var toArrayAsyncMethod = typeof(EntityFrameworkQueryableExtensions).GetMethod("ToArrayAsync")!.MakeGenericMethod(outputType);
 
-                var selectQueryable = queryMethod!.Invoke(this.query, new object[] { this.query, lambda });
+                var selectQueryable = queryMethod!.Invoke(query, new object[] { query, lambda });
 
                 var outputTypeTaskResultProp = typeof(Task<>).MakeGenericType(outputType.MakeArrayType()).GetProperty("Result");
 

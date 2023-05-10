@@ -23,7 +23,7 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
     {
         AuthenticateResult result;
 
-        if (this.Context.Request.Headers["Authorization"] == "Bearer Success")
+        if (Context.Request.Headers["Authorization"] == "Bearer Success")
         {
             var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
             var identity = new ClaimsIdentity(claims, "Test");

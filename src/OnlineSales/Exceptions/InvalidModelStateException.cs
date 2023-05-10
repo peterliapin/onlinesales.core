@@ -10,9 +10,8 @@ public class InvalidModelStateException : Exception
 {
     public InvalidModelStateException(ModelStateDictionary modelState)
     {
-        this.ModelState = modelState;
+        ModelState = modelState;
     }
 
     public ModelStateDictionary? ModelState { get; init; }
 }
-

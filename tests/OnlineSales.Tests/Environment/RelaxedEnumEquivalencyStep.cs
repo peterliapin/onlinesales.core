@@ -74,4 +74,3 @@ internal class RelaxedEnumEquivalencyStep : IEquivalencyStep
         return o?.GetType().IsEnum == true ? Convert.ToDecimal(o, CultureInfo.InvariantCulture) : null;
     }
 }
-

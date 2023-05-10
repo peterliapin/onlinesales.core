@@ -30,8 +30,8 @@ namespace OnlineSales.Services
 
         public async Task<EmailVerifyInfoDto> Validate(string email)
         {
-            var apiUrl = this.emailVerificationApiConfig.Value.Url;
-            var apiKey = this.emailVerificationApiConfig.Value.ApiKey;
+            var apiUrl = emailVerificationApiConfig.Value.Url;
+            var apiKey = emailVerificationApiConfig.Value.ApiKey;
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

@@ -17,4 +17,3 @@ public class GravatarHelper
         return "https://www.gravatar.com/avatar/" + Convert.ToHexString(emailHashCode).ToLower() + "?size=48&d=mp";
     }
 }
-

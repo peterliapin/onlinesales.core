@@ -14,7 +14,7 @@ public class ErrorsTests : BaseTest
     {
         var testContent = new TestContent();
 
-        var response = await this.Request(HttpMethod.Post, "/api/content", testContent, "Fail");
+        var response = await Request(HttpMethod.Post, "/api/content", testContent, "Fail");
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
@@ -28,7 +28,7 @@ public class ErrorsTests : BaseTest
     {
         var contentUpdateDto = new ContentUpdateDto();
 
-        var response = await this.Request(HttpMethod.Post, "/api/content", contentUpdateDto);
+        var response = await Request(HttpMethod.Post, "/api/content", contentUpdateDto);
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
 
@@ -43,7 +43,7 @@ public class ErrorsTests : BaseTest
     [Fact]
     public async Task Http500ErrorTest()
     {
-        var response = await this.Request(HttpMethod.Post, "/api/statistics", null);
+        var response = await Request(HttpMethod.Post, "/api/statistics", null);
 
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
 

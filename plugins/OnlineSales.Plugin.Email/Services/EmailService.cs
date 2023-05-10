@@ -26,7 +26,7 @@ public class EmailService : IEmailService
 
         if (settings != null)
         {
-            this.pluginSettings = settings;
+            pluginSettings = settings;
         }
     }
 
@@ -36,9 +36,9 @@ public class EmailService : IEmailService
 
         try
         {
-            await client.ConnectAsync(this.pluginSettings.Email.Server, this.pluginSettings.Email.Port, this.pluginSettings.Email.UseSsl);
+            await client.ConnectAsync(pluginSettings.Email.Server, pluginSettings.Email.Port, pluginSettings.Email.UseSsl);
 
-            await client.AuthenticateAsync(new NetworkCredential(this.pluginSettings.Email.UserName, this.pluginSettings.Email.Password));
+            await client.AuthenticateAsync(new NetworkCredential(pluginSettings.Email.UserName, pluginSettings.Email.Password));
 
             await client.SendAsync(await GenerateEmailBody(subject, fromEmail, fromName, recipients, body, attachments));
         }

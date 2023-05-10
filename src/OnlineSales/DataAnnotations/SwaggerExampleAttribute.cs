@@ -8,7 +8,7 @@ public class SwaggerExampleAttribute<T> : Attribute
 {
     public SwaggerExampleAttribute(T value)
     {
-        this.Value = value;
+        Value = value;
     }
 
     public T Value { get; }

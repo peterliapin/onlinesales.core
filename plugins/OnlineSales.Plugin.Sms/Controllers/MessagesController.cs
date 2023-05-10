@@ -48,36 +48,36 @@ public class MessagesController : Controller
 
             try
             {
-                var phoneNumber = this.phoneNumberUtil.Parse(smsDetails.Recipient, string.Empty);
+                var phoneNumber = phoneNumberUtil.Parse(smsDetails.Recipient, string.Empty);
 
-                recipient = this.phoneNumberUtil.Format(phoneNumber, PhoneNumberFormat.E164);
+                recipient = phoneNumberUtil.Format(phoneNumber, PhoneNumberFormat.E164);
             }
             catch (NumberParseException npex)
             {
-                this.ModelState.AddModelError(npex.ErrorType.ToString(), npex.Message);
+                ModelState.AddModelError(npex.ErrorType.ToString(), npex.Message);
             }
 
-            if (!this.ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                throw new InvalidModelStateException(this.ModelState);
+                throw new InvalidModelStateException(ModelState);
             }
 
             var smsLog = new SmsLog
             {
-                Sender = this.smsService.GetSender(recipient),
+                Sender = smsService.GetSender(recipient),
                 Recipient = smsDetails.Recipient,
                 Message = smsDetails.Message,
                 Status = Entities.SmsLog.SmsStatus.NotSent,
             };
 
-            this.dbContext.SmsLogs!.Add(smsLog);
-            await this.dbContext.SaveChangesAsync();
+            dbContext.SmsLogs!.Add(smsLog);
+            await dbContext.SaveChangesAsync();
 
-            await this.smsService.SendAsync(recipient, smsDetails.Message);
+            await smsService.SendAsync(recipient, smsDetails.Message);
 
             smsLog.Status = SmsLog.SmsStatus.Sent;
 
-            return this.Ok();
+            return Ok();
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ public class MessagesController : Controller
         }
         finally
         {
-            await this.dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 }

@@ -11,11 +11,11 @@ public class LinkTests : BaseTest
     {
         var link = new TestLink();
 
-        var location = await this.PostTest("/api/links", link);
+        var location = await PostTest("/api/links", link);
 
         location.Should().NotBeNull();
 
-        var response = await this.GetTest("/go/" + link.Uid, HttpStatusCode.TemporaryRedirect, "Anonymous");
+        var response = await GetTest("/go/" + link.Uid, HttpStatusCode.TemporaryRedirect, "Anonymous");
 
         var destination = response.Headers?.Location?.AbsoluteUri ?? string.Empty;
 
@@ -28,4 +28,3 @@ public class LinkTests : BaseTest
         linkLog!.Destination.Should().Be(link.Destination);
     }
 }
-

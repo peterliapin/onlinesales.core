@@ -53,8 +53,8 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<string[]>> GetTags()
     {
-        var tags = (await this.dbSet.Select(c => c.Tags).ToArrayAsync()).SelectMany(z => z).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
-        return this.Ok(tags);
+        var tags = (await dbSet.Select(c => c.Tags).ToArrayAsync()).SelectMany(z => z).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
+        return Ok(tags);
     }
 
     [HttpGet("categories")]
@@ -65,7 +65,7 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
 
     public async Task<ActionResult<string[]>> GetCategories()
     {
-        var categories = (await this.dbSet.Select(c => c.Category).ToArrayAsync()).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
-        return this.Ok(categories);
+        var categories = (await dbSet.Select(c => c.Category).ToArrayAsync()).Distinct().Where(str => !string.IsNullOrEmpty(str)).ToArray();
+        return Ok(categories);
     }
 }

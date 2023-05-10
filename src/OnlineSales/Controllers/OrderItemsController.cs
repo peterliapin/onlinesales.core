@@ -34,26 +34,26 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
     {
-        var existOrder = await (from order in this.dbContext.Orders
+        var existOrder = await (from order in dbContext.Orders
                                 where order.Id == value.OrderId
                                 select order).FirstOrDefaultAsync();
 
         if (existOrder == null)
         {
-            this.ModelState.AddModelError("OrderId", "The referenced order was not found");
+            ModelState.AddModelError("OrderId", "The referenced order was not found");
 
-            throw new InvalidModelStateException(this.ModelState);
+            throw new InvalidModelStateException(ModelState);
         }
 
-        var orderItem = this.mapper.Map<OrderItem>(value);
+        var orderItem = mapper.Map<OrderItem>(value);
 
-        await this.orderItemService.AddAsync(existOrder, orderItem);
+        await orderItemService.AddAsync(existOrder, orderItem);
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        var returnedValue = this.mapper.Map<OrderItemDetailsDto>(orderItem);
+        var returnedValue = mapper.Map<OrderItemDetailsDto>(orderItem);
 
-        return this.CreatedAtAction(nameof(GetOne), new { id = orderItem.Id }, returnedValue);
+        return CreatedAtAction(nameof(GetOne), new { id = orderItem.Id }, returnedValue);
     }
 
     [HttpPatch("{id}")]
@@ -63,26 +63,26 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Patch(int id, [FromBody] OrderItemUpdateDto value)
     {
-        var orderItem = await this.FindOrThrowNotFound(id);
+        var orderItem = await FindOrThrowNotFound(id);
 
-        var order = await (from o in this.dbContext.Orders
+        var order = await (from o in dbContext.Orders
                            where o.Id == orderItem.OrderId
                            select o).FirstOrDefaultAsync();
 
         if (order == null)
         {
-            this.ModelState.AddModelError("OrderId", "The referenced order was not found");
+            ModelState.AddModelError("OrderId", "The referenced order was not found");
 
-            throw new InvalidModelStateException(this.ModelState);
+            throw new InvalidModelStateException(ModelState);
         }
 
-        this.mapper.Map(value, orderItem);
+        mapper.Map(value, orderItem);
 
-        this.orderItemService.Update(order!, orderItem);
+        orderItemService.Update(order!, orderItem);
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        return this.mapper.Map<OrderItemDetailsDto>(orderItem);
+        return mapper.Map<OrderItemDetailsDto>(orderItem);
     }
 
     [HttpDelete("{id}")]
@@ -92,14 +92,14 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult> Delete(int id)
     {
-        var existingEntity = await this.FindOrThrowNotFound(id);
+        var existingEntity = await FindOrThrowNotFound(id);
 
-        var existingOrder = await (from order in this.dbContext.Orders
+        var existingOrder = await (from order in dbContext.Orders
                                    where order.Id == existingEntity.OrderId
                                    select order).FirstOrDefaultAsync();
 
-        await this.orderItemService.DeleteAsync(existingOrder!, existingEntity);
+        await orderItemService.DeleteAsync(existingOrder!, existingEntity);
 
-        return this.NoContent();
+        return NoContent();
     }
 }

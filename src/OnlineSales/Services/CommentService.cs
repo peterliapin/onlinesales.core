@@ -22,21 +22,21 @@ public class CommentService : ICommentService
 
     public async Task SaveAsync(Comment comment)
     {
-        await this.EnrichWithContactId(comment);
+        await EnrichWithContactId(comment);
 
         if (comment.Id > 0)
         {
-            this.pgDbContext.Comments!.Update(comment);
+            pgDbContext.Comments!.Update(comment);
         }
         else
         {
-            await this.pgDbContext.Comments!.AddAsync(comment);
+            await pgDbContext.Comments!.AddAsync(comment);
         }
     }
 
     public async Task SaveRangeAsync(List<Comment> comments)
     {
-        await this.EnrichWithContactIdAsync(comments);
+        await EnrichWithContactIdAsync(comments);
 
         var newAndExisting = comments.GroupBy(c => c.Id > 0);
 
@@ -44,11 +44,11 @@ public class CommentService : ICommentService
         {
             if (group.Key)
             {
-                this.pgDbContext.UpdateRange(group.ToList());
+                pgDbContext.UpdateRange(group.ToList());
             }
             else
             {
-                await this.pgDbContext.AddRangeAsync(group.ToList());
+                await pgDbContext.AddRangeAsync(group.ToList());
             }
         }
     }
@@ -57,13 +57,13 @@ public class CommentService : ICommentService
     {
         if (comment.ContactId == 0)
         {
-            var contact = await this.pgDbContext.Contacts!.Where(contact => contact.Email == comment.AuthorEmail).FirstOrDefaultAsync();
+            var contact = await pgDbContext.Contacts!.Where(contact => contact.Email == comment.AuthorEmail).FirstOrDefaultAsync();
 
             if (contact == null)
             {
                 contact = new Contact { Email = comment.AuthorEmail, FirstName = comment.AuthorName };
 
-                await this.contactsService.SaveAsync(contact);
+                await contactsService.SaveAsync(contact);
             }
 
             comment.Contact = contact;
@@ -75,7 +75,7 @@ public class CommentService : ICommentService
         var emails = (from comment in comments
                       select comment.AuthorEmail).Distinct();
 
-        var existingContacts = await this.pgDbContext.Contacts!
+        var existingContacts = await pgDbContext.Contacts!
                                 .Where(contact => emails.Contains(contact.Email))
                                 .ToDictionaryAsync(contact => contact.Email, contact => contact);
 
@@ -100,7 +100,6 @@ public class CommentService : ICommentService
             comment.Contact = contact;
         }
 
-        await this.contactsService.SaveRangeAsync(newContacts);
+        await contactsService.SaveRangeAsync(newContacts);
     }
 }
-

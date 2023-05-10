@@ -16,20 +16,20 @@ public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdate
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await this.GetAllWithAuthentification("Anonymous");
+        await GetAllWithAuthentification("Anonymous");
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await this.CreateAndGetItemWithAuthentification("Anonymous");
+        await CreateAndGetItemWithAuthentification("Anonymous");
     }
 
     [Fact]
     public async Task CheckTags()
     {
-        await this.CreateItem();
-        var response = await this.GetTest(this.itemsUrl + "/tags", HttpStatusCode.OK);
+        await CreateItem();
+        var response = await GetTest(itemsUrl + "/tags", HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
         var data = JsonHelper.Deserialize<string[]>(content);
         data.Should().NotBeNull();
@@ -39,8 +39,8 @@ public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdate
     [Fact]
     public async Task CheckCategories()
     {
-        await this.CreateItem();
-        var response = await this.GetTest(this.itemsUrl + "/categories", HttpStatusCode.OK);
+        await CreateItem();
+        var response = await GetTest(itemsUrl + "/categories", HttpStatusCode.OK);
         var content = await response.Content.ReadAsStringAsync();
         var data = JsonHelper.Deserialize<string[]>(content);
         data.Should().NotBeNull();

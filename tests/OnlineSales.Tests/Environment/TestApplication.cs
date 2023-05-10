@@ -28,10 +28,10 @@ public class TestApplication : WebApplicationFactory<Program>
 
     public void CleanDatabase()
     {
-        using (var scope = this.Services.CreateScope())
+        using (var scope = Services.CreateScope())
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-            this.RenewDatabase(dataContaxt);
+            RenewDatabase(dataContaxt);
 
             var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
             esDbContext.ElasticClient.Indices.Delete("*");
@@ -42,7 +42,7 @@ public class TestApplication : WebApplicationFactory<Program>
         where T : BaseEntityWithId
         where TS : ISaveService<T>
     {
-        using (var scope = this.Services.CreateScope())
+        using (var scope = Services.CreateScope())
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
 
@@ -63,14 +63,14 @@ public class TestApplication : WebApplicationFactory<Program>
 
     public PgDbContext? GetDbContext()
     {
-        var scope = this.Services.CreateScope();
+        var scope = Services.CreateScope();
         var dataContext = scope.ServiceProvider.GetRequiredService<PgDbContext>();
         return dataContext;
     }
 
     public IMapper GetMapper()
     {
-        using (var serviceScope = this.Services.CreateScope())
+        using (var serviceScope = Services.CreateScope())
         {
             return serviceScope.ServiceProvider.GetService<IMapper>()!;
         }
@@ -106,7 +106,7 @@ public class TestApplication : WebApplicationFactory<Program>
         catch
         {
             Thread.Sleep(1000);
-            this.RenewDatabase(context);
+            RenewDatabase(context);
         }
     }
 }
