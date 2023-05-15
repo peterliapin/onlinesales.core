@@ -17,7 +17,7 @@ namespace OnlineSales.SendGrid.Tasks
 {
     public class EmailLogsToActivityLogDumpTask : BaseTask
     {
-        private static readonly string SourceName = "SMS";
+        private static readonly string SourceName = "EmailService";
         private readonly PgDbContext dbContext;
         private readonly ActivityLogService logService;
 
