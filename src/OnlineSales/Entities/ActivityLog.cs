@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// <copyright file="ActivityLog.cs" company="WavePoint Co. Ltd.">
+// Licensed under the MIT license. See LICENSE file in the samples root for full license information.
+// </copyright>
+using System.ComponentModel.DataAnnotations;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
