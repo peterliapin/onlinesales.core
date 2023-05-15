@@ -3,10 +3,13 @@
 // </copyright>
 
 using System.Configuration;
+using System.Diagnostics;
+using Microsoft.Identity.Client;
 using Nest;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
+using OnlineSales.Entities;
 
 namespace OnlineSales.Services
 {
@@ -24,11 +27,11 @@ namespace OnlineSales.Services
 
         public async Task<int> GetMaxId(string source)
         {
-            var sr = new SearchRequest<ActivityLogDto>(indexName);
+            var sr = new SearchRequest<ActivityLog>(indexName);
             sr.Query = new TermQuery() { Field = "source.keyword", Value = source };
             sr.Sort = new List<ISort>() { new FieldSort { Field = "sourceId", Order = Nest.SortOrder.Descending } };
             sr.Size = 1;
-            var res = await esDbContext.ElasticClient.SearchAsync<ActivityLogDto>(sr);
+            var res = await esDbContext.ElasticClient.SearchAsync<ActivityLog>(sr);
             if (res != null)
             {
                 var doc = res.Documents.FirstOrDefault();
@@ -41,11 +44,11 @@ namespace OnlineSales.Services
             return 0;
         }
 
-        public async Task<bool> AddActivityRecords(List<ActivityLogDto> records)
+        public async Task<bool> AddActivityRecords(List<ActivityLog> records)
         {
             if (records.Count > 0)
             {
-                var responce = await esDbContext.ElasticClient.IndexManyAsync<ActivityLogDto>(records, indexName);
+                var responce = await esDbContext.ElasticClient.IndexManyAsync<ActivityLog>(records, indexName);
 
                 if (!responce.IsValid)
                 {

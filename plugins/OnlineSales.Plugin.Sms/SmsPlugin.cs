@@ -2,13 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.Services;
+using OnlineSales.SendGrid.Tasks;
 
 namespace OnlineSales.Plugin.Sms;
 
@@ -27,6 +27,9 @@ public class SmsPlugin : IPlugin
 
         services.AddScoped<PluginDbContextBase, SmsDbContext>();
         services.AddScoped<SmsDbContext, SmsDbContext>();
+        
         services.AddSingleton<ISmsService, SmsService>();
+
+        services.AddScoped<ITask, SyncActivityLogTask>();
     }
 }

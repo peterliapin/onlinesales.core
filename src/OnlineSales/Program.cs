@@ -14,6 +14,7 @@ using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
+using OnlineSales.SendGrid.Tasks;
 using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Quartz;
@@ -429,6 +430,7 @@ public class Program
         builder.Services.AddScoped<ITask, DomainVerificationTask>();
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, ContactAccountTask>();
+        builder.Services.AddScoped<ITask, EmailLogsToActivityLogDumpTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

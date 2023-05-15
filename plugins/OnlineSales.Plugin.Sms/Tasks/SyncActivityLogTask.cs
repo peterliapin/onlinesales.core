@@ -64,9 +64,9 @@ namespace OnlineSales.SendGrid.Tasks
             }
         }
 
-        private static ActivityLogDto Convert(SmsLog ev)
+        private static ActivityLog Convert(SmsLog ev)
         {
-            return new ActivityLogDto()
+            return new ActivityLog()
             {
                 Source = SourceName,
                 SourceId = ev.Id,
