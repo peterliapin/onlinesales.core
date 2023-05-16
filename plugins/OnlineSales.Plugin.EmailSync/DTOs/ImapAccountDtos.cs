@@ -6,16 +6,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OnlineSales.Plugin.EmailSync.DTOs;
 
-public class ImapAccountCreateDto
+public class ImapAccountBaseDto
 {
     [Required]
     public string Host { get; set; } = string.Empty;
 
     [Required]
     public string UserName { get; set; } = string.Empty;
-
-    [Required]
-    public string Password { get; set; } = string.Empty;
 
     [Required]
     public int Port { get; set; }
@@ -25,6 +22,12 @@ public class ImapAccountCreateDto
 
     [Required]
     public string UserId { get; set; } = string.Empty;
+}
+
+public class ImapAccountCreateDto : ImapAccountBaseDto
+{
+    [Required]
+    public string Password { get; set; } = string.Empty;
 }
 
 public class ImapAccountUpdateDto
@@ -42,7 +45,7 @@ public class ImapAccountUpdateDto
     public string? UserId { get; set; } = string.Empty;
 }
 
-public class ImapAccountDetailsDto : ImapAccountCreateDto
+public class ImapAccountDetailsDto : ImapAccountBaseDto
 {
     public int Id { get; set; }
 
