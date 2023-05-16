@@ -4,6 +4,7 @@
 
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
@@ -19,8 +20,21 @@ namespace OnlineSales.Plugin.EmailSync.Controllers;
 [Route("api/[controller]")]
 public class ImapAccountsController : BaseController<ImapAccount, ImapAccountCreateDto, ImapAccountUpdateDto, ImapAccountDetailsDto>
 {
+    protected readonly EmailSyncDbContext emailSyncContext;
+
     public ImapAccountsController(EmailSyncDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
     : base(dbContext, mapper, apiSettingsConfig, esDbContext)
     {
+        this.emailSyncContext = dbContext;
+    }
+
+    [HttpGet("user/{userid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public ActionResult<List<ImapAccountDetailsDto>> GetAccountsForUser(string userid)
+    {
+        var result = emailSyncContext.ImapAccounts!.Where(a => a.UserId == userid).ToList();
+        return Ok(mapper.Map<List<ImapAccountDetailsDto>>(result));
     }
 }
