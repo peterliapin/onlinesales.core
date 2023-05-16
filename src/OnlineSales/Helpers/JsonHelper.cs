@@ -27,7 +27,6 @@ public class JsonHelper
     {
         options.PropertyNamingPolicy = policy;
 
-        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
         options.Converters.Add(new JsonStringEnumConverter());
     }
 
@@ -42,7 +41,6 @@ public class JsonHelper
             options.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
         }
 
-        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
         options.Converters.Add(new JsonStringEnumConverter());
     }
 

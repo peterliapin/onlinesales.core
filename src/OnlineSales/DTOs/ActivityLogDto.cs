@@ -11,6 +11,8 @@ namespace OnlineSales.DTOs;
 
 public class ActivityLogDto
 {
+    public int Id { get; set; }
+
     public string Source { get; set; } = string.Empty;
 
     public int SourceId { get; set; }

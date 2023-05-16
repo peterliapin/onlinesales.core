@@ -4,6 +4,7 @@
 
 using System.Web;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Nest;
@@ -14,6 +15,9 @@ using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
+
+[Authorize]
+[Route("api/[controller]")]
 public class ActivityLogController : ControllerBase
 {
     private readonly IMapper mapper;
