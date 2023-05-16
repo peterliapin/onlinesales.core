@@ -24,7 +24,7 @@ namespace OnlineSales.SendGrid.Tasks
         private readonly int batchSize;
 
         public EmailLogsToActivityLogDumpTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
-            : base("Tasks:SyncActivityLogTask", configuration, taskStatusService)
+            : base("Tasks:EmailLogsToActivityLogDumpTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.logService = logService;

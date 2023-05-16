@@ -56,5 +56,16 @@
       "Code": "+7",
       "Gateway": "Smsc"
     }
+  ],
+  "Tasks": [
+    {
+      "SyncActivityLogTask": {
+        "Enable": true,
+        "CronSchedule": "0/30 * * * * ? *",
+        "RetryCount": "2",
+        "RetryInterval": "5",
+        "BatchSize": "100"
+      }
+    }
   ]
 }

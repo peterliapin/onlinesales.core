@@ -11,11 +11,6 @@ namespace OnlineSales.Plugin.Sms.Data;
 
 public class SmsDbContext : PluginDbContextBase
 {
-    public SmsDbContext()
-        : base()
-    {
-    }
-
     public SmsDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
