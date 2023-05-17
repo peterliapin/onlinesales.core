@@ -17,17 +17,15 @@ public class EmailSyncDbContext : PluginDbContextBase
 {
     private readonly IEncryptionProvider encryptionProvider;
 
-    private readonly string key = "fTjWnZr4u7x!A%D*";
-
-    public EmailSyncDbContext()
-        : base()
-    {
-        encryptionProvider = new GenerateEncryptionProvider(key);
-    }
-
     public EmailSyncDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
+        var key = configuration.GetSection("EmailSync:EncryptionKey").Get<string>();
+        if (key == null )
+        {
+            throw new ArgumentNullException(key);
+        }
+
         encryptionProvider = new GenerateEncryptionProvider(key);
     }
 

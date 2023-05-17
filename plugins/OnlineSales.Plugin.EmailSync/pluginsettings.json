@@ -1,9 +1,12 @@
 ﻿{
-  "InternalDomains": [],
-  "IgnoredEmails": [],
+  "EmailSync": {
+    "InternalDomains": [],
+    "IgnoredEmails": [],
+    "EncryptionKey": "fTjWnZr4u7x!A%D*"
+  },
   "Tasks": {
     "EmailSyncTask": {
-      "Enable": false,
+      "Enable": true,
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1",

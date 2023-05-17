@@ -49,10 +49,10 @@ namespace OnlineSales.EmailSync.Tasks
                 throw new MissingConfigurationException($"The specified configuration section for the provided configKey {this.configKey} could not be found in the settings file.");
             }
 
-            var domains = configuration.GetSection("InternalDomains")!.Get<string[]>();
+            var domains = configuration.GetSection("EmailSync:InternalDomains")!.Get<string[]>();
             this.internalDomains = (domains != null) ? domains : new string[0];
 
-            var ignored = configuration.GetSection("IgnoredEmails")!.Get<string[]>();
+            var ignored = configuration.GetSection("EmailSync:IgnoredEmails")!.Get<string[]>();
             this.ignoredEmails = (ignored != null) ? ignored : new string[0];
         }
 
