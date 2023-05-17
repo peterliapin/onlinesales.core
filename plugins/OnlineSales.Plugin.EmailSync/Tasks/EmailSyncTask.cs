@@ -7,12 +7,14 @@ using MailKit.Net.Imap;
 using MailKit.Search;
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Configuration;
+using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Exceptions;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.EmailSync.Data;
 using OnlineSales.Services;
 using OnlineSales.Tasks;
+using Serilog;
 
 namespace OnlineSales.EmailSync.Tasks
 {
@@ -56,40 +58,44 @@ namespace OnlineSales.EmailSync.Tasks
 
         public override async Task<bool> Execute(TaskExecutionLog currentJob)
         {
-            try
+            var accounts = dbContext.ImapAccounts!.ToList();
+            foreach (var imapAccount in accounts)
             {
-                var accounts = dbContext.ImapAccounts!.ToList();
-                foreach (var imapAccount in accounts)
+                try
                 {
-                    using (var client = new ImapClient())
+                    using (var transaction = await dbContext!.Database.BeginTransactionAsync())
                     {
-                        client.Connect(imapAccount.Host, imapAccount.Port, imapAccount.UseSsl);
+                        using (var client = new ImapClient())
+                        {
+                            client.Connect(imapAccount.Host, imapAccount.Port, imapAccount.UseSsl);
 
-                        client.Authenticate(imapAccount.UserName, imapAccount.Password);
+                            client.Authenticate(imapAccount.UserName, imapAccount.Password);
 
-                        var folders = client.GetFolders(client.PersonalNamespaces[0]);
+                            var folders = client.GetFolders(client.PersonalNamespaces[0]);
 
-                        var now = DateTime.UtcNow;
+                            var now = DateTime.UtcNow;
 
-                        var contactsToAdd = new HashSet<string>();
+                            var contactsToAdd = new HashSet<string>();
 
-                        await AddEmailLogs(imapAccount.LastDateTime, now, folders, contactsToAdd);
+                            await AddEmailLogs(imapAccount.LastDateTime, now, folders, contactsToAdd);
 
-                        await contactService.SaveRangeAsync(contactsToAdd.Select(c => new Contact() { Email = c, }).ToList());
+                            await contactService.SaveRangeAsync(contactsToAdd.Select(c => new Contact() { Email = c, }).ToList());
 
-                        imapAccount.LastDateTime = now;
+                            imapAccount.LastDateTime = now;
+
+                            await dbContext.SaveChangesAsync();
+
+                            await transaction.CommitAsync();
+                        }
                     }
                 }
-
-                await dbContext.SaveChangesAsync();
-
-                return true;
+                catch (Exception e)
+                {
+                    Log.Error(e, $"Error occured during imap syncronization, imap: {imapAccount.Host}, userName: {imapAccount.UserName}");
+                }
             }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-                throw;
-            }            
+
+            return true;            
         }
 
         private bool IsInternalDomain(string email)
