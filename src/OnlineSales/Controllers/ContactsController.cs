@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Security.Cryptography;
-using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,11 +22,13 @@ namespace OnlineSales.Controllers;
 public class ContactsController : BaseControllerWithImport<Contact, ContactCreateDto, ContactUpdateDto, ContactDetailsDto, ContactImportDto>
 {
     private readonly IContactService contactService;
+    private readonly CommentConrollerService commentConrollerService;
 
-    public ContactsController(PgDbContext dbContext, IMapper mapper, IContactService contactService, EsDbContext esDbContext, QueryProviderFactory<Contact> queryProviderFactory)
+    public ContactsController(PgDbContext dbContext, IMapper mapper, IContactService contactService, EsDbContext esDbContext, QueryProviderFactory<Contact> queryProviderFactory, CommentConrollerService commentConrollerService)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.contactService = contactService;
+        this.commentConrollerService = commentConrollerService;
     }
 
     [HttpGet("{id}")]
@@ -111,6 +111,28 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         returnedValue.AvatarUrl = GravatarHelper.EmailToGravatarUrl(returnedValue.Email);
 
         return Ok(returnedValue);
+    }
+
+    [HttpGet("{id}/comments")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
+    {
+        return commentConrollerService.ReturnComments(await commentConrollerService.GetCommentsForICommentable<Contact>(id), this);
+    }
+
+    [HttpPost("{id}/comments")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
+    {
+        return await commentConrollerService.PostComment(commentConrollerService.CreateCommentForICommentable<Contact>(value, id), this);
     }
 
     protected override async Task SaveRangeAsync(List<Contact> newRecords)

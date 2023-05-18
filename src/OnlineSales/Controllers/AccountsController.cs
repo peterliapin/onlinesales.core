@@ -19,8 +19,33 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class AccountsController : BaseControllerWithImport<Account, AccountCreateDto, AccountUpdateDto, AccountDetailsDto, AccountImportDto>
 {
-    public AccountsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Account> queryProviderFactory)
+    private readonly CommentConrollerService commentConrollerService;
+
+    public AccountsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Account> queryProviderFactory, CommentConrollerService commentConrollerService)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
+        this.commentConrollerService = commentConrollerService;
+    }
+
+    [HttpGet("{id}/comments")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
+    {
+        return commentConrollerService.ReturnComments(await commentConrollerService.GetCommentsForICommentable<Account>(id), this);
+    }
+
+    [HttpPost("{id}/comments")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
+    {
+        return await commentConrollerService.PostComment(commentConrollerService.CreateCommentForICommentable<Account>(value, id), this);
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Reflection;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +21,16 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
-    private readonly ICommentService commentService;
+    private static readonly Dictionary<CommentableType, Type> CommentableTypes = FindCommentableTypes();
 
-    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryProviderFactory)
+    private readonly ICommentService commentService;
+    private readonly CommentConrollerService commentConrollerService;
+
+    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryProviderFactory, CommentConrollerService commentConrollerService)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.commentService = commentService;
+        this.commentConrollerService = commentConrollerService;
     }
 
     [HttpGet]
@@ -39,21 +44,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
 
         var items = (List<CommentDetailsDto>)((ObjectResult)returnedItems!).Value!;
 
-        items.ForEach(c =>
-        {
-            c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.AuthorEmail);
-        });
-
-        if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            return Ok(items);
-        }
-        else
-        {
-            var commentsForAnonymous = mapper.Map<List<AnonymousCommentDetailsDto>>(items);
-
-            return Ok(commentsForAnonymous);
-        }
+        return commentConrollerService.ReturnComments(items, this);
     }
 
     // GET api/{entity}s/5
@@ -93,17 +84,46 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     {
         var comment = mapper.Map<Comment>(value);
 
-        await commentService.SaveAsync(comment);
+        if (!CheckCommentableEntity(comment.CommentableType, comment.CommentableId))
+        {
+            return UnprocessableEntity(value);
+        }
 
-        await dbContext.SaveChangesAsync();
-
-        var returnedValue = mapper.Map<CommentDetailsDto>(comment);
-
-        return CreatedAtAction(nameof(GetOne), new { id = comment.Id }, returnedValue);
+        return await commentConrollerService.PostComment(comment, this);
     }
 
     protected override async Task SaveRangeAsync(List<Comment> comments)
     {
         await commentService.SaveRangeAsync(comments);
+    }
+        
+    protected override bool AdditionalImportCheck(List<CommentImportDto> importRecords, int importedValueIndex, ImportResult importResult)
+    {
+        var importedValue = importRecords[importedValueIndex];
+        if (!CheckCommentableEntity(importedValue.CommentableType, importedValue.CommentableId))
+        {
+            importResult.AddError(importedValueIndex, $"Commentable entity of type {importedValue.CommentableType} with id = {importedValue.CommentableId} cannot be found");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static Dictionary<CommentableType, Type> FindCommentableTypes()
+    {
+        var assembly = Assembly.GetAssembly(typeof(ICommentable));
+        return assembly!.GetTypes().Where(t => t.IsClass && typeof(ICommentable).IsAssignableFrom(t)).ToDictionary(t => ICommentable.GetCommentableType(t), t => t);
+    }
+
+    private bool CheckCommentableEntity(CommentableType ct, int id)
+    {
+        var contains = CommentableTypes.TryGetValue(ct, out var type);
+        if (contains)
+        {
+            var data = dbContext.SetDbEntity(type!);
+            return data.Any(d => ((BaseEntityWithId)d).Id == id);
+        }
+
+        return false;
     }
 }

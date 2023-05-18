@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230517141022_Commentable")]
+    partial class Commentable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,17 +491,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address2");
 
-                    b.Property<DateTime?>("Birthday")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("birthday");
-
                     b.Property<string>("CityName")
                         .HasColumnType("text")
                         .HasColumnName("city_name");
-
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("text")
-                        .HasColumnName("company_name");
 
                     b.Property<int?>("ContinentCode")
                         .HasColumnType("integer")
@@ -520,10 +515,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<string>("Department")
-                        .HasColumnType("text")
-                        .HasColumnName("department");
-
                     b.Property<int>("DomainId")
                         .HasColumnType("integer")
                         .HasColumnName("domain_id");
@@ -537,10 +528,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("first_name");
 
-                    b.Property<string>("JobTitle")
-                        .HasColumnType("text")
-                        .HasColumnName("job_title");
-
                     b.Property<string>("Language")
                         .HasColumnType("text")
                         .HasColumnName("language");
@@ -549,21 +536,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
-                    b.Property<string>("MiddleName")
-                        .HasColumnType("text")
-                        .HasColumnName("middle_name");
-
                     b.Property<string>("Phone")
                         .HasColumnType("text")
                         .HasColumnName("phone");
-
-                    b.Property<string>("Prefix")
-                        .HasColumnType("text")
-                        .HasColumnName("prefix");
-
-                    b.Property<Dictionary<string, string>>("SocialMedia")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("social_media");
 
                     b.Property<string>("Source")
                         .HasColumnType("text")
@@ -737,6 +712,11 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("language");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
                     b.Property<string>("Source")
                         .HasColumnType("text")
                         .HasColumnName("source");
@@ -770,6 +750,10 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_content");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_content_slug");
 
                     b.ToTable("content", (string)null);
                 });
@@ -953,11 +937,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_email");
 
-                    b.Property<string>("MessageId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("message_id");
-
                     b.Property<string>("Recipient")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1083,10 +1062,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<int>("EmailGroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("email_group_id");
-
                     b.Property<string>("FromEmail")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1096,6 +1071,10 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("from_name");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("group_id");
 
                     b.Property<string>("Language")
                         .IsRequired()
@@ -1139,8 +1118,8 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_template");
 
-                    b.HasIndex("EmailGroupId")
-                        .HasDatabaseName("ix_email_template_email_group_id");
+                    b.HasIndex("GroupId")
+                        .HasDatabaseName("ix_email_template_group_id");
 
                     b.ToTable("email_template", (string)null);
                 });
@@ -1807,13 +1786,13 @@ namespace OnlineSales.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany("Contacts")
+                        .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_contact_account_account_id");
 
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
-                        .WithMany("Contacts")
+                        .WithMany()
                         .HasForeignKey("DomainId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -1856,7 +1835,7 @@ namespace OnlineSales.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany("Domains")
+                        .WithMany()
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_domain_account_account_id");
@@ -1878,14 +1857,14 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.EmailGroup", "EmailGroup")
-                        .WithMany("EmailTemplates")
-                        .HasForeignKey("EmailGroupId")
+                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_email_template_email_group_email_group_id");
+                        .HasConstraintName("fk_email_template_email_group_group_id");
 
-                    b.Navigation("EmailGroup");
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
@@ -1903,7 +1882,7 @@ namespace OnlineSales.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Contact", "Contact")
-                        .WithMany("Orders")
+                        .WithMany()
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -1915,7 +1894,7 @@ namespace OnlineSales.Migrations
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Order", "Order")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -1932,33 +1911,6 @@ namespace OnlineSales.Migrations
                         .HasConstraintName("fk_unsubscribe_contact_contact_id");
 
                     b.Navigation("Contact");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Account", b =>
-                {
-                    b.Navigation("Contacts");
-
-                    b.Navigation("Domains");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
-                {
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
-                {
-                    b.Navigation("Contacts");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
-                {
-                    b.Navigation("EmailTemplates");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Order", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

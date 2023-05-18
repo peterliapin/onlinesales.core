@@ -14,8 +14,7 @@ namespace OnlineSales.Entities;
 [Table("content")]
 [SupportsElastic]
 [SupportsChangeLog]
-[Index(nameof(Slug), IsUnique = true)]
-public class Content : BaseEntity
+public class Content : BaseEntity, ICommentable
 {
     [Searchable]
     [Required]
@@ -34,9 +33,6 @@ public class Content : BaseEntity
     public string CoverImageAlt { get; set; } = string.Empty;
 
     [Required]
-    public string Slug { get; set; } = string.Empty;
-
-    [Required]
     public string Type { get; set; } = string.Empty;
 
     [Searchable]
@@ -53,6 +49,8 @@ public class Content : BaseEntity
 
     public bool AllowComments { get; set; } = false;
 
-    [JsonIgnore]
-    public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+    public static CommentableType GetCommentableType()
+    {
+        return CommentableType.Content;
+    }
 }

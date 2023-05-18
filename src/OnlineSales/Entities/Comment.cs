@@ -64,12 +64,11 @@ public class Comment : BaseEntity
     public CommentStatus Status { get; set; } = CommentStatus.NotApproved;
 
     [Required]
-    public int ContentId { get; set; }
+    public int CommentableId { get; set; }
 
-    [JsonIgnore]
-    [ForeignKey("ContentId")]
-    public virtual Content? Content { get; set; }
-   
+    [Required]
+    public CommentableType CommentableType { get; set; }
+
     public int? ParentId { get; set; }
 
     [JsonIgnore]

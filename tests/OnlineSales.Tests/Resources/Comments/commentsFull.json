@@ -6,13 +6,14 @@
     "authorName": "Author Name 2",
     "authorEmail": "contact2@test2.net",
     "body": "TestContent2",
-    "contentId": 1,
+    "commentableId": 1,
     "parentId": null,
     "createdByIp": "192.168.1.2",
     "updatedByIp": null,
     "createdByUserAgent": "TestAgent2",
     "updatedByUserAgent": null,
-    "key": "key1"
+    "key": "key1",
+    "commentablType": "Content"
   },
   {
     "id": 1,
@@ -21,12 +22,13 @@
     "authorName": "Author Name 1",
     "authorEmail": "contact1@test1.net",
     "body": "Test Comment Body 1",
-    "contentId": 1,
+    "commentableId": 1,
     "parentId": null,
     "createdByIp": "192.168.1.1",
     "updatedByIp": "192.168.1.3",
     "createdByUserAgent": "TestAgent1",
     "updatedByUserAgent": "TestAgent3",
-    "key": "key2"
+    "key": "key2",
+    "commentablType": "Content"
   }
 ]

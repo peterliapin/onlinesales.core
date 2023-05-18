@@ -24,9 +24,6 @@ public class ContentCreateDto
     public string? CoverImageAlt { get; set; }
 
     [Required]
-    public string Slug { get; set; } = string.Empty;
-
-    [Required]
     public string Type { get; set; } = string.Empty;
 
     [Required]
@@ -60,9 +57,6 @@ public class ContentUpdateDto
     public string? CoverImageUrl { get; set; }
 
     public string? CoverImageAlt { get; set; }
-
-    [MinLength(1)]
-    public string? Slug { get; set; }
 
     [MinLength(1)]
     public string? Type { get; set; }
@@ -110,10 +104,6 @@ public class ContentImportDto : BaseImportDto
 
     [Optional]
     public string? CoverImageAlt { get; set; }
-
-    [Optional]
-    [SwaggerUnique]
-    public string? Slug { get; set; } = string.Empty;
 
     [Optional]
     public string? Type { get; set; } = string.Empty;

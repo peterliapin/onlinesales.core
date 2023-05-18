@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         for (var i = 0; i < importRecords.Count; i++)
         {
             var importRecord = importRecords[i];
+
+            if (!AdditionalImportCheck(importRecords, i, result))
+            {
+                continue;
+            }
 
             if (duplicates.TryGetValue(importRecord, out var identifierValue))
             {
@@ -150,6 +156,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         await dbContext.SaveChangesAsync();
 
         return Ok(result);
+    }
+
+    protected virtual bool AdditionalImportCheck(List<TI> importRecords, int importedValueIndex, ImportResult importResult)
+    {
+        return true;
     }
 
     protected virtual async Task SaveRangeAsync(List<T> newRecords)
