@@ -1,4 +1,4 @@
-﻿// <copyright file="SyncActivityLogTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="SyncSmsLogTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -15,9 +15,9 @@ using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Serilog;
 
-namespace OnlineSales.SendGrid.Tasks
+namespace OnlineSales.Plugin.Sms.Tasks
 {
-    public class SyncActivityLogTask : BaseTask
+    public class SyncSmsLogTask : BaseTask
     {
         private static readonly string SourceName = "SMS";
 
@@ -27,8 +27,8 @@ namespace OnlineSales.SendGrid.Tasks
 
         private readonly int batchSize;
 
-        public SyncActivityLogTask(IConfiguration configuration, SmsDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
-            : base("Tasks:SyncActivityLogTask", configuration, taskStatusService)
+        public SyncSmsLogTask(IConfiguration configuration, SmsDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
+            : base("Tasks:SyncSmsLogTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.logService = logService;

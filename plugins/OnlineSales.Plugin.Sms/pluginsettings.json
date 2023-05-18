@@ -59,7 +59,7 @@
   ],
   "Tasks": [
     {
-      "SyncActivityLogTask": {
+      "SyncSmsLogTask": {
         "Enable": true,
         "CronSchedule": "0/30 * * * * ? *",
         "RetryCount": "2",

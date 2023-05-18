@@ -37,7 +37,7 @@ public class ActivityLogController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public virtual async Task<ActionResult<List<ActivityLogDto>>> Get([FromQuery] string? query)
+    public virtual async Task<ActionResult<List<ActivityLogDetailsDto>>> Get([FromQuery] string? query)
     {
         var limit = apiSettingsConfig.Value.MaxListSize;
 
@@ -46,7 +46,7 @@ public class ActivityLogController : ControllerBase
         var result = await qp.GetResult();
         Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
         Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
-        return Ok(mapper.Map<List<ActivityLogDto>>(result.Records));
+        return Ok(mapper.Map<List<ActivityLogDetailsDto>>(result.Records));
     }
 
     private IQueryProvider<ActivityLog> BuildQueryProvider(int maxLimitSize)

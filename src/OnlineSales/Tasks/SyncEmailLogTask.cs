@@ -1,4 +1,4 @@
-﻿// <copyright file="EmailLogsToActivityLogDumpTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="SyncEmailLogTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -13,9 +13,9 @@ using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Serilog;
 
-namespace OnlineSales.SendGrid.Tasks
+namespace OnlineSales.Tasks
 {
-    public class EmailLogsToActivityLogDumpTask : BaseTask
+    public class SyncEmailLogTask : BaseTask
     {
         private static readonly string SourceName = "EmailService";
         private readonly PgDbContext dbContext;
@@ -23,8 +23,8 @@ namespace OnlineSales.SendGrid.Tasks
 
         private readonly int batchSize;
 
-        public EmailLogsToActivityLogDumpTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
-            : base("Tasks:EmailLogsToActivityLogDumpTask", configuration, taskStatusService)
+        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
+            : base("Tasks:SyncEmailLogTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.logService = logService;

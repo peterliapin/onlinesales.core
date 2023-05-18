@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
-public class ActivityLogDto
+public class ActivityLogDetailsDto
 {
     public int Id { get; set; }
 

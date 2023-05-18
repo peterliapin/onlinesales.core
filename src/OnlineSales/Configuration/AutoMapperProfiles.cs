@@ -133,7 +133,7 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<User, UserDetailsDto>();
 
-        CreateMap<ActivityLog, ActivityLogDto>()
+        CreateMap<ActivityLog, ActivityLogDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 

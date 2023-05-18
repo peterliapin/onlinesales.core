@@ -8,7 +8,7 @@ using OnlineSales.Data;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.Services;
-using OnlineSales.SendGrid.Tasks;
+using OnlineSales.Plugin.Sms.Tasks;
 
 namespace OnlineSales.Plugin.Sms;
 
@@ -30,6 +30,6 @@ public class SmsPlugin : IPlugin
         
         services.AddSingleton<ISmsService, SmsService>();
 
-        services.AddScoped<ITask, SyncActivityLogTask>();
+        services.AddScoped<ITask, SyncSmsLogTask>();
     }
 }
