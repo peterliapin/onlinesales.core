@@ -92,6 +92,17 @@ public class ContactDetailsDto : ContactCreateDto
     public DateTime? UpdatedAt { get; set; }
 
     public int DomainId { get; set; }
+
+    public int AccountId { get; set; }
+
+    [Ignore]
+    public DomainDetailsDto? Domain { get; set; }
+
+    [Ignore]
+    public AccountDetailsDto? Account { get; set; }
+
+    [Ignore]
+    public List<OrderDetailsDto>? Orders { get; set; }
 }
 
 public class ContactImportDto : BaseImportDto

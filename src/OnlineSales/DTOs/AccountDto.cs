@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
+using OnlineSales.Entities;
 using OnlineSales.Geography;
 
 namespace OnlineSales.DTOs;
@@ -105,6 +106,12 @@ public class AccountDetailsDto : AccountCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    [Ignore]
+    public List<ContactDetailsDto>? Contacts { get; set; }
+
+    [Ignore]
+    public List<DomainDetailsDto>? Domains { get; set; }
 }
 
 public class AccountImportDto : BaseImportDto

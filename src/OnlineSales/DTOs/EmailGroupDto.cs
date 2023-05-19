@@ -3,7 +3,11 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
+using OnlineSales.Entities;
+using static OnlineSales.Helpers.JsonHelper;
 
 namespace OnlineSales.DTOs;
 
@@ -26,4 +30,7 @@ public class EmailGroupDetailsDto : EmailGroupCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    [Ignore]
+    public List<EmailTemplateDetailsDto>? EmailTemplates { get; set; }
 }

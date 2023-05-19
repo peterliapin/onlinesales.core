@@ -21,7 +21,6 @@ public class OrderItem : BaseEntity
     [Required]
     public int OrderId { get; set; }
 
-    [Ignore]
     [JsonIgnore]
     [ForeignKey("OrderId")]
     public virtual Order? Order { get; set; }

@@ -15,7 +15,8 @@ namespace OnlineSales.Entities
         Skip = 3,
         Where = 4,
         Search = 5,
-        None = 6,
+        Include = 6,
+        None = 7,
     }
 
     public enum WOperand
@@ -41,6 +42,7 @@ namespace OnlineSales.Entities
             { "order", FilterType.Order },
             { "skip", FilterType.Skip },
             { "where", FilterType.Where },
+            { "include", FilterType.Include },
         };
 
         public static Dictionary<string, WOperand> OperandMappings { get; } = new Dictionary<string, WOperand>()

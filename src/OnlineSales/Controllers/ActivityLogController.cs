@@ -19,15 +19,17 @@ namespace OnlineSales.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 public class ActivityLogController : ControllerBase
-{
+{    
     private readonly IMapper mapper;
+    private readonly PgDbContext dbContext;
     private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
     private readonly ElasticClient elasticClient;
     private readonly IConfiguration configuration;
 
-    public ActivityLogController(IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
-    {
+    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
+    {        
         this.mapper = mapper;
+        this.dbContext = dbContext;
         this.apiSettingsConfig = apiSettingsConfig;
         this.configuration = configuration;
         elasticClient = esDbContext.ElasticClient;
@@ -51,10 +53,10 @@ public class ActivityLogController : ControllerBase
 
     private IQueryProvider<ActivityLog> BuildQueryProvider(int maxLimitSize)
     {
-        var queryCommands = Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
-        var parseData = new QueryParseData<ActivityLog>(queryCommands, maxLimitSize);
+        var queryCommands = QueryParser.Parse(Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()) : string.Empty);
+        var queryParams = new QueryData<ActivityLog>(queryCommands, maxLimitSize, dbContext);
 
         var indexPrefix = configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-        return new ESQueryProvider<ActivityLog>(elasticClient, parseData, indexPrefix!);
+        return new ESQueryProvider<ActivityLog>(elasticClient, queryParams, indexPrefix!);
     }
 }

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Collections;
+using System.Reflection;
 using System.Web;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -119,7 +121,9 @@ namespace OnlineSales.Controllers
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
             Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
-            return Ok(mapper.Map<List<TD>>(result.Records));
+            var res = mapper.Map<List<TD>>(result.Records);
+            RemoveSecondLevelObjects(res);
+            return Ok(res);
         }
 
         [HttpGet("export")]
@@ -133,8 +137,9 @@ namespace OnlineSales.Controllers
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
             Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
-
-            return Ok(mapper.Map<List<TD>>(result.Records));
+            var res = mapper.Map<List<TD>>(result.Records);
+            RemoveSecondLevelObjects(res);
+            return Ok(res);
         }
 
         protected async Task<T> FindOrThrowNotFound(int id)
@@ -150,20 +155,116 @@ namespace OnlineSales.Controllers
 
             return existingEntity;
         }
+                
+        private static void RemoveSecondLevelObjects(IList<TD> data)
+        {
+            var refs = SecondLevelDTOs.Data;
+
+            foreach (var item in data)
+            {
+                foreach (var r in refs)
+                {
+                    var propertyObject = r.Key.GetValue(item);
+                    if (propertyObject != null)
+                    {
+                        if (r.Key.PropertyType.GetInterface("IEnumerable") != null && r.Key.PropertyType.IsGenericType)
+                        {
+                            var e = propertyObject as IEnumerable;
+                            foreach (var obj in e!)
+                            {
+                                foreach (var p in r.Value)
+                                {
+                                    p.SetValue(obj, null);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (var p in r.Value)
+                            {
+                                p.SetValue(propertyObject, null);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         private IQueryProvider<T> BuildQueryProvider(int maxLimitSize)
         {
-            var queryCommands = Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()).Substring(1).Split('&').ToArray() : new string[0];
-            var parseData = new QueryParseData<T>(queryCommands, maxLimitSize);
+            var queryCommands = QueryParser.Parse(Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()) : string.Empty);
 
-            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && parseData.SearchData.Count > 0)
+            var queryData = new QueryData<T>(queryCommands, maxLimitSize, dbContext);
+
+            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
             {
-                var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                return new ESQueryProvider<T>(elasticClient, parseData, indexPrefix!);
+                var indexPrefix = this.dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
+                return new MixedQueryProvider<T>(queryData, this.dbSet!.AsQueryable<T>(), this.elasticClient, indexPrefix!);
             }
             else
             {
-                return new DBQueryProvider<T>(dbSet!.AsQueryable<T>(), parseData);
+                return new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), queryData);
+            }
+        }
+
+        private sealed class SecondLevelDTOs 
+        {
+            public static readonly Dictionary<PropertyInfo, List<PropertyInfo>> Data = InitReferences();
+
+            private static Dictionary<PropertyInfo, List<PropertyInfo>> InitReferences()
+            {
+                bool IsNullableProperty(PropertyInfo pi)
+                {
+                    var context = new NullabilityInfoContext();
+                    var info = context.Create(pi);
+                    return info.WriteState == NullabilityState.Nullable;
+                }
+
+                bool IsDto(Type type)
+                {
+                    return type.IsClass && type.Namespace != null && type.Namespace!.StartsWith("OnlineSales.DTOs");
+                }
+
+                bool IsNeedToSave(PropertyInfo pi)
+                {
+                    return IsNullableProperty(pi) &&
+                        (IsDto(pi.PropertyType) || (pi.PropertyType.GetInterface("IEnumerable") != null && pi.PropertyType.IsGenericType && IsDto(pi.PropertyType.GetGenericArguments()[0])));
+                }
+
+                Type GetType(PropertyInfo pi)
+                {
+                    if (pi.PropertyType.GetInterface("IEnumerable") != null && pi.PropertyType.IsGenericType)
+                    {
+                        return pi.PropertyType.GetGenericArguments()[0];
+                    }
+                    else
+                    {
+                        return pi.PropertyType;
+                    }
+                }
+
+                var res = new Dictionary<PropertyInfo, List<PropertyInfo>>();
+                var properties = typeof(TD).GetProperties();
+                foreach (var property in properties)
+                {
+                    var pType = GetType(property);
+                    var nestedProperties = pType.GetProperties();
+                    foreach (var nestedProperty in nestedProperties.Where(np => IsNeedToSave(np)))
+                    {
+                        List<PropertyInfo> temp;
+                        if (res.TryGetValue(property, out temp!))
+                        {
+                            temp.Add(nestedProperty);
+                        }
+                        else
+                        {
+                            temp = new List<PropertyInfo>() { nestedProperty };
+                            res.Add(property, temp);
+                        }
+                    }
+                }
+
+                return res;
             }
         }
     }

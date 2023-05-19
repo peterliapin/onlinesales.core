@@ -56,6 +56,12 @@ public class OrderDetailsDto : OrderCreateDto
     public int Quantity { get; set; }
 
     public decimal Total { get; set; }
+
+    [Ignore]
+    public List<OrderItemDetailsDto>? OrderItems { get; set; }
+
+    [Ignore]
+    public ContactDetailsDto? Contact { get; set; }
 }
 
 public class OrderImportDto : BaseImportDto

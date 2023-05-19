@@ -38,10 +38,12 @@ public class CommentCreateDto
 
     public int? ContactId { get; set; }
 
-    public int? ParentId { get; set; }
+    public int? ParentId { get; set; }    
 
     [Optional]
     public string? Source { get; set; }
+
+    public string Language { get; set; } = string.Empty;
 }
 
 public class CommentUpdateDto
@@ -67,6 +69,14 @@ public class AnonymousCommentDetailsDto
     public int ContentId { get; set; }
 
     public string AvatarUrl { get; set; } = string.Empty;
+
+    public string Language { get; set; } = string.Empty;
+
+    [Ignore]
+    public ContentDetailsDto? Content { get; set; }
+
+    [Ignore]
+    public CommentDetailsDto? Parent { get; set; }
 }
 
 public class CommentDetailsDto : AnonymousCommentDetailsDto
@@ -76,6 +86,10 @@ public class CommentDetailsDto : AnonymousCommentDetailsDto
     public int? ContactId { get; set; }
 
     public string? Source { get; set; }
+
+    [Ignore]
+
+    public ContactDetailsDto? Contact { get; set; }
 }
 
 public class CommentImportDto : BaseImportDto

@@ -50,6 +50,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.ReverseP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.SendGrid", "plugins\OnlineSales.Plugin.SendGrid\OnlineSales.Plugin.SendGrid.csproj", "{5FFB36F9-CA3A-4B57-90F0-88970A67F49C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.EmailSync", "plugins\OnlineSales.Plugin.EmailSync\OnlineSales.Plugin.EmailSync.csproj", "{075AC92F-979C-41CD-A30B-C73E0AE7DD49}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,12 @@ Global
 		{5FFB36F9-CA3A-4B57-90F0-88970A67F49C}.Migration|Any CPU.Build.0 = Release|Any CPU
 		{5FFB36F9-CA3A-4B57-90F0-88970A67F49C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FFB36F9-CA3A-4B57-90F0-88970A67F49C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49}.Migration|Any CPU.ActiveCfg = Debug|Any CPU
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49}.Migration|Any CPU.Build.0 = Debug|Any CPU
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,6 +117,7 @@ Global
 		{1DA75BFA-CEFD-4B3D-87D6-76E17FD20282} = {0F2716C8-A043-4743-A8AD-54B86635D567}
 		{9D3BD61F-94A1-4F00-B646-0681A2062A5B} = {0F2716C8-A043-4743-A8AD-54B86635D567}
 		{5FFB36F9-CA3A-4B57-90F0-88970A67F49C} = {0F2716C8-A043-4743-A8AD-54B86635D567}
+		{075AC92F-979C-41CD-A30B-C73E0AE7DD49} = {0F2716C8-A043-4743-A8AD-54B86635D567}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6EF3C125-1622-4B2D-8E00-69AF3F2CF063}
@@ -118,6 +127,6 @@ Global
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
 		$0.TextStylePolicy = $3
-		version = 1.2.5-pre
+		version = 1.2.6-pre
 	EndGlobalSection
 EndGlobal
