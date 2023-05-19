@@ -48,7 +48,7 @@ namespace OnlineSales.Tasks
                 var res = await logService.AddActivityRecords(events);
                 if (!res)
                 {
-                    throw new EmailLogsToActivityLogDumpException("Unable to log email events");
+                    throw new SyncEmailLogTaskException("Unable to log email events");
                 }
 
                 return true;
