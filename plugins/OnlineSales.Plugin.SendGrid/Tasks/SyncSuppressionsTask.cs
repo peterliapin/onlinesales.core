@@ -30,10 +30,10 @@ public class SyncSuppressionsTask : BaseTask
 
     public override async Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        await this.Unsubscribe<BlockOrBounceDto>("bounces");
-        await this.Unsubscribe<BlockOrBounceDto>("blocks");
-        await this.Unsubscribe<SpamReportDto>("spam_reports");
-        await this.Unsubscribe<SuppressionDto>("unsubscribes");
+        await Unsubscribe<BlockOrBounceDto>("bounces");
+        await Unsubscribe<BlockOrBounceDto>("blocks");
+        await Unsubscribe<SpamReportDto>("spam_reports");
+        await Unsubscribe<SuppressionDto>("unsubscribes");
         return true;
     }
 
@@ -47,29 +47,29 @@ public class SyncSuppressionsTask : BaseTask
     {
         var sourceAndKeyDictionary = new Dictionary<string, string>();
 
-        sourceAndKeyDictionary.Add(this.CreateSourceString(this.primaryApiKeyName, suppressionType), SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey);
+        sourceAndKeyDictionary.Add(CreateSourceString(primaryApiKeyName, suppressionType), SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey);
 
         for (var i = 0; i < SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys.Count; ++i)
         {
-            sourceAndKeyDictionary.Add(this.CreateSourceString($"SecondaryApiKey{i}", suppressionType), SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys[i]);
+            sourceAndKeyDictionary.Add(CreateSourceString($"SecondaryApiKey{i}", suppressionType), SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys[i]);
         }
 
         foreach (var (source, key) in sourceAndKeyDictionary)
         {
-            var supressions = await this.GetLatestSuppressionsByType<T>(source, key, suppressionType);
+            var supressions = await GetLatestSuppressionsByType<T>(source, key, suppressionType);
 
             foreach (var supression in supressions)
             {
-                await this.contactService.Unsubscribe(supression.Email, supression.GetReason(), source, supression.CreatedAt, null);
+                await contactService.Unsubscribe(supression.Email, supression.GetReason(), source, supression.CreatedAt, null);
             }
         }
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
     }
 
     private async Task<List<T>> GetLatestSuppressionsByType<T>(string source, string apiKeyValue, string suppressionType)
     {
-        var query = from u in this.dbContext.Unsubscribes
+        var query = from u in dbContext.Unsubscribes
                     where u.Source == source
                     orderby u.CreatedAt descending
                     select u.CreatedAt;
@@ -97,4 +97,3 @@ public class SyncSuppressionsTask : BaseTask
         return JsonHelper.Deserialize<List<T>>(result)!;
     }
 }
-

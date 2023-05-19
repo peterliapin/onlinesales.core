@@ -9,9 +9,8 @@ public class SurrogateIdentityAttribute : Attribute
 {
     public SurrogateIdentityAttribute(string propertyName)
     {
-        this.PropertyName = propertyName;
+        PropertyName = propertyName;
     }
 
     public string PropertyName { get; set; }
 }
-

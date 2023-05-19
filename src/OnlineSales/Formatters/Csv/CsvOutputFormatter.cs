@@ -17,8 +17,8 @@ public class CsvOutputFormatter : OutputFormatter
 {
     public CsvOutputFormatter()
     {
-        this.ContentType = "text/csv";
-        this.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
+        ContentType = "text/csv";
+        SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
     }
 
     public string ContentType { get; private set; }
@@ -57,7 +57,7 @@ public class CsvOutputFormatter : OutputFormatter
             throw new ArgumentNullException("type");
         }
 
-        return this.IsTypeOfIEnumerable(type);
+        return IsTypeOfIEnumerable(type);
     }
 
     private bool IsTypeOfIEnumerable(Type type)

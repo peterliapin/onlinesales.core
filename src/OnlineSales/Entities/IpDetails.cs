@@ -26,4 +26,3 @@ public class IpDetails
 
     public double Longitude { get; set; }
 }
-

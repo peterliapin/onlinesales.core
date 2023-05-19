@@ -28,7 +28,7 @@ public class DomainVerificationTask : BaseTask
 
         if (config is not null)
         {
-            this.batchSize = config.BatchSize;
+            batchSize = config.BatchSize;
         }
         else
         {
@@ -40,17 +40,17 @@ public class DomainVerificationTask : BaseTask
     {
         try
         {
-            var domains = this.dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null /*|| d.MxCheck == null*/);
+            var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null /*|| d.MxCheck == null*/);
             var totalSize = domains.Count();
 
-            for (var start = 0; start < totalSize; start += this.batchSize)
+            for (var start = 0; start < totalSize; start += batchSize)
             {
-                domains.Skip(start).Take(this.batchSize).AsParallel().ForAll(domain =>
+                domains.Skip(start).Take(batchSize).AsParallel().ForAll(domain =>
                 {
-                    this.domainService.Verify(domain).Wait();
+                    domainService.Verify(domain).Wait();
                 });
 
-                await this.dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
             }
         }
         catch (Exception ex)

@@ -19,7 +19,7 @@ public class AzureAdJwtBearerEventsHandler : JwtBearerEvents
 
         if (string.IsNullOrWhiteSpace(userEmail))
         {
-            await this.AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
+            await AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
             return;
         }
 

@@ -8,6 +8,6 @@ public class TestDomain : DomainCreateDto
 {
     public TestDomain(string name = "")
     {
-        this.Name = $"gmail{name}.com";
+        Name = $"gmail{name}.com";
     }
 }

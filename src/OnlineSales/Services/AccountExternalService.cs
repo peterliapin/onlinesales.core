@@ -30,8 +30,8 @@ namespace OnlineSales.Services
 
         public async Task<AccountDetailsInfo?> GetAccountDetails(string domain)
         {
-            var apiUrl = this.accountDetailsApiConfig.Value.Url;
-            var accessToken = this.accountDetailsApiConfig.Value.ApiKey;
+            var apiUrl = accountDetailsApiConfig.Value.Url;
+            var accessToken = accountDetailsApiConfig.Value.ApiKey;
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

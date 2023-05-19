@@ -56,18 +56,11 @@ public class DomainUpdateDto
     [SwaggerExample<string>("https://example.com/favicon.ico")]
     public string? FaviconUrl { get; set; }
 
-    public bool? HttpCheck { get; set; }
-
     public bool? Free { get; set; }
 
     public bool? Disposable { get; set; }
 
     public bool? CatchAll { get; set; }
-
-    [Column(TypeName = "jsonb")]
-    public List<DnsRecord>? DnsRecords { get; set; }
-
-    public bool? DnsCheck { get; set; }
 }
 
 public class DomainDetailsDto : DomainCreateDto

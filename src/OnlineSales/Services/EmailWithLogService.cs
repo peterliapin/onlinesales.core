@@ -28,7 +28,7 @@ namespace OnlineSales.Services
 
             try
             {
-                await this.emailService.SendAsync(subject, fromEmail, fromName, recipients, body, attachments);
+                await emailService.SendAsync(subject, fromEmail, fromName, recipients, body, attachments);
                 emailStatus = true;
 
                 Log.Information($"Email with subject {subject} sent to {recipients} from {fromEmail}");
@@ -41,7 +41,7 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await this.AddEmailLogEntry(subject, fromEmail, body, emails, emailStatus, templateId: templateId);
+                await AddEmailLogEntry(subject, fromEmail, body, emails, emailStatus, templateId: templateId);
             }
         }
 
@@ -52,11 +52,11 @@ namespace OnlineSales.Services
 
             try
             {
-                recipient = await this.GetContactEmailById(contactId);
+                recipient = await GetContactEmailById(contactId);
 
                 var recipientCollection = new[] { recipient };
 
-                await this.emailService.SendAsync(subject, fromEmail, fromName, recipientCollection, body, attachments);
+                await emailService.SendAsync(subject, fromEmail, fromName, recipientCollection, body, attachments);
                 emailStatus = true;
 
                 Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");
@@ -68,7 +68,7 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await this.AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, contactId, scheduleId, templateId);
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, contactId, scheduleId, templateId);
             }
         }
 
@@ -100,8 +100,8 @@ namespace OnlineSales.Services
                 log.Status = status ? EmailStatus.Sent : EmailStatus.NotSent;
                 log.CreatedAt = DateTime.UtcNow;
 
-                await this.pgDbContext.EmailLogs!.AddAsync(log);
-                await this.pgDbContext.SaveChangesAsync();
+                await pgDbContext.EmailLogs!.AddAsync(log);
+                await pgDbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -111,7 +111,7 @@ namespace OnlineSales.Services
 
         private async Task<string> GetContactEmailById(int contactId)
         {
-            var contact = await this.pgDbContext.Contacts!.FirstOrDefaultAsync(x => x.Id == contactId);
+            var contact = await pgDbContext.Contacts!.FirstOrDefaultAsync(x => x.Id == contactId);
 
             return contact!.Email;
         }

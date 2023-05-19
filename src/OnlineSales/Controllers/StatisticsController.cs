@@ -21,4 +21,3 @@ public class StatisticsController : Controller
         throw new NotSupportedException();
     }
 }
-

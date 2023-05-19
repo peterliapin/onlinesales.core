@@ -24,20 +24,20 @@ public class IdentityController : ControllerBase
     {
         const string provider = "OpenIdConnect";
         // var redirectUrl = Url.Action("ExternalLoginCallback");
-        var properties = this.signInManager.ConfigureExternalAuthenticationProperties(provider, returnUrl);
+        var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, returnUrl);
         return new ChallengeResult(provider, properties);
     }
 
     [HttpGet("callback")]
     public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
     {
-        var info = await this.signInManager.GetExternalLoginInfoAsync();
+        var info = await signInManager.GetExternalLoginInfoAsync();
         if (info == null)
         {
             throw new IdentityException("Failed to retrieve external login info");
         }
 
-        var result = await this.signInManager.ExternalLoginSignInAsync(
+        var result = await signInManager.ExternalLoginSignInAsync(
             info.LoginProvider,
             info.ProviderKey,
             isPersistent: false,
@@ -55,6 +55,6 @@ public class IdentityController : ControllerBase
             }
         }
 
-        return this.LocalRedirect(returnUrl);
+        return LocalRedirect(returnUrl);
     }
 }

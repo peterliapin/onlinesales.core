@@ -10,17 +10,17 @@ public class TaskStatusService
 
     public void SetInitialState(string name, bool running)
     {
-        if (!this.taskStatusByName.ContainsKey(name))
+        if (!taskStatusByName.ContainsKey(name))
         {
-            this.taskStatusByName[name] = running;
+            taskStatusByName[name] = running;
         }
     }
 
     public bool IsRunning(string name)
     {
-        if (this.taskStatusByName.ContainsKey(name))
+        if (taskStatusByName.ContainsKey(name))
         {
-            return this.taskStatusByName[name];
+            return taskStatusByName[name];
         }
         else
         {
@@ -30,7 +30,6 @@ public class TaskStatusService
 
     public void SetRunning(string name, bool running)
     {
-        this.taskStatusByName[name] = running;
+        taskStatusByName[name] = running;
     }
 }
-

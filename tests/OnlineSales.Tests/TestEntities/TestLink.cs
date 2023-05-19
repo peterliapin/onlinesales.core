@@ -8,9 +8,8 @@ public class TestLink : LinkCreateDto
 {
     public TestLink()
     {
-        this.Uid = "google_link";
-        this.Destination = "https://google.com/";
-        this.Name = "Google Link";
+        Uid = "google_link";
+        Destination = "https://google.com/";
+        Name = "Google Link";
     }
 }
-

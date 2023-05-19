@@ -16,131 +16,131 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     [Fact]
     public async Task GetWithWhereLikeTest()
     {
-        var fkItem = this.CreateFKItem().Result;
+        var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "1 Test q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test 2 z q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test 3 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te1st 4 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
 
-        await this.SyncElasticSearch();
+        await SyncElasticSearch();
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][like]=.*est&query=q");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][like]=.*est&query=q");
         result!.Count.Should().Be(3);
     }
 
     [Fact]
     public async Task GetWithWhereEqualTest()
     {
-        var fkItem = this.CreateFKItem().Result;
+        var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "Test1 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test2 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test3 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Tes|t4 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("5", tc => tc.AffiliateName = "Test1 Test2 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
-        await this.SyncElasticSearch();
+        await SyncElasticSearch();
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][ContactIp][eq]=&query=q");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][ContactIp][eq]=&query=q");
         result!.Count.Should().Be(5);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][ContactIp][neq]=&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][ContactIp][neq]=&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][UpdatedAt][eq]=null&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][eq]=null&query=q");
         result!.Count.Should().Be(5);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][UpdatedAt][neq]=null&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][neq]=null&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][UpdatedAt][eq]=&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][eq]=&query=q");
         result!.Count.Should().Be(5);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][UpdatedAt][neq]=&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][UpdatedAt][neq]=&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][CreatedAt][eq]=null&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][eq]=null&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][CreatedAt][neq]=null&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][neq]=null&query=q");
         result!.Count.Should().Be(5);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q&query=q");
         result!.Count.Should().Be(1);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][eq]=Test5 q|Test6 q&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test5 q|Test6 q&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q|Test2 q|Test3 q|Tes\\|t4 q&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q|Test2 q|Test3 q|Tes\\|t4 q&query=q");
         result!.Count.Should().Be(4);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q|Test2 q&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][eq]=Test1 q|Test2 q&query=q");
         result!.Count.Should().Be(2);
     }
 
     [Fact]
     public async Task GetWithWhereDateComparisonTest()
     {
-        var fkItem = this.CreateFKItem().Result;
+        var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "Test1 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
-        await this.SyncElasticSearch();
+        await SyncElasticSearch();
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][CreatedAt][gt]=&query=q", HttpStatusCode.BadRequest);
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][gt]=&query=q", HttpStatusCode.BadRequest);
         result.Should().BeNull();
 
         var now = DateTime.UtcNow;
         var timeStr = now.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK");
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][CreatedAt][gt]=" + timeStr + "&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][gt]=" + timeStr + "&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][CreatedAt][lt]=" + timeStr + "&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][lt]=" + timeStr + "&query=q");
         result!.Count.Should().Be(1);
     }
 
     [Fact]
     public async Task GetWithWhereContainTest()
     {
-        var fkItem = this.CreateFKItem().Result;
+        var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "1 Test q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = "Test 2 z q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.AffiliateName = "Test 3 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te*st 3 q", fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
-        await this.SyncElasticSearch();
+        await SyncElasticSearch();
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][contains]=*Te\\*st*&query=q");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Te\\*st*&query=q");
         result!.Count.Should().Be(1);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][contains]=Test&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=Test&query=q");
         result!.Count.Should().Be(0);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][contains]=*Test*&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Test*&query=q");
         result!.Count.Should().Be(3);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][contains]=Test*&query=q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=Test*&query=q");
         result!.Count.Should().Be(2);
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][AffiliateName][contains]=*Test q");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Test q");
         result!.Count.Should().Be(1);
     }
 
@@ -184,45 +184,45 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     [Fact]
     public async Task GetWithSearchTest()
     {
-        var fkItem = this.CreateFKItem().Result;
+        var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", null, fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         var testAN = "Nearly ten years had passed since the Dursleys had woken up to find their nephew on the front step" +
         ", but Privet Drive had hardly changed at all. The sun rose on the same tidy front gardens and lit up the brass number four on the Dursleys' front door;" +
         " it crept into their living room, which was almost exactly the same as it had been on the night when Mr. Dursley had seen that fateful news report about the owls. ";
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("2", tc => tc.AffiliateName = testAN, fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("3", tc => tc.ExchangeRate = 123.456M, fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = testAN, fkId);
-        bulkEntitiesList.Add(this.mapper.Map<Order>(bulkList));
+        bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
-        await this.SyncElasticSearch();
+        await SyncElasticSearch();
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?query=fatefully&filter[order]=Id");
+        var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=Id");
         result!.Count.Should().Be(2);
         result[0].AffiliateName.Should().Be(testAN);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?query=fatefully&filter[order]=ContactIp");
+        result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=ContactIp");
         result!.Count.Should().Be(2);
         result[0].AffiliateName.Should().Be(testAN);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?query=fatefully");
+        result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully");
         result!.Count.Should().Be(2);
         result[0].AffiliateName.Should().Be(testAN);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?query=123.456");
+        result = await GetTest<List<Order>>(itemsUrl + "?query=123.456");
         result!.Count.Should().Be(1);
         result[0].ExchangeRate.Should().Be(123.456M);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?query=");
+        result = await GetTest<List<Order>>(itemsUrl + "?query=");
         result!.Count.Should().Be(4);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?query=SomeSearchString");
+        result = await GetTest<List<Order>>(itemsUrl + "?query=SomeSearchString");
         result!.Count.Should().Be(0);
     }
 
@@ -230,25 +230,25 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     public async Task GetWithSearchWithBigLimitTest()
     {
         var entitiesNumber = 13000;
-        var fkItem = this.CreateFKItem().Result;
+        var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>(entitiesNumber, to => to.AffiliateName = "AffiliateName", fkId);
-        var bulkEntitiesList = this.mapper.Map<List<Order>>(bulkList);
+        var bulkEntitiesList = mapper.Map<List<Order>>(bulkList);
 
         App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
 
         var totalCountHeader = string.Empty;
         while (totalCountHeader != $"{entitiesNumber}")
         {
-            await this.SyncElasticSearch();
-            var resp = await this.GetTest(this.itemsUrl + "?query=AffiliateName");
+            await SyncElasticSearch();
+            var resp = await GetTest(itemsUrl + "?query=AffiliateName");
             totalCountHeader = resp.Headers.GetValues(ResponseHeaderNames.TotalCount).FirstOrDefault()!;
         }
 
         async Task TestSkipAndLimit(int skip, int limit, int expextedSize)
         {
-            var response = await this.GetTestCSV<OrderImportDto>(this.itemsUrl + $"/export/?query=AffiliateName&filter[skip]={skip}&filter[limit]={limit}");
+            var response = await GetTestCSV<OrderImportDto>(itemsUrl + $"/export/?query=AffiliateName&filter[skip]={skip}&filter[limit]={limit}");
             response.Should().NotBeNull();
             response!.Count.Should().Be(expextedSize);
             for (var i = 0; i < response.Count; ++i)
@@ -268,8 +268,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     public async Task GetWithLimitTest()
     {
         var limit = 5;
-        this.GenerateBulkRecords(limit);
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[limit]={0}", limit));
+        GenerateBulkRecords(limit);
+        var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[limit]={0}", limit));
         result.Should().NotBeNull();
         result!.Count.Should().Be(limit);
     }
@@ -278,8 +278,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     public async Task GetWithOrderByIdTest()
     {
         var numberOfItems = 10;
-        this.GenerateBulkRecords(numberOfItems);
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[order]=Id%20ASC");
+        GenerateBulkRecords(numberOfItems);
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20ASC");
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
         for (var i = 0; i < numberOfItems; ++i)
@@ -287,7 +287,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
             result[i].Id.Should().Be(i + 1);
         }
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[order]=Id%20DESC");
+        result = await GetTest<List<Order>>(itemsUrl + "?filter[order]=Id%20DESC");
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
@@ -311,9 +311,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
             index++;
         };
 
-        this.GenerateBulkRecords(numberOfItems, populateAttributes);
+        GenerateBulkRecords(numberOfItems, populateAttributes);
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC&filter[where][Currency]=Test");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[order][0]=AffiliateName%20ASC&filter[order][1]=Id%20DESC&filter[where][Currency]=Test");
 
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems);
@@ -332,11 +332,11 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     public async Task GetWithSkipTest()
     {
         var numberOfItems = 30;
-        this.GenerateBulkRecords(numberOfItems);
+        GenerateBulkRecords(numberOfItems);
 
         async Task GetAndCheck(int skipItemsNumber)
         {
-            var result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[skip]={0}", skipItemsNumber));
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[skip]={0}", skipItemsNumber));
             result.Should().NotBeNull();
             result!.Count.Should().Be(numberOfItems >= skipItemsNumber ? numberOfItems - skipItemsNumber : 0);
         }
@@ -364,26 +364,26 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
             index++;
         };
 
-        this.GenerateBulkRecords(numberOfItems, populateAttributes);
+        GenerateBulkRecords(numberOfItems, populateAttributes);
 
-        var result = await this.GetTest<List<Order>>(this.itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
+        var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][or][Id][lte]=2&filter[where][or][Id][gte]=9");
         result.Should().NotBeNull();
         result!.Count.Should().Be(4);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(1);
         result[0].Id.Should().Be(numberOfItems / 2);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[where][Id][neq]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][neq]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems - 1);
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[where][Id][gte]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][gte]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(1 + (numberOfItems / 2));
 
-        result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[where][Id][lte]={0}", numberOfItems / 2));
+        result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}", numberOfItems / 2));
         result.Should().NotBeNull();
         result!.Count.Should().Be(numberOfItems / 2);
     }
@@ -392,9 +392,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
 
     public async Task GetWithIncorrectQueryTest()
     {
-        this.GenerateBulkRecords(10);
+        GenerateBulkRecords(10);
 
-        await this.GetTest<List<Order>>(this.itemsUrl + "?incorrect-query", HttpStatusCode.BadRequest);
+        await GetTest<List<Order>>(itemsUrl + "?incorrect-query", HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -403,11 +403,11 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         const int numberOfItems = 100;
         const int pageSize = 10;
 
-        this.GenerateBulkRecords(numberOfItems);
+        GenerateBulkRecords(numberOfItems);
 
         async Task GetAndCheck(int skipItemsNumber, int expectedItemsNumber = pageSize)
         {
-            var result = await this.GetTest<List<Order>>(this.itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
+            var result = await GetTest<List<Order>>(itemsUrl + string.Format("?filter[where][Id][lte]={0}&filter[limit]={1}&filter[skip]={2}", numberOfItems / 2, pageSize, skipItemsNumber));
             result.Should().NotBeNull();
             result!.Count.Should().Be(expectedItemsNumber);
             for (var i = 0; i < expectedItemsNumber; ++i)
@@ -429,15 +429,15 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     {
         var updateOrder = new OrderUpdateDto();
         updateOrder.RefNo = "1111";
-        await this.PatchTest(this.itemsUrlNotFound, updateOrder, HttpStatusCode.NotFound);
+        await PatchTest(itemsUrlNotFound, updateOrder, HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task ShouldNotBeUpdateTest()
     {
-        var orderDetails = await this.CreateItem();
+        var orderDetails = await CreateItem();
 
-        var order = await this.GetTest<Order>(orderDetails.Item2);
+        var order = await GetTest<Order>(orderDetails.Item2);
         order.Should().NotBeNull();
 
         if (order != null)
@@ -446,8 +446,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
 
             var updateOrderQ = new TestOrderWithQuantity();
             updateOrderQ.Quantity = order.Quantity + 10;
-            await this.Patch(orderUrl, updateOrderQ);
-            var updatedOrder = await this.GetTest<OrderItem>(orderUrl);
+            await Patch(orderUrl, updateOrderQ);
+            var updatedOrder = await GetTest<OrderItem>(orderUrl);
             updatedOrder.Should().NotBeNull();
             if (updatedOrder != null)
             {
@@ -456,8 +456,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
 
             var updateOrderT = new TestOrderWithTotal();
             updateOrderT.Total = order.Total + new decimal(10);
-            await this.Patch(orderUrl, updateOrderT);
-            updatedOrder = await this.GetTest<OrderItem>(orderUrl);
+            await Patch(orderUrl, updateOrderT);
+            updatedOrder = await GetTest<OrderItem>(orderUrl);
             updatedOrder.Should().NotBeNull();
             if (updatedOrder != null)
             {
@@ -466,8 +466,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
 
             var updateOrderCT = new TestOrderWithCurrencyTotal();
             updateOrderCT.CurrencyTotal = order.CurrencyTotal + new decimal(10);
-            await this.Patch(orderUrl, updateOrderCT);
-            updatedOrder = await this.GetTest<OrderItem>(orderUrl);
+            await Patch(orderUrl, updateOrderCT);
+            updatedOrder = await GetTest<OrderItem>(orderUrl);
             updatedOrder.Should().NotBeNull();
             if (updatedOrder != null)
             {
@@ -479,8 +479,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     [Fact]
     public async Task ImportFileWithoutContactId()
     {
-        await this.CreateFKItem();
-        await this.PostImportTest(this.itemsUrl, "ordersNoFK.csv");
+        await CreateFKItem();
+        await PostImportTest(itemsUrl, "ordersNoFK.csv");
 
         var addedOrder = App.GetDbContext()!.Orders!.First(o => o.Id == 1);
         addedOrder.Should().NotBeNull();
@@ -491,7 +491,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     {
         var testOrder = new TestOrder(uid, fkId);
 
-        var newUrl = await this.PostTest(this.itemsUrl, testOrder);
+        var newUrl = await PostTest(itemsUrl, testOrder);
 
         return (testOrder, newUrl);
     }
@@ -507,9 +507,9 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
     {
         var fkItemCreate = new TestContact();
 
-        var fkUrl = await this.PostTest("/api/contacts", fkItemCreate, HttpStatusCode.Created, authToken);
+        var fkUrl = await PostTest("/api/contacts", fkItemCreate, HttpStatusCode.Created, authToken);
 
-        var fkItem = await this.GetTest<Contact>(fkUrl, HttpStatusCode.OK, authToken);
+        var fkItem = await GetTest<Contact>(fkUrl, HttpStatusCode.OK, authToken);
 
         fkItem.Should().NotBeNull();
 

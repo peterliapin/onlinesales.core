@@ -33,12 +33,12 @@ public class Domain : BaseEntityWithIdAndDates
     {
         get
         {
-            return this.name;
+            return name;
         }
 
         set
         {
-            this.name = value.ToLower();
+            name = value.ToLower();
         }
     }
 

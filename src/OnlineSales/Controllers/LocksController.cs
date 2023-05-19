@@ -26,7 +26,7 @@ public class LocksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public ActionResult Lock(string key)
     {
-        return this.Ok();
+        return Ok();
     }
 
     [HttpGet("{key}/release")]
@@ -35,7 +35,6 @@ public class LocksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public ActionResult Release(string key)
     {
-        return this.Ok();
+        return Ok();
     }
 }
-

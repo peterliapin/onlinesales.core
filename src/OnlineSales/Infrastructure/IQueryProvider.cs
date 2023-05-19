@@ -17,8 +17,8 @@ namespace OnlineSales.Infrastructure
     {
         public QueryResult(IList<T>? records, long totalCount)
         {
-            this.Records = records;
-            this.TotalCount = totalCount;
+            Records = records;
+            TotalCount = totalCount;
         }
 
         public IList<T>? Records { get; init; }

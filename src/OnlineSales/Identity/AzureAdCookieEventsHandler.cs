@@ -19,7 +19,7 @@ public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
 
         if (string.IsNullOrWhiteSpace(userEmail))
         {
-            await this.RedirectToAccessDenied(((PropertiesContext<CookieAuthenticationOptions>)context as RedirectContext<CookieAuthenticationOptions>)!);
+            await RedirectToAccessDenied(((PropertiesContext<CookieAuthenticationOptions>)context as RedirectContext<CookieAuthenticationOptions>)!);
             return;
         }
 

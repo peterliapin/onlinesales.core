@@ -43,15 +43,15 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
             c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.AuthorEmail);
         });
 
-        if (this.User.Identity != null && this.User.Identity.IsAuthenticated)
+        if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return this.Ok(items);
+            return Ok(items);
         }
         else
         {
-            var commentsForAnonymous = this.mapper.Map<List<AnonymousCommentDetailsDto>>(items);
+            var commentsForAnonymous = mapper.Map<List<AnonymousCommentDetailsDto>>(items);
 
-            return this.Ok(commentsForAnonymous);
+            return Ok(commentsForAnonymous);
         }
     }
 
@@ -69,15 +69,15 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
 
         commentDetails!.AvatarUrl = GravatarHelper.EmailToGravatarUrl(commentDetails.AuthorEmail);
 
-        if (this.User.Identity != null && this.User.Identity.IsAuthenticated)
+        if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return this.Ok(commentDetails!);
+            return Ok(commentDetails!);
         }
         else
         {
-            var commentForAnonymous = this.mapper.Map<AnonymousCommentDetailsDto>(commentDetails);
+            var commentForAnonymous = mapper.Map<AnonymousCommentDetailsDto>(commentDetails);
 
-            return this.Ok(commentForAnonymous!);
+            return Ok(commentForAnonymous!);
         }
     }
 
@@ -90,19 +90,19 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
     {
-        var comment = this.mapper.Map<Comment>(value);
+        var comment = mapper.Map<Comment>(value);
 
-        await this.commentService.SaveAsync(comment);
+        await commentService.SaveAsync(comment);
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        var returnedValue = this.mapper.Map<CommentDetailsDto>(comment);
+        var returnedValue = mapper.Map<CommentDetailsDto>(comment);
 
-        return this.CreatedAtAction(nameof(GetOne), new { id = comment.Id }, returnedValue);
+        return CreatedAtAction(nameof(GetOne), new { id = comment.Id }, returnedValue);
     }
 
     protected override async Task SaveRangeAsync(List<Comment> comments)
     {
-        await this.commentService.SaveRangeAsync(comments);
+        await commentService.SaveRangeAsync(comments);
     }
 }

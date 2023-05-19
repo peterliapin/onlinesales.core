@@ -23,4 +23,3 @@ public class LinkLog : BaseCreateByEntity
 
     public string? Referrer { get; set; }
 }
-

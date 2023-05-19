@@ -30,7 +30,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public ActionResult Get()
     {
-        return this.Ok(this.tasks.Select(t => this.CreateTaskDetailsDto(t)));
+        return Ok(tasks.Select(t => CreateTaskDetailsDto(t)));
     }
 
     [HttpGet("{name}")]
@@ -39,7 +39,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public TaskDetailsDto Get(string name)
     {
-        var result = this.tasks.Where(t => t.Name == name);
+        var result = tasks.Where(t => t.Name == name);
 
         if (!result.Any())
         {
@@ -47,7 +47,7 @@ public class TasksController : ControllerBase
         }
         else
         {
-            return this.CreateTaskDetailsDto(result.First());
+            return CreateTaskDetailsDto(result.First());
         }
     }
 
@@ -57,7 +57,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public TaskDetailsDto Start(string name)
     {
-        return this.StartOrStop(name, true);
+        return StartOrStop(name, true);
     }
 
     [HttpGet("stop/{name}")]
@@ -66,7 +66,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public TaskDetailsDto Stop(string name)
     {
-        return this.StartOrStop(name, false);
+        return StartOrStop(name, false);
     }
 
     [HttpGet("execute/{name}")]
@@ -75,7 +75,7 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<TaskExecutionDto> Execute(string name)
     {
-        var result = this.tasks.Where(t => t.Name == name);
+        var result = tasks.Where(t => t.Name == name);
 
         if (!result.Any())
         {
@@ -83,7 +83,7 @@ public class TasksController : ControllerBase
         }
         else
         {
-            var completed = await this.taskRunner.ExecuteTask(result.First());
+            var completed = await taskRunner.ExecuteTask(result.First());
             return new TaskExecutionDto
             {
                 Name = name,
@@ -94,7 +94,7 @@ public class TasksController : ControllerBase
 
     private TaskDetailsDto StartOrStop(string name, bool start)
     {
-        var result = this.tasks.Where(t => t.Name == name);
+        var result = tasks.Where(t => t.Name == name);
 
         if (!result.Any())
         {
@@ -103,8 +103,8 @@ public class TasksController : ControllerBase
         else
         {
             var task = result.First();
-            this.taskRunner.StartOrStopTask(task, start);
-            return this.CreateTaskDetailsDto(task);
+            taskRunner.StartOrStopTask(task, start);
+            return CreateTaskDetailsDto(task);
         }
     }
 
@@ -120,4 +120,3 @@ public class TasksController : ControllerBase
         };
     }
 }
-

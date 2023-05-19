@@ -34,27 +34,26 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<DomainDetailsDto>> Verify(string name)
     {
-        var domain = (from d in this.dbSet
+        var domain = (from d in dbSet
                       where d.Name == name
                       select d).FirstOrDefault();
 
         if (domain == null)
         {
             domain = new Domain() { Name = name };
-            await this.domainService.SaveAsync(domain);
+            await domainService.SaveAsync(domain);
         }
 
-        await this.domainService.Verify(domain);
-        await this.dbContext.SaveChangesAsync();
+        await domainService.Verify(domain);
+        await dbContext.SaveChangesAsync();
 
-        var resultConverted = this.mapper.Map<DomainDetailsDto>(domain);
+        var resultConverted = mapper.Map<DomainDetailsDto>(domain);
 
-        return this.Ok(resultConverted);
+        return Ok(resultConverted);
     }
 
     protected override async Task SaveRangeAsync(List<Domain> newRecords)
     {
-        await this.domainService.SaveRangeAsync(newRecords);
+        await domainService.SaveRangeAsync(newRecords);
     }
 }
-

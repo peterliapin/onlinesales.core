@@ -8,6 +8,6 @@ public class TestEmailGroup : EmailGroupCreateDto
 {
     public TestEmailGroup(string uid = "")
     {
-        this.Name = $"TestEmailGroup{uid}";
+        Name = $"TestEmailGroup{uid}";
     }
 }

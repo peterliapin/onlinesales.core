@@ -18,17 +18,17 @@ namespace OnlineSales.Services
 
         public ActivityLogService(IConfiguration configuration, EsDbContext esDbContext)
         {
-            this.indexName = configuration.GetSection("Elastic:IndexPrefix").Get<string>() + "-activitylog";
+            indexName = configuration.GetSection("Elastic:IndexPrefix").Get<string>() + "-activitylog";
             this.esDbContext = esDbContext;
         }
 
         public async Task<int> GetMaxId(string source)
         {
-            var sr = new SearchRequest<ActivityLogDto>(this.indexName);
+            var sr = new SearchRequest<ActivityLogDto>(indexName);
             sr.Query = new TermQuery() { Field = "source.keyword", Value = source };
             sr.Sort = new List<ISort>() { new FieldSort { Field = "sourceId", Order = Nest.SortOrder.Descending } };
             sr.Size = 1;
-            var res = await this.esDbContext.ElasticClient.SearchAsync<ActivityLogDto>(sr);
+            var res = await esDbContext.ElasticClient.SearchAsync<ActivityLogDto>(sr);
             if (res != null)
             {
                 var doc = res.Documents.FirstOrDefault();
@@ -45,7 +45,7 @@ namespace OnlineSales.Services
         {
             if (records.Count > 0)
             {
-                var responce = await this.esDbContext.ElasticClient.IndexManyAsync<ActivityLogDto>(records, this.indexName);
+                var responce = await esDbContext.ElasticClient.IndexManyAsync<ActivityLogDto>(records, indexName);
 
                 if (!responce.IsValid)
                 {

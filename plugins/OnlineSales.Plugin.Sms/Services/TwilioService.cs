@@ -22,7 +22,7 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public TwilioService(TwilioConfig twilioCfg)
         {
-            this.twilioConfig = twilioCfg;
+            twilioConfig = twilioCfg;
             try
             {
                 TwilioClient.Init(twilioCfg.AccountSid, twilioCfg.AuthToken);
@@ -35,14 +35,14 @@ namespace OnlineSales.Plugin.Sms.Services
 
         public string GetSender(string recipient)
         {
-            return this.twilioConfig.SenderId;
+            return twilioConfig.SenderId;
         }
 
         public async Task SendAsync(string recipient, string message)
         {
             var options = new CreateMessageOptions(new PhoneNumber(recipient))
             {
-                From = new PhoneNumber(this.twilioConfig.SenderId),
+                From = new PhoneNumber(twilioConfig.SenderId),
                 Body = message,
             };
 

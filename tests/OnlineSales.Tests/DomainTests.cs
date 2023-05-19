@@ -17,11 +17,11 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto,
 
         var domainName = testDomain.Name;
 
-        await this.PostTest(this.itemsUrl, testDomain);
+        await PostTest(itemsUrl, testDomain);
 
-        var url = this.itemsUrl + "/verify/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
-        var item = await this.GetTest<Domain>(url, HttpStatusCode.OK);
+        var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
     }
@@ -31,9 +31,9 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto,
     {
         var domainName = "gmail.com";
 
-        var url = this.itemsUrl + "/verify/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
-        var item = await this.GetTest<Domain>(url, HttpStatusCode.OK);
+        var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
 
@@ -54,9 +54,9 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto,
         var domainName = testDomain.Name;
         domainName.Should().NotBeEmpty();
 
-        var location = await this.PostTest(this.itemsUrl, testDomain);
+        var location = await PostTest(itemsUrl, testDomain);
 
-        var item = await this.GetTest<Domain>(location, HttpStatusCode.OK);
+        var item = await GetTest<Domain>(location, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
         item!.Name.Should().Be(domainName);
@@ -67,9 +67,9 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto,
         item!.Title.Should().BeNull();
         item!.Description.Should().BeNull();
 
-        var url = this.itemsUrl + "/verify/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
-        item = await this.GetTest<Domain>(url, HttpStatusCode.OK);
+        item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
         item!.Name.Should().Be(domainName);
@@ -86,9 +86,9 @@ public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto,
     {
         var domainName = "incorrect-domain";
 
-        var url = this.itemsUrl + "/verify/" + domainName;
+        var url = itemsUrl + "/verify/" + domainName;
 
-        var item = await this.GetTest<Domain>(url, HttpStatusCode.OK);
+        var item = await GetTest<Domain>(url, HttpStatusCode.OK);
 
         item.Should().NotBeNull();
         item!.Name.Should().Be(domainName);

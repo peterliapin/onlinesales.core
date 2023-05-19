@@ -32,12 +32,12 @@ public class Contact : BaseEntity
     {
         get
         {
-            return this.email;
+            return email;
         }
 
         set
         {
-            this.email = value.ToLower();
+            email = value.ToLower();
         }
     }
 

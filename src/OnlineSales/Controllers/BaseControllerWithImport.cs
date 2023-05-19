@@ -43,11 +43,11 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         var newRecords = new List<T>();
         var duplicates = new Dictionary<TI, object>();
 
-        this.dbContext.IsImportRequest = true;
+        dbContext.IsImportRequest = true;
 
-        var typeIdentifiersMap = this.BuildTypeIdentifiersMap(importRecords);
+        var typeIdentifiersMap = BuildTypeIdentifiersMap(importRecords);
 
-        var relatedObjectsMap = this.BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords, duplicates);
+        var relatedObjectsMap = BuildRelatedObjectsMap(typeIdentifiersMap, importRecords, newRecords, duplicates);
 
         var relatedTObjectsMap = relatedObjectsMap[typeof(T)];
 
@@ -71,16 +71,16 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                 if (propertyValue != null && relatedTObjectsMap[identifierProperty].TryGetValue(propertyValue, out dbRecord))
                 {
-                    this.mapper.Map(importRecord, dbRecord);
-                    this.FixDateKindIfNeeded((T)dbRecord!);
+                    mapper.Map(importRecord, dbRecord);
+                    FixDateKindIfNeeded((T)dbRecord!);
                     break;
                 }
             }
 
             if (dbRecord == null)
             {
-                dbRecord = this.mapper.Map<T>(importRecord);
-                this.FixDateKindIfNeeded((T)dbRecord!);
+                dbRecord = mapper.Map<T>(importRecord);
+                FixDateKindIfNeeded((T)dbRecord!);
                 newRecords.Add((T)dbRecord!);
             }
 
@@ -123,9 +123,9 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             }
         }
 
-        await this.SaveRangeAsync(newRecords);
+        await SaveRangeAsync(newRecords);
 
-        var entriesByState = this.dbContext.ChangeTracker
+        var entriesByState = dbContext.ChangeTracker
             .Entries()
             .Where(e => e.Entity is T && (
                 e.State == EntityState.Added
@@ -147,14 +147,14 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             result.Skipped -= result.Updated;
         }
 
-        await this.dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        return this.Ok(result);
+        return Ok(result);
     }
 
     protected virtual async Task SaveRangeAsync(List<T> newRecords)
     {
-        await this.dbSet.AddRangeAsync(newRecords);
+        await dbSet.AddRangeAsync(newRecords);
     }
 
     private void FixDateKindIfNeeded(T record)
@@ -198,9 +198,9 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
                 var propertyValues = identifierValues[propertyName];
 
-                var predicate = this.BuildPropertyValuesPredicate(type, propertyName, propertyValues);
+                var predicate = BuildPropertyValuesPredicate(type, propertyName, propertyValues);
 
-                var existingObjectsDict = this.dbContext.SetDbEntity(type)
+                var existingObjectsDict = dbContext.SetDbEntity(type)
                                         .Where(predicate).AsQueryable()
                                         .ToDictionary(x => existingRecordsProperty.GetValue(x)!, x => x);
 
@@ -230,8 +230,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
                             {
                                 if (record == null && !mappedObjectsCash.TryGetValue(importRecord, out record))
                                 {
-                                    record = this.mapper.Map<T>(importRecord);
-                                    this.FixDateKindIfNeeded((T)record);
+                                    record = mapper.Map<T>(importRecord);
+                                    FixDateKindIfNeeded((T)record);
                                     newRecords.Add((T)record);
                                 }
 
@@ -268,7 +268,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             typeIdentifiersMap[typeof(T)].IdentifierPropertyNames.Add("Id");
         }
 
-        var uniqueIndexPropertyName = this.FindAlternateKeyPropertyName();
+        var uniqueIndexPropertyName = FindAlternateKeyPropertyName();
 
         if (uniqueIndexPropertyName != null)
         {
@@ -396,10 +396,10 @@ public class ImportResult
 
     public void AddError(int row, string message)
     {
-        this.Failed++;
-        this.Errors = this.Errors ?? new List<ImportError>();
+        Failed++;
+        Errors = Errors ?? new List<ImportError>();
 
-        this.Errors.Add(new ImportError
+        Errors.Add(new ImportError
         {
             Row = row,
             Message = message,

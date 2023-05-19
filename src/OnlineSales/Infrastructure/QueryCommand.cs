@@ -71,10 +71,10 @@ namespace OnlineSales.Entities
 
         public System.Reflection.PropertyInfo ParseProperty<T>()
         {
-            var propertyName = this.Props.ElementAtOrDefault(0);
+            var propertyName = Props.ElementAtOrDefault(0);
             if (propertyName == null || string.IsNullOrWhiteSpace(propertyName))
             {
-                throw new QueryException(this.Source, "Property field not found");
+                throw new QueryException(Source, "Property field not found");
             }
 
             var typeProperties = typeof(T).GetProperties();
@@ -82,7 +82,7 @@ namespace OnlineSales.Entities
 
             if (property == null)
             {
-                throw new QueryException(this.Source, $"No such property '{propertyName}'");
+                throw new QueryException(Source, $"No such property '{propertyName}'");
             }
 
             return property;
