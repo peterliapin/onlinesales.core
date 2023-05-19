@@ -76,6 +76,9 @@ public class Domain : BaseEntityWithIdAndDates
     public virtual Account? Account { get; set; }
 
     public AccountSyncStatus AccountStatus { get; set; } = AccountSyncStatus.NotIntended;
+
+    [JsonIgnore]
+    public virtual ICollection<Contact>? Contacts { get; set; }
 }
 
 public class DnsRecord

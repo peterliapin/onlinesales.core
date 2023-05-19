@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
@@ -29,7 +30,7 @@ public class EmailTemplateCreateDto
     public string Language { get; set; } = string.Empty;
 
     [Required]
-    public int GroupId { get; set; }
+    public int EmailGroupId { get; set; }
 }
 
 public class EmailTemplateUpdateDto
@@ -49,7 +50,7 @@ public class EmailTemplateUpdateDto
     [MinLength(1)]
     public string? FromName { get; set; }
 
-    public int? GroupId { get; set; }
+    public int? EmailGroupId { get; set; }
 }
 
 public class EmailTemplateDetailsDto : EmailTemplateCreateDto
@@ -59,4 +60,7 @@ public class EmailTemplateDetailsDto : EmailTemplateCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    [Ignore]
+    public EmailGroupDetailsDto? EmailGroup { get; set; }
 }

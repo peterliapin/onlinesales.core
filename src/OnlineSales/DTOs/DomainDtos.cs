@@ -70,6 +70,12 @@ public class DomainDetailsDto : DomainCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    [Ignore]
+    public AccountDetailsDto? Account { get; set; }
+
+    [Ignore]
+    public List<ContactDetailsDto>? Contacts { get; set; }
 }
 
 public class DomainImportDto : BaseImportDtoWithDates

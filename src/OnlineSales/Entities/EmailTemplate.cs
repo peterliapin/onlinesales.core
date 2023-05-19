@@ -32,11 +32,11 @@ namespace OnlineSales.Entities
         public string FromName { get; set; } = string.Empty;
 
         [Required]
-        public int GroupId { get; set; }
+        public int EmailGroupId { get; set; }
 
         [JsonIgnore]
-        [ForeignKey("GroupId")]
-        public virtual EmailGroup? Group { get; set; }
+        [ForeignKey("EmailGroupId")]
+        public virtual EmailGroup? EmailGroup { get; set; }
 
         [Required]
         public string Language { get; set; } = string.Empty;

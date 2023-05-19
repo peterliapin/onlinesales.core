@@ -62,6 +62,9 @@ public class OrderItemDetailsDto : OrderItemCreateDto
     public decimal CurrencyTotal { get; set; } = 0;
 
     public decimal Total { get; set; } = 0;
+
+    [Ignore]
+    public OrderDetailsDto? Order { get; set; }
 }
 
 public class OrderItemImportDto : BaseImportDto

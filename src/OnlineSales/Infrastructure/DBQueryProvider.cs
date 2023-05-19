@@ -2,15 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Collections;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using AutoMapper;
-using AutoMapper.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using Newtonsoft.Json.Linq;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
@@ -19,10 +18,10 @@ namespace OnlineSales.Infrastructure
     public class DBQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        private readonly QueryParseData<T> parseData;
+        private readonly QueryData<T> parseData;
         private IQueryable<T> query;
 
-        public DBQueryProvider(IQueryable<T> query, QueryParseData<T> parseData)
+        public DBQueryProvider(IQueryable<T> query, QueryData<T> parseData)
         {
             this.query = query;
             this.parseData = parseData;
@@ -36,6 +35,7 @@ namespace OnlineSales.Infrastructure
             var totalCount = query.Count();
             IList<T>? records;
 
+            AddIncludeCommands();
             AddOrderCommands();
             AddSkipCommand();
             AddLimitCommand();
@@ -49,6 +49,14 @@ namespace OnlineSales.Infrastructure
             }
 
             return new QueryResult<T>(records, totalCount);
+        }
+
+        private void AddIncludeCommands()
+        {
+            foreach (var data in parseData.IncludeData)
+            {
+                query = query.Include(data.Name);
+            }
         }
 
         private void AddOrderCommands()
@@ -201,12 +209,12 @@ namespace OnlineSales.Infrastructure
             }
         }
 
-        private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryParseData<T>.WhereUnitData cmd)
+        private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryData<T>.WhereUnitData cmd)
         {
             Expression outputExpression;
             var parameterPropertyExpression = Expression.Property(expressionParameter, cmd.Property.Name);
 
-            Expression CreateEqualExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            Expression CreateEqualExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression orExpression = Expression.Constant(false);
                 var stringValues = cmd.ParseStringValues();
@@ -229,13 +237,13 @@ namespace OnlineSales.Infrastructure
                 return orExpression;
             }
 
-            Expression CreateNEqualExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            Expression CreateNEqualExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
             {
                 var expression = CreateEqualExpression(cmd, parameter);
                 return Expression.Not(expression);
             }
 
-            Expression? CreateCompareExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateCompareExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
@@ -271,7 +279,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateLikeExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateLikeExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
             {
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
 
@@ -295,7 +303,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateContainExpression(QueryParseData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateContainExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
 
@@ -310,11 +318,11 @@ namespace OnlineSales.Infrastructure
                 sb.Append('^');
                 foreach (var d in data)
                 {
-                    if (d.Item1 == QueryParseData<T>.WhereUnitData.ContainsType.MatchAll)
+                    if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.MatchAll)
                     {
                         sb.Append("(.*)");
                     }
-                    else if (d.Item1 == QueryParseData<T>.WhereUnitData.ContainsType.Substring)
+                    else if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.Substring)
                     {
                         sb.Append(Regex.Escape(d.Item2));
                     }

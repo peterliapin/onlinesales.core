@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.DataAnnotations;
@@ -52,6 +53,6 @@ public class Content : BaseEntity
 
     public bool AllowComments { get; set; } = false;
 
-    [Ignore]
+    [JsonIgnore]
     public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
 }
