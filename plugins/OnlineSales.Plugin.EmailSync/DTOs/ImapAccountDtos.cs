@@ -19,9 +19,6 @@ public class ImapAccountBaseDto
 
     [Required]
     public bool UseSsl { get; set; }
-
-    [Required]
-    public string UserId { get; set; } = string.Empty;
 }
 
 public class ImapAccountCreateDto : ImapAccountBaseDto
@@ -41,8 +38,6 @@ public class ImapAccountUpdateDto
     public int? Port { get; set; }
 
     public bool? UseSsl { get; set; }
-
-    public string? UserId { get; set; } = string.Empty;
 }
 
 public class ImapAccountDetailsDto : ImapAccountBaseDto
