@@ -1,0 +1,16 @@
+﻿{
+  "EmailSync": {
+    "InternalDomains": [],
+    "IgnoredEmails": [],
+    "EncryptionKey": "fTjWnZr4u7x!A%D*"
+  },
+  "Tasks": {
+    "EmailSyncTask": {
+      "Enable": false,
+      "CronSchedule": "0/30 * * * * ?",
+      "RetryCount": "2",
+      "RetryInterval": "1",
+      "BatchSize": "5000"
+    }
+  }
+}
