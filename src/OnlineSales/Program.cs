@@ -432,6 +432,7 @@ public class Program
         builder.Services.AddScoped<ITask, DomainVerificationTask>();
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, ContactAccountTask>();
+        builder.Services.AddScoped<ITask, SyncEmailLogTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)

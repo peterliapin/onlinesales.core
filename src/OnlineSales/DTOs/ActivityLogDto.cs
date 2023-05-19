@@ -9,8 +9,10 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
-public class ActivityLogDto
+public class ActivityLogDetailsDto
 {
+    public int Id { get; set; }
+
     public string Source { get; set; } = string.Empty;
 
     public int SourceId { get; set; }
