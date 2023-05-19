@@ -89,6 +89,9 @@ public class ContentDetailsDto : ContentCreateDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    [Ignore]
+    public List<CommentDetailsDto>? Comments { get; set; }
 }
 
 public class ContentImportDto : BaseImportDto

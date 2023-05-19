@@ -4,6 +4,10 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using CsvHelper.TypeConversion;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using OnlineSales.Configuration;
 
 namespace OnlineSales.Helpers;
@@ -27,7 +31,6 @@ public class JsonHelper
     {
         options.PropertyNamingPolicy = policy;
 
-        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
         options.Converters.Add(new JsonStringEnumConverter());
     }
 
@@ -42,8 +45,8 @@ public class JsonHelper
             options.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
         }
 
-        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
         options.Converters.Add(new JsonStringEnumConverter());
+        options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     }
 
     public static string Serialize(object obj)

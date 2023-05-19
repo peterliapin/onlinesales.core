@@ -17,6 +17,7 @@ RUN dotnet publish "OnlineSales.csproj" -c Release -o /app/publish /p:UseAppHost
 
 FROM base AS final
 RUN apk add --no-cache icu-libs
+RUN apk add --no-cache icu-data-full
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 WORKDIR /app
 COPY --from=publish /app/publish .

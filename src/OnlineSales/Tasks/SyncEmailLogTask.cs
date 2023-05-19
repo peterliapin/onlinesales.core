@@ -1,38 +1,32 @@
-﻿// <copyright file="SyncActivityLogTask.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="SyncEmailLogTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
-using OnlineSales.DataAnnotations;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Exceptions;
 using OnlineSales.Helpers;
-using OnlineSales.Plugin.SendGrid.Data;
-using OnlineSales.Plugin.SendGrid.Entities;
-using OnlineSales.Plugin.SendGrid.Exceptions;
 using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Serilog;
 
-namespace OnlineSales.SendGrid.Tasks
+namespace OnlineSales.Tasks
 {
-    public class SyncActivityLogTask : BaseTask
+    public class SyncEmailLogTask : BaseTask
     {
-        private static readonly string SourceName = "SendGrid";
-
-        private readonly SendgridDbContext sgDbContext;
-
+        private static readonly string SourceName = "EmailService";
+        private readonly PgDbContext dbContext;
         private readonly ActivityLogService logService;
 
         private readonly int batchSize;
 
-        public SyncActivityLogTask(IConfiguration configuration, SendgridDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
-            : base("Tasks:SyncActivityLogTask", configuration, taskStatusService)
+        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
+            : base("Tasks:SyncEmailLogTask", configuration, taskStatusService)
         {
-            sgDbContext = dbContext;
+            this.dbContext = dbContext;
             this.logService = logService;
             var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
@@ -50,33 +44,31 @@ namespace OnlineSales.SendGrid.Tasks
             try
             {
                 var maxId = await logService.GetMaxId(SourceName);
-                var events = sgDbContext.SendgridEvents!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
+                var events = dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
                 var res = await logService.AddActivityRecords(events);
                 if (!res)
                 {
-                    throw new SendGridApiException("Cannot log sendgrid events");
+                    throw new EmailLogsToActivityLogDumpException("Unable to log email events");
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Error("Error while logging sendgrid events. Reason: " + ex.Message);
+                Log.Error("Failed to dump email events to activity log. Reason: " + ex.Message);
                 throw;
             }
         }
 
-        private static ActivityLog Convert(SendgridEvent ev)
+        private static ActivityLog Convert(EmailLog ev)
         {
             return new ActivityLog()
             {
                 Source = SourceName,
                 SourceId = ev.Id,
-                Type = ev.Event,
+                Type = "Message",
                 CreatedAt = ev.CreatedAt,
-                ContactId = ev.ContactId,
-                Ip = ev.Ip,
-                Data = JsonHelper.Serialize(new { Id = ev.Id, MessageId = ev.MessageId, EventId = ev.EventId }),
+                Data = JsonHelper.Serialize(new { Id = ev.Id, Status = ev.Status, Sender = ev.FromEmail, Recipient = ev.Recipient, Subject = ev.Subject }),
             };
         }
     }

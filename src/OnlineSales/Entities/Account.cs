@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Geography;
@@ -52,4 +53,10 @@ public class Account : BaseEntity
     [Searchable]
     [Column(TypeName = "jsonb")]
     public string? Data { get; set; }
+
+    [JsonIgnore]
+    public virtual ICollection<Contact>? Contacts { get; set; }
+
+    [JsonIgnore]
+    public virtual ICollection<Domain>? Domains { get; set; }
 }

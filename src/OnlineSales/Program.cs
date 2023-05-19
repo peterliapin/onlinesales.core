@@ -87,8 +87,12 @@ public class Program
         ConfigureImportSizeLimit(builder);
         ConfigureEmailVerification(builder);
         ConfigureAccountDetails(builder);
-
-        builder.Services.AddAutoMapper(typeof(Program));
+        
+        builder.Services.AddAutoMapper(x =>
+        {
+            x.AddProfile(new AutoMapperProfiles());
+            x.AllowNullCollections = true;
+        });
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddControllers(options =>
@@ -100,7 +104,6 @@ public class Program
             options.OutputFormatters.Add(new CsvOutputFormatter());
             options.FormatterMappings.SetMediaTypeMappingForFormat("csv", "text/csv");
         })
-        .AddXmlSerializerFormatters()
         .ConfigureApiBehaviorOptions(options =>
         {
             options.SuppressModelStateInvalidFilter = true;
@@ -429,6 +432,7 @@ public class Program
         builder.Services.AddScoped<ITask, DomainVerificationTask>();
         builder.Services.AddScoped<ITask, ContactScheduledEmailTask>();
         builder.Services.AddScoped<ITask, ContactAccountTask>();
+        builder.Services.AddScoped<ITask, SyncEmailLogTask>();
     }
 
     private static void ConfigureCORS(WebApplicationBuilder builder)
