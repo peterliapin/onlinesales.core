@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -44,11 +45,14 @@ namespace OnlineSales.Tasks
             try
             {
                 var maxId = await logService.GetMaxId(SourceName);
-                var events = dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
-                var res = await logService.AddActivityRecords(events);
+                var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToArrayAsync();
+                var tasks = batch.Select(Convert).ToArray();
+                Task.WaitAll(tasks);
+                await dbContext.SaveChangesAsync();
+                var res = await logService.AddActivityRecords(tasks.Select(t => t.Result).ToList());
                 if (!res)
                 {
-                    throw new EmailLogsToActivityLogDumpException("Unable to log email events");
+                    throw new SyncEmailLogTaskException("Unable to log email events");
                 }
 
                 return true;
@@ -60,13 +64,23 @@ namespace OnlineSales.Tasks
             }
         }
 
-        private static ActivityLog Convert(EmailLog ev)
+        private async Task<ActivityLog> Convert(EmailLog ev)
         {
+            var contact = await dbContext.Contacts!.FirstOrDefaultAsync(contact => contact.Email == ev.Recipient);
+            if (contact == null)
+            {
+                contact = (await dbContext.Contacts!.AddAsync(new Contact
+                {
+                    Email = ev.Recipient,
+                })).Entity;
+            }
+
             return new ActivityLog()
             {
                 Source = SourceName,
                 SourceId = ev.Id,
                 Type = "Message",
+                ContactId = contact.Id,
                 CreatedAt = ev.CreatedAt,
                 Data = JsonHelper.Serialize(new { Id = ev.Id, Status = ev.Status, Sender = ev.FromEmail, Recipient = ev.Recipient, Subject = ev.Subject }),
             };
