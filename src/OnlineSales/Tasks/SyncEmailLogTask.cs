@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
@@ -60,13 +61,24 @@ namespace OnlineSales.Tasks
             }
         }
 
-        private static ActivityLog Convert(EmailLog ev)
+        private ActivityLog Convert(EmailLog ev)
         {
+            var contact = dbContext.Contacts!.FirstOrDefault(contact => contact.Email == ev.Recipient);
+            if (contact == null)
+            {
+                contact = dbContext.Contacts!.Add(new Contact
+                {
+                    Email = ev.Recipient,
+                }).Entity;
+                dbContext.SaveChanges();
+            }
+
             return new ActivityLog()
             {
                 Source = SourceName,
                 SourceId = ev.Id,
                 Type = "Message",
+                ContactId = contact.Id,
                 CreatedAt = ev.CreatedAt,
                 Data = JsonHelper.Serialize(new { Id = ev.Id, Status = ev.Status, Sender = ev.FromEmail, Recipient = ev.Recipient, Subject = ev.Subject }),
             };
