@@ -45,8 +45,11 @@ namespace OnlineSales.Tasks
             try
             {
                 var maxId = await logService.GetMaxId(SourceName);
-                var events = dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).Select(e => Convert(e)).ToList();
-                var res = await logService.AddActivityRecords(events);
+                var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToArrayAsync();
+                var tasks = batch.Select(Convert).ToArray();
+                Task.WaitAll(tasks);
+                await dbContext.SaveChangesAsync();
+                var res = await logService.AddActivityRecords(tasks.Select(t => t.Result).ToList());
                 if (!res)
                 {
                     throw new SyncEmailLogTaskException("Unable to log email events");
@@ -61,16 +64,15 @@ namespace OnlineSales.Tasks
             }
         }
 
-        private ActivityLog Convert(EmailLog ev)
+        private async Task<ActivityLog> Convert(EmailLog ev)
         {
-            var contact = dbContext.Contacts!.FirstOrDefault(contact => contact.Email == ev.Recipient);
+            var contact = await dbContext.Contacts!.FirstOrDefaultAsync(contact => contact.Email == ev.Recipient);
             if (contact == null)
             {
-                contact = dbContext.Contacts!.Add(new Contact
+                contact = (await dbContext.Contacts!.AddAsync(new Contact
                 {
                     Email = ev.Recipient,
-                }).Entity;
-                dbContext.SaveChanges();
+                })).Entity;
             }
 
             return new ActivityLog()
