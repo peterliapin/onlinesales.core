@@ -42,6 +42,8 @@ public class CommentCreateDto
 
     [Optional]
     public string? Source { get; set; }
+
+    public string Language { get; set; } = string.Empty;
 }
 
 public class CommentUpdateDto
@@ -67,6 +69,8 @@ public class AnonymousCommentDetailsDto
     public int ContentId { get; set; }
 
     public string AvatarUrl { get; set; } = string.Empty;
+
+    public string Language { get; set; } = string.Empty;
 
     [Ignore]
     public ContentDetailsDto? Content { get; set; }
