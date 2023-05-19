@@ -366,6 +366,8 @@ public class Program
                 },
             });
 
+            config.EnableAnnotations();
+
             config.SupportNonNullableReferenceTypes();
 
             config.SchemaFilter<CustomSwaggerScheme>();

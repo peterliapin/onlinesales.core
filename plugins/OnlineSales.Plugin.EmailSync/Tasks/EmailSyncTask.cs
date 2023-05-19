@@ -7,7 +7,6 @@ using MailKit.Net.Imap;
 using MailKit.Search;
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Configuration;
-using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Exceptions;
 using OnlineSales.Interfaces;

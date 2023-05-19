@@ -6,7 +6,7 @@
   },
   "Tasks": {
     "EmailSyncTask": {
-      "Enable": true,
+      "Enable": false,
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1",

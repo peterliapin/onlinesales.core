@@ -14,10 +14,12 @@ using OnlineSales.Exceptions;
 using OnlineSales.Plugin.EmailSync.Data;
 using OnlineSales.Plugin.EmailSync.DTOs;
 using OnlineSales.Plugin.EmailSync.Entities;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace OnlineSales.Plugin.EmailSync.Controllers;
 
 [Authorize]
+[Route("api/users")]
 public class ImapAccountsController : ControllerBase
 {
     private readonly EmailSyncDbContext dbContext;
@@ -29,54 +31,58 @@ public class ImapAccountsController : ControllerBase
         this.mapper = mapper;
     }
 
-    [HttpGet("users/{userid}/imap-accounts/{id}")]
+    [SwaggerOperation(Tags = new[] { "Users" })]
+    [HttpGet("{userId}/imap-accounts/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]    
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ImapAccountDetailsDto>> GetAccountForUser(string userid, int id)
+    public async Task<ActionResult<ImapAccountDetailsDto>> GetAccountForUser(string userId, int id)
     {
-        var result = await FindOrThrowNotFound(userid, id);
+        var result = await FindOrThrowNotFound(userId, id);
 
         var resultConverted = mapper.Map<ImapAccountDetailsDto>(result);
 
         return Ok(resultConverted);
     }
 
-    [HttpGet("users/{userid}/imap-accounts")]
+    [SwaggerOperation(Tags = new[] { "Users" })]
+    [HttpGet("{userId}/imap-accounts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public ActionResult<List<ImapAccountDetailsDto>> GetAccountsForUser(string userid)
+    public ActionResult<List<ImapAccountDetailsDto>> GetAccountsForUser(string userId)
     {
-        var result = dbContext.ImapAccounts!.Where(a => a.UserId == userid).ToList();
+        var result = dbContext.ImapAccounts!.Where(a => a.UserId == userId).ToList();
         return Ok(mapper.Map<List<ImapAccountDetailsDto>>(result));
     }
 
-    [HttpPost("users/{userid}/imap-accounts")]
+    [SwaggerOperation(Tags = new[] { "Users" })]
+    [HttpPost("{userId}/imap-accounts")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ImapAccountDetailsDto>> PostAccountForUser(string userid, [FromBody] ImapAccountCreateDto imapAccount)
+    public async Task<ActionResult<ImapAccountDetailsDto>> PostAccountForUser(string userId, [FromBody] ImapAccountCreateDto imapAccount)
     {
         var newValue = mapper.Map<ImapAccount>(imapAccount);
-        newValue.UserId = userid;
+        newValue.UserId = userId;
         var result = await dbContext.ImapAccounts!.AddAsync(newValue);
         await dbContext.SaveChangesAsync();
 
         var resultsToClient = mapper.Map<ImapAccountDetailsDto>(newValue);
 
-        return CreatedAtAction(nameof(GetAccountsForUser), new { userId = userid, id = result.Entity.Id }, resultsToClient);
+        return CreatedAtAction(nameof(GetAccountsForUser), new { userId = userId, id = result.Entity.Id }, resultsToClient);
     }
 
-    [HttpPatch("users/{userid}/imap-accounts/{id}")]
+    [SwaggerOperation(Tags = new[] { "Users" })]
+    [HttpPatch("{userId}/imap-accounts/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public virtual async Task<ActionResult<ImapAccountDetailsDto>> PatchAccountForUser(string userid, int id, [FromBody] ImapAccountUpdateDto value)
+    public virtual async Task<ActionResult<ImapAccountDetailsDto>> PatchAccountForUser(string userId, int id, [FromBody] ImapAccountUpdateDto value)
     {
-        var existingEntity = await FindOrThrowNotFound(userid, id);
+        var existingEntity = await FindOrThrowNotFound(userId, id);
 
         mapper.Map(value, existingEntity);
         await dbContext.SaveChangesAsync();
@@ -85,14 +91,15 @@ public class ImapAccountsController : ControllerBase
         return Ok(resultsToClient);
     }
 
-    [HttpDelete("users/{userid}/imap-accounts/{id}")]
+    [SwaggerOperation(Tags = new[] { "Users" })]
+    [HttpDelete("{userId}/imap-accounts/{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public virtual async Task<ActionResult> Delete(string userid, int id)
+    public virtual async Task<ActionResult> Delete(string userId, int id)
     {
-        var existingEntity = await FindOrThrowNotFound(userid, id);
+        var existingEntity = await FindOrThrowNotFound(userId, id);
 
         dbContext.Remove(existingEntity);
 
@@ -101,9 +108,9 @@ public class ImapAccountsController : ControllerBase
         return NoContent();
     }
 
-    private async Task<ImapAccount> FindOrThrowNotFound(string userid, int id)
+    private async Task<ImapAccount> FindOrThrowNotFound(string userId, int id)
     {
-        var result = await dbContext.ImapAccounts!.Where(a => a.UserId == userid && a.Id == id).FirstOrDefaultAsync();
+        var result = await dbContext.ImapAccounts!.Where(a => a.UserId == userId && a.Id == id).FirstOrDefaultAsync();
         if (result == null)
         {
             throw new EntityNotFoundException(typeof(ImapAccount).Name, id.ToString());
