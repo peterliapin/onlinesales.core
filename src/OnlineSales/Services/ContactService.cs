@@ -97,7 +97,12 @@ namespace OnlineSales.Services
             }
             else
             {
-                contact.Domain = new Domain() { Name = domainName, AccountStatus = AccountSyncStatus.NotInitialized };
+                contact.Domain = new Domain()
+                {
+                    Name = domainName,
+                    AccountStatus = AccountSyncStatus.NotInitialized,
+                };
+
                 await domainService.SaveAsync(contact.Domain);
             }
         }
@@ -145,10 +150,11 @@ namespace OnlineSales.Services
                             {
                                 Name = contactWithDomainInfo.DomainName,
                                 Source = contactWithDomainInfo.Contact.Email,
+                                AccountStatus = AccountSyncStatus.NotIntended,
                             };
 
                             newDomains.Add(domain.Name, domain);
-                            await pgDbContext.AddAsync(domain);
+                            await domainService.SaveAsync(domain);
                             contactWithDomainInfo.Contact.Domain = domain;
                         }
                         else

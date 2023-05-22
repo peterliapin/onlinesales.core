@@ -12,9 +12,15 @@ namespace OnlineSales.DTOs;
 
 public abstract class BaseContactDto
 {
-    public string? LastName { get; set; }
+    public string? Prefix { get; set; }
 
     public string? FirstName { get; set; }
+
+    public string? MiddleName { get; set; }
+
+    public string? LastName { get; set; }
+
+    public DateTime? Birthday { get; set; }
 
     public Continent? ContinentCode { get; set; }
 
@@ -26,6 +32,12 @@ public abstract class BaseContactDto
 
     public string? Address2 { get; set; }
 
+    public string? JobTitle { get; set; }
+
+    public string? CompanyName { get; set; }
+
+    public string? Department { get; set; }
+
     public string? State { get; set; }
 
     public string? Zip { get; set; }
@@ -35,6 +47,8 @@ public abstract class BaseContactDto
     public int? Timezone { get; set; }
 
     public string? Language { get; set; }
+
+    public Dictionary<string, string>? SocialMedia { get; set; }
 
     [SwaggerHide]
     public int? UnsubscribeId { get; set; }
@@ -126,10 +140,19 @@ public class ContactImportDto : BaseImportDto
     }
 
     [Optional]
-    public string? LastName { get; set; }
+    public string? Prefix { get; set; }
 
     [Optional]
     public string? FirstName { get; set; }
+
+    [Optional]
+    public string? MiddleName { get; set; }
+
+    [Optional]
+    public string? LastName { get; set; }
+
+    [Optional]
+    public DateTime? Birthday { get; set; }
 
     [Optional]
     public Continent? ContinentCode { get; set; }
@@ -147,6 +170,15 @@ public class ContactImportDto : BaseImportDto
     public string? Address2 { get; set; }
 
     [Optional]
+    public string? JobTitle { get; set; }
+
+    [Optional]
+    public string? CompanyName { get; set; }
+
+    [Optional]
+    public string? Department { get; set; }
+
+    [Optional]
     public string? State { get; set; }
 
     [Optional]
@@ -160,6 +192,9 @@ public class ContactImportDto : BaseImportDto
 
     [Optional]
     public string? Language { get; set; }
+
+    [Optional]
+    public Dictionary<string, string>? SocialMedia { get; set; }
 
     [Optional]
     public int? UnsubscribeId { get; set; }
