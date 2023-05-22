@@ -21,10 +21,19 @@ public class Contact : BaseEntity
     private string email = string.Empty;
 
     [Searchable]
-    public string? LastName { get; set; }
+    public string? Prefix { get; set; }
 
     [Searchable]
     public string? FirstName { get; set; }
+
+    [Searchable]
+    public string? MiddleName { get; set; }
+
+    [Searchable]
+    public string? LastName { get; set; }
+
+    [Searchable]
+    public DateTime? Birthday { get; set; }
 
     [Required]
     [Searchable]
@@ -57,6 +66,15 @@ public class Contact : BaseEntity
     public string? Address2 { get; set; }
 
     [Searchable]
+    public string? JobTitle { get; set; }
+
+    [Searchable]
+    public string? CompanyName { get; set; }
+
+    [Searchable]
+    public string? Department { get; set; }
+
+    [Searchable]
     public string? State { get; set; }
 
     [Searchable]
@@ -69,6 +87,10 @@ public class Contact : BaseEntity
 
     [Searchable]
     public string? Language { get; set; }
+
+    [Searchable]
+    [Column(TypeName = "jsonb")]
+    public Dictionary<string, string>? SocialMedia { get; set; }
 
     [Required]
     public int DomainId { get; set; }
