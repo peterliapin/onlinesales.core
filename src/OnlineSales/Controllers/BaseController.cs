@@ -15,6 +15,7 @@ using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers
 {
@@ -27,17 +28,15 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
-        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-        private readonly ElasticClient elasticClient;
+        private readonly QueryFactory<T> queryFactory;
 
-        public BaseController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
+        public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryFactory<T> queryFactory)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
-            this.apiSettingsConfig = apiSettingsConfig;
 
             dbSet = dbContext.Set<T>();
-            elasticClient = esDbContext.ElasticClient;
+            this.queryFactory = queryFactory;
         }
 
         // GET api/{entity}s/5
@@ -114,9 +113,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
-            var limit = apiSettingsConfig.Value.MaxListSize;
-
-            var qp = BuildQueryProvider(limit);
+            var qp = queryFactory.BuildQueryProvider();
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -130,9 +127,11 @@ namespace OnlineSales.Controllers
         [Produces("text/csv", "text/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+#pragma warning disable S4144 // Methods should not have identical implementations
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
+#pragma warning restore S4144 // Methods should not have identical implementations
         {
-            var qp = BuildQueryProvider(int.MaxValue);
+            var qp = queryFactory.BuildQueryProvider();
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -187,23 +186,6 @@ namespace OnlineSales.Controllers
                         }
                     }
                 }
-            }
-        }
-
-        private IQueryProvider<T> BuildQueryProvider(int maxLimitSize)
-        {
-            var queryCommands = QueryParser.Parse(Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()) : string.Empty);
-
-            var queryData = new QueryData<T>(queryCommands, maxLimitSize, dbContext);
-
-            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
-            {
-                var indexPrefix = this.dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                return new MixedQueryProvider<T>(queryData, this.dbSet!.AsQueryable<T>(), this.elasticClient, indexPrefix!);
-            }
-            else
-            {
-                return new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), queryData);
             }
         }
 

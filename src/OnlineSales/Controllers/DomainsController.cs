@@ -11,6 +11,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -20,8 +21,8 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 {
     private readonly IDomainService domainService;
 
-    public DomainsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public DomainsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryFactory<Domain> queryFactory)
+        : base(dbContext, mapper, esDbContext, queryFactory)
     {
         this.domainService = domainService;
     }

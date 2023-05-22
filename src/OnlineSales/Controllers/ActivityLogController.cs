@@ -13,6 +13,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -21,18 +22,12 @@ namespace OnlineSales.Controllers;
 public class ActivityLogController : ControllerBase
 {    
     private readonly IMapper mapper;
-    private readonly PgDbContext dbContext;
-    private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-    private readonly ElasticClient elasticClient;
-    private readonly IConfiguration configuration;
+    private readonly QueryFactory<ActivityLog> queryFactory;
 
-    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
+    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, QueryFactory<ActivityLog> queryFactory)
     {        
         this.mapper = mapper;
-        this.dbContext = dbContext;
-        this.apiSettingsConfig = apiSettingsConfig;
-        this.configuration = configuration;
-        elasticClient = esDbContext.ElasticClient;
+        this.queryFactory = queryFactory;
     }
 
     [HttpGet]
@@ -41,22 +36,11 @@ public class ActivityLogController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<List<ActivityLogDetailsDto>>> Get([FromQuery] string? query)
     {
-        var limit = apiSettingsConfig.Value.MaxListSize;
-
-        var qp = BuildQueryProvider(limit);
+        var qp = queryFactory.BuildQueryProvider();
 
         var result = await qp.GetResult();
         Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
         Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
         return Ok(mapper.Map<List<ActivityLogDetailsDto>>(result.Records));
-    }
-
-    private IQueryProvider<ActivityLog> BuildQueryProvider(int maxLimitSize)
-    {
-        var queryCommands = QueryParser.Parse(Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()) : string.Empty);
-        var queryParams = new QueryData<ActivityLog>(queryCommands, maxLimitSize, dbContext);
-
-        var indexPrefix = configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-        return new ESQueryProvider<ActivityLog>(elasticClient, queryParams, indexPrefix!);
     }
 }

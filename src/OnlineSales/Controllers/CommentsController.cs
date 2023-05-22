@@ -12,6 +12,7 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -21,8 +22,8 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
 {
     private readonly ICommentService commentService;
 
-    public CommentsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, ICommentService commentService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryFactory<Comment> queryFactory)
+        : base(dbContext, mapper, esDbContext, queryFactory)
     {
         this.commentService = commentService;
     }

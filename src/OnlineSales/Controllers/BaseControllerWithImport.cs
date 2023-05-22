@@ -14,6 +14,7 @@ using OnlineSales.DataAnnotations;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
+using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -24,8 +25,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     where TD : class
     where TI : BaseImportDtoWithIdAndSource
 {
-    public BaseControllerWithImport(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public BaseControllerWithImport(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryFactory<T> queryFactory)
+        : base(dbContext, mapper, esDbContext, queryFactory)
     {
     }
 
