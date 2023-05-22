@@ -36,11 +36,11 @@ namespace OnlineSales.Services
             this.httpContextHelper = httpContextHelper;
         }
 
-        public IQueryProvider<T> BuildQueryProvider()
+        public IQueryProvider<T> BuildQueryProvider(int limit = -1)
         {
             var queryCommands = QueryParser.Parse(httpContextHelper.Request.QueryString.HasValue ? HttpUtility.UrlDecode(httpContextHelper.Request.QueryString.ToString()) : string.Empty);
 
-            var queryData = new QueryData<T>(queryCommands, apiSettingsConfig.Value.MaxListSize, dbContext);
+            var queryData = new QueryData<T>(queryCommands, limit == -1 ? apiSettingsConfig.Value.MaxListSize : limit, dbContext);
 
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
             {

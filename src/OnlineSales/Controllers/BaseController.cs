@@ -131,7 +131,7 @@ namespace OnlineSales.Controllers
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
 #pragma warning restore S4144 // Methods should not have identical implementations
         {
-            var qp = queryFactory.BuildQueryProvider();
+            var qp = queryFactory.BuildQueryProvider(int.MaxValue);
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
