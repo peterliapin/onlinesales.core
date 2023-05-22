@@ -8,6 +8,7 @@ using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -69,18 +70,22 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task SaveAsync(Domain domain)
+        public async Task<EntityEntry<Domain>> SaveAsync(Domain domain)
         {
             VerifyFreeAndDisposable(domain);
 
+            EntityEntry<Domain> entry;
+
             if (domain.Id > 0)
             {
-                pgDbContext.Domains!.Update(domain);
+               entry = pgDbContext.Domains!.Update(domain);
             }
             else
             {
-                await pgDbContext.Domains!.AddAsync(domain);
+               entry = await pgDbContext.Domains!.AddAsync(domain);
             }
+
+            return entry;
         }
 
         public async Task SaveRangeAsync(List<Domain> domains)

@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Nest;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -21,19 +22,23 @@ namespace OnlineSales.Services
             this.domainService = domainService;
         }
 
-        public async Task SaveAsync(Contact contact)
+        public async Task<EntityEntry<Contact>> SaveAsync(Contact contact)
         {
             await EnrichWithDomainId(contact);
             EnrichWithAccountId(contact);
 
+            EntityEntry<Contact> entry;
+
             if (contact.Id > 0)
             {
-                pgDbContext.Contacts!.Update(contact);
+                entry = pgDbContext.Contacts!.Update(contact);
             }
             else
             {
-                await pgDbContext.Contacts!.AddAsync(contact);
+                entry = await pgDbContext.Contacts!.AddAsync(contact);
             }
+
+            return entry;
         }
 
         public async Task SaveRangeAsync(List<Contact> contacts)

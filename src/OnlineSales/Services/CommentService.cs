@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -20,18 +21,22 @@ public class CommentService : ICommentService
         this.contactsService = contactsService;
     }
 
-    public async Task SaveAsync(Comment comment)
+    public async Task<EntityEntry<Comment>> SaveAsync(Comment comment)
     {
         await EnrichWithContactId(comment);
 
+        EntityEntry<Comment> entry;
+
         if (comment.Id > 0)
         {
-            pgDbContext.Comments!.Update(comment);
+            entry = pgDbContext.Comments!.Update(comment);
         }
         else
         {
-            await pgDbContext.Comments!.AddAsync(comment);
+            entry = await pgDbContext.Comments!.AddAsync(comment);
         }
+
+        return entry;
     }
 
     public async Task SaveRangeAsync(List<Comment> comments)

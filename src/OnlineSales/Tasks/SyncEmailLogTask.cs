@@ -21,14 +21,17 @@ namespace OnlineSales.Tasks
         private static readonly string SourceName = "EmailService";
         private readonly PgDbContext dbContext;
         private readonly ActivityLogService logService;
+        private readonly ContactService contactService;
 
         private readonly int batchSize;
 
-        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
+        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService, ContactService contactService)
             : base("Tasks:SyncEmailLogTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.logService = logService;
+            this.contactService = contactService;
+
             var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
             {
@@ -55,10 +58,10 @@ namespace OnlineSales.Tasks
 
                     if (!existingContacts.TryGetValue(log.Recipient, out contact))
                     {
-                        contact = dbContext.Contacts!.Add(new Contact
+                        contact = contactService.SaveAsync(new Contact
                         {
                             Email = log.Recipient,
-                        }).Entity;
+                        }).Result.Entity;
                     }
 
                     return new ActivityLog()
