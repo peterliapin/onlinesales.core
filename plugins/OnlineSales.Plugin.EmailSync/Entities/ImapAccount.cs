@@ -26,8 +26,6 @@ public class ImapAccount : BaseEntity
 
     public bool UseSsl { get; set; }
 
-    public DateTime LastDateTime { get; set; } = new DateTime(1970, 1, 1).ToUniversalTime();
-
     [Required]
     public string UserId { get; set; } = string.Empty;
 

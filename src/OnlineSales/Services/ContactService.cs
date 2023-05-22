@@ -22,6 +22,11 @@ namespace OnlineSales.Services
             this.domainService = domainService;
         }
 
+        public async Task SaveChangesAsync()
+        {
+            await pgDbContext.SaveChangesAsync();
+        }
+
         public async Task SaveAsync(Contact contact)
         {
             await EnrichWithDomainId(contact);

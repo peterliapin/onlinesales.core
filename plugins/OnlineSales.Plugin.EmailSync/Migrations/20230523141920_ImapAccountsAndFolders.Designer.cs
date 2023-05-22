@@ -14,8 +14,8 @@ using OnlineSales.Plugin.EmailSync.Data;
 namespace OnlineSales.Plugin.EmailSync.Migrations
 {
     [DbContext(typeof(EmailSyncDbContext))]
-    [Migration("20230511222311_ImapAccount")]
-    partial class ImapAccount
+    [Migration("20230523141920_ImapAccountsAndFolders")]
+    partial class ImapAccountsAndFolders
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -981,6 +981,11 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_email");
 
+                    b.Property<string>("MessageId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message_id");
+
                     b.Property<string>("Recipient")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1813,10 +1818,6 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("host");
 
-                    b.Property<DateTime>("LastDateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_date_time");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1863,6 +1864,65 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasDatabaseName("ix_imap_account_user_id");
 
                     b.ToTable("imap_account", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccountFolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("full_name");
+
+                    b.Property<int>("ImapAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("imap_account_id");
+
+                    b.Property<int>("LastUid")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_uid");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_imap_account_folder");
+
+                    b.HasIndex("ImapAccountId")
+                        .HasDatabaseName("ix_imap_account_folder_imap_account_id");
+
+                    b.ToTable("imap_account_folder", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -2090,6 +2150,18 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasConstraintName("fk_imap_account_users_user_id");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccountFolder", b =>
+                {
+                    b.HasOne("OnlineSales.Plugin.EmailSync.Entities.ImapAccount", "ImapAccount")
+                        .WithMany()
+                        .HasForeignKey("ImapAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_imap_account_folder_imap_account_imap_account_id");
+
+                    b.Navigation("ImapAccount");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Content", b =>
