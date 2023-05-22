@@ -10,6 +10,7 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Exceptions;
 using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Serilog;
@@ -21,16 +22,16 @@ namespace OnlineSales.Tasks
         private static readonly string SourceName = "EmailService";
         private readonly PgDbContext dbContext;
         private readonly ActivityLogService logService;
-        private readonly ContactService contactService;
+        private readonly IServiceProvider provider;
 
         private readonly int batchSize;
 
-        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService, ContactService contactService)
+        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService, IServiceProvider provider)
             : base("Tasks:SyncEmailLogTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.logService = logService;
-            this.contactService = contactService;
+            this.provider = provider;
 
             var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
@@ -47,39 +48,44 @@ namespace OnlineSales.Tasks
         {
             try
             {
-                var maxId = await logService.GetMaxId(SourceName);
-                var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToListAsync();
-                var batchContacts = batch.Select(b => b.Recipient).ToArray();
-                var existingContacts = await dbContext.Contacts!.Where(contact => batchContacts.Contains(contact.Email)).ToDictionaryAsync(k => k.Email);
-
-                var converted = batch.Select(log =>
+                using (var scope = provider.CreateScope())
                 {
-                    Contact? contact;
+                    var contactService = scope.ServiceProvider.GetRequiredService<ContactService>();
 
-                    if (!existingContacts.TryGetValue(log.Recipient, out contact))
+                    var maxId = await logService.GetMaxId(SourceName);
+                    var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToListAsync();
+                    var batchContacts = batch.Select(b => b.Recipient).ToArray();
+                    var existingContacts = await dbContext.Contacts!.Where(contact => batchContacts.Contains(contact.Email)).ToDictionaryAsync(k => k.Email);
+
+                    var converted = batch.Select(log =>
                     {
-                        contact = contactService.SaveAsync(new Contact
+                        Contact? contact;
+
+                        if (!existingContacts.TryGetValue(log.Recipient, out contact))
                         {
-                            Email = log.Recipient,
-                        }).Result.Entity;
-                    }
+                            contact = contactService.SaveAsync(new Contact
+                            {
+                                Email = log.Recipient,
+                            }).Result.Entity;
+                        }
 
-                    return new ActivityLog()
+                        return new ActivityLog()
+                        {
+                            Source = SourceName,
+                            SourceId = log.Id,
+                            Type = "Message",
+                            ContactId = contact.Id,
+                            CreatedAt = log.CreatedAt,
+                            Data = JsonHelper.Serialize(new { Id = log.Id, Status = log.Status, Sender = log.FromEmail, Recipient = log.Recipient, Subject = log.Subject }),
+                        };
+                    }).ToList();
+
+                    await dbContext.SaveChangesAsync();
+                    var res = await logService.AddActivityRecords(converted);
+                    if (!res)
                     {
-                        Source = SourceName,
-                        SourceId = log.Id,
-                        Type = "Message",
-                        ContactId = contact.Id,
-                        CreatedAt = log.CreatedAt,
-                        Data = JsonHelper.Serialize(new { Id = log.Id, Status = log.Status, Sender = log.FromEmail, Recipient = log.Recipient, Subject = log.Subject }),
-                    };
-                }).ToList();
-
-                await dbContext.SaveChangesAsync();
-                var res = await logService.AddActivityRecords(converted);
-                if (!res)
-                {
-                    throw new SyncEmailLogTaskException("Unable to log email events");
+                        throw new SyncEmailLogTaskException("Unable to log email events");
+                    }
                 }
 
                 return true;
