@@ -18,8 +18,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailTemplateDetailsDto>
 {
-    public EmailTemplatesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<EmailTemplate> queryFactory)
-    : base(dbContext, mapper, esDbContext, queryFactory)
+    public EmailTemplatesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<EmailTemplate> queryProviderFactory)
+    : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
     }
 }

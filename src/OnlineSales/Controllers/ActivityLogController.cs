@@ -21,12 +21,12 @@ namespace OnlineSales.Controllers;
 public class ActivityLogController : ControllerBase
 {    
     private readonly IMapper mapper;
-    private readonly QueryProviderFactory<ActivityLog> queryFactory;
+    private readonly QueryProviderFactory<ActivityLog> queryProviderFactory;
 
-    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, QueryProviderFactory<ActivityLog> queryFactory)
+    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, QueryProviderFactory<ActivityLog> queryProviderFactory)
     {        
         this.mapper = mapper;
-        this.queryFactory = queryFactory;
+        this.queryProviderFactory = queryProviderFactory;
     }
 
     [HttpGet]
@@ -35,7 +35,7 @@ public class ActivityLogController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<List<ActivityLogDetailsDto>>> Get([FromQuery] string? query)
     {
-        var qp = queryFactory.BuildQueryProvider();
+        var qp = queryProviderFactory.BuildQueryProvider();
 
         var result = await qp.GetResult();
         Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());

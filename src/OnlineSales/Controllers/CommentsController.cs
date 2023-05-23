@@ -22,8 +22,8 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
 {
     private readonly ICommentService commentService;
 
-    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryFactory)
-        : base(dbContext, mapper, esDbContext, queryFactory)
+    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.commentService = commentService;
     }

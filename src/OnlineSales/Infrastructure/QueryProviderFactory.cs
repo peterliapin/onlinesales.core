@@ -39,16 +39,16 @@ namespace OnlineSales.Infrastructure
         {
             var queryCommands = QueryStringParser.Parse(httpContextHelper.Request.QueryString.HasValue ? HttpUtility.UrlDecode(httpContextHelper.Request.QueryString.ToString()) : string.Empty);
 
-            var queryData = new QueryModelBuilder<T>(queryCommands, limit == -1 ? apiSettingsConfig.Value.MaxListSize : limit, dbContext);
+            var queryBuilder = new QueryModelBuilder<T>(queryCommands, limit == -1 ? apiSettingsConfig.Value.MaxListSize : limit, dbContext);
 
-            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
+            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryBuilder.SearchData.Count > 0)
             {
                 var indexPrefix = dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                return new MixedQueryProvider<T>(queryData, dbSet!.AsQueryable<T>(), elasticClient, indexPrefix!);
+                return new MixedQueryProvider<T>(queryBuilder, dbSet!.AsQueryable<T>(), elasticClient, indexPrefix!);
             }
             else
             {
-                return new DBQueryProvider<T>(dbSet!.AsQueryable<T>(), queryData);
+                return new DBQueryProvider<T>(dbSet!.AsQueryable<T>(), queryBuilder);
             }
         }
     }

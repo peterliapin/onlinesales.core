@@ -27,15 +27,15 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
-        private readonly QueryProviderFactory<T> queryFactory;
+        private readonly QueryProviderFactory<T> queryProviderFactory;
 
-        public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<T> queryFactory)
+        public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<T> queryProviderFactory)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
 
             dbSet = dbContext.Set<T>();
-            this.queryFactory = queryFactory;
+            this.queryProviderFactory = queryProviderFactory;
         }
 
         // GET api/{entity}s/5
@@ -112,7 +112,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
-            var qp = queryFactory.BuildQueryProvider();
+            var qp = queryProviderFactory.BuildQueryProvider();
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -128,7 +128,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
         {
-            var qp = queryFactory.BuildQueryProvider(int.MaxValue);
+            var qp = queryProviderFactory.BuildQueryProvider(int.MaxValue);
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());

@@ -19,17 +19,17 @@ namespace OnlineSales.Infrastructure
         private readonly ElasticClient elasticClient;
         private readonly List<QueryContainer> andQueries = new List<QueryContainer>();
         private readonly List<QueryContainer> orQueries = new List<QueryContainer>();
-        private readonly QueryModelBuilder<T> parseData;
+        private readonly QueryModelBuilder<T> queryBuilder;
         private readonly string indexName;
         private readonly PropertyInfo[] searchableTextProperties;
         private readonly PropertyInfo[] searchableNonTextProperties;
         private readonly int maxResultWindow = 10000;
 
-        public ESQueryProvider(ElasticClient elasticClient, QueryModelBuilder<T> parseData, string indexPrefix)
+        public ESQueryProvider(ElasticClient elasticClient, QueryModelBuilder<T> queryBuilder, string indexPrefix)
         {
             indexName = indexPrefix + "-" + typeof(T).Name.ToLower();
             this.elasticClient = elasticClient;
-            this.parseData = parseData;
+            this.queryBuilder = queryBuilder;
             searchableTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType == typeof(string)).ToArray();
             searchableNonTextProperties = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false) && p.PropertyType != typeof(string)).ToArray();
             elasticClient.Indices.UpdateSettings(indexName, s => s.IndexSettings(i => i.Setting(UpdatableIndexSettings.MaxResultWindow, maxResultWindow)));
@@ -64,20 +64,20 @@ namespace OnlineSales.Infrastructure
 
                 AddSortConditions(sr);
 
-                if (parseData.Skip >= 0)
+                if (queryBuilder.Skip >= 0)
                 {
-                    sr.From = parseData.Skip;
+                    sr.From = queryBuilder.Skip;
                 }
 
-                if (parseData.Limit >= 0)
+                if (queryBuilder.Limit >= 0)
                 {
-                    sr.Size = parseData.Limit;
+                    sr.Size = queryBuilder.Limit;
                 }
 
-                if (parseData.SelectData.IsSelect)
+                if (queryBuilder.SelectData.IsSelect)
                 {
                     var fields = new List<Field>();
-                    foreach (var sp in parseData.SelectData.SelectedProperties)
+                    foreach (var sp in queryBuilder.SelectData.SelectedProperties)
                     {
                         fields.Add(sp);
                     }
@@ -97,9 +97,9 @@ namespace OnlineSales.Infrastructure
         {
             var sortedConditions = new List<ISort>();
 
-            if (parseData.OrderData.Count > 0)
+            if (queryBuilder.OrderData.Count > 0)
             {
-                foreach (var orderCmd in parseData.OrderData)
+                foreach (var orderCmd in queryBuilder.OrderData)
                 {
                     var sortOrder = orderCmd.Ascending ? Nest.SortOrder.Ascending : Nest.SortOrder.Descending;
 
@@ -121,7 +121,7 @@ namespace OnlineSales.Infrastructure
             {
                 var res = new List<object>();
 
-                foreach (var p in parseData.OrderData)
+                foreach (var p in queryBuilder.OrderData)
                 {
                     res.Add(p.Property.GetValue(lastObject)!);
                 }
@@ -129,7 +129,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            if ((parseData.Skip >= 0 || parseData.Limit >= 0) && (parseData.Skip + parseData.Limit <= maxResultWindow))
+            if ((queryBuilder.Skip >= 0 || queryBuilder.Limit >= 0) && (queryBuilder.Skip + queryBuilder.Limit <= maxResultWindow))
             {
                 var res = await elasticClient.SearchAsync<T>(sr);
                 CheckSearchRequestResult(res);
@@ -143,7 +143,7 @@ namespace OnlineSales.Infrastructure
                 sr.Size = maxResultWindow;
                 sr.PointInTime = new PointInTime(pitId, "2m");
                 var total = 0;
-                while (total <= parseData.Skip + parseData.Limit)
+                while (total <= queryBuilder.Skip + queryBuilder.Limit)
                 {
                     var res = await elasticClient.SearchAsync<T>(sr);
                     CheckSearchRequestResult(res);
@@ -154,28 +154,28 @@ namespace OnlineSales.Infrastructure
                         break;
                     }
 
-                    if (newTotal >= parseData.Skip)
+                    if (newTotal >= queryBuilder.Skip)
                     {
-                        if (total <= parseData.Skip)
+                        if (total <= queryBuilder.Skip)
                         {
-                            if (newTotal <= parseData.Skip + parseData.Limit)
+                            if (newTotal <= queryBuilder.Skip + queryBuilder.Limit)
                             {
-                                result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, ds.Count)));
+                                result.AddRange(res.Documents.Take(new Range(queryBuilder.Skip - total, ds.Count)));
                             }
                             else
                             {
-                                result.AddRange(res.Documents.Take(new Range(parseData.Skip - total, parseData.Skip + parseData.Limit - total)));
+                                result.AddRange(res.Documents.Take(new Range(queryBuilder.Skip - total, queryBuilder.Skip + queryBuilder.Limit - total)));
                             }
                         }
                         else
                         {
-                            if (newTotal <= parseData.Skip + parseData.Limit)
+                            if (newTotal <= queryBuilder.Skip + queryBuilder.Limit)
                             {
                                 result.AddRange(res.Documents.Take(new Range(0, ds.Count)));
                             }
                             else
                             {
-                                result.AddRange(res.Documents.Take(new Range(0, parseData.Skip + parseData.Limit - total)));
+                                result.AddRange(res.Documents.Take(new Range(0, queryBuilder.Skip + queryBuilder.Limit - total)));
                             }
                         }
                     }
@@ -358,7 +358,7 @@ namespace OnlineSales.Infrastructure
                 }
             }
 
-            foreach (var cmds in parseData.WhereData)
+            foreach (var cmds in queryBuilder.WhereData)
             {
                 if (cmds.OrOperation)
                 {
@@ -383,11 +383,11 @@ namespace OnlineSales.Infrastructure
         {
             var sq = new List<QueryContainer>();
 
-            if (parseData.SearchData.Count > 0)
+            if (queryBuilder.SearchData.Count > 0)
             {
                 var tQ = new MultiMatchQuery
                 {
-                    Query = string.Join(" ", parseData.SearchData),
+                    Query = string.Join(" ", queryBuilder.SearchData),
                     Fields = searchableTextProperties,
                     Lenient = true,
                     Fuzziness = Fuzziness.Auto,
@@ -398,7 +398,7 @@ namespace OnlineSales.Infrastructure
 
                 var ntQ = new MultiMatchQuery
                 {
-                    Query = string.Join(" ", parseData.SearchData),
+                    Query = string.Join(" ", queryBuilder.SearchData),
                     Fields = searchableNonTextProperties,
                     Lenient = true,
                     Operator = Operator.Or,

@@ -22,8 +22,8 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
 {
     private readonly IOrderItemService orderItemService;
 
-    public OrderItemsController(PgDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, EsDbContext esDbContext, QueryProviderFactory<OrderItem> queryFactory)
-        : base(dbContext, mapper, esDbContext, queryFactory)
+    public OrderItemsController(PgDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, EsDbContext esDbContext, QueryProviderFactory<OrderItem> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.orderItemService = orderItemService;
     }
