@@ -72,6 +72,12 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_imap_account_host_user_name",
+                table: "imap_account",
+                columns: new[] { "host", "user_name" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "ix_imap_account_user_id",
                 table: "imap_account",
                 column: "user_id");
