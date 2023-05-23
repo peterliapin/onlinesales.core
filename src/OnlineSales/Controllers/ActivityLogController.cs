@@ -13,7 +13,6 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -22,9 +21,9 @@ namespace OnlineSales.Controllers;
 public class ActivityLogController : ControllerBase
 {    
     private readonly IMapper mapper;
-    private readonly QueryFactory<ActivityLog> queryFactory;
+    private readonly QueryProviderFactory<ActivityLog> queryFactory;
 
-    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, QueryFactory<ActivityLog> queryFactory)
+    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, QueryProviderFactory<ActivityLog> queryFactory)
     {        
         this.mapper = mapper;
         this.queryFactory = queryFactory;

@@ -18,10 +18,10 @@ namespace OnlineSales.Infrastructure
     public class DBQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        private readonly QueryData<T> parseData;
+        private readonly QueryModelBuilder<T> parseData;
         private IQueryable<T> query;
 
-        public DBQueryProvider(IQueryable<T> query, QueryData<T> parseData)
+        public DBQueryProvider(IQueryable<T> query, QueryModelBuilder<T> parseData)
         {
             this.query = query;
             this.parseData = parseData;
@@ -209,12 +209,12 @@ namespace OnlineSales.Infrastructure
             }
         }
 
-        private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryData<T>.WhereUnitData cmd)
+        private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryModelBuilder<T>.WhereUnitData cmd)
         {
             Expression outputExpression;
             var parameterPropertyExpression = Expression.Property(expressionParameter, cmd.Property.Name);
 
-            Expression CreateEqualExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression CreateEqualExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression orExpression = Expression.Constant(false);
                 var stringValues = cmd.ParseStringValues();
@@ -237,13 +237,13 @@ namespace OnlineSales.Infrastructure
                 return orExpression;
             }
 
-            Expression CreateNEqualExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression CreateNEqualExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 var expression = CreateEqualExpression(cmd, parameter);
                 return Expression.Not(expression);
             }
 
-            Expression? CreateCompareExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateCompareExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
@@ -279,7 +279,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateLikeExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateLikeExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
 
@@ -303,7 +303,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateContainExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateContainExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
 
@@ -318,11 +318,11 @@ namespace OnlineSales.Infrastructure
                 sb.Append('^');
                 foreach (var d in data)
                 {
-                    if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.MatchAll)
+                    if (d.Item1 == QueryModelBuilder<T>.WhereUnitData.ContainsType.MatchAll)
                     {
                         sb.Append("(.*)");
                     }
-                    else if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.Substring)
+                    else if (d.Item1 == QueryModelBuilder<T>.WhereUnitData.ContainsType.Substring)
                     {
                         sb.Append(Regex.Escape(d.Item2));
                     }

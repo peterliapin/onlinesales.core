@@ -21,22 +21,18 @@ public class CommentService : ICommentService
         this.contactsService = contactsService;
     }
 
-    public async Task<EntityEntry<Comment>> SaveAsync(Comment comment)
+    public async Task SaveAsync(Comment comment)
     {
         await EnrichWithContactId(comment);
 
-        EntityEntry<Comment> entry;
-
         if (comment.Id > 0)
         {
-            entry = pgDbContext.Comments!.Update(comment);
+            pgDbContext.Comments!.Update(comment);
         }
         else
         {
-            entry = await pgDbContext.Comments!.AddAsync(comment);
+            await pgDbContext.Comments!.AddAsync(comment);
         }
-
-        return entry;
     }
 
     public async Task SaveRangeAsync(List<Comment> comments)

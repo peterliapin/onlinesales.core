@@ -10,8 +10,8 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -19,7 +19,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class AccountsController : BaseControllerWithImport<Account, AccountCreateDto, AccountUpdateDto, AccountDetailsDto, AccountImportDto>
 {
-    public AccountsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryFactory<Account> queryFactory)
+    public AccountsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Account> queryFactory)
         : base(dbContext, mapper, esDbContext, queryFactory)
     {
     }

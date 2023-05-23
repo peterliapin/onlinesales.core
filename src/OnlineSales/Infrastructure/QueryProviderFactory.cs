@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryFactory.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="QueryProviderFactory.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -10,12 +10,11 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
-using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
-namespace OnlineSales.Services
+namespace OnlineSales.Infrastructure
 {
-    public class QueryFactory<T>
+    public class QueryProviderFactory<T>
         where T : BaseEntityWithId, new()
     {
         private readonly DbSet<T> dbSet;
@@ -24,7 +23,7 @@ namespace OnlineSales.Services
         private readonly ElasticClient elasticClient;
         private readonly IHttpContextHelper httpContextHelper;
 
-        public QueryFactory(PgDbContext dbContext, EsDbContext esDbContext, IOptions<ApiSettingsConfig> apiSettingsConfig, IHttpContextHelper? httpContextHelper)
+        public QueryProviderFactory(PgDbContext dbContext, EsDbContext esDbContext, IOptions<ApiSettingsConfig> apiSettingsConfig, IHttpContextHelper? httpContextHelper)
         {
             this.dbContext = dbContext;
             this.apiSettingsConfig = apiSettingsConfig;
@@ -38,9 +37,9 @@ namespace OnlineSales.Services
 
         public IQueryProvider<T> BuildQueryProvider(int limit = -1)
         {
-            var queryCommands = QueryParser.Parse(httpContextHelper.Request.QueryString.HasValue ? HttpUtility.UrlDecode(httpContextHelper.Request.QueryString.ToString()) : string.Empty);
+            var queryCommands = QueryStringParser.Parse(httpContextHelper.Request.QueryString.HasValue ? HttpUtility.UrlDecode(httpContextHelper.Request.QueryString.ToString()) : string.Empty);
 
-            var queryData = new QueryData<T>(queryCommands, limit == -1 ? apiSettingsConfig.Value.MaxListSize : limit, dbContext);
+            var queryData = new QueryModelBuilder<T>(queryCommands, limit == -1 ? apiSettingsConfig.Value.MaxListSize : limit, dbContext);
 
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
             {

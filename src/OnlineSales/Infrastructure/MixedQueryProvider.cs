@@ -12,7 +12,7 @@ namespace OnlineSales.Infrastructure
     public class MixedQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        private readonly QueryData<T> parseData;
+        private readonly QueryModelBuilder<T> parseData;
 
         private readonly ElasticClient elasticClient;
 
@@ -20,7 +20,7 @@ namespace OnlineSales.Infrastructure
 
         private IQueryable<T> query;
 
-        public MixedQueryProvider(QueryData<T> parseData, IQueryable<T> query, ElasticClient elasticClient, string indexPrefix/*, PgDbContext dbContext*/)
+        public MixedQueryProvider(QueryModelBuilder<T> parseData, IQueryable<T> query, ElasticClient elasticClient, string indexPrefix/*, PgDbContext dbContext*/)
         {
             this.parseData = parseData;
             this.elasticClient = elasticClient;
@@ -30,13 +30,13 @@ namespace OnlineSales.Infrastructure
 
         public async Task<QueryResult<T>> GetResult()
         {
-            var selectData = new QueryData<T>.SelectCommandData();
+            var selectData = new QueryModelBuilder<T>.SelectCommandData();
             selectData.SelectedProperties.AddRange(parseData.SelectData.SelectedProperties);
             selectData.IsSelect = parseData.SelectData.IsSelect;
             var includeData = new List<PropertyInfo>();
             includeData.AddRange(parseData.IncludeData);
 
-            var idSelectData = new QueryData<T>.SelectCommandData() { SelectedProperties = new List<PropertyInfo> { typeof(T).GetProperty("Id") ! }, IsSelect = true };
+            var idSelectData = new QueryModelBuilder<T>.SelectCommandData() { SelectedProperties = new List<PropertyInfo> { typeof(T).GetProperty("Id") ! }, IsSelect = true };
 
             parseData.SelectData = idSelectData;
             parseData.IncludeData.Clear();

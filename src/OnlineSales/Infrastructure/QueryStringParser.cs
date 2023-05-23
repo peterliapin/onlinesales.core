@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryParser.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="QueryStringParser.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -7,7 +7,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
 {
-    public class QueryParser
+    public class QueryStringParser
     {
         public static List<QueryCommand> Parse(string query)
         {

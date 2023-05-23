@@ -13,7 +13,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
-using OnlineSales.Services;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
@@ -21,7 +21,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto, LinkDetailsDto>
 {
-    public LinksController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryFactory<Link> queryFactory)
+    public LinksController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Link> queryFactory)
         : base(dbContext, mapper, esDbContext, queryFactory)
     {
     }

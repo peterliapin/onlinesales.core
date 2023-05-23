@@ -70,22 +70,18 @@ namespace OnlineSales.Services
             }
         }
 
-        public async Task<EntityEntry<Domain>> SaveAsync(Domain domain)
+        public async Task SaveAsync(Domain domain)
         {
             VerifyFreeAndDisposable(domain);
 
-            EntityEntry<Domain> entry;
-
             if (domain.Id > 0)
             {
-               entry = pgDbContext.Domains!.Update(domain);
+               pgDbContext.Domains!.Update(domain);
             }
             else
             {
-               entry = await pgDbContext.Domains!.AddAsync(domain);
+               await pgDbContext.Domains!.AddAsync(domain);
             }
-
-            return entry;
         }
 
         public async Task SaveRangeAsync(List<Domain> domains)

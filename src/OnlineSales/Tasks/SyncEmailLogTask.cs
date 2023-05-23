@@ -63,10 +63,12 @@ namespace OnlineSales.Tasks
 
                         if (!existingContacts.TryGetValue(log.Recipient, out contact))
                         {
-                            contact = contactService.SaveAsync(new Contact
+                            contact = new Contact
                             {
                                 Email = log.Recipient,
-                            }).Result.Entity;
+                            };
+
+                            contactService.SaveAsync(contact).Wait();
                         }
 
                         return new ActivityLog()

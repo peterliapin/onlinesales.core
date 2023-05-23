@@ -15,7 +15,6 @@ using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers
 {
@@ -28,9 +27,9 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
-        private readonly QueryFactory<T> queryFactory;
+        private readonly QueryProviderFactory<T> queryFactory;
 
-        public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryFactory<T> queryFactory)
+        public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<T> queryFactory)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
@@ -127,9 +126,7 @@ namespace OnlineSales.Controllers
         [Produces("text/csv", "text/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-#pragma warning disable S4144 // Methods should not have identical implementations
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
-#pragma warning restore S4144 // Methods should not have identical implementations
         {
             var qp = queryFactory.BuildQueryProvider(int.MaxValue);
 

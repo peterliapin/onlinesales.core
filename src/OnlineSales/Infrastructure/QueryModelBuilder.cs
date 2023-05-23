@@ -1,27 +1,21 @@
-﻿// <copyright file="QueryData.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="QueryModelBuilder.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections;
-using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
-using AutoMapper.Internal;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Infrastructure
 {
-    public class QueryData<T>
+    public class QueryModelBuilder<T>
         where T : BaseEntityWithId
     {
         private readonly PgDbContext dbContext;
 
-        public QueryData(List<QueryCommand> commands, int maxLimitSize, PgDbContext dbContext)
+        public QueryModelBuilder(List<QueryCommand> commands, int maxLimitSize, PgDbContext dbContext)
         {
             this.dbContext = dbContext;
             IncludeData = ParseIncludeCommands(commands);

@@ -10,8 +10,8 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -19,7 +19,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class UnsubscribesController : BaseControllerWithImport<Unsubscribe, UnsubscribeDto, UnsubscribeDto, UnsubscribeDetailsDto, UnsubscribeImportDto>
 {
-    public UnsubscribesController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryFactory<Unsubscribe> queryFactory)
+    public UnsubscribesController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Unsubscribe> queryFactory)
         : base(dbContext, mapper, esDbContext, queryFactory)
     {
     }

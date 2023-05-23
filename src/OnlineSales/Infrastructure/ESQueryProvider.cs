@@ -19,13 +19,13 @@ namespace OnlineSales.Infrastructure
         private readonly ElasticClient elasticClient;
         private readonly List<QueryContainer> andQueries = new List<QueryContainer>();
         private readonly List<QueryContainer> orQueries = new List<QueryContainer>();
-        private readonly QueryData<T> parseData;
+        private readonly QueryModelBuilder<T> parseData;
         private readonly string indexName;
         private readonly PropertyInfo[] searchableTextProperties;
         private readonly PropertyInfo[] searchableNonTextProperties;
         private readonly int maxResultWindow = 10000;
 
-        public ESQueryProvider(ElasticClient elasticClient, QueryData<T> parseData, string indexPrefix)
+        public ESQueryProvider(ElasticClient elasticClient, QueryModelBuilder<T> parseData, string indexPrefix)
         {
             indexName = indexPrefix + "-" + typeof(T).Name.ToLower();
             this.elasticClient = elasticClient;
@@ -227,11 +227,11 @@ namespace OnlineSales.Infrastructure
 
         private void AddWhereCommands()
         {
-            QueryContainer CreateQueryComparison(QueryData<T>.WhereUnitData cmd)
+            QueryContainer CreateQueryComparison(QueryModelBuilder<T>.WhereUnitData cmd)
             {
                 var value = cmd.ParseValues(new string[] { cmd.StringValue }).FirstOrDefault()!;
 
-                TermRangeQuery CreateTermRangeQuery(QueryData<T>.WhereUnitData cmd)
+                TermRangeQuery CreateTermRangeQuery(QueryModelBuilder<T>.WhereUnitData cmd)
                 {
                     TermRangeQuery res;
                     if (cmd.Property.PropertyType == typeof(string))
@@ -265,9 +265,9 @@ namespace OnlineSales.Infrastructure
                 }
             }
 
-            QueryContainer CreateQuery(QueryData<T>.WhereUnitData cmd)
+            QueryContainer CreateQuery(QueryModelBuilder<T>.WhereUnitData cmd)
             {
-                BoolQuery CreateTermQuery(QueryData<T>.WhereUnitData cmd)
+                BoolQuery CreateTermQuery(QueryModelBuilder<T>.WhereUnitData cmd)
                 {
                     var parsedValues = cmd.ParseValues(cmd.ParseStringValues().ToList());
 
@@ -296,7 +296,7 @@ namespace OnlineSales.Infrastructure
                     return res;
                 }
 
-                RegexpQuery CreateRegExpQuery(QueryData<T>.WhereUnitData cmd)
+                RegexpQuery CreateRegExpQuery(QueryModelBuilder<T>.WhereUnitData cmd)
                 {
                     if (cmd.Operation == WOperand.Like)
                     {
@@ -309,11 +309,11 @@ namespace OnlineSales.Infrastructure
 
                         foreach (var d in data)
                         {
-                            if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.MatchAll)
+                            if (d.Item1 == QueryModelBuilder<T>.WhereUnitData.ContainsType.MatchAll)
                             {
                                 sb.Append(".*");
                             }
-                            else if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.Substring)
+                            else if (d.Item1 == QueryModelBuilder<T>.WhereUnitData.ContainsType.Substring)
                             {
                                 sb.Append(Escape(d.Item2));
                             }

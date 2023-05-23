@@ -22,23 +22,19 @@ namespace OnlineSales.Services
             this.domainService = domainService;
         }
 
-        public async Task<EntityEntry<Contact>> SaveAsync(Contact contact)
+        public async Task SaveAsync(Contact contact)
         {
             await EnrichWithDomainId(contact);
             EnrichWithAccountId(contact);
 
-            EntityEntry<Contact> entry;
-
             if (contact.Id > 0)
             {
-                entry = pgDbContext.Contacts!.Update(contact);
+                pgDbContext.Contacts!.Update(contact);
             }
             else
             {
-                entry = await pgDbContext.Contacts!.AddAsync(contact);
+                await pgDbContext.Contacts!.AddAsync(contact);
             }
-
-            return entry;
         }
 
         public async Task SaveRangeAsync(List<Contact> contacts)

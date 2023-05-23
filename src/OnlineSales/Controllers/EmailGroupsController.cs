@@ -11,7 +11,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Services;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
@@ -19,7 +19,7 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto, EmailGroupDetailsDto>
 {
-    public EmailGroupsController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryFactory<EmailGroup> queryFactory)
+    public EmailGroupsController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<EmailGroup> queryFactory)
     : base(dbContext, mapper, esDbContext, queryFactory)
     {
     }

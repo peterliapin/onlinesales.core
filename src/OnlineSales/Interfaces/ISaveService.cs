@@ -10,7 +10,7 @@ namespace OnlineSales.Interfaces
     public interface ISaveService<T>
         where T : BaseEntityWithId
     {
-        Task<EntityEntry<T>> SaveAsync(T item);
+        Task SaveAsync(T item);
 
         Task SaveRangeAsync(List<T> items);
     }
