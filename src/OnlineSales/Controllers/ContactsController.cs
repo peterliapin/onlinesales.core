@@ -14,6 +14,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -24,8 +25,8 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
 {
     private readonly IContactService contactService;
 
-    public ContactsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IContactService contactService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public ContactsController(PgDbContext dbContext, IMapper mapper, IContactService contactService, EsDbContext esDbContext, QueryProviderFactory<Contact> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.contactService = contactService;
     }

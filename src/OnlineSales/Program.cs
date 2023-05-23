@@ -68,6 +68,7 @@ public class Program
         builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
         builder.Services.AddSingleton<ActivityLogService, ActivityLogService>();
+        builder.Services.AddTransient(typeof(QueryProviderFactory<>), typeof(QueryProviderFactory<>));
 
         ConfigureCacheProfiles(builder);
 

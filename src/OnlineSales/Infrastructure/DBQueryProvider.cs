@@ -18,13 +18,13 @@ namespace OnlineSales.Infrastructure
     public class DBQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        private readonly QueryData<T> parseData;
+        private readonly QueryModelBuilder<T> queryBuilder;
         private IQueryable<T> query;
 
-        public DBQueryProvider(IQueryable<T> query, QueryData<T> parseData)
+        public DBQueryProvider(IQueryable<T> query, QueryModelBuilder<T> queryBuilder)
         {
             this.query = query;
-            this.parseData = parseData;
+            this.queryBuilder = queryBuilder;
         }
 
         public async Task<QueryResult<T>> GetResult()
@@ -39,7 +39,7 @@ namespace OnlineSales.Infrastructure
             AddOrderCommands();
             AddSkipCommand();
             AddLimitCommand();
-            if (parseData.SelectData.IsSelect)
+            if (queryBuilder.SelectData.IsSelect)
             {
                 records = await GetSelectResult();
             }
@@ -53,7 +53,7 @@ namespace OnlineSales.Infrastructure
 
         private void AddIncludeCommands()
         {
-            foreach (var data in parseData.IncludeData)
+            foreach (var data in queryBuilder.IncludeData)
             {
                 query = query.Include(data.Name);
             }
@@ -61,14 +61,14 @@ namespace OnlineSales.Infrastructure
 
         private void AddOrderCommands()
         {
-            if (parseData.OrderData.Count == 0)
+            if (queryBuilder.OrderData.Count == 0)
             {
                 query = query.OrderBy(t => t.Id);
             }
             else
             {
                 var moreThanOne = false;
-                foreach (var orderCmd in parseData.OrderData)
+                foreach (var orderCmd in queryBuilder.OrderData)
                 {
                     var expressionParameter = Expression.Parameter(typeof(T));
                     var orderPropertyType = orderCmd.Property.PropertyType;
@@ -99,23 +99,23 @@ namespace OnlineSales.Infrastructure
 
         private void AddSkipCommand()
         {
-            if (parseData.Skip > 0)
+            if (queryBuilder.Skip > 0)
             {
-                query = query.Skip(parseData.Skip);
+                query = query.Skip(queryBuilder.Skip);
             }
         }
 
         private void AddLimitCommand()
         {
-            if (parseData.Limit > 0)
+            if (queryBuilder.Limit > 0)
             {
-                query = query.Take(parseData.Limit);
+                query = query.Take(queryBuilder.Limit);
             }
         }
 
         private void AddSearchCommands()
         {
-            foreach (var cmdValue in parseData.SearchData)
+            foreach (var cmdValue in queryBuilder.SearchData)
             {
                 var props = typeof(T).GetProperties().Where(p => p.IsDefined(typeof(SearchableAttribute), false));
 
@@ -157,7 +157,7 @@ namespace OnlineSales.Infrastructure
 
         private void AddWhereCommands()
         {
-            var commands = parseData.WhereData;
+            var commands = queryBuilder.WhereData;
             if (commands.Count > 0)
             {
                 var expressionParameter = Expression.Parameter(typeof(T));
@@ -209,12 +209,12 @@ namespace OnlineSales.Infrastructure
             }
         }
 
-        private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryData<T>.WhereUnitData cmd)
+        private Expression ParseWhereCommand(ParameterExpression expressionParameter, QueryModelBuilder<T>.WhereUnitData cmd)
         {
             Expression outputExpression;
             var parameterPropertyExpression = Expression.Property(expressionParameter, cmd.Property.Name);
 
-            Expression CreateEqualExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression CreateEqualExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression orExpression = Expression.Constant(false);
                 var stringValues = cmd.ParseStringValues();
@@ -237,13 +237,13 @@ namespace OnlineSales.Infrastructure
                 return orExpression;
             }
 
-            Expression CreateNEqualExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression CreateNEqualExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 var expression = CreateEqualExpression(cmd, parameter);
                 return Expression.Not(expression);
             }
 
-            Expression? CreateCompareExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateCompareExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
@@ -279,7 +279,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateLikeExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateLikeExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 var parsedValue = cmd.ParseValues(new string[] { cmd.StringValue })[0];
 
@@ -303,7 +303,7 @@ namespace OnlineSales.Infrastructure
                 return res;
             }
 
-            Expression? CreateContainExpression(QueryData<T>.WhereUnitData cmd, Expression parameter)
+            Expression? CreateContainExpression(QueryModelBuilder<T>.WhereUnitData cmd, Expression parameter)
             {
                 Expression? res = null;
 
@@ -318,11 +318,11 @@ namespace OnlineSales.Infrastructure
                 sb.Append('^');
                 foreach (var d in data)
                 {
-                    if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.MatchAll)
+                    if (d.Item1 == QueryModelBuilder<T>.WhereUnitData.ContainsType.MatchAll)
                     {
                         sb.Append("(.*)");
                     }
-                    else if (d.Item1 == QueryData<T>.WhereUnitData.ContainsType.Substring)
+                    else if (d.Item1 == QueryModelBuilder<T>.WhereUnitData.ContainsType.Substring)
                     {
                         sb.Append(Regex.Escape(d.Item2));
                     }
@@ -382,14 +382,14 @@ namespace OnlineSales.Infrastructure
 
         private async Task<IList<T>?> GetSelectResult()
         {
-            if (parseData.SelectData.SelectedProperties.Any())
+            if (queryBuilder.SelectData.SelectedProperties.Any())
             {
                 var expressionParameter = Expression.Parameter(typeof(T));
-                var outputType = TypeHelper.CompileTypeForSelectStatement(parseData.SelectData.SelectedProperties.ToArray());
+                var outputType = TypeHelper.CompileTypeForSelectStatement(queryBuilder.SelectData.SelectedProperties.ToArray());
                 var delegateType = typeof(Func<,>).MakeGenericType(typeof(T), outputType);
                 var createOutputTypeExpression = Expression.New(outputType);
 
-                var expressionSelectedProperties = parseData.SelectData.SelectedProperties.Select(p =>
+                var expressionSelectedProperties = queryBuilder.SelectData.SelectedProperties.Select(p =>
                 {
                     var bindProp = outputType.GetProperty(p.Name);
                     var exprProp = Expression.Property(expressionParameter, p);

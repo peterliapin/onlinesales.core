@@ -11,6 +11,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
@@ -18,8 +19,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class ContentController : BaseControllerWithImport<Content, ContentCreateDto, ContentUpdateDto, ContentDetailsDto, ContentImportDto>
 {
-    public ContentController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public ContentController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Content> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
     }
 

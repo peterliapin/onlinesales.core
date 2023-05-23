@@ -8,6 +8,7 @@ using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -75,11 +76,11 @@ namespace OnlineSales.Services
 
             if (domain.Id > 0)
             {
-                pgDbContext.Domains!.Update(domain);
+               pgDbContext.Domains!.Update(domain);
             }
             else
             {
-                await pgDbContext.Domains!.AddAsync(domain);
+               await pgDbContext.Domains!.AddAsync(domain);
             }
         }
 

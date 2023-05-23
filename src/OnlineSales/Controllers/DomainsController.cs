@@ -10,6 +10,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -20,8 +21,8 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 {
     private readonly IDomainService domainService;
 
-    public DomainsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public DomainsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Domain> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.domainService = domainService;
     }

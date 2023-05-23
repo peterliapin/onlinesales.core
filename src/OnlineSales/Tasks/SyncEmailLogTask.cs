@@ -10,6 +10,7 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Exceptions;
 using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Serilog;
@@ -21,14 +22,17 @@ namespace OnlineSales.Tasks
         private static readonly string SourceName = "EmailService";
         private readonly PgDbContext dbContext;
         private readonly ActivityLogService logService;
+        private readonly IServiceProvider provider;
 
         private readonly int batchSize;
 
-        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService)
+        public SyncEmailLogTask(IConfiguration configuration, PgDbContext dbContext, TaskStatusService taskStatusService, ActivityLogService logService, IServiceProvider provider)
             : base("Tasks:SyncEmailLogTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.logService = logService;
+            this.provider = provider;
+
             var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
             {
@@ -44,15 +48,46 @@ namespace OnlineSales.Tasks
         {
             try
             {
-                var maxId = await logService.GetMaxId(SourceName);
-                var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToArrayAsync();
-                var tasks = batch.Select(Convert).ToArray();
-                Task.WaitAll(tasks);
-                await dbContext.SaveChangesAsync();
-                var res = await logService.AddActivityRecords(tasks.Select(t => t.Result).ToList());
-                if (!res)
+                using (var scope = provider.CreateScope())
                 {
-                    throw new SyncEmailLogTaskException("Unable to log email events");
+                    var contactService = scope.ServiceProvider.GetRequiredService<ContactService>();
+
+                    var maxId = await logService.GetMaxId(SourceName);
+                    var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToListAsync();
+                    var batchContacts = batch.Select(b => b.Recipient).ToArray();
+                    var existingContacts = await dbContext.Contacts!.Where(contact => batchContacts.Contains(contact.Email)).ToDictionaryAsync(k => k.Email);
+
+                    var converted = batch.Select(log =>
+                    {
+                        Contact? contact;
+
+                        if (!existingContacts.TryGetValue(log.Recipient, out contact))
+                        {
+                            contact = new Contact
+                            {
+                                Email = log.Recipient,
+                            };
+
+                            contactService.SaveAsync(contact).Wait();
+                        }
+
+                        return new ActivityLog()
+                        {
+                            Source = SourceName,
+                            SourceId = log.Id,
+                            Type = "Message",
+                            ContactId = contact.Id,
+                            CreatedAt = log.CreatedAt,
+                            Data = JsonHelper.Serialize(new { Id = log.Id, Status = log.Status, Sender = log.FromEmail, Recipient = log.Recipient, Subject = log.Subject }),
+                        };
+                    }).ToList();
+
+                    await dbContext.SaveChangesAsync();
+                    var res = await logService.AddActivityRecords(converted);
+                    if (!res)
+                    {
+                        throw new SyncEmailLogTaskException("Unable to log email events");
+                    }
                 }
 
                 return true;
@@ -62,28 +97,6 @@ namespace OnlineSales.Tasks
                 Log.Error("Failed to dump email events to activity log. Reason: " + ex.Message);
                 throw;
             }
-        }
-
-        private async Task<ActivityLog> Convert(EmailLog ev)
-        {
-            var contact = await dbContext.Contacts!.FirstOrDefaultAsync(contact => contact.Email == ev.Recipient);
-            if (contact == null)
-            {
-                contact = (await dbContext.Contacts!.AddAsync(new Contact
-                {
-                    Email = ev.Recipient,
-                })).Entity;
-            }
-
-            return new ActivityLog()
-            {
-                Source = SourceName,
-                SourceId = ev.Id,
-                Type = "Message",
-                ContactId = contact.Id,
-                CreatedAt = ev.CreatedAt,
-                Data = JsonHelper.Serialize(new { Id = ev.Id, Status = ev.Status, Sender = ev.FromEmail, Recipient = ev.Recipient, Subject = ev.Subject }),
-            };
         }
     }
 }
