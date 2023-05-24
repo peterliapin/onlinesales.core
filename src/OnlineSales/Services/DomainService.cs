@@ -39,11 +39,6 @@ namespace OnlineSales.Services
             });
         }
 
-        public async Task SaveChangesAsync()
-        {
-            await pgDbContext.SaveChangesAsync();
-        }
-
         public async Task Verify(Domain domain)
         {
             VerifyFreeAndDisposable(domain);

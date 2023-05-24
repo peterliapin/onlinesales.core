@@ -21,11 +21,6 @@ public class CommentService : ICommentService
         this.contactsService = contactsService;
     }
 
-    public async Task SaveChangesAsync()
-    {
-        await pgDbContext.SaveChangesAsync();
-    }
-
     public async Task SaveAsync(Comment comment)
     {
         await EnrichWithContactId(comment);

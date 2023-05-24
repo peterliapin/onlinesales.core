@@ -13,7 +13,5 @@ namespace OnlineSales.Interfaces
         Task SaveAsync(T item);
 
         Task SaveRangeAsync(List<T> items);
-
-        Task SaveChangesAsync();
     }
 }
