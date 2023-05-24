@@ -7,41 +7,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OnlineSales.Plugin.EmailSync.Migrations
 {
     /// <inheritdoc />
-    public partial class ImapAccountsAndFolders : Migration
+    public partial class ImapFolders : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "imap_account",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    host = table.Column<string>(type: "text", nullable: false),
-                    user_name = table.Column<string>(type: "text", nullable: false),
-                    password = table.Column<string>(type: "text", nullable: false),
-                    port = table.Column<int>(type: "integer", nullable: false),
-                    use_ssl = table.Column<bool>(type: "boolean", nullable: false),
-                    user_id = table.Column<string>(type: "text", nullable: false),
-                    source = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    created_by_ip = table.Column<string>(type: "text", nullable: true),
-                    created_by_user_agent = table.Column<string>(type: "text", nullable: true),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    updated_by_ip = table.Column<string>(type: "text", nullable: true),
-                    updated_by_user_agent = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_imap_account", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_imap_account_users_user_id",
-                        column: x => x.user_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.DropColumn(
+                name: "last_date_time",
+                table: "imap_account");
 
             migrationBuilder.CreateTable(
                 name: "imap_account_folder",
@@ -78,11 +51,6 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_imap_account_user_id",
-                table: "imap_account",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_imap_account_folder_imap_account_id",
                 table: "imap_account_folder",
                 column: "imap_account_id");
@@ -94,8 +62,16 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
             migrationBuilder.DropTable(
                 name: "imap_account_folder");
 
-            migrationBuilder.DropTable(
-                name: "imap_account");
+            migrationBuilder.DropIndex(
+                name: "ix_imap_account_host_user_name",
+                table: "imap_account");
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "last_date_time",
+                table: "imap_account",
+                type: "timestamp with time zone",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
         }
     }
 }

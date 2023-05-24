@@ -14,8 +14,8 @@ using OnlineSales.Plugin.EmailSync.Data;
 namespace OnlineSales.Plugin.EmailSync.Migrations
 {
     [DbContext(typeof(EmailSyncDbContext))]
-    [Migration("20230523161820_ImapAccountsAndFolders")]
-    partial class ImapAccountsAndFolders
+    [Migration("20230524094335_ImapFolders")]
+    partial class ImapFolders
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
