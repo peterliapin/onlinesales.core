@@ -35,7 +35,7 @@ namespace OnlineSales.Entities
         public int? TemplateId { get; set; }
 
         [Searchable]
-        [Required]
+        [Required(AllowEmptyStrings = true)]
         public string Subject { get; set; } = string.Empty;
 
         /// <summary>
@@ -55,6 +55,8 @@ namespace OnlineSales.Entities
         [Searchable]
         [Required]
         public string Body { get; set; } = string.Empty;
+
+        public string MessageId { get; set; } = string.Empty;
 
         public EmailStatus Status { get; set; }
     }

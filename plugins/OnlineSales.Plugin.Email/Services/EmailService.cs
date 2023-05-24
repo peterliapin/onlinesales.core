@@ -30,7 +30,7 @@ public class EmailService : IEmailService
         }
     }
 
-    public async Task SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments)
+    public async Task<string> SendAsync(string subject, string fromEmail, string fromName, string[] recipients, string body, List<AttachmentDto>? attachments)
     {
         var client = new SmtpClient();
 
@@ -40,7 +40,11 @@ public class EmailService : IEmailService
 
             await client.AuthenticateAsync(new NetworkCredential(pluginSettings.Email.UserName, pluginSettings.Email.Password));
 
-            await client.SendAsync(await GenerateEmailBody(subject, fromEmail, fromName, recipients, body, attachments));
+            var message = await GenerateEmailBody(subject, fromEmail, fromName, recipients, body, attachments);
+
+            await client.SendAsync(message);
+
+            return message.MessageId;
         }
         catch (Exception exception)
         {

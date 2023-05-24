@@ -2,15 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Security.Cryptography.X509Certificates;
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Search;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
+using MimeKit;
 using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Exceptions;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.EmailSync.Data;
+using OnlineSales.Plugin.EmailSync.Entities;
 using OnlineSales.Services;
 using OnlineSales.Tasks;
 using Serilog;
@@ -29,14 +33,11 @@ namespace OnlineSales.EmailSync.Tasks
 
         private readonly IDomainService domainService;
 
-        private readonly IContactService contactService;
-
-        public EmailSyncTask(IConfiguration configuration, EmailSyncDbContext dbContext, TaskStatusService taskStatusService, IDomainService domainService, IContactService contactService)
+        public EmailSyncTask(IConfiguration configuration, EmailSyncDbContext dbContext, TaskStatusService taskStatusService, IDomainService domainService)
             : base("Tasks:EmailSyncTask", configuration, taskStatusService)
         {
             this.dbContext = dbContext;
             this.domainService = domainService;
-            this.contactService = contactService;
 
             var config = configuration.GetSection(this.configKey)!.Get<TaskWithBatchConfig>();            
             if (config is not null)
@@ -62,29 +63,24 @@ namespace OnlineSales.EmailSync.Tasks
             {
                 try
                 {
-                    using (var transaction = await dbContext!.Database.BeginTransactionAsync())
+                    using (var client = new ImapClient())
                     {
-                        using (var client = new ImapClient())
+                        client.Connect(imapAccount.Host, imapAccount.Port, imapAccount.UseSsl);
+
+                        client.Authenticate(imapAccount.UserName, imapAccount.Password);
+
+                        foreach (var personalNamespace in client.PersonalNamespaces)
                         {
-                            client.Connect(imapAccount.Host, imapAccount.Port, imapAccount.UseSsl);
+                            var folders = client.GetFolders(personalNamespace);
 
-                            client.Authenticate(imapAccount.UserName, imapAccount.Password);
+                            var imapAccountFolders = dbContext.ImapAccountFolders!.Where(f => f.ImapAccountId == imapAccount.Id).ToList();
 
-                            var folders = client.GetFolders(client.PersonalNamespaces[0]);
+                            foreach (var folder in folders)
+                            {
+                                await GetEmailLogsFromFolder(imapAccountFolders, folder, imapAccount);
+                            }
 
-                            var now = DateTime.UtcNow;
-
-                            var contactsToAdd = new HashSet<string>();
-
-                            await AddEmailLogs(imapAccount.LastDateTime, now, folders, contactsToAdd);
-
-                            await contactService.SaveRangeAsync(contactsToAdd.Select(c => new Contact() { Email = c, }).ToList());
-
-                            imapAccount.LastDateTime = now;
-
-                            await dbContext.SaveChangesAsync();
-
-                            await transaction.CommitAsync();
+                            await DeleteUnexistedFolders(imapAccountFolders, folders);
                         }
                     }
                 }
@@ -97,99 +93,114 @@ namespace OnlineSales.EmailSync.Tasks
             return true;            
         }
 
+        private async Task DeleteUnexistedFolders(List<ImapAccountFolder> imapAccountFolders, IList<IMailFolder> folders)
+        {
+            var foldersToDelete = imapAccountFolders.Where(iaf => !folders.Select(f => f.FullName).Contains(iaf.FullName));
+            dbContext.ImapAccountFolders!.RemoveRange(foldersToDelete);
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task GetEmailLogsFromFolder(List<ImapAccountFolder> imapAccountFolders, IMailFolder folder, ImapAccount imapAccount)
+        {
+            await folder.OpenAsync(FolderAccess.ReadOnly);
+            var dbFolder = imapAccountFolders.FirstOrDefault(f => f.FullName == folder.FullName);
+            if (dbFolder == null)
+            {
+                dbFolder = new ImapAccountFolder
+                {
+                    FullName = folder.FullName,
+                    LastUid = 0,
+                    ImapAccountId = imapAccount.Id,
+                };
+
+                await dbContext.ImapAccountFolders!.AddAsync(dbFolder);
+            }
+
+            if (folder.UidNext.HasValue && folder.UidNext.Value.Id <= dbFolder.LastUid)
+            {
+                dbFolder.LastUid = 0;
+            }
+
+            var range = new UniqueIdRange(new UniqueId((uint)dbFolder.LastUid + 1), UniqueId.MaxValue);
+            var uids = folder.Search(range, SearchQuery.All);
+            var position = 0;
+            while (position < uids.Count)
+            {
+                var batch = uids.Skip(position).Take(batchSize);
+                await GetEmailLogs(dbFolder, folder, batch);
+                position += batchSize;
+            }
+        }
+
+        private async Task GetEmailLogs(ImapAccountFolder dbFolder, IMailFolder folder, IEnumerable<UniqueId> uids)
+        {
+            var resultData = new List<EmailLog>();
+            var resultLastId = dbFolder.LastUid;
+
+            var messages = new List<MimeMessage>();
+            foreach (var uid in uids)
+            {
+                if (uid.Id <= dbFolder.LastUid)
+                {
+                    continue;
+                }
+
+                messages.Add(folder.GetMessage(uid));
+                resultLastId = (int)uid.Id;
+            }
+
+            var existedMessagesUids = dbContext.EmailLogs!.Where(el => messages.Select(m => m.MessageId).Contains(el.MessageId)).Select(m => m.MessageId).ToList();
+
+            foreach (var message in messages)
+            {
+                if (!existedMessagesUids.Contains(message.MessageId))
+                {
+                    var fromEmail = message.From.Mailboxes.Single().Address;
+
+                    if (!ignoredEmails.Contains(fromEmail))
+                    {
+                        var recipients = message.GetRecipients().Select(r => r.Address).ToList();
+
+                        if (!IsInternalEmails(fromEmail, recipients))
+                        {
+                            var log = new EmailLog()
+                            {
+                                Subject = message.Subject == null ? string.Empty : message.Subject,
+                                Recipient = string.Join(";", recipients),
+                                FromEmail = message.From.Mailboxes.Single().Address,
+                                Body = message.TextBody,
+                                MessageId = message.MessageId,
+                            };
+
+                            if (log.Body == null)
+                            {
+                                log.Body = message.HtmlBody;
+                            }
+
+                            resultData.Add(log);
+                        }
+                    }                    
+                }
+            }
+
+            if (resultData.Count > 0)
+            {
+                await dbContext.EmailLogs!.AddRangeAsync(resultData);
+            }
+
+            dbFolder.LastUid = resultLastId;
+
+            await dbContext.SaveChangesAsync();
+        }
+
         private bool IsInternalDomain(string email)
         {
             return internalDomains.Contains(domainService.GetDomainNameByEmail(email));
         }
 
-        private Dictionary<string, bool> HandleContactsAndDomains(string fromEmail, List<string> toEmails, HashSet<string> contactsToAdd)
+        private bool IsInternalEmails(string fromEmail, List<string> toEmails)
         {
-            void AddToResult(string email, Dictionary<string, bool> res)
-            {
-                res.Add(email, IsInternalDomain(email));
-            }
-
-            var res = new Dictionary<string, bool>();
-            AddToResult(fromEmail, res);
-            foreach (var e in toEmails)
-            {
-                AddToResult(e, res);
-            }
-
-            var existedContacts = dbContext.Contacts!.Where(c => res.Keys.Contains(c.Email)).Select(c => c.Email).ToList();
-
-            foreach (var r in res)
-            {
-                if (!r.Value && !existedContacts.Contains(r.Key))
-                {
-                    contactsToAdd.Add(r.Key);
-                }
-            }
-
-            return res;
-        }
-
-        private async Task AddEmailLogs(DateTime sinceDateTime, DateTime toDateTime, IList<IMailFolder> folders, HashSet<string> contactsToAdd)
-        {
-            if (toDateTime > sinceDateTime)
-            {
-                int uidsCount = 0;
-                var folderData = new Dictionary<IMailFolder, List<IMessageSummary>>();
-                foreach (var folder in folders)
-                {
-                    await folder.OpenAsync(FolderAccess.ReadOnly);
-                    var uids = await folder.SearchAsync(SearchQuery.SentSince(sinceDateTime.Date.AddDays(-1)).And(SearchQuery.SentBefore(toDateTime.Date.AddDays(1))).And(SearchQuery.NotDeleted).And(SearchQuery.NotDraft));
-                    var data = await folder.FetchAsync(uids, MessageSummaryItems.UniqueId | MessageSummaryItems.Envelope);
-                    var newestData = data.Where(d => d.Envelope.Date.HasValue && d.Envelope.Date.Value.UtcDateTime >= sinceDateTime && d.Envelope.Date.Value.UtcDateTime < toDateTime).ToList();
-                    uidsCount += newestData.Count;
-                    folderData.Add(folder, newestData);
-                }
-
-                if (uidsCount > batchSize)
-                {
-                    var diff = (toDateTime - sinceDateTime).Divide(2);
-                    var middle = sinceDateTime + diff;
-                    await AddEmailLogs(sinceDateTime, middle, folders, contactsToAdd);
-                    await AddEmailLogs(middle, toDateTime, folders, contactsToAdd);
-                }
-                else
-                {
-                    foreach (var data in folderData)
-                    {
-                        foreach (var uid in data.Value.Select(d => d.UniqueId))
-                        {
-                            await data.Key.OpenAsync(FolderAccess.ReadOnly);
-                            var message = await data.Key.GetMessageAsync(uid);
-                            var fromEmail = message.From.Mailboxes.Single().Address;
-
-                            if (!ignoredEmails.Contains(fromEmail))
-                            {
-                                var recipients = message.GetRecipients().Select(r => r.Address).ToList();
-
-                                var contactsWithInternalFlag = HandleContactsAndDomains(fromEmail, recipients, contactsToAdd);
-
-                                if (contactsWithInternalFlag.Any(c => !c.Value))
-                                {
-                                    var log = new EmailLog()
-                                    {
-                                        Subject = message.Subject,
-                                        Recipient = string.Join(";", recipients),
-                                        FromEmail = message.From.Mailboxes.Single().Address,
-                                        Body = message.TextBody,
-                                    };
-
-                                    if (log.Body == null)
-                                    {
-                                        log.Body = message.HtmlBody;
-                                    }
-
-                                    await dbContext.EmailLogs!.AddAsync(log);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return IsInternalDomain(fromEmail) && toEmails.TrueForAll(email => IsInternalDomain(email));
         }
     }
 }

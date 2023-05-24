@@ -3,19 +3,22 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.Plugin.EmailSync.Data;
 
 #nullable disable
 
-namespace OnlineSales.Migrations
+namespace OnlineSales.Plugin.EmailSync.Migrations
 {
-    [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(EmailSyncDbContext))]
+    [Migration("20230524094335_ImapFolders")]
+    partial class ImapFolders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("roles", (string)null);
+                    b.ToTable("roles", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -83,7 +89,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("RoleId")
                         .HasDatabaseName("ix_role_claims_role_id");
 
-                    b.ToTable("role_claims", (string)null);
+                    b.ToTable("role_claims", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -114,7 +123,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_claims_user_id");
 
-                    b.ToTable("user_claims", (string)null);
+                    b.ToTable("user_claims", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -142,7 +154,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_logins_user_id");
 
-                    b.ToTable("user_logins", (string)null);
+                    b.ToTable("user_logins", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -161,7 +176,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("RoleId")
                         .HasDatabaseName("ix_user_roles_role_id");
 
-                    b.ToTable("user_roles", (string)null);
+                    b.ToTable("user_roles", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -185,7 +203,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name")
                         .HasName("pk_user_tokens");
 
-                    b.ToTable("user_tokens", (string)null);
+                    b.ToTable("user_tokens", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Account", b =>
@@ -281,7 +302,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_account_name");
 
-                    b.ToTable("account", (string)null);
+                    b.ToTable("account", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ChangeLog", b =>
@@ -322,7 +346,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_change_log");
 
-                    b.ToTable("change_log", (string)null);
+                    b.ToTable("change_log", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ChangeLogTaskLog", b =>
@@ -370,7 +397,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_change_log_task_log");
 
-                    b.ToTable("change_log_task_log", (string)null);
+                    b.ToTable("change_log_task_log", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
@@ -463,7 +493,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_comment_parent_id");
 
-                    b.ToTable("comment", (string)null);
+                    b.ToTable("comment", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
@@ -612,7 +645,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("UnsubscribeId")
                         .HasDatabaseName("ix_contact_unsubscribe_id");
 
-                    b.ToTable("contact", (string)null);
+                    b.ToTable("contact", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
@@ -673,7 +709,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("ScheduleId")
                         .HasDatabaseName("ix_contact_email_schedule_schedule_id");
 
-                    b.ToTable("contact_email_schedule", (string)null);
+                    b.ToTable("contact_email_schedule", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Content", b =>
@@ -779,7 +818,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_content_slug");
 
-                    b.ToTable("content", (string)null);
+                    b.ToTable("content", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
@@ -870,7 +912,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_domain_name");
 
-                    b.ToTable("domain", (string)null);
+                    b.ToTable("domain", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
@@ -923,7 +968,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_group");
 
-                    b.ToTable("email_group", (string)null);
+                    b.ToTable("email_group", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailLog", b =>
@@ -1007,7 +1055,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_log");
 
-                    b.ToTable("email_log", (string)null);
+                    b.ToTable("email_log", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
@@ -1062,7 +1113,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("GroupId")
                         .HasDatabaseName("ix_email_schedule_group_id");
 
-                    b.ToTable("email_schedule", (string)null);
+                    b.ToTable("email_schedule", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
@@ -1150,7 +1204,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("EmailGroupId")
                         .HasDatabaseName("ix_email_template_email_group_id");
 
-                    b.ToTable("email_template", (string)null);
+                    b.ToTable("email_template", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.IpDetails", b =>
@@ -1187,7 +1244,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_ip_details_ip");
 
-                    b.ToTable("ip_details", (string)null);
+                    b.ToTable("ip_details", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Link", b =>
@@ -1249,7 +1309,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_link_uid");
 
-                    b.ToTable("link", (string)null);
+                    b.ToTable("link", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
@@ -1296,7 +1359,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("LinkId")
                         .HasDatabaseName("ix_link_log_link_id");
 
-                    b.ToTable("link_log", (string)null);
+                    b.ToTable("link_log", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Media", b =>
@@ -1368,7 +1434,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_media");
 
-                    b.ToTable("media", (string)null);
+                    b.ToTable("media", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
@@ -1468,7 +1537,10 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_order_ref_no");
 
-                    b.ToTable("order", (string)null);
+                    b.ToTable("order", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
@@ -1549,7 +1621,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("OrderId")
                         .HasDatabaseName("ix_order_item_order_id");
 
-                    b.ToTable("order_item", (string)null);
+                    b.ToTable("order_item", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
@@ -1592,7 +1667,10 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_task_execution_log");
 
-                    b.ToTable("task_execution_log", (string)null);
+                    b.ToTable("task_execution_log", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>
@@ -1635,7 +1713,10 @@ namespace OnlineSales.Migrations
                     b.HasIndex("ContactId")
                         .HasDatabaseName("ix_unsubscribe_contact_id");
 
-                    b.ToTable("unsubscribe", (string)null);
+                    b.ToTable("unsubscribe", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.User", b =>
@@ -1733,7 +1814,147 @@ namespace OnlineSales.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("host");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("password");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("integer")
+                        .HasColumnName("port");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.Property<bool>("UseSsl")
+                        .HasColumnType("boolean")
+                        .HasColumnName("use_ssl");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_imap_account");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_imap_account_user_id");
+
+                    b.HasIndex("Host", "UserName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_imap_account_host_user_name");
+
+                    b.ToTable("imap_account", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccountFolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("full_name");
+
+                    b.Property<int>("ImapAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("imap_account_id");
+
+                    b.Property<int>("LastUid")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_uid");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_imap_account_folder");
+
+                    b.HasIndex("ImapAccountId")
+                        .HasDatabaseName("ix_imap_account_folder_imap_account_id");
+
+                    b.ToTable("imap_account_folder", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1949,6 +2170,30 @@ namespace OnlineSales.Migrations
                         .HasConstraintName("fk_unsubscribe_contact_contact_id");
 
                     b.Navigation("Contact");
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccount", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_imap_account_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccountFolder", b =>
+                {
+                    b.HasOne("OnlineSales.Plugin.EmailSync.Entities.ImapAccount", "ImapAccount")
+                        .WithMany()
+                        .HasForeignKey("ImapAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_imap_account_folder_imap_account_imap_account_id");
+
+                    b.Navigation("ImapAccount");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Account", b =>

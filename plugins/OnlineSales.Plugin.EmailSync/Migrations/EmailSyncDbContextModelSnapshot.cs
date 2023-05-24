@@ -517,9 +517,17 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address2");
 
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("birthday");
+
                     b.Property<string>("CityName")
                         .HasColumnType("text")
                         .HasColumnName("city_name");
+
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("text")
+                        .HasColumnName("company_name");
 
                     b.Property<int?>("ContinentCode")
                         .HasColumnType("integer")
@@ -541,6 +549,10 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
+                    b.Property<string>("Department")
+                        .HasColumnType("text")
+                        .HasColumnName("department");
+
                     b.Property<int>("DomainId")
                         .HasColumnType("integer")
                         .HasColumnName("domain_id");
@@ -554,6 +566,10 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("first_name");
 
+                    b.Property<string>("JobTitle")
+                        .HasColumnType("text")
+                        .HasColumnName("job_title");
+
                     b.Property<string>("Language")
                         .HasColumnType("text")
                         .HasColumnName("language");
@@ -562,9 +578,21 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text")
+                        .HasColumnName("middle_name");
+
                     b.Property<string>("Phone")
                         .HasColumnType("text")
                         .HasColumnName("phone");
+
+                    b.Property<string>("Prefix")
+                        .HasColumnType("text")
+                        .HasColumnName("prefix");
+
+                    b.Property<Dictionary<string, string>>("SocialMedia")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("social_media");
 
                     b.Property<string>("Source")
                         .HasColumnType("text")
@@ -978,6 +1006,11 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_email");
 
+                    b.Property<string>("MessageId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message_id");
+
                     b.Property<string>("Recipient")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1109,6 +1142,10 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
+                    b.Property<int>("EmailGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_group_id");
+
                     b.Property<string>("FromEmail")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1118,10 +1155,6 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("from_name");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("group_id");
 
                     b.Property<string>("Language")
                         .IsRequired()
@@ -1165,8 +1198,8 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_template");
 
-                    b.HasIndex("GroupId")
-                        .HasDatabaseName("ix_email_template_group_id");
+                    b.HasIndex("EmailGroupId")
+                        .HasDatabaseName("ix_email_template_email_group_id");
 
                     b.ToTable("email_template", null, t =>
                         {
@@ -1810,10 +1843,6 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                         .HasColumnType("text")
                         .HasColumnName("host");
 
-                    b.Property<DateTime>("LastDateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_date_time");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1859,7 +1888,70 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_imap_account_user_id");
 
+                    b.HasIndex("Host", "UserName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_imap_account_host_user_name");
+
                     b.ToTable("imap_account", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccountFolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("full_name");
+
+                    b.Property<int>("ImapAccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("imap_account_id");
+
+                    b.Property<int>("LastUid")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_uid");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_imap_account_folder");
+
+                    b.HasIndex("ImapAccountId")
+                        .HasDatabaseName("ix_imap_account_folder_imap_account_id");
+
+                    b.ToTable("imap_account_folder", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1950,13 +2042,13 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
+                        .WithMany("Contacts")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_contact_account_account_id");
 
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
-                        .WithMany()
+                        .WithMany("Contacts")
                         .HasForeignKey("DomainId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -1999,7 +2091,7 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
+                        .WithMany("Domains")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_domain_account_account_id");
@@ -2021,14 +2113,14 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
+                    b.HasOne("OnlineSales.Entities.EmailGroup", "EmailGroup")
+                        .WithMany("EmailTemplates")
+                        .HasForeignKey("EmailGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_email_template_email_group_group_id");
+                        .HasConstraintName("fk_email_template_email_group_email_group_id");
 
-                    b.Navigation("Group");
+                    b.Navigation("EmailGroup");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
@@ -2046,7 +2138,7 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Contact", "Contact")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2058,7 +2150,7 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Order", "Order")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2089,9 +2181,48 @@ namespace OnlineSales.Plugin.EmailSync.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("OnlineSales.Plugin.EmailSync.Entities.ImapAccountFolder", b =>
+                {
+                    b.HasOne("OnlineSales.Plugin.EmailSync.Entities.ImapAccount", "ImapAccount")
+                        .WithMany()
+                        .HasForeignKey("ImapAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_imap_account_folder_imap_account_imap_account_id");
+
+                    b.Navigation("ImapAccount");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Account", b =>
+                {
+                    b.Navigation("Contacts");
+
+                    b.Navigation("Domains");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("OnlineSales.Entities.Content", b =>
                 {
                     b.Navigation("Comments");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
+                {
+                    b.Navigation("Contacts");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
+                {
+                    b.Navigation("EmailTemplates");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }
