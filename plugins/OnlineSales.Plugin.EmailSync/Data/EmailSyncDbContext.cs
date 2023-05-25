@@ -15,7 +15,12 @@ namespace OnlineSales.Plugin.EmailSync.Data;
 
 public class EmailSyncDbContext : PluginDbContextBase
 {
-    private readonly IEncryptionProvider encryptionProvider;
+    private readonly IEncryptionProvider? encryptionProvider = null;
+
+    public EmailSyncDbContext()
+        : base()
+    {
+    }
 
     public EmailSyncDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
@@ -31,9 +36,14 @@ public class EmailSyncDbContext : PluginDbContextBase
 
     public DbSet<ImapAccount>? ImapAccounts { get; set; }
 
+    public DbSet<ImapAccountFolder>? ImapAccountFolders { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.UseEncryption(encryptionProvider);
+        if (encryptionProvider != null)
+        {
+            builder.UseEncryption(encryptionProvider);
+        }            
     }
 }
