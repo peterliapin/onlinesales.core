@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 
 namespace OnlineSales.Tests;
 
@@ -19,6 +20,22 @@ public class MediaTests : BaseTest
     {
         var result = await CreateAndGetMedia(fileName, fileSize);
         result.Should().Be(shouldBePositive);
+    }
+
+    [Theory]
+    [InlineData("Привет, мир 3120.png", "privetmir3120.png", 1024)]
+    [InlineData("HelloWorld-ThisIs---     ...DotNet.png", "helloworld-thisis---...dotnet.png", 1024)]
+    public async Task TransliterationAndSlugifyTest(string fileName, string expectedTransliteratedName, int fileSize)
+    {
+        var testImage = new TestMedia(fileName, fileSize);
+
+        var postResult = await PostTest("/api/media", testImage);
+        postResult.Item2.Should().BeTrue();
+        var convertedFileName = Regex.Match(postResult.Item1, @"\/api\/media\/\S+\/(\S+.\S+)").Groups[1].Value;
+        convertedFileName.Should().Match(expectedTransliteratedName);
+        var imageStream = await GetImageTest(postResult.Item1);
+        imageStream.Should().NotBeNull();
+        CompareStreams(imageStream!, imageStream!).Should().BeTrue();
     }
 
     [Theory]
