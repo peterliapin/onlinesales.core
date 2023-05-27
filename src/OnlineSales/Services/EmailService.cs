@@ -9,24 +9,29 @@ using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using OnlineSales.Configuration;
 using OnlineSales.DTOs;
-using OnlineSales.Plugin.Email.Configuration;
-using OnlineSales.Plugin.Email.Exceptions;
+using OnlineSales.Exceptions;
+using OnlineSales.Interfaces;
 using Serilog;
 
-namespace OnlineSales.Plugin.Email.Services;
+namespace OnlineSales.Services;
 
 public class EmailService : IEmailService
 {
-    private readonly PluginSettings pluginSettings = new PluginSettings();
+    private readonly EmailConfig config = new EmailConfig();
 
     public EmailService(IConfiguration configuration)
     {
-        var settings = configuration.Get<PluginSettings>();
+        var settings = configuration.GetSection("Email").Get<EmailConfig>();
 
         if (settings != null)
         {
-            pluginSettings = settings;
+            config = settings;
+        }
+        else
+        {
+            throw new MissingConfigurationException($"The specified configuration section for the type {typeof(EmailConfig).FullName} could not be found in the settings file.");
         }
     }
 
@@ -36,9 +41,9 @@ public class EmailService : IEmailService
 
         try
         {
-            await client.ConnectAsync(pluginSettings.Email.Server, pluginSettings.Email.Port, pluginSettings.Email.UseSsl);
+            await client.ConnectAsync(config.Server, config.Port, config.UseSsl);
 
-            await client.AuthenticateAsync(new NetworkCredential(pluginSettings.Email.UserName, pluginSettings.Email.Password));
+            await client.AuthenticateAsync(new NetworkCredential(config.UserName, config.Password));
 
             var message = await GenerateEmailBody(subject, fromEmail, fromName, recipients, body, attachments);
 
