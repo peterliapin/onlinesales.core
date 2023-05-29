@@ -118,3 +118,8 @@ public class CorsConfig
 {
     public string[] AllowedOrigins { get; set; } = Array.Empty<string>();
 }
+
+public class EmailConfig : BaseServiceConfig
+{
+    public bool UseSsl { get; set; }
+}

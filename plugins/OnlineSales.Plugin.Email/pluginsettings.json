@@ -1,9 +1,0 @@
-﻿{
-  "Email": {
-    "Server": "$EMAIL__SERVER",
-    "UserName": "$EMAIL__USERNAME",
-    "Password": "$EMAIL__PASSWORD",
-    "Port": "25",
-    "UseSsl": "true"
-  }
-}
