@@ -4,7 +4,7 @@
 
 using System.Runtime.Serialization;
 
-namespace OnlineSales.Plugin.Email.Exceptions;
+namespace OnlineSales.Exceptions;
 
 [Serializable]
 public class EmailException : Exception
