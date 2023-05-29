@@ -60,8 +60,8 @@ public class Account : BaseEntity, ICommentable
     [JsonIgnore]
     public virtual ICollection<Domain>? Domains { get; set; }
 
-    public static CommentableType GetCommentableType()
+    public static string GetCommentableType()
     {
-        return CommentableType.Account;
+        return "Account";
     }
 }

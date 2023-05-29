@@ -25,6 +25,8 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
     where TD : class
     where TI : BaseImportDtoWithIdAndSource
 {
+    protected AdditionalImportChecker additionalImportChecker = new AdditionalImportChecker();
+
     public BaseControllerWithImport(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<T> queryProviderFactory)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
@@ -52,11 +54,13 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         var relatedTObjectsMap = relatedObjectsMap[typeof(T)];
 
+        additionalImportChecker.SetData(importRecords);
+
         for (var i = 0; i < importRecords.Count; i++)
         {
             var importRecord = importRecords[i];
 
-            if (!AdditionalImportCheck(importRecords, i, result))
+            if (!additionalImportChecker.Check(i, result))
             {
                 continue;
             }
@@ -156,11 +160,6 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         await dbContext.SaveChangesAsync();
 
         return Ok(result);
-    }
-
-    protected virtual bool AdditionalImportCheck(List<TI> importRecords, int importedValueIndex, ImportResult importResult)
-    {
-        return true;
     }
 
     protected virtual async Task SaveRangeAsync(List<T> newRecords)
@@ -390,6 +389,18 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
         var lambdaExpression = Expression.Lambda<Func<object, bool>>(containsExpression, objectParam);
 
         return lambdaExpression.Compile();
+    }
+
+    protected class AdditionalImportChecker
+    {
+        public virtual void SetData(List<TI> importRecords)
+        {
+        }
+
+        public virtual bool Check(int index, ImportResult result)
+        {
+            return true;
+        }
     }
 }
 

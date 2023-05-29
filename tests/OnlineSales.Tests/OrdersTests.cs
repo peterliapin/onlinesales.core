@@ -506,7 +506,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
             {
                 Body = $"TestComment{i}",
                 CommentableId = 1,
-                CommentableType = CommentableType.Order,    
+                CommentableType = Order.GetCommentableType(),    
             };
 
             var response = await Request(HttpMethod.Post, itemsUrl + "/1/comments", comments[i], "Success");

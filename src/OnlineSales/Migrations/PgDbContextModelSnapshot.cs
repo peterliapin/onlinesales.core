@@ -401,8 +401,9 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("commentable_id");
 
-                    b.Property<int>("CommentableType")
-                        .HasColumnType("integer")
+                    b.Property<string>("CommentableType")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("commentable_type");
 
                     b.Property<int>("ContactId")
@@ -737,6 +738,11 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("language");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
                     b.Property<string>("Source")
                         .HasColumnType("text")
                         .HasColumnName("source");
@@ -770,6 +776,10 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_content");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_content_slug");
 
                     b.ToTable("content", (string)null);
                 });

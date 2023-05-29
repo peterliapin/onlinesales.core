@@ -3,20 +3,12 @@
 // </copyright>
 
 namespace OnlineSales.Entities;
-public enum CommentableType
-{
-    Content = 0,
-    Account = 1,
-    Order = 2,
-    Contact = 3,
-}
-
 public interface ICommentable 
 {
-    public static CommentableType GetCommentableType(Type t)
+    public static string GetCommentableType(Type t)
     {
-        return (CommentableType)t.GetMethod("GetCommentableType")!.Invoke(null, null)!;
+        return (string)t.GetMethod("GetCommentableType")!.Invoke(null, null)!;
     }
 
-    public static abstract CommentableType GetCommentableType();
+    public static abstract string GetCommentableType();
 }

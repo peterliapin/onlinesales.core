@@ -21,25 +21,25 @@ namespace OnlineSales.Migrations
             migrationBuilder.RenameColumn(
                 name: "content_id",
                 table: "comment",
-                newName: "commentable_type");
+                newName: "commentable_id");
 
-            migrationBuilder.AddColumn<int>(
-                name: "commentable_id",
+            migrationBuilder.AddColumn<string>(
+                name: "commentable_type",
                 table: "comment",
-                type: "integer",
+                type: "text",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "commentable_id",
+                name: "commentable_type",
                 table: "comment");
 
             migrationBuilder.RenameColumn(
-                name: "commentable_type",
+                name: "commentable_id",
                 table: "comment",
                 newName: "content_id");
 

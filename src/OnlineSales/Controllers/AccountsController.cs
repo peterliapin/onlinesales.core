@@ -19,12 +19,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class AccountsController : BaseControllerWithImport<Account, AccountCreateDto, AccountUpdateDto, AccountDetailsDto, AccountImportDto>
 {
-    private readonly CommentConrollerService commentConrollerService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
 
-    public AccountsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Account> queryProviderFactory, CommentConrollerService commentConrollerService)
+    public AccountsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Account> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
-        this.commentConrollerService = commentConrollerService;
+        this.commentableControllerExtension = commentableControllerExtension;
     }
 
     [HttpGet("{id}/comments")]
@@ -35,7 +35,7 @@ public class AccountsController : BaseControllerWithImport<Account, AccountCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
     {
-        return commentConrollerService.ReturnComments(await commentConrollerService.GetCommentsForICommentable<Account>(id), this);
+        return commentableControllerExtension.ReturnComments(await commentableControllerExtension.GetCommentsForICommentable<Account>(id), this);
     }
 
     [HttpPost("{id}/comments")]
@@ -46,6 +46,6 @@ public class AccountsController : BaseControllerWithImport<Account, AccountCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
     {
-        return await commentConrollerService.PostComment(commentConrollerService.CreateCommentForICommentable<Account>(value, id), this);
+        return await commentableControllerExtension.PostComment(commentableControllerExtension.CreateCommentForICommentable<Account>(value, id), this);
     }
 }

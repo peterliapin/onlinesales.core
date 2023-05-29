@@ -12,6 +12,6 @@ public class TestComment : CommentCreateDto
         AuthorEmail = $"contact{uid}@test{uid}.net";
         Body = $"Test Comment{uid}";
         CommentableId = commentableId;
-        CommentableType = CommentableType.Content;
+        CommentableType = Content.GetCommentableType();
     }
 }

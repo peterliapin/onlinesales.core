@@ -7,13 +7,13 @@
     "authorEmail": "contact2@test2.net",
     "body": "TestContent2",
     "commentableId": 1,
+    "commentableType": "Content",
     "parentId": null,
     "createdByIp": "192.168.1.2",
     "updatedByIp": null,
     "createdByUserAgent": "TestAgent2",
     "updatedByUserAgent": null,
-    "key": "key1",
-    "commentablType": "Content"
+    "key": "key1"
   },
   {
     "id": 1,
@@ -23,6 +23,7 @@
     "authorEmail": "contact1@test1.net",
     "body": "Test Comment Body 1",
     "commentableId": 1,
+    "commentableType": "Content",
     "parentId": null,
     "createdByIp": "192.168.1.1",
     "updatedByIp": "192.168.1.3",

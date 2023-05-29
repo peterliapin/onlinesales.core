@@ -22,13 +22,13 @@ namespace OnlineSales.Controllers;
 public class ContactsController : BaseControllerWithImport<Contact, ContactCreateDto, ContactUpdateDto, ContactDetailsDto, ContactImportDto>
 {
     private readonly IContactService contactService;
-    private readonly CommentConrollerService commentConrollerService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
 
-    public ContactsController(PgDbContext dbContext, IMapper mapper, IContactService contactService, EsDbContext esDbContext, QueryProviderFactory<Contact> queryProviderFactory, CommentConrollerService commentConrollerService)
+    public ContactsController(PgDbContext dbContext, IMapper mapper, IContactService contactService, EsDbContext esDbContext, QueryProviderFactory<Contact> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.contactService = contactService;
-        this.commentConrollerService = commentConrollerService;
+        this.commentableControllerExtension = commentableControllerExtension;
     }
 
     [HttpGet("{id}")]
@@ -121,7 +121,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
     {
-        return commentConrollerService.ReturnComments(await commentConrollerService.GetCommentsForICommentable<Contact>(id), this);
+        return commentableControllerExtension.ReturnComments(await commentableControllerExtension.GetCommentsForICommentable<Contact>(id), this);
     }
 
     [HttpPost("{id}/comments")]
@@ -132,7 +132,7 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
     {
-        return await commentConrollerService.PostComment(commentConrollerService.CreateCommentForICommentable<Contact>(value, id), this);
+        return await commentableControllerExtension.PostComment(commentableControllerExtension.CreateCommentForICommentable<Contact>(value, id), this);
     }
 
     protected override async Task SaveRangeAsync(List<Contact> newRecords)

@@ -49,7 +49,7 @@ public class CommentCreateDto : CommentCreateBaseDto
     public int CommentableId { get; set; }
 
     [Required]
-    public CommentableType CommentableType { get; set; }
+    public string CommentableType { get; set; } = string.Empty;
 }
 
 public class CommentUpdateDto
@@ -74,7 +74,7 @@ public class AnonymousCommentDetailsDto
 
     public int CommentableId { get; set; }
 
-    public CommentableType CommentableType { get; set; }
+    public string CommentableType { get; set; } = string.Empty;
 
     public string AvatarUrl { get; set; } = string.Empty;
 
@@ -139,7 +139,7 @@ public class CommentImportDto : BaseImportDto
     public int CommentableId { get; set; }
 
     [Optional]
-    public CommentableType CommentableType { get; set; }
+    public string CommentableType { get; set; } = string.Empty;
 
     [Optional]
     public int? ParentId { get; set; }

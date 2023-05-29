@@ -67,7 +67,7 @@ public class Comment : BaseEntity
     public int CommentableId { get; set; }
 
     [Required]
-    public CommentableType CommentableType { get; set; }
+    public string CommentableType { get; set; } = string.Empty;
 
     public int? ParentId { get; set; }
 

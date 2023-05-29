@@ -20,12 +20,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class ContentController : BaseControllerWithImport<Content, ContentCreateDto, ContentUpdateDto, ContentDetailsDto, ContentImportDto>
 {
-    private readonly CommentConrollerService commentConrollerService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
 
-    public ContentController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Content> queryProviderFactory, CommentConrollerService commentConrollerService)
+    public ContentController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Content> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
-        this.commentConrollerService = commentConrollerService;
+        this.commentableControllerExtension = commentableControllerExtension;
     }
 
     [HttpGet]
@@ -82,7 +82,7 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
     {
-        return commentConrollerService.ReturnComments(await commentConrollerService.GetCommentsForICommentable<Content>(id), this);
+        return commentableControllerExtension.ReturnComments(await commentableControllerExtension.GetCommentsForICommentable<Content>(id), this);
     }
 
     [HttpPost("{id}/comments")]
@@ -93,6 +93,6 @@ public class ContentController : BaseControllerWithImport<Content, ContentCreate
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
     {
-        return await commentConrollerService.PostComment(commentConrollerService.CreateCommentForICommentable<Content>(value, id), this);
+        return await commentableControllerExtension.PostComment(commentableControllerExtension.CreateCommentForICommentable<Content>(value, id), this);
     }
 }

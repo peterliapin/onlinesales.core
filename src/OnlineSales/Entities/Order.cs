@@ -94,8 +94,8 @@ public class Order : BaseEntity, ICommentable
     [JsonIgnore]
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
 
-    public static CommentableType GetCommentableType()
+    public static string GetCommentableType()
     {
-        return CommentableType.Order;
+        return "Order";
     }
 }

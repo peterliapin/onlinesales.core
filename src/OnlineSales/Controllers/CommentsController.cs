@@ -6,8 +6,6 @@ using System.Reflection;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -21,16 +19,17 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
-    private static readonly Dictionary<CommentableType, Type> CommentableTypes = FindCommentableTypes();
+    private static readonly Dictionary<string, Type> CommentableTypes = FindCommentableTypes();
 
     private readonly ICommentService commentService;
-    private readonly CommentConrollerService commentConrollerService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
 
-    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryProviderFactory, CommentConrollerService commentConrollerService)
+    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.commentService = commentService;
-        this.commentConrollerService = commentConrollerService;
+        this.commentableControllerExtension = commentableControllerExtension;
+        additionalImportChecker = new CommentsImportChecker(dbContext);
     }
 
     [HttpGet]
@@ -44,7 +43,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
 
         var items = (List<CommentDetailsDto>)((ObjectResult)returnedItems!).Value!;
 
-        return commentConrollerService.ReturnComments(items, this);
+        return commentableControllerExtension.ReturnComments(items, this);
     }
 
     // GET api/{entity}s/5
@@ -89,33 +88,21 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
             return UnprocessableEntity(value);
         }
 
-        return await commentConrollerService.PostComment(comment, this);
+        return await commentableControllerExtension.PostComment(comment, this);
     }
 
     protected override async Task SaveRangeAsync(List<Comment> comments)
     {
         await commentService.SaveRangeAsync(comments);
     }
-        
-    protected override bool AdditionalImportCheck(List<CommentImportDto> importRecords, int importedValueIndex, ImportResult importResult)
-    {
-        var importedValue = importRecords[importedValueIndex];
-        if (!CheckCommentableEntity(importedValue.CommentableType, importedValue.CommentableId))
-        {
-            importResult.AddError(importedValueIndex, $"Commentable entity of type {importedValue.CommentableType} with id = {importedValue.CommentableId} cannot be found");
-            return false;
-        }
 
-        return true;
-    }
-
-    private static Dictionary<CommentableType, Type> FindCommentableTypes()
+    private static Dictionary<string, Type> FindCommentableTypes()
     {
         var assembly = Assembly.GetAssembly(typeof(ICommentable));
         return assembly!.GetTypes().Where(t => t.IsClass && typeof(ICommentable).IsAssignableFrom(t)).ToDictionary(t => ICommentable.GetCommentableType(t), t => t);
     }
 
-    private bool CheckCommentableEntity(CommentableType ct, int id)
+    private bool CheckCommentableEntity(string ct, int id)
     {
         var contains = CommentableTypes.TryGetValue(ct, out var type);
         if (contains)
@@ -125,5 +112,45 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
         }
 
         return false;
+    }
+
+    private sealed class CommentsImportChecker : AdditionalImportChecker
+    {
+        private readonly PgDbContext dbContext;
+        private readonly Dictionary<string, List<int>> existedCommentableIds = new Dictionary<string, List<int>>();
+        private List<CommentImportDto> importRecords = new List<CommentImportDto>();
+
+        public CommentsImportChecker(PgDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
+        public override void SetData(List<CommentImportDto> importRecords)
+        {
+            this.importRecords = importRecords;
+            foreach (var commentableType in CommentableTypes)
+            {
+                var importRecordIds = importRecords.Where(r => r.CommentableType == commentableType.Key).Select(ir => ir.CommentableId).ToHashSet();
+                var existedIds = dbContext.SetDbEntity(commentableType.Value).Where(c => importRecordIds.Contains(((BaseEntityWithId)c).Id)).Select(c => ((BaseEntityWithId)c).Id).ToList();
+                existedCommentableIds.Add(commentableType.Key, existedIds);
+            }
+        }
+
+        public override bool Check(int index, ImportResult result)
+        {
+            if (index < 0 || index > importRecords.Count)
+            {
+                return false;
+            }
+
+            var importRecord = importRecords[index];
+            if (!existedCommentableIds[importRecord.CommentableType].Contains(importRecord.CommentableId))
+            {
+                result.AddError(index, $"Commentable entity of type {importRecord.CommentableType} with id = {importRecord.CommentableId} cannot be found");
+                return false;
+            }
+
+            return true;
+        }
     }
 }

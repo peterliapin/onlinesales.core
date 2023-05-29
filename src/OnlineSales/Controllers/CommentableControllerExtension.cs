@@ -1,4 +1,4 @@
-﻿// <copyright file="CommentConrollerService.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="CommentableControllerExtension.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -16,13 +16,13 @@ using OnlineSales.Services;
 
 namespace OnlineSales.Interfaces;
 
-public class CommentConrollerService
+public class CommentableControllerExtension
 {
     private readonly IMapper mapper;
     private readonly ICommentService commentService;
     private readonly PgDbContext dbContext;
 
-    public CommentConrollerService(PgDbContext dbContext, IMapper mapper, ICommentService commentService)
+    public CommentableControllerExtension(PgDbContext dbContext, IMapper mapper, ICommentService commentService)
     {
         this.mapper = mapper;
         this.commentService = commentService;
@@ -83,7 +83,7 @@ public class CommentConrollerService
         return controller.CreatedAtAction("GetOne", "Comments", new { id = comment.Id }, returnedValue);
     }
 
-    private static CommentableType GetCommentableType<T>()
+    private static string GetCommentableType<T>()
         where T : ICommentable
     {
         return T.GetCommentableType();

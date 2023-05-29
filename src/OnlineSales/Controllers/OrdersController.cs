@@ -19,12 +19,12 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto, OrderImportDto>
 {
-    private readonly CommentConrollerService commentConrollerService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
 
-    public OrdersController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Order> queryProviderFactory, CommentConrollerService commentConrollerService)
+    public OrdersController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Order> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
-        this.commentConrollerService = commentConrollerService;
+        this.commentableControllerExtension = commentableControllerExtension;
     }
 
     [HttpGet("{id}/comments")]
@@ -35,7 +35,7 @@ public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, 
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
     {
-        return commentConrollerService.ReturnComments(await commentConrollerService.GetCommentsForICommentable<Order>(id), this);
+        return commentableControllerExtension.ReturnComments(await commentableControllerExtension.GetCommentsForICommentable<Order>(id), this);
     }
 
     [HttpPost("{id}/comments")]
@@ -46,6 +46,6 @@ public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, 
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
     {
-        return await commentConrollerService.PostComment(commentConrollerService.CreateCommentForICommentable<Order>(value, id), this);
+        return await commentableControllerExtension.PostComment(commentableControllerExtension.CreateCommentForICommentable<Order>(value, id), this);
     }
 }

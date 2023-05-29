@@ -69,7 +69,7 @@ public class Program
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
         builder.Services.AddSingleton<ActivityLogService, ActivityLogService>();
         builder.Services.AddTransient(typeof(QueryProviderFactory<>), typeof(QueryProviderFactory<>));
-        builder.Services.AddTransient<CommentConrollerService, CommentConrollerService>();
+        builder.Services.AddTransient<CommentableControllerExtension, CommentableControllerExtension>();
 
         ConfigureCacheProfiles(builder);
 
