@@ -31,11 +31,6 @@ public class ElasticConfig : BaseServiceConfig
     public string Url => $"http{(UseHttps ? "s" : string.Empty)}://{Server}:{Port}";
 }
 
-public class SmtpServerConfig : BaseServiceConfig
-{
-    public bool UseTLS { get; set; } = false;
-}
-
 public class ExtensionConfig
 {
     public string Extension { get; set; } = string.Empty;
@@ -110,8 +105,6 @@ public class AppSettings
     public PostgresConfig Postgres { get; set; } = new PostgresConfig();
 
     public ElasticConfig Elastic { get; set; } = new ElasticConfig();
-
-    public SmtpServerConfig SmtpServer { get; set; } = new SmtpServerConfig();
 }
 
 public class CorsConfig
