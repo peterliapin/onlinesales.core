@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Security.Cryptography;
-using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +12,7 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -23,11 +22,13 @@ namespace OnlineSales.Controllers;
 public class ContactsController : BaseControllerWithImport<Contact, ContactCreateDto, ContactUpdateDto, ContactDetailsDto, ContactImportDto>
 {
     private readonly IContactService contactService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
 
-    public ContactsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IContactService contactService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public ContactsController(PgDbContext dbContext, IMapper mapper, IContactService contactService, EsDbContext esDbContext, QueryProviderFactory<Contact> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.contactService = contactService;
+        this.commentableControllerExtension = commentableControllerExtension;
     }
 
     [HttpGet("{id}")]
@@ -110,6 +111,28 @@ public class ContactsController : BaseControllerWithImport<Contact, ContactCreat
         returnedValue.AvatarUrl = GravatarHelper.EmailToGravatarUrl(returnedValue.Email);
 
         return Ok(returnedValue);
+    }
+
+    [HttpGet("{id}/comments")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<CommentDetailsDto>>> GetComments(int id)
+    {
+        return commentableControllerExtension.ReturnComments(await commentableControllerExtension.GetCommentsForICommentable<Contact>(id), this);
+    }
+
+    [HttpPost("{id}/comments")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CommentDetailsDto>> PostComment(int id, [FromBody] CommentCreateBaseDto value)
+    {
+        return await commentableControllerExtension.PostComment(commentableControllerExtension.CreateCommentForICommentable<Contact>(value, id), this);
     }
 
     protected override async Task SaveRangeAsync(List<Contact> newRecords)

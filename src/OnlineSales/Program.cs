@@ -68,6 +68,9 @@ public class Program
         builder.Services.AddScoped<IAccountExternalService, AccountExternalService>();
         builder.Services.AddSingleton<TaskStatusService, TaskStatusService>();
         builder.Services.AddSingleton<ActivityLogService, ActivityLogService>();
+        builder.Services.AddTransient(typeof(QueryProviderFactory<>), typeof(QueryProviderFactory<>));
+        builder.Services.AddSingleton<IEmailService, EmailService>();
+        builder.Services.AddTransient<CommentableControllerExtension, CommentableControllerExtension>();
 
         ConfigureCacheProfiles(builder);
 

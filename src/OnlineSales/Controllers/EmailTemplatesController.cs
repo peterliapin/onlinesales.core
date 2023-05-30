@@ -10,6 +10,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
@@ -17,8 +18,8 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailTemplateDetailsDto>
 {
-    public EmailTemplatesController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
-    : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public EmailTemplatesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<EmailTemplate> queryProviderFactory)
+    : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
     }
 }

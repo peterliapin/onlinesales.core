@@ -1,7 +1,7 @@
-﻿id,key,body,parentKey,contentSlug,authorName,authorEmail
-1,,Body 1,,test-slug100,Peter,contact1@test1.net
-2,,Body 2,,test-slug100,Peter,contact1@test1.net
-,Key3,Body 3,Key2,test-slug100,Peter,contact1@test1.net
-,Key4,Body 4,,test-slug100,Peter,contact1@test1.net
-,Key5,Body 5,,test-slug100,Peter,contact1@test1.net
-,,Body 6,Key5,test-slug100,Peter,contact1@test1.net
+﻿id,key,body,parentKey,commentableId,commentableType,authorName,authorEmail
+1,,Body 1,,1,Content,Peter,contact1@test1.net
+2,,Body 2,,1,Content,Peter,contact1@test1.net
+,Key3,Body 3,Key2,1,Content,Peter,contact1@test1.net
+,Key4,Body 4,,1,Content,Peter,contact1@test1.net
+,Key5,Body 5,,1,Content,Peter,contact1@test1.net
+,,Body 6,Key5,1,Content,Peter,contact1@test1.net

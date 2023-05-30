@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230520223228_ExtendContactAttributes")]
+    partial class ExtendContactAttributes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -397,18 +400,13 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
-                    b.Property<int>("CommentableId")
-                        .HasColumnType("integer")
-                        .HasColumnName("commentable_id");
-
-                    b.Property<string>("CommentableType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("commentable_type");
-
                     b.Property<int>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
+
+                    b.Property<int>("ContentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("content_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -461,6 +459,9 @@ namespace OnlineSales.Migrations
 
                     b.HasIndex("ContactId")
                         .HasDatabaseName("ix_comment_contact_id");
+
+                    b.HasIndex("ContentId")
+                        .HasDatabaseName("ix_comment_content_id");
 
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_comment_parent_id");
@@ -962,11 +963,6 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("from_email");
-
-                    b.Property<string>("MessageId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("message_id");
 
                     b.Property<string>("Recipient")
                         .IsRequired()
@@ -1804,12 +1800,21 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_comment_contact_contact_id");
 
+                    b.HasOne("OnlineSales.Entities.Content", "Content")
+                        .WithMany("Comments")
+                        .HasForeignKey("ContentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comment_content_content_id");
+
                     b.HasOne("OnlineSales.Entities.Comment", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
                         .HasConstraintName("fk_comment_comment_parent_id");
 
                     b.Navigation("Contact");
+
+                    b.Navigation("Content");
 
                     b.Navigation("Parent");
                 });
@@ -1954,6 +1959,11 @@ namespace OnlineSales.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Content", b =>
+                {
+                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>

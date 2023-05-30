@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using EntityFrameworkCore.EncryptColumn.Attribute;
+using Microsoft.EntityFrameworkCore;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 
@@ -13,6 +14,7 @@ namespace OnlineSales.Plugin.EmailSync.Entities;
 
 [Table("imap_account")]
 [SupportsChangeLog]
+[Index(nameof(Host), nameof(UserName), IsUnique = true)]
 public class ImapAccount : BaseEntity
 {
     public string Host { get; set; } = string.Empty;
@@ -25,8 +27,6 @@ public class ImapAccount : BaseEntity
     public int Port { get; set; }
 
     public bool UseSsl { get; set; }
-
-    public DateTime LastDateTime { get; set; } = new DateTime(1970, 1, 1).ToUniversalTime();
 
     [Required]
     public string UserId { get; set; } = string.Empty;

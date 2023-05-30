@@ -26,9 +26,11 @@ namespace OnlineSales.Services
             var emailStatus = false;
             var emails = string.Join(";", recipients);
 
+            string messageId = string.Empty;
+
             try
             {
-                await emailService.SendAsync(subject, fromEmail, fromName, recipients, body, attachments);
+                messageId = await emailService.SendAsync(subject, fromEmail, fromName, recipients, body, attachments);
                 emailStatus = true;
 
                 Log.Information($"Email with subject {subject} sent to {recipients} from {fromEmail}");
@@ -41,7 +43,7 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await AddEmailLogEntry(subject, fromEmail, body, emails, emailStatus, templateId: templateId);
+                await AddEmailLogEntry(subject, fromEmail, body, emails, emailStatus, messageId, templateId: templateId);
             }
         }
 
@@ -50,13 +52,15 @@ namespace OnlineSales.Services
             var emailStatus = false;
             var recipient = string.Empty;
 
+            string messageId = string.Empty;
+
             try
             {
                 recipient = await GetContactEmailById(contactId);
 
                 var recipientCollection = new[] { recipient };
 
-                await emailService.SendAsync(subject, fromEmail, fromName, recipientCollection, body, attachments);
+                messageId = await emailService.SendAsync(subject, fromEmail, fromName, recipientCollection, body, attachments);
                 emailStatus = true;
 
                 Log.Information($"Email with subject {subject} sent to {recipient} from {fromEmail}");
@@ -68,11 +72,11 @@ namespace OnlineSales.Services
             }
             finally
             {
-                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, contactId, scheduleId, templateId);
+                await AddEmailLogEntry(subject, fromEmail, body, recipient, emailStatus, messageId, contactId, scheduleId, templateId);
             }
         }
 
-        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, int contactId = 0, int scheduleId = 0, int templateId = 0)
+        private async Task AddEmailLogEntry(string subject, string fromEmail, string body, string recipient, bool status, string messageId, int contactId = 0, int scheduleId = 0, int templateId = 0)
         {
             try
             {
@@ -99,6 +103,7 @@ namespace OnlineSales.Services
                 log.Recipient = recipient;
                 log.Status = status ? EmailStatus.Sent : EmailStatus.NotSent;
                 log.CreatedAt = DateTime.UtcNow;
+                log.MessageId = messageId;
 
                 await pgDbContext.EmailLogs!.AddAsync(log);
                 await pgDbContext.SaveChangesAsync();

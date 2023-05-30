@@ -1,4 +1,4 @@
-id,createdAt,updatedAt,authorName,authorEmail,body,contentId,parentId,contentSlug,key,parentKey
-0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment4,contact4@test4.net,TestContent4,1,,,key4,key1
-0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment5,contact5@test5.net,TestContent5,1,,,key5,key2
-0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment6,contact6@test6.net,TestContent6,1,,,key6,key4
+id,createdAt,updatedAt,authorName,authorEmail,body,commentableId,commentableType,parentId,contentSlug,key,parentKey
+0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment4,contact4@test4.net,TestContent4,1,Content,,,key4,key1
+0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment5,contact5@test5.net,TestContent5,1,Content,,,key5,key2
+0,2023-01-15 17:32:02,2023-01-15 17:32:02,TestComment6,contact6@test6.net,TestContent6,1,Content,,,key6,key4

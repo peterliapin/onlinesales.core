@@ -2,6 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System;
+using System.Security.Policy;
+using Microsoft.AspNetCore.Http;
+using OnlineSales.Entities;
+using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
@@ -485,6 +490,39 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         var addedOrder = App.GetDbContext()!.Orders!.First(o => o.Id == 1);
         addedOrder.Should().NotBeNull();
         addedOrder.ContactId.Should().Be(1);
+    }
+
+    [Fact]
+
+    public async Task CommentsTest()
+    {
+        GenerateBulkRecords(1);
+
+        int numberOfComments = 10;
+        var comments = new TestComment[numberOfComments];
+        for (int i = 0; i < numberOfComments; ++i)
+        {
+            comments[i] = new TestComment()
+            {
+                Body = $"TestComment{i}",
+                CommentableId = 1,
+                CommentableType = Order.GetCommentableType(),    
+            };
+
+            var response = await Request(HttpMethod.Post, itemsUrl + "/1/comments", comments[i], "Success");
+            response.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
+
+        var savedComments = await GetTest<List<Comment>>(itemsUrl + "/1/comments");
+        savedComments.Should().NotBeNull();
+        savedComments!.Count.Should().Be(numberOfComments);
+        for (int i = 0; i < numberOfComments; ++i)
+        {
+            savedComments[i].Body.Should().Be(comments[i].Body);
+        }
+
+        var notFoundResponceComments = await GetTest<List<Comment>>(itemsUrl + "/2/comments", HttpStatusCode.NotFound);
+        notFoundResponceComments.Should().BeNull();
     }
 
     protected override async Task<(TestOrder, string)> CreateItem(string uid, int fkId)

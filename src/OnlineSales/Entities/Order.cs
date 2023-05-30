@@ -15,7 +15,7 @@ namespace OnlineSales.Entities;
 [SupportsElastic]
 [SupportsChangeLog]
 [Index(nameof(RefNo), IsUnique = true)]
-public class Order : BaseEntity
+public class Order : BaseEntity, ICommentable
 {
     /// <summary>
     /// Gets or sets reference to a contact table.
@@ -93,4 +93,9 @@ public class Order : BaseEntity
 
     [JsonIgnore]
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
+
+    public static string GetCommentableType()
+    {
+        return "Order";
+    }
 }

@@ -10,6 +10,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -20,8 +21,8 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
 {
     private readonly IDomainService domainService;
 
-    public DomainsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, IDomainService domainService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public DomainsController(PgDbContext dbContext, IMapper mapper, IDomainService domainService, EsDbContext esDbContext, QueryProviderFactory<Domain> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.domainService = domainService;
     }
@@ -32,7 +33,7 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<DomainDetailsDto>> Verify(string name)
+    public async Task<ActionResult<DomainDetailsDto>> Verify(string name, bool force = false)
     {
         var domain = (from d in dbSet
                       where d.Name == name
@@ -42,6 +43,17 @@ public class DomainsController : BaseControllerWithImport<Domain, DomainCreateDt
         {
             domain = new Domain() { Name = name };
             await domainService.SaveAsync(domain);
+        }
+
+        if (force)
+        {
+            domain.Title = null;
+            domain.Description = null;
+            domain.DnsRecords = null;
+            domain.DnsCheck = null;
+            domain.HttpCheck = null;
+            domain.MxCheck = null;
+            domain.Url = null;
         }
 
         await domainService.Verify(domain);

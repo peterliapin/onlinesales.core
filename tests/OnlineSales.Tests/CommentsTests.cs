@@ -68,14 +68,14 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var updatedComment = await GetTest<Comment>($"{itemsUrl}/1");
         updatedComment.Should().NotBeNull();
 
-        updatedComment!.ContentId.Should().Be(1);
+        updatedComment!.CommentableId.Should().Be(1);
         updatedComment!.ContactId.Should().NotBe(0);
         updatedComment!.AuthorName.Should().Be("Author Name 1");
 
         var newComment = await GetTest<Comment>($"{itemsUrl}/2");
         newComment.Should().NotBeNull();
 
-        newComment!.ContentId.Should().Be(1);
+        newComment!.CommentableId.Should().Be(1);
         newComment!.ContactId.Should().NotBe(0);
         newComment!.AuthorName.Should().Be("Author Name 2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
@@ -94,7 +94,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var updatedComment = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
 
-        updatedComment!.ContentId.Should().Be(1);
+        updatedComment!.CommentableId.Should().Be(1);
         updatedComment!.ContactId.Should().NotBe(0);
         updatedComment!.AuthorName.Should().Be("Author Name 1");
         updatedComment!.UpdatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
@@ -107,7 +107,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         var newComment = App.GetDbContext()!.Comments!.First(c => c.Id == 2);
         newComment.Should().NotBeNull();
 
-        newComment!.ContentId.Should().Be(1);
+        newComment!.CommentableId.Should().Be(1);
         newComment!.ContactId.Should().NotBe(0);
         newComment!.AuthorName.Should().Be("Author Name 2");
         newComment!.CreatedAt.Should().Be(DateTime.Parse("2023-01-15T17:32:02.074179Z").ToUniversalTime());
@@ -124,16 +124,16 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
 
         var addedComment1 = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         addedComment1.Should().NotBeNull();
-        addedComment1.ContentId.Should().Be(1);
+        addedComment1.CommentableId.Should().Be(1);
 
         var addedComment2 = App.GetDbContext()!.Comments!.First(c => c.Id == 2);
         addedComment2.Should().NotBeNull();
-        addedComment2.ContentId.Should().Be(2);
+        addedComment2.CommentableId.Should().Be(2);
 
         await PostImportTest(itemsUrl, "commentsNoFKHasUKeyUpdate.csv");
         var updatedComment = App.GetDbContext()!.Comments!.First(c => c.Id == 1);
         updatedComment.Should().NotBeNull();
-        updatedComment.ContentId.Should().Be(2);
+        updatedComment.CommentableId.Should().Be(2);
     }
 
     [Fact]
@@ -200,6 +200,12 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         importResult.Updated.Should().Be(1);
         importResult.Failed.Should().Be(2);
         importResult.Skipped.Should().Be(2);
+    }
+
+    [Fact(Skip = "Comment doesn't contain real fk items yet")]
+    public override Task CascadeDeleteTest()
+    {
+        throw new NotImplementedException();
     }
 
     protected override void MustBeEquivalent(object? expected, object? result)

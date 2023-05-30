@@ -23,6 +23,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<CommentStatus?, CommentStatus>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
+        CreateMap<Comment, CommentCreateBaseDto>().ReverseMap();
         CreateMap<Comment, CommentUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<CommentUpdateDto, Comment>()

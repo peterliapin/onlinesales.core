@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.Controllers
 {
@@ -33,7 +34,7 @@ namespace OnlineSales.Controllers
         {
             var provider = new FileExtensionContentTypeProvider();
 
-            var incomingFileName = imageCreateDto.Image!.FileName;
+            var incomingFileName = imageCreateDto.Image!.FileName.ToTranslit().Slugify();
             var incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
             var incomingFileSize = imageCreateDto.Image!.Length; // bytes
             var incomingFileMimeType = string.Empty;

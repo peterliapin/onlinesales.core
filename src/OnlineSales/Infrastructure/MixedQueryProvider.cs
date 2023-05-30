@@ -12,7 +12,7 @@ namespace OnlineSales.Infrastructure
     public class MixedQueryProvider<T> : IQueryProvider<T>
         where T : BaseEntityWithId
     {
-        private readonly QueryData<T> parseData;
+        private readonly QueryModelBuilder<T> queryBuilder;
 
         private readonly ElasticClient elasticClient;
 
@@ -20,9 +20,9 @@ namespace OnlineSales.Infrastructure
 
         private IQueryable<T> query;
 
-        public MixedQueryProvider(QueryData<T> parseData, IQueryable<T> query, ElasticClient elasticClient, string indexPrefix/*, PgDbContext dbContext*/)
+        public MixedQueryProvider(QueryModelBuilder<T> queryBuilder, IQueryable<T> query, ElasticClient elasticClient, string indexPrefix/*, PgDbContext dbContext*/)
         {
-            this.parseData = parseData;
+            this.queryBuilder = queryBuilder;
             this.elasticClient = elasticClient;
             this.indexPrefix = indexPrefix;
             this.query = query;
@@ -30,31 +30,31 @@ namespace OnlineSales.Infrastructure
 
         public async Task<QueryResult<T>> GetResult()
         {
-            var selectData = new QueryData<T>.SelectCommandData();
-            selectData.SelectedProperties.AddRange(parseData.SelectData.SelectedProperties);
-            selectData.IsSelect = parseData.SelectData.IsSelect;
+            var selectData = new QueryModelBuilder<T>.SelectCommandData();
+            selectData.SelectedProperties.AddRange(queryBuilder.SelectData.SelectedProperties);
+            selectData.IsSelect = queryBuilder.SelectData.IsSelect;
             var includeData = new List<PropertyInfo>();
-            includeData.AddRange(parseData.IncludeData);
+            includeData.AddRange(queryBuilder.IncludeData);
 
-            var idSelectData = new QueryData<T>.SelectCommandData() { SelectedProperties = new List<PropertyInfo> { typeof(T).GetProperty("Id") ! }, IsSelect = true };
+            var idSelectData = new QueryModelBuilder<T>.SelectCommandData() { SelectedProperties = new List<PropertyInfo> { typeof(T).GetProperty("Id") ! }, IsSelect = true };
 
-            parseData.SelectData = idSelectData;
-            parseData.IncludeData.Clear();
+            queryBuilder.SelectData = idSelectData;
+            queryBuilder.IncludeData.Clear();
 
-            var esProvider = new ESQueryProvider<T>(elasticClient, parseData, indexPrefix);
+            var esProvider = new ESQueryProvider<T>(elasticClient, queryBuilder, indexPrefix);
             var esResult = await esProvider.GetResult();
             List<int> ids = esResult.Records == null ? new List<int>() : esResult.Records.Select(r => r.Id).ToList();
 
             query = query.Where(e => ids.Contains(e.Id));
 
-            parseData.WhereData.Clear();
-            parseData.SearchData.Clear();
-            parseData.IncludeData = includeData;
-            parseData.SelectData = selectData;
-            parseData.Skip = 0;
-            parseData.Limit = ids.Count;
+            queryBuilder.WhereData.Clear();
+            queryBuilder.SearchData.Clear();
+            queryBuilder.IncludeData = includeData;
+            queryBuilder.SelectData = selectData;
+            queryBuilder.Skip = 0;
+            queryBuilder.Limit = ids.Count;
 
-            var dbProvider = new DBQueryProvider<T>(query, parseData);
+            var dbProvider = new DBQueryProvider<T>(query, queryBuilder);
 
             var dbResult = await dbProvider.GetResult();
 

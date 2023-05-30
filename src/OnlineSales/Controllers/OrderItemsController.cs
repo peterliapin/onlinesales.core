@@ -11,6 +11,7 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -21,8 +22,8 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
 {
     private readonly IOrderItemService orderItemService;
 
-    public OrderItemsController(PgDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    public OrderItemsController(PgDbContext dbContext, IMapper mapper, IOrderItemService orderItemService, EsDbContext esDbContext, QueryProviderFactory<OrderItem> queryProviderFactory)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.orderItemService = orderItemService;
     }

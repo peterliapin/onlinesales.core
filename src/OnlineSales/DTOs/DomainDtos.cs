@@ -40,6 +40,8 @@ public class DomainCreateDto
 
     public bool? DnsCheck { get; set; }
 
+    public bool? MxCheck { get; set; }
+
     [Optional]
     public string? Source { get; set; }
 }
@@ -116,4 +118,7 @@ public class DomainImportDto : BaseImportDtoWithDates
 
     [Optional]
     public bool? DnsCheck { get; set; }
+
+    [Optional]
+    public bool? MxCheck { get; set; }
 }

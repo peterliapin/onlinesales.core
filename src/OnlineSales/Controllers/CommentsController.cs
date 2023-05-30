@@ -2,15 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Reflection;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
@@ -19,12 +19,17 @@ namespace OnlineSales.Controllers;
 [Route("api/[controller]")]
 public class CommentsController : BaseControllerWithImport<Comment, CommentCreateDto, CommentUpdateDto, CommentDetailsDto, CommentImportDto>
 {
-    private readonly ICommentService commentService;
+    private static readonly Dictionary<string, Type> CommentableTypes = FindCommentableTypes();
 
-    public CommentsController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, ICommentService commentService, EsDbContext esDbContext)
-        : base(dbContext, mapper, apiSettingsConfig, esDbContext)
+    private readonly ICommentService commentService;
+    private readonly CommentableControllerExtension commentableControllerExtension;
+
+    public CommentsController(PgDbContext dbContext, IMapper mapper, ICommentService commentService, EsDbContext esDbContext, QueryProviderFactory<Comment> queryProviderFactory, CommentableControllerExtension commentableControllerExtension)
+        : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
         this.commentService = commentService;
+        this.commentableControllerExtension = commentableControllerExtension;
+        additionalImportChecker = new CommentsImportChecker(dbContext);
     }
 
     [HttpGet]
@@ -38,21 +43,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
 
         var items = (List<CommentDetailsDto>)((ObjectResult)returnedItems!).Value!;
 
-        items.ForEach(c =>
-        {
-            c.AvatarUrl = GravatarHelper.EmailToGravatarUrl(c.AuthorEmail);
-        });
-
-        if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            return Ok(items);
-        }
-        else
-        {
-            var commentsForAnonymous = mapper.Map<List<AnonymousCommentDetailsDto>>(items);
-
-            return Ok(commentsForAnonymous);
-        }
+        return commentableControllerExtension.ReturnComments(items, this);
     }
 
     // GET api/{entity}s/5
@@ -92,17 +83,74 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     {
         var comment = mapper.Map<Comment>(value);
 
-        await commentService.SaveAsync(comment);
+        if (!CheckCommentableEntity(comment.CommentableType, comment.CommentableId))
+        {
+            return UnprocessableEntity(value);
+        }
 
-        await dbContext.SaveChangesAsync();
-
-        var returnedValue = mapper.Map<CommentDetailsDto>(comment);
-
-        return CreatedAtAction(nameof(GetOne), new { id = comment.Id }, returnedValue);
+        return await commentableControllerExtension.PostComment(comment, this);
     }
 
     protected override async Task SaveRangeAsync(List<Comment> comments)
     {
         await commentService.SaveRangeAsync(comments);
+    }
+
+    private static Dictionary<string, Type> FindCommentableTypes()
+    {
+        var assembly = Assembly.GetAssembly(typeof(ICommentable));
+        return assembly!.GetTypes().Where(t => t.IsClass && typeof(ICommentable).IsAssignableFrom(t)).ToDictionary(t => ICommentable.GetCommentableType(t), t => t);
+    }
+
+    private bool CheckCommentableEntity(string ct, int id)
+    {
+        var contains = CommentableTypes.TryGetValue(ct, out var type);
+        if (contains)
+        {
+            var data = dbContext.SetDbEntity(type!);
+            return data.Any(d => ((BaseEntityWithId)d).Id == id);
+        }
+
+        return false;
+    }
+
+    private sealed class CommentsImportChecker : AdditionalImportChecker
+    {
+        private readonly PgDbContext dbContext;
+        private readonly Dictionary<string, List<int>> existedCommentableIds = new Dictionary<string, List<int>>();
+        private List<CommentImportDto> importRecords = new List<CommentImportDto>();
+
+        public CommentsImportChecker(PgDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
+        public override void SetData(List<CommentImportDto> importRecords)
+        {
+            this.importRecords = importRecords;
+            foreach (var commentableType in CommentableTypes)
+            {
+                var importRecordIds = importRecords.Where(r => r.CommentableType == commentableType.Key).Select(ir => ir.CommentableId).ToHashSet();
+                var existedIds = dbContext.SetDbEntity(commentableType.Value).Where(c => importRecordIds.Contains(((BaseEntityWithId)c).Id)).Select(c => ((BaseEntityWithId)c).Id).ToList();
+                existedCommentableIds.Add(commentableType.Key, existedIds);
+            }
+        }
+
+        public override bool Check(int index, ImportResult result)
+        {
+            if (index < 0 || index > importRecords.Count)
+            {
+                return false;
+            }
+
+            var importRecord = importRecords[index];
+            if (!existedCommentableIds[importRecord.CommentableType].Contains(importRecord.CommentableId))
+            {
+                result.AddError(index, $"Commentable entity of type {importRecord.CommentableType} with id = {importRecord.CommentableId} cannot be found");
+                return false;
+            }
+
+            return true;
+        }
     }
 }

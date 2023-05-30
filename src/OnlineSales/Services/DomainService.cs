@@ -8,6 +8,7 @@ using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -75,11 +76,11 @@ namespace OnlineSales.Services
 
             if (domain.Id > 0)
             {
-                pgDbContext.Domains!.Update(domain);
+               pgDbContext.Domains!.Update(domain);
             }
             else
             {
-                await pgDbContext.Domains!.AddAsync(domain);
+               await pgDbContext.Domains!.AddAsync(domain);
             }
         }
 
@@ -179,21 +180,26 @@ namespace OnlineSales.Services
 
             foreach (var url in urls)
             {
-                var responce = await GetRequest(url);
+                var response = await GetRequest(url);
 
-                if (responce != null && responce.RequestMessage != null && responce.RequestMessage.RequestUri != null)
+                if (response != null && response.RequestMessage != null && response.RequestMessage.RequestUri != null && response.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     domain.HttpCheck = true;
 
-                    domain.Url = responce.RequestMessage.RequestUri.ToString();
-                    var web = new HtmlWeb();
-                    var htmlDoc = await web.LoadFromWebAsync(domain.Url, Encoding.UTF8);
-
-                    if (htmlDoc != null)
+                    domain.Url = response.RequestMessage.RequestUri.ToString();
+                    var htmlDoc = new HtmlDocument();
+                    var contentStream = await response.Content.ReadAsStreamAsync();
+                    if (contentStream.Length == 0)
                     {
-                        domain.Title = GetTitle(htmlDoc);
-                        domain.Description = GetDescription(htmlDoc);
+                        continue;
                     }
+
+                    htmlDoc.Load(contentStream);
+
+                    var title = GetTitle(htmlDoc);
+                    var description = GetDescription(htmlDoc);
+                    domain.Title = title != null ? HtmlEntity.DeEntitize(title) : null;
+                    domain.Description = description != null ? HtmlEntity.DeEntitize(description) : null;
 
                     break;
                 }

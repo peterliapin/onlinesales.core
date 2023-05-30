@@ -9,7 +9,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
-public class CommentCreateDto
+public class CommentCreateBaseDto
 {
     private string authorEmail = string.Empty;
 
@@ -33,9 +33,6 @@ public class CommentCreateDto
     [Required]
     public string Body { get; set; } = string.Empty;
 
-    [Required]
-    public int ContentId { get; set; }
-
     public int? ContactId { get; set; }
 
     public int? ParentId { get; set; }    
@@ -44,6 +41,15 @@ public class CommentCreateDto
     public string? Source { get; set; }
 
     public string Language { get; set; } = string.Empty;
+}
+
+public class CommentCreateDto : CommentCreateBaseDto
+{
+    [Required]
+    public int CommentableId { get; set; }
+
+    [Required]
+    public string CommentableType { get; set; } = string.Empty;
 }
 
 public class CommentUpdateDto
@@ -66,7 +72,9 @@ public class AnonymousCommentDetailsDto
 
     public DateTime? UpdatedAt { get; set; }
 
-    public int ContentId { get; set; }
+    public int CommentableId { get; set; }
+
+    public string CommentableType { get; set; } = string.Empty;
 
     public string AvatarUrl { get; set; } = string.Empty;
 
@@ -128,11 +136,10 @@ public class CommentImportDto : BaseImportDto
     public string? Language { get; set; }
 
     [Optional]
-    public int? ContentId { get; set; }
+    public int CommentableId { get; set; }
 
     [Optional]
-    [SurrogateForeignKey(typeof(Content), "Slug", "ContentId")]
-    public string? ContentSlug { get; set; }
+    public string CommentableType { get; set; } = string.Empty;
 
     [Optional]
     public int? ParentId { get; set; }

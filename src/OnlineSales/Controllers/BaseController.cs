@@ -27,17 +27,15 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
-        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-        private readonly ElasticClient elasticClient;
+        private readonly QueryProviderFactory<T> queryProviderFactory;
 
-        public BaseController(PgDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)
+        public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<T> queryProviderFactory)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
-            this.apiSettingsConfig = apiSettingsConfig;
 
             dbSet = dbContext.Set<T>();
-            elasticClient = esDbContext.ElasticClient;
+            this.queryProviderFactory = queryProviderFactory;
         }
 
         // GET api/{entity}s/5
@@ -114,9 +112,7 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Get([FromQuery] string? query)
         {
-            var limit = apiSettingsConfig.Value.MaxListSize;
-
-            var qp = BuildQueryProvider(limit);
+            var qp = queryProviderFactory.BuildQueryProvider();
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -126,13 +122,13 @@ namespace OnlineSales.Controllers
             return Ok(res);
         }
 
-        [HttpGet("export")]
+        [HttpGet("export")]        
         [Produces("text/csv", "text/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public virtual async Task<ActionResult<List<TD>>> Export([FromQuery] string? query)
         {
-            var qp = BuildQueryProvider(int.MaxValue);
+            var qp = queryProviderFactory.BuildQueryProvider(int.MaxValue);
 
             var result = await qp.GetResult();
             Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
@@ -187,23 +183,6 @@ namespace OnlineSales.Controllers
                         }
                     }
                 }
-            }
-        }
-
-        private IQueryProvider<T> BuildQueryProvider(int maxLimitSize)
-        {
-            var queryCommands = QueryParser.Parse(Request.QueryString.HasValue ? HttpUtility.UrlDecode(Request.QueryString.ToString()) : string.Empty);
-
-            var queryData = new QueryData<T>(queryCommands, maxLimitSize, dbContext);
-
-            if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryData.SearchData.Count > 0)
-            {
-                var indexPrefix = this.dbContext.Configuration.GetSection("Elastic:IndexPrefix").Get<string>();
-                return new MixedQueryProvider<T>(queryData, this.dbSet!.AsQueryable<T>(), this.elasticClient, indexPrefix!);
-            }
-            else
-            {
-                return new DBQueryProvider<T>(this.dbSet!.AsQueryable<T>(), queryData);
             }
         }
 
