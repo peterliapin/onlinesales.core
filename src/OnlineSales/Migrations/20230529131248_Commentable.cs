@@ -29,6 +29,8 @@ namespace OnlineSales.Migrations
                 type: "text",
                 nullable: false,
                 defaultValue: "");
+
+            migrationBuilder.Sql("UPDATE comment SET commentable_type = 'Content'");
         }
 
         /// <inheritdoc />
