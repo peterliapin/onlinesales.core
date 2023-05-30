@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using EntityFrameworkCore.EncryptColumn.Attribute;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 

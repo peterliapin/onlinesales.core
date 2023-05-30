@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Security.Cryptography.X509Certificates;
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Search;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using OnlineSales.Configuration;
@@ -59,6 +57,7 @@ namespace OnlineSales.EmailSync.Tasks
         public override async Task<bool> Execute(TaskExecutionLog currentJob)
         {
             var accounts = dbContext.ImapAccounts!.ToList();
+
             foreach (var imapAccount in accounts)
             {
                 try
@@ -77,7 +76,7 @@ namespace OnlineSales.EmailSync.Tasks
 
                             foreach (var folder in folders)
                             {
-                                await GetEmailLogsFromFolder(imapAccountFolders, folder, imapAccount);
+                                await GetEmailLogsFromFolder(imapAccount.UserName, imapAccountFolders, folder, imapAccount);
                             }
 
                             await DeleteUnexistedFolders(imapAccountFolders, folders);
@@ -100,10 +99,12 @@ namespace OnlineSales.EmailSync.Tasks
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task GetEmailLogsFromFolder(List<ImapAccountFolder> imapAccountFolders, IMailFolder folder, ImapAccount imapAccount)
+        private async Task GetEmailLogsFromFolder(string userName, List<ImapAccountFolder> imapAccountFolders, IMailFolder folder, ImapAccount imapAccount)
         {
             await folder.OpenAsync(FolderAccess.ReadOnly);
+
             var dbFolder = imapAccountFolders.FirstOrDefault(f => f.FullName == folder.FullName);
+
             if (dbFolder == null)
             {
                 dbFolder = new ImapAccountFolder
@@ -111,6 +112,7 @@ namespace OnlineSales.EmailSync.Tasks
                     FullName = folder.FullName,
                     LastUid = 0,
                     ImapAccountId = imapAccount.Id,
+                    Source = userName,
                 };
 
                 await dbContext.ImapAccountFolders!.AddAsync(dbFolder);
@@ -127,14 +129,14 @@ namespace OnlineSales.EmailSync.Tasks
             while (position < uids.Count)
             {
                 var batch = uids.Skip(position).Take(batchSize);
-                await GetEmailLogs(dbFolder, folder, batch);
+                await GetEmailLogs(userName, dbFolder, folder, batch);
                 position += batchSize;
             }
         }
 
-        private async Task GetEmailLogs(ImapAccountFolder dbFolder, IMailFolder folder, IEnumerable<UniqueId> uids)
+        private async Task GetEmailLogs(string userName, ImapAccountFolder dbFolder, IMailFolder folder, IEnumerable<UniqueId> uids)
         {
-            var resultData = new List<EmailLog>();
+            var emailLogs = new List<EmailLog>();
             var resultLastId = dbFolder.LastUid;
 
             var messages = new List<MimeMessage>();
@@ -163,29 +165,31 @@ namespace OnlineSales.EmailSync.Tasks
 
                         if (!IsInternalEmails(fromEmail, recipients))
                         {
-                            var log = new EmailLog()
+                            var emailLog = new EmailLog()
                             {
                                 Subject = message.Subject == null ? string.Empty : message.Subject,
                                 Recipient = string.Join(";", recipients),
                                 FromEmail = message.From.Mailboxes.Single().Address,
-                                Body = message.TextBody,
+                                Body = message.HtmlBody,
                                 MessageId = message.MessageId,
+                                Source = userName + " - " + folder.FullName,
+                                Status = EmailStatus.Sent,                                
                             };
 
-                            if (log.Body == null)
+                            if (string.IsNullOrEmpty(emailLog.Body))
                             {
-                                log.Body = message.HtmlBody;
+                                emailLog.Body = message.TextBody;
                             }
 
-                            resultData.Add(log);
+                            emailLogs.Add(emailLog);
                         }
                     }                    
                 }
             }
 
-            if (resultData.Count > 0)
+            if (emailLogs.Count > 0)
             {
-                await dbContext.EmailLogs!.AddRangeAsync(resultData);
+                await dbContext.EmailLogs!.AddRangeAsync(emailLogs);
             }
 
             dbFolder.LastUid = resultLastId;
