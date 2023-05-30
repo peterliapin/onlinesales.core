@@ -14,7 +14,7 @@ namespace OnlineSales.Entities;
 [SupportsElastic]
 [SupportsChangeLog]
 [Index(nameof(Name), IsUnique = true)]
-public class Account : BaseEntity
+public class Account : BaseEntity, ICommentable
 {
     [Searchable]
     public string Name { get; set; } = string.Empty;
@@ -59,4 +59,9 @@ public class Account : BaseEntity
 
     [JsonIgnore]
     public virtual ICollection<Domain>? Domains { get; set; }
+
+    public static string GetCommentableType()
+    {
+        return "Account";
+    }
 }

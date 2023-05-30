@@ -6,7 +6,8 @@
     "authorName": "Author Name 2",
     "authorEmail": "contact2@test2.net",
     "body": "TestContent2",
-    "contentId": 1,
+    "commentableId": 1,
+    "commentableType": "Content",
     "parentId": null,
     "key": "key1"
   },
@@ -17,7 +18,8 @@
     "authorName": "Author Name 1",
     "authorEmail": "contact1@test1.net",
     "body": "TestContent1",
-    "contentId": 1,
+    "commentableId": 1,
+    "commentableType": "Content",
     "parentId": null,
     "key": "key2"
   }

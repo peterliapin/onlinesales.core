@@ -1,3 +1,3 @@
-id,createdAt,updatedAt,authorName,authorEmail,body,contentId,contentSlug,parentId,createdByIp,updatedByIp,createdByUserAgent,updatedByUserAgent,key
-1,2023-01-15T17:32:02.074179Z,,Author Name 2,contact2@test2.net,TestContent2,,test-slug101,,192.168.1.2,,TestAgent2,,key1
+id,createdAt,updatedAt,authorName,authorEmail,body,commentableId,commentableType,parentId,createdByIp,updatedByIp,createdByUserAgent,updatedByUserAgent,key
+1,2023-01-15T17:32:02.074179Z,,Author Name 2,contact2@test2.net,TestContent2,2,Content,,192.168.1.2,,TestAgent2,,key1
 

@@ -15,7 +15,7 @@ namespace OnlineSales.Entities;
 [SupportsElastic]
 [SupportsChangeLog]
 [Index(nameof(Slug), IsUnique = true)]
-public class Content : BaseEntity
+public class Content : BaseEntity, ICommentable
 {
     [Searchable]
     [Required]
@@ -53,6 +53,8 @@ public class Content : BaseEntity
 
     public bool AllowComments { get; set; } = false;
 
-    [JsonIgnore]
-    public virtual ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+    public static string GetCommentableType()
+    {
+        return "Content";
+    }
 }

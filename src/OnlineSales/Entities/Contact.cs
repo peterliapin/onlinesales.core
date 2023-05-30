@@ -16,7 +16,7 @@ namespace OnlineSales.Entities;
 [SupportsElastic]
 [SupportsChangeLog]
 [Index(nameof(Email), IsUnique = true)]
-public class Contact : BaseEntity
+public class Contact : BaseEntity, ICommentable
 {
     private string email = string.Empty;
 
@@ -116,4 +116,9 @@ public class Contact : BaseEntity
 
     [JsonIgnore]
     public virtual ICollection<Order>? Orders { get; set; }
+
+    public static string GetCommentableType()
+    {
+        return "Contact";
+    }
 }

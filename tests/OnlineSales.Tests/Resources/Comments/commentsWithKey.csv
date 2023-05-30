@@ -1,5 +1,5 @@
-﻿key,body,authorName,authorEmail,contentSlug
-Key1,Body 1,Peter,contact1@test1.net,test-slug100
-Key2,Body 2,Peter,contact1@test1.net,test-slug100
-Key3,Body 3,Peter,contact1@test1.net,test-slug100
-Key4,Body 4,Peter,contact1@test1.net,test-slug100
+﻿key,body,authorName,authorEmail,commentableId,commentableType
+Key1,Body 1,Peter,contact1@test1.net,1,Content
+Key2,Body 2,Peter,contact1@test1.net,1,Content
+Key3,Body 3,Peter,contact1@test1.net,1,Content
+Key4,Body 4,Peter,contact1@test1.net,1,Content

@@ -122,7 +122,7 @@ namespace OnlineSales.Controllers
             return Ok(res);
         }
 
-        [HttpGet("export")]
+        [HttpGet("export")]        
         [Produces("text/csv", "text/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
