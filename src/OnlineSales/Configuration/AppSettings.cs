@@ -123,3 +123,8 @@ public class EmailConfig : BaseServiceConfig
 {
     public bool UseSsl { get; set; }
 }
+
+public class DefaultLanguage
+{
+    public string Language { get; set; } = "ru-RU";
+}
