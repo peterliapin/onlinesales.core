@@ -9,7 +9,6 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace OnlineSales.Services
 {
@@ -17,14 +16,14 @@ namespace OnlineSales.Services
     {
         private readonly IEmailWithLogService emailWithLogService;
         private readonly PgDbContext pgDbContext;
-        private readonly DefaultLanguage config;
+        private readonly ApiSettingsConfig config;
 
         public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext pgDbContext, IConfiguration configuration)
         {
             this.emailWithLogService = emailWithLogService;
             this.pgDbContext = pgDbContext;
 
-            var settings = configuration.GetSection("DefaultLanguage").Get<DefaultLanguage>();
+            var settings = configuration.GetSection("ApiSettings").Get<ApiSettingsConfig>();
 
             if (settings != null)
             {
@@ -32,7 +31,7 @@ namespace OnlineSales.Services
             }
             else
             {
-                throw new MissingConfigurationException($"The specified configuration section for the type {typeof(DefaultLanguage).FullName} could not be found in the settings file.");
+                throw new MissingConfigurationException($"The specified configuration section for the type {typeof(ApiSettingsConfig).FullName} could not be found in the settings file.");
             }
         }
 
@@ -78,14 +77,10 @@ namespace OnlineSales.Services
             language ??= defLang;
 
             // try find template by provided language
-            // with 2 and 5 language codes
-            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && (x.Language.Length == 2 ? x.Language == language.Substring(0, 2) : x.Language == language));
+            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
 
             // if template not found, try find with default language
-            if (template == null)
-            {
-                template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && (x.Language.Length == 2 ? x.Language == defLang.Substring(0, 2) : x.Language == defLang));
-            }
+            template ??= await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == defLang);
 
             return template;
         }

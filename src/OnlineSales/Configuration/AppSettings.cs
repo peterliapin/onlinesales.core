@@ -71,6 +71,8 @@ public class ApiSettingsConfig
     public int MaxListSize { get; set; }
 
     public string MaxImportSize { get; set; } = string.Empty;
+
+    public string Language { get; set; } = "ru-RU";
 }
 
 public class GeolocationApiConfig
@@ -122,9 +124,4 @@ public class CorsConfig
 public class EmailConfig : BaseServiceConfig
 {
     public bool UseSsl { get; set; }
-}
-
-public class DefaultLanguage
-{
-    public string Language { get; set; } = "ru-RU";
 }
