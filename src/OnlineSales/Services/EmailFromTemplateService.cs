@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -16,23 +17,13 @@ namespace OnlineSales.Services
     {
         private readonly IEmailWithLogService emailWithLogService;
         private readonly PgDbContext pgDbContext;
-        private readonly ApiSettingsConfig config;
+        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
 
-        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext pgDbContext, IConfiguration configuration)
+        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext pgDbContext, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {
             this.emailWithLogService = emailWithLogService;
             this.pgDbContext = pgDbContext;
-
-            var settings = configuration.GetSection("ApiSettings").Get<ApiSettingsConfig>();
-
-            if (settings != null)
-            {
-                config = settings;
-            }
-            else
-            {
-                throw new MissingConfigurationException($"The specified configuration section for the type {typeof(ApiSettingsConfig).FullName} could not be found in the settings file.");
-            }
+            this.apiSettingsConfig = apiSettingsConfig;
         }
 
         public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments)
@@ -71,7 +62,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate?> GetEmailTemplateByLanguage(string name, string? language)
         {
-            string defLang = config.Language!;
+            string defLang = apiSettingsConfig.Value.DefaultLanguage!;
 
             // set default if not set
             language ??= defLang;

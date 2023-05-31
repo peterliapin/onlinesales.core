@@ -72,7 +72,7 @@ public class ApiSettingsConfig
 
     public string MaxImportSize { get; set; } = string.Empty;
 
-    public string Language { get; set; } = "ru-RU";
+    public string DefaultLanguage { get; set; } = "en-US";
 }
 
 public class GeolocationApiConfig
