@@ -1,4 +1,4 @@
-﻿// <copyright file="EmailTemplatesController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DealPipelinesController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -14,9 +14,9 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailTemplateDetailsDto>
+public class DealPipelinesController : BaseController<DealPipeline, DealPipelineCreateDto, DealPipelineUpdateDto, DealPipelineDetailsDto>
 {
-    public EmailTemplatesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<EmailTemplate> queryProviderFactory)
+    public DealPipelinesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<DealPipeline> queryProviderFactory)
     : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
     }

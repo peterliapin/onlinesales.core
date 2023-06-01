@@ -81,6 +81,30 @@ public class AutoMapperProfiles : Profile
         CreateMap<ContactImportDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
+        CreateMap<DealPipelineCreateDto, DealPipeline>().ReverseMap();
+        CreateMap<DealPipelineUpdateDto, DealPipeline>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DealPipeline, DealPipelineUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DealPipeline, DealPipelineDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<DealCreateDto, Deal>().ReverseMap();
+        CreateMap<DealUpdateDto, Deal>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Deal, DealUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Deal, DealDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<PipelineStageCreateDto, PipelineStage>().ReverseMap();
+        CreateMap<PipelineStageUpdateDto, PipelineStage>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<PipelineStage, PipelineStageUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<PipelineStage, PipelineStageDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();
         CreateMap<EmailGroupUpdateDto, EmailGroup>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));

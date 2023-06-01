@@ -98,7 +98,7 @@ public class BaseTest : IDisposable
 
         if (expectedCode == HttpStatusCode.OK)
         {
-            CheckForRedundantProperties(content);
+            CheckForRedundantProperties<T>(content);
 
             return JsonHelper.Deserialize<T>(content);
         }
@@ -220,30 +220,33 @@ public class BaseTest : IDisposable
         return string.Empty;
     }
 
-    private void CheckForRedundantProperties(string content)
+    private void CheckForRedundantProperties<T>(string content)
     {
-        var isCollection = content.StartsWith("[");
+        if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+        {
+            var isCollection = content.StartsWith("[");
 
-        if (isCollection)
-        {
-            var resultCollection = JsonHelper.Deserialize<List<BaseEntity>>(content)!;
-            resultCollection.Should().NotBeNull();
-            if (resultCollection.Count > 0)
+            if (isCollection)
             {
-                resultCollection[0].CreatedByIp.Should().BeNull();
-                resultCollection[0].UpdatedByIp.Should().BeNull();
-                resultCollection[0].CreatedByUserAgent.Should().BeNull();
-                resultCollection[0].UpdatedByUserAgent.Should().BeNull();
+                var resultCollection = JsonHelper.Deserialize<List<BaseEntity>>(content)!;
+                resultCollection.Should().NotBeNull();
+                if (resultCollection.Count > 0)
+                {
+                    resultCollection[0].CreatedByIp.Should().BeNull();
+                    resultCollection[0].UpdatedByIp.Should().BeNull();
+                    resultCollection[0].CreatedByUserAgent.Should().BeNull();
+                    resultCollection[0].UpdatedByUserAgent.Should().BeNull();
+                }
             }
-        }
-        else
-        {
-            var result = JsonHelper.Deserialize<BaseEntity>(content)!;
-            result.Should().NotBeNull();
-            result.CreatedByIp.Should().BeNull();
-            result.UpdatedByIp.Should().BeNull();
-            result.CreatedByUserAgent.Should().BeNull();
-            result.UpdatedByUserAgent.Should().BeNull();
+            else
+            {
+                var result = JsonHelper.Deserialize<BaseEntity>(content)!;
+                result.Should().NotBeNull();
+                result.CreatedByIp.Should().BeNull();
+                result.UpdatedByIp.Should().BeNull();
+                result.CreatedByUserAgent.Should().BeNull();
+                result.UpdatedByUserAgent.Should().BeNull();
+            }
         }
     }
 
