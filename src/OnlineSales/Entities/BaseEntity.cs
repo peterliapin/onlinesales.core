@@ -20,7 +20,7 @@ public class BaseEntity : BaseCreateByEntity, IHasUpdatedAt, IHasUpdatedBy
 public class BaseCreateByEntity : BaseEntityWithId, IHasCreatedAt, IHasCreatedBy
 {
     [Required]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public string? CreatedByIp { get; set; }
 
@@ -30,7 +30,7 @@ public class BaseCreateByEntity : BaseEntityWithId, IHasCreatedAt, IHasCreatedBy
 public class BaseEntityWithIdAndDates : BaseEntityWithId, IHasCreatedAt, IHasUpdatedAt
 {
     [Required]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
 }
