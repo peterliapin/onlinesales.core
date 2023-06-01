@@ -3,6 +3,8 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -15,11 +17,13 @@ namespace OnlineSales.Services
     {
         private readonly IEmailWithLogService emailWithLogService;
         private readonly PgDbContext pgDbContext;
+        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
 
-        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext pgDbContext)
+        public EmailFromTemplateService(IEmailWithLogService emailWithLogService, PgDbContext pgDbContext, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {
             this.emailWithLogService = emailWithLogService;
             this.pgDbContext = pgDbContext;
+            this.apiSettingsConfig = apiSettingsConfig;
         }
 
         public async Task SendAsync(string templateName, string language, string[] recipients, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments)
@@ -42,7 +46,7 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
-            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
+            var template = await GetEmailTemplateByLanguage(name, language);
 
             return template!;
         }
@@ -51,9 +55,25 @@ namespace OnlineSales.Services
         {
             var contactLanguage = pgDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId)!.Language;
 
-            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == contactLanguage);
+            var template = await GetEmailTemplateByLanguage(name, contactLanguage);
 
             return template!;
+        }
+
+        private async Task<EmailTemplate?> GetEmailTemplateByLanguage(string name, string? language)
+        {
+            string defLang = apiSettingsConfig.Value.DefaultLanguage!;
+
+            // set default if not set
+            language ??= defLang;
+
+            // try find template by provided language
+            var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
+
+            // if template not found, try find with default language
+            template ??= await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == defLang);
+
+            return template;
         }
 
         private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string>? templateArguments)
