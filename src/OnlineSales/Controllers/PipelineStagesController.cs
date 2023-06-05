@@ -14,9 +14,9 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class PipelineStagesController : BaseController<PipelineStage, PipelineStageCreateDto, PipelineStageUpdateDto, PipelineStageDetailsDto>
+public class PipelineStagesController : BaseController<DealPipelineStage, PipelineStageCreateDto, PipelineStageUpdateDto, PipelineStageDetailsDto>
 {
-    public PipelineStagesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<PipelineStage> queryProviderFactory)
+    public PipelineStagesController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<DealPipelineStage> queryProviderFactory)
     : base(dbContext, mapper, esDbContext, queryProviderFactory)
     {
     }

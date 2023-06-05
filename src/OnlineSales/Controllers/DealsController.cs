@@ -10,7 +10,6 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
@@ -35,6 +34,8 @@ public class DealsController : BaseController<Deal, DealCreateDto, DealUpdateDto
     {
         var newValue = mapper.Map<Deal>(value);
 
+        newValue.Contacts = GetContactsFromContactIds(value.ContactIds);
+
         await dealService.SaveAsync(newValue);
         
         await dbContext.SaveChangesAsync();
@@ -42,5 +43,41 @@ public class DealsController : BaseController<Deal, DealCreateDto, DealUpdateDto
         var resultsToClient = mapper.Map<DealDetailsDto>(newValue);
 
         return CreatedAtAction(nameof(GetOne), new { id = newValue.Id }, resultsToClient);
+    }
+
+    public override async Task<ActionResult<DealDetailsDto>> Patch(int id, [FromBody] DealUpdateDto value)
+    {
+        var existingEntity = await FindOrThrowNotFound(id);
+
+        mapper.Map(value, existingEntity);
+
+        if (value.ContactIds != null)
+        {
+            dbContext.Entry(existingEntity).Collection(x => x.Contacts!).Load();
+            existingEntity.Contacts = GetContactsFromContactIds(value.ContactIds);
+        }
+
+        await dealService.SaveAsync(existingEntity);
+
+        await dbContext.SaveChangesAsync();
+
+        var resultsToClient = mapper.Map<DealDetailsDto>(existingEntity);
+
+        return Ok(resultsToClient);
+    }
+
+    private List<Contact> GetContactsFromContactIds(HashSet<int> contactIds)
+    {
+        var contacts = dbContext.Contacts!.Where(c => contactIds.Contains(c.Id)).ToList();
+        if (contacts.Count == contactIds.Count)
+        {
+            return contacts;
+        }
+        else
+        {
+            var existingContactIds = contacts.Select(c => c.Id);
+            var nonExistingContactId = contactIds.First(cid => !existingContactIds.Contains(cid));
+            throw new EntityNotFoundException("Contact", nonExistingContactId.ToString());
+        }
     }
 }

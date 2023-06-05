@@ -4,30 +4,32 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
-using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
 
-public class DealCreateDto
+public class DealBaseDto
 {
-    [Required]
-    public int AccountId { get; set; }
+    public int? AccountId { get; set; }
 
     [Required]
     public int DealPipelineId { get; set; }
 
-    public decimal DealMoney { get; set; }
+    public decimal DealValue { get; set; }
 
     [Required]
-    public string Currency { get; set; } = string.Empty;
+    public string DealCurrency { get; set; } = string.Empty;
 
-    [Required]
-    public DateTime ExpectedCloseDate { get; set; }
+    public DateTime? ExpectedCloseDate { get; set; }
 
     public DateTime? ActualCloseDate { get; set; }
 
     [Required]
     public string UserId { get; set; } = string.Empty;
+}
+
+public class DealCreateDto : DealBaseDto
+{
+    public HashSet<int> ContactIds { get; set; } = new HashSet<int>();
 }
 
 public class DealUpdateDto
@@ -36,10 +38,12 @@ public class DealUpdateDto
 
     public int? DealPipelineId { get; set; }
 
-    public decimal? DealMoney { get; set; }
+    public HashSet<int>? ContactIds { get; set; }
+
+    public decimal? DealValue { get; set; }
 
     [MinLength(1)]
-    public string? Currency { get; set; }
+    public string? DealCurrency { get; set; }
 
     public DateTime? ExpectedCloseDate { get; set; }
 
@@ -48,7 +52,7 @@ public class DealUpdateDto
     public string? UserId { get; set; }
 }
 
-public class DealDetailsDto : DealCreateDto
+public class DealDetailsDto : DealBaseDto
 {
     public int Id { get; set; }
 

@@ -6,11 +6,12 @@ namespace OnlineSales.Tests.TestEntities;
 
 public class TestDeal : DealCreateDto
 {
-    public TestDeal(string uid = "", int accountId = 0, int dealPipelineId = 0, string userId = "userId")
+    public TestDeal(string uid, HashSet<int> contactIds, int accountId, int dealPipelineId, string userId)
     {
         AccountId = accountId;
+        ContactIds = contactIds;
         DealPipelineId = dealPipelineId;
-        Currency = "USD";
+        DealCurrency = "USD";
         ExpectedCloseDate = new DateTime(2023, 6, 1).ToUniversalTime();
         UserId = userId;
     }

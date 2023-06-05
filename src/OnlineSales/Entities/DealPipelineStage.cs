@@ -1,4 +1,4 @@
-﻿// <copyright file="PipelineStage.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DealPipelineStage.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -9,10 +9,10 @@ using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
-[Table("pipeline_stage")]
+[Table("deal_pipeline_stage")]
 [SupportsElastic]
 [SupportsChangeLog]
-public class PipelineStage : BaseEntity
+public class DealPipelineStage : BaseEntity
 {
     [Required]
     [Searchable]

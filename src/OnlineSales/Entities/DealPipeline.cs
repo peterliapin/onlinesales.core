@@ -19,5 +19,5 @@ public class DealPipeline : BaseEntity
     public string Name { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public virtual ICollection<PipelineStage>? PipelineStages { get; set; }
+    public virtual ICollection<DealPipelineStage>? PipelineStages { get; set; }
 }

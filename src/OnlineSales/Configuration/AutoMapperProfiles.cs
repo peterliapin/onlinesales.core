@@ -97,12 +97,12 @@ public class AutoMapperProfiles : Profile
         CreateMap<Deal, DealDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
-        CreateMap<PipelineStageCreateDto, PipelineStage>().ReverseMap();
-        CreateMap<PipelineStageUpdateDto, PipelineStage>()
+        CreateMap<PipelineStageCreateDto, DealPipelineStage>().ReverseMap();
+        CreateMap<PipelineStageUpdateDto, DealPipelineStage>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<PipelineStage, PipelineStageUpdateDto>()
+        CreateMap<DealPipelineStage, PipelineStageUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        CreateMap<PipelineStage, PipelineStageDetailsDto>()
+        CreateMap<DealPipelineStage, PipelineStageDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();

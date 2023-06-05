@@ -812,7 +812,7 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AccountId")
+                    b.Property<int?>("AccountId")
                         .HasColumnType("integer")
                         .HasColumnName("account_id");
 
@@ -832,20 +832,20 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<string>("Currency")
+                    b.Property<string>("DealCurrency")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("currency");
-
-                    b.Property<decimal>("DealMoney")
-                        .HasColumnType("numeric")
-                        .HasColumnName("deal_money");
+                        .HasColumnName("deal_currency");
 
                     b.Property<int>("DealPipelineId")
                         .HasColumnType("integer")
                         .HasColumnName("deal_pipeline_id");
 
-                    b.Property<DateTime>("ExpectedCloseDate")
+                    b.Property<decimal>("DealValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deal_value");
+
+                    b.Property<DateTime?>("ExpectedCloseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expected_close_date");
 
@@ -938,6 +938,65 @@ namespace OnlineSales.Migrations
                         .HasName("pk_deal_pipeline");
 
                     b.ToTable("deal_pipeline", (string)null);
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.DealPipelineStage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int>("DealPipelineId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deal_pipeline_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer")
+                        .HasColumnName("order");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_deal_pipeline_stage");
+
+                    b.HasIndex("DealPipelineId")
+                        .HasDatabaseName("ix_deal_pipeline_stage_deal_pipeline_id");
+
+                    b.ToTable("deal_pipeline_stage", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
@@ -1710,65 +1769,6 @@ namespace OnlineSales.Migrations
                     b.ToTable("order_item", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.PipelineStage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int>("DealPipelineId")
-                        .HasColumnType("integer")
-                        .HasColumnName("deal_pipeline_id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer")
-                        .HasColumnName("order");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text")
-                        .HasColumnName("source");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_pipeline_stage");
-
-                    b.HasIndex("DealPipelineId")
-                        .HasDatabaseName("ix_pipeline_stage_deal_pipeline_id");
-
-                    b.ToTable("pipeline_stage", (string)null);
-                });
-
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
                 {
                     b.Property<int>("Id")
@@ -2100,8 +2100,6 @@ namespace OnlineSales.Migrations
                     b.HasOne("OnlineSales.Entities.Account", "Account")
                         .WithMany("Deals")
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_deal_account_account_id");
 
                     b.HasOne("OnlineSales.Entities.DealPipeline", "DealPipeline")
@@ -2111,12 +2109,12 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_deal_deal_pipeline_deal_pipeline_id");
 
-                    b.HasOne("OnlineSales.Entities.PipelineStage", "PipelineStage")
+                    b.HasOne("OnlineSales.Entities.DealPipelineStage", "PipelineStage")
                         .WithMany()
                         .HasForeignKey("PipelineStageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_deal_pipeline_stage_pipeline_stage_id");
+                        .HasConstraintName("fk_deal_deal_pipeline_stage_pipeline_stage_id");
 
                     b.HasOne("OnlineSales.Entities.User", "CreatedBy")
                         .WithMany()
@@ -2132,6 +2130,18 @@ namespace OnlineSales.Migrations
                     b.Navigation("DealPipeline");
 
                     b.Navigation("PipelineStage");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.DealPipelineStage", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.DealPipeline", "DealPipeline")
+                        .WithMany("PipelineStages")
+                        .HasForeignKey("DealPipelineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_deal_pipeline_stage_deal_pipeline_deal_pipeline_id");
+
+                    b.Navigation("DealPipeline");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
@@ -2203,18 +2213,6 @@ namespace OnlineSales.Migrations
                         .HasConstraintName("fk_order_item_order_order_id");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.PipelineStage", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.DealPipeline", "DealPipeline")
-                        .WithMany("PipelineStages")
-                        .HasForeignKey("DealPipelineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_pipeline_stage_deal_pipeline_deal_pipeline_id");
-
-                    b.Navigation("DealPipeline");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>

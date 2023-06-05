@@ -14,7 +14,7 @@ namespace OnlineSales.Entities;
 [SupportsChangeLog]
 public class Deal : BaseEntity
 {
-    public int AccountId { get; set; }
+    public int? AccountId { get; set; }
 
     [JsonIgnore]
     [ForeignKey("AccountId")]
@@ -30,22 +30,21 @@ public class Deal : BaseEntity
 
     [JsonIgnore]
     [ForeignKey("PipelineStageId")]
-    public virtual PipelineStage? PipelineStage { get; set; }
+    public virtual DealPipelineStage? PipelineStage { get; set; }
 
     [JsonIgnore]
     public virtual ICollection<Contact>? Contacts { get; set; }
 
-    public decimal DealMoney { get; set; }
+    public decimal DealValue { get; set; }
 
     /// <summary>
     /// Gets or sets the currency ISO code for the payment - ISO 4217. Example: "USD".
     /// </summary>
     [Searchable]
     [Required]
-    public string Currency { get; set; } = string.Empty;
+    public string DealCurrency { get; set; } = string.Empty;
 
-    [Required]
-    public DateTime ExpectedCloseDate { get; set; }
+    public DateTime? ExpectedCloseDate { get; set; }
 
     public DateTime? ActualCloseDate { get; set; }
 

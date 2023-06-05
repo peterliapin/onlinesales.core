@@ -33,7 +33,7 @@ namespace OnlineSales.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "pipeline_stage",
+                name: "deal_pipeline_stage",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -51,9 +51,9 @@ namespace OnlineSales.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_pipeline_stage", x => x.id);
+                    table.PrimaryKey("pk_deal_pipeline_stage", x => x.id);
                     table.ForeignKey(
-                        name: "fk_pipeline_stage_deal_pipeline_deal_pipeline_id",
+                        name: "fk_deal_pipeline_stage_deal_pipeline_deal_pipeline_id",
                         column: x => x.deal_pipeline_id,
                         principalTable: "deal_pipeline",
                         principalColumn: "id",
@@ -66,12 +66,12 @@ namespace OnlineSales.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    account_id = table.Column<int>(type: "integer", nullable: false),
+                    account_id = table.Column<int>(type: "integer", nullable: true),
                     deal_pipeline_id = table.Column<int>(type: "integer", nullable: false),
                     pipeline_stage_id = table.Column<int>(type: "integer", nullable: false),
-                    deal_money = table.Column<decimal>(type: "numeric", nullable: false),
-                    currency = table.Column<string>(type: "text", nullable: false),
-                    expected_close_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    deal_value = table.Column<decimal>(type: "numeric", nullable: false),
+                    deal_currency = table.Column<string>(type: "text", nullable: false),
+                    expected_close_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     actual_close_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     user_id = table.Column<string>(type: "text", nullable: false),
                     source = table.Column<string>(type: "text", nullable: true),
@@ -89,8 +89,7 @@ namespace OnlineSales.Migrations
                         name: "fk_deal_account_account_id",
                         column: x => x.account_id,
                         principalTable: "account",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                     table.ForeignKey(
                         name: "fk_deal_deal_pipeline_deal_pipeline_id",
                         column: x => x.deal_pipeline_id,
@@ -98,9 +97,9 @@ namespace OnlineSales.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_deal_pipeline_stage_pipeline_stage_id",
+                        name: "fk_deal_deal_pipeline_stage_pipeline_stage_id",
                         column: x => x.pipeline_stage_id,
-                        principalTable: "pipeline_stage",
+                        principalTable: "deal_pipeline_stage",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -161,8 +160,8 @@ namespace OnlineSales.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_pipeline_stage_deal_pipeline_id",
-                table: "pipeline_stage",
+                name: "ix_deal_pipeline_stage_deal_pipeline_id",
+                table: "deal_pipeline_stage",
                 column: "deal_pipeline_id");
         }
 
@@ -176,7 +175,7 @@ namespace OnlineSales.Migrations
                 name: "deal");
 
             migrationBuilder.DropTable(
-                name: "pipeline_stage");
+                name: "deal_pipeline_stage");
 
             migrationBuilder.DropTable(
                 name: "deal_pipeline");
