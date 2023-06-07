@@ -1,4 +1,4 @@
-﻿// <copyright file="PipelineStageDto.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DealPipelineStageDto.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -8,7 +8,7 @@ using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
 
-public class PipelineStageCreateDto
+public class DealPipelineStageCreateDto
 {
     [Required]
     public string Name { get; set; } = string.Empty;
@@ -20,7 +20,7 @@ public class PipelineStageCreateDto
     public int Order { get; set; }
 }
 
-public class PipelineStageUpdateDto
+public class DealPipelineStageUpdateDto
 {
     [MinLength(1)]
     public string? Name { get; set; }
@@ -30,7 +30,7 @@ public class PipelineStageUpdateDto
     public int? Order { get; set; }
 }
 
-public class PipelineStageDetailsDto : PipelineStageCreateDto
+public class DealPipelineStageDetailsDto : DealPipelineStageCreateDto
 {
     public int Id { get; set; }
 

@@ -4,12 +4,14 @@
 
 namespace OnlineSales.Tests.TestEntities;
 
-public class TestPipelineStage : PipelineStageCreateDto
+public class TestPipelineStage : DealPipelineStageCreateDto
 {
+    private static int nextOrder = 1;
+
     public TestPipelineStage(string uid = "", int pipelineId = 0)
     {
         this.Name = $"TestPipelineStage{uid}";
-        this.Order = 0;
+        this.Order = nextOrder++;
         this.DealPipelineId = pipelineId;
     }
 }

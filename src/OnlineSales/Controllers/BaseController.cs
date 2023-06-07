@@ -75,13 +75,7 @@ namespace OnlineSales.Controllers
         public virtual async Task<ActionResult<TD>> Patch(int id, [FromBody] TU value)
         {
             var existingEntity = await FindOrThrowNotFound(id);
-
-            mapper.Map(value, existingEntity);
-            await dbContext.SaveChangesAsync();
-
-            var resultsToClient = mapper.Map<TD>(existingEntity);
-
-            return Ok(resultsToClient);
+            return await Patch(existingEntity, value);
         }
 
         // DELETE api/{entity}s/5
@@ -146,7 +140,17 @@ namespace OnlineSales.Controllers
 
             return existingEntity;
         }
-                
+
+        protected async Task<ActionResult<TD>> Patch(T existingEntity, TU value)
+        {
+            mapper.Map(value, existingEntity);
+            await dbContext.SaveChangesAsync();
+
+            var resultsToClient = mapper.Map<TD>(existingEntity);
+
+            return Ok(resultsToClient);
+        }
+
         private static void RemoveSecondLevelObjects(IList<TD> data)
         {
             var refs = SecondLevelDTOs.Data;

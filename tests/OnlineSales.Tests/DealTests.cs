@@ -132,7 +132,7 @@ public class DealTests : SimpleTableTests<Deal, TestDeal, DealUpdateDto, IDealSe
         var stages = new TestPipelineStage[] { new TestPipelineStage(string.Empty, pipeline!.Id) { Order = 0 }, new TestPipelineStage(string.Empty, pipeline!.Id) { Order = 1 } };
         foreach (var stage in stages)
         {
-            var stageUrl = await PostTest("/api/pipeline-stages", stage, HttpStatusCode.Created, authToken);
+            var stageUrl = await PostTest("/api/deal-pipeline-stages", stage, HttpStatusCode.Created, authToken);
             var newStage = await GetTest<DealPipelineStage>(stageUrl);
             newStage.Should().NotBeNull();
         }

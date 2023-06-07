@@ -100,7 +100,7 @@ public class PgDbContext : IdentityDbContext<User>
 
     public virtual DbSet<DealPipeline>? DealPipelines { get; set; }
 
-    public virtual DbSet<DealPipelineStage>? PipelineStages { get; set; }
+    public virtual DbSet<DealPipelineStage>? DealPipelineStages { get; set; }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {

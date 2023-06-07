@@ -67,7 +67,7 @@ public class DealDetailsDto : DealBaseDto
     public DealPipelineDetailsDto? DealPipeline { get; set; }
 
     [Ignore]
-    public PipelineStageDetailsDto? PipelineStage { get; set; }
+    public DealPipelineStageDetailsDto? PipelineStage { get; set; }
 
     [Ignore]
     public List<ContactDetailsDto>? Contacts { get; set; }

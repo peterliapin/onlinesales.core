@@ -29,5 +29,5 @@ public class DealPipelineDetailsDto : DealPipelineCreateDto
     public DateTime? UpdatedAt { get; set; }
 
     [Ignore]
-    public List<PipelineStageDetailsDto>? PipelineStages { get; set; }
+    public List<DealPipelineStageDetailsDto>? PipelineStages { get; set; }
 }

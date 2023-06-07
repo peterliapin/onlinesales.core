@@ -29,11 +29,7 @@ public class DealService : IDealService
         {
             if (item.PipelineStageId <= 0)
             {
-                var stageId = GetStartStageId(item.DealPipelineId);
-                if (stageId != null)
-                {
-                    item.PipelineStageId = stageId.Value;
-                }
+                item.PipelineStageId = GetStartStageId(item.DealPipelineId);
             }
 
             await pgDbContext.Deals!.AddAsync(item);
@@ -43,7 +39,7 @@ public class DealService : IDealService
     public async Task SaveRangeAsync(List<Deal> items)
     {
         var pipelineIds = items.Select(i => i.DealPipelineId).ToHashSet();
-        var stages = await pgDbContext.PipelineStages!.Where(s => pipelineIds.Contains(s.DealPipelineId)).ToListAsync();
+        var stages = await pgDbContext.DealPipelineStages!.Where(s => pipelineIds.Contains(s.DealPipelineId)).ToListAsync();
         foreach (var item in items)
         {
             if (item.PipelineStageId <= 0)
@@ -52,6 +48,10 @@ public class DealService : IDealService
                 if (stage != null)
                 {
                     item.PipelineStageId = stage.Id;
+                }
+                else
+                {
+                    throw new DealPipelineStageException($"Pipeline with id = {item.DealPipelineId} doesn't have any stages");
                 }
             }
         }
@@ -71,12 +71,17 @@ public class DealService : IDealService
         }
     }
 
-    private int? GetStartStageId(int pipelineId)
+    private int GetStartStageId(int pipelineId)
     {
         var pipeline = pgDbContext.DealPipelines!.Include(p => p.PipelineStages).Where(p => p.Id == pipelineId).FirstOrDefault();
-        if (pipeline == null || pipeline.PipelineStages == null || pipeline.PipelineStages!.Count == 0)
+        if (pipeline == null)
         {
-            return null;
+            throw new DealPipelineStageException($"Cannot find pipeline with id = {pipelineId}");
+        }
+
+        if (pipeline.PipelineStages == null || pipeline.PipelineStages!.Count == 0)
+        {
+            throw new DealPipelineStageException($"Pipeline with id = {pipelineId} doesn't have any stages");
         }
 
         var res = pipeline.PipelineStages!.AsEnumerable().MinBy(s => s.Order)!.Id;
