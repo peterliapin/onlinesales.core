@@ -26,11 +26,11 @@ public class Deal : BaseEntity
     [ForeignKey("DealPipelineId")]
     public virtual DealPipeline? DealPipeline { get; set; }
 
-    public int PipelineStageId { get; set; }
+    public int DealPipelineStageId { get; set; }
 
     [JsonIgnore]
-    [ForeignKey("PipelineStageId")]
-    public virtual DealPipelineStage? PipelineStage { get; set; }
+    [ForeignKey("DealPipelineStageId")]
+    public virtual DealPipelineStage? DealPipelineStage { get; set; }
 
     [JsonIgnore]
     public virtual ICollection<Contact>? Contacts { get; set; }

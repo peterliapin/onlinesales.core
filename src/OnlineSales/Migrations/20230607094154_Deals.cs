@@ -68,7 +68,7 @@ namespace OnlineSales.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     account_id = table.Column<int>(type: "integer", nullable: true),
                     deal_pipeline_id = table.Column<int>(type: "integer", nullable: false),
-                    pipeline_stage_id = table.Column<int>(type: "integer", nullable: false),
+                    deal_pipeline_stage_id = table.Column<int>(type: "integer", nullable: false),
                     deal_value = table.Column<decimal>(type: "numeric", nullable: false),
                     deal_currency = table.Column<string>(type: "text", nullable: false),
                     expected_close_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -97,8 +97,8 @@ namespace OnlineSales.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_deal_deal_pipeline_stage_pipeline_stage_id",
-                        column: x => x.pipeline_stage_id,
+                        name: "fk_deal_deal_pipeline_stage_deal_pipeline_stage_id",
+                        column: x => x.deal_pipeline_stage_id,
                         principalTable: "deal_pipeline_stage",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -150,9 +150,9 @@ namespace OnlineSales.Migrations
                 column: "deal_pipeline_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_deal_pipeline_stage_id",
+                name: "ix_deal_deal_pipeline_stage_id",
                 table: "deal",
-                column: "pipeline_stage_id");
+                column: "deal_pipeline_stage_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_deal_user_id",

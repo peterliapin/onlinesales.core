@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -23,13 +22,18 @@ public class DealService : IDealService
     {
         if (item.Id > 0)
         {
+            CheckPipelineAndStage(item.DealPipelineId, item.DealPipelineStageId);
             pgDbContext.Deals!.Update(item);
         }
         else
         {
-            if (item.PipelineStageId <= 0)
+            if (item.DealPipelineStageId <= 0)
             {
-                item.PipelineStageId = GetStartStageId(item.DealPipelineId);
+                item.DealPipelineStageId = GetStartStageId(item.DealPipelineId);
+            }
+            else
+            {
+                CheckPipelineAndStage(item.DealPipelineId, item.DealPipelineStageId);
             }
 
             await pgDbContext.Deals!.AddAsync(item);
@@ -42,16 +46,23 @@ public class DealService : IDealService
         var stages = await pgDbContext.DealPipelineStages!.Where(s => pipelineIds.Contains(s.DealPipelineId)).ToListAsync();
         foreach (var item in items)
         {
-            if (item.PipelineStageId <= 0)
+            if (item.DealPipelineStageId <= 0)
             {
                 var stage = stages.Where(s => s.DealPipelineId == item.DealPipelineId).MinBy(s => s.Order);
                 if (stage != null)
                 {
-                    item.PipelineStageId = stage.Id;
+                    item.DealPipelineStageId = stage.Id;
                 }
                 else
                 {
                     throw new DealPipelineStageException($"Pipeline with id = {item.DealPipelineId} doesn't have any stages");
+                }
+            }
+            else
+            {
+                if (!stages.Any(s => s.Id == item.DealPipelineStageId && s.DealPipelineId == item.DealPipelineId))
+                {
+                    throw new DealPipelineStageException($"Pipeline with id = {item.DealPipelineId} doesn't contain stage with Id = {item.DealPipelineStageId}");
                 }
             }
         }
@@ -68,6 +79,14 @@ public class DealService : IDealService
             {
                 await pgDbContext.AddRangeAsync(deal.ToList());
             }
+        }
+    }
+
+    private void CheckPipelineAndStage(int pipelineId, int stageId)
+    {
+        if (!pgDbContext.DealPipelineStages!.Any(s => s.Id == stageId && s.DealPipelineId == pipelineId))
+        {
+            throw new DealPipelineStageException($"Pipeline with id = {pipelineId} doesn't contain stage with Id = {stageId}");
         }
     }
 

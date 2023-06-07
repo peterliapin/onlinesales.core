@@ -14,7 +14,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    [Migration("20230605114749_Deals")]
+    [Migration("20230607094154_Deals")]
     partial class Deals
     {
         /// <inheritdoc />
@@ -844,6 +844,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("deal_pipeline_id");
 
+                    b.Property<int>("DealPipelineStageId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deal_pipeline_stage_id");
+
                     b.Property<decimal>("DealValue")
                         .HasColumnType("numeric")
                         .HasColumnName("deal_value");
@@ -851,10 +855,6 @@ namespace OnlineSales.Migrations
                     b.Property<DateTime?>("ExpectedCloseDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expected_close_date");
-
-                    b.Property<int>("PipelineStageId")
-                        .HasColumnType("integer")
-                        .HasColumnName("pipeline_stage_id");
 
                     b.Property<string>("Source")
                         .HasColumnType("text")
@@ -886,8 +886,8 @@ namespace OnlineSales.Migrations
                     b.HasIndex("DealPipelineId")
                         .HasDatabaseName("ix_deal_deal_pipeline_id");
 
-                    b.HasIndex("PipelineStageId")
-                        .HasDatabaseName("ix_deal_pipeline_stage_id");
+                    b.HasIndex("DealPipelineStageId")
+                        .HasDatabaseName("ix_deal_deal_pipeline_stage_id");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_deal_user_id");
@@ -2112,12 +2112,12 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_deal_deal_pipeline_deal_pipeline_id");
 
-                    b.HasOne("OnlineSales.Entities.DealPipelineStage", "PipelineStage")
+                    b.HasOne("OnlineSales.Entities.DealPipelineStage", "DealPipelineStage")
                         .WithMany()
-                        .HasForeignKey("PipelineStageId")
+                        .HasForeignKey("DealPipelineStageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_deal_deal_pipeline_stage_pipeline_stage_id");
+                        .HasConstraintName("fk_deal_deal_pipeline_stage_deal_pipeline_stage_id");
 
                     b.HasOne("OnlineSales.Entities.User", "CreatedBy")
                         .WithMany()
@@ -2132,7 +2132,7 @@ namespace OnlineSales.Migrations
 
                     b.Navigation("DealPipeline");
 
-                    b.Navigation("PipelineStage");
+                    b.Navigation("DealPipelineStage");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.DealPipelineStage", b =>
