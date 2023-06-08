@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using OnlineSales.DataAnnotations;
 
@@ -35,14 +36,13 @@ public class Deal : BaseEntity
     [JsonIgnore]
     public virtual ICollection<Contact>? Contacts { get; set; }
 
-    public decimal DealValue { get; set; }
+    public decimal? DealValue { get; set; }
 
     /// <summary>
     /// Gets or sets the currency ISO code for the payment - ISO 4217. Example: "USD".
-    /// </summary>
+    /// </summary>    
     [Searchable]
-    [Required]
-    public string DealCurrency { get; set; } = string.Empty;
+    public string? DealCurrency { get; set; }
 
     public DateTime? ExpectedCloseDate { get; set; }
 

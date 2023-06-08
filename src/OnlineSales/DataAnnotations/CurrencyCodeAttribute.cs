@@ -43,30 +43,32 @@ public class CurrencyCodeAttribute : ValidationAttribute
     {
         var currencyCode = value as string;
 
-        if (currencyCode == null)
+        if (currencyCode != null)
         {
-            return new ValidationResult("Invalid Currency Code");
-        }
-
-        var symbol = CultureInfo.GetCultures(CultureTypes.AllCultures).Where(c => !c.IsNeutralCulture).Select(culture =>
-        {
-            try
+            var symbol = CultureInfo.GetCultures(CultureTypes.AllCultures).Where(c => !c.IsNeutralCulture).Select(culture =>
             {
-                return new RegionInfo(culture.Name);
-            }
-            catch
-            {
-                return null;
-            }
-        }).Where(ri => ri != null && ri.ISOCurrencySymbol == currencyCode.ToUpper()).Select(ri => ri!.CurrencySymbol).FirstOrDefault();
+                try
+                {
+                    return new RegionInfo(culture.Name);
+                }
+                catch
+                {
+                    return null;
+                }
+            }).Where(ri => ri != null && ri.ISOCurrencySymbol == currencyCode.ToUpper()).Select(ri => ri!.CurrencySymbol).FirstOrDefault();
 
-        if (symbol != null)
-        {
-            return ValidationResult.Success!;
+            if (symbol != null)
+            {
+                return ValidationResult.Success!;
+            }
+            else
+            {
+                return new ValidationResult("Invalid Currency Code");
+            }
         }
         else
         {
-            return new ValidationResult("Invalid Currency Code");
+            return ValidationResult.Success!;
         }
     }
 }

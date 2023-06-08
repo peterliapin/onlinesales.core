@@ -47,7 +47,11 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [Fact]
     public virtual async Task UpdateItemNotFoundTest()
     {
-        await PatchTest(itemsUrlNotFound, new TU(), HttpStatusCode.NotFound);
+        var testCreateItem = await CreateItem();
+
+        var testUpdateItem = UpdateItem(testCreateItem.Item1);
+
+        await PatchTest(itemsUrlNotFound, testUpdateItem!, HttpStatusCode.NotFound);
     }
 
     [Fact]

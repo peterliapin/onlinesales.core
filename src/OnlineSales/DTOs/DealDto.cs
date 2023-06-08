@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
 
@@ -14,10 +15,12 @@ public class DealBaseDto
     [Required]
     public int DealPipelineId { get; set; }
 
-    public decimal DealValue { get; set; }
+    [Optional]
+    public decimal? DealValue { get; set; }
 
-    [Required]
-    public string DealCurrency { get; set; } = string.Empty;
+    [Optional]
+    [CurrencyCode]
+    public string? DealCurrency { get; set; } = string.Empty;
 
     public DateTime? ExpectedCloseDate { get; set; }
 
@@ -43,6 +46,7 @@ public class DealUpdateDto
     public decimal? DealValue { get; set; }
 
     [MinLength(1)]
+    [CurrencyCode]
     public string? DealCurrency { get; set; }
 
     public DateTime? ExpectedCloseDate { get; set; }

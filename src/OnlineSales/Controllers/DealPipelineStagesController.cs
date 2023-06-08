@@ -42,12 +42,9 @@ public class DealPipelineStagesController : BaseController<DealPipelineStage, De
     {
         var existingEntity = await FindOrThrowNotFound(id);
 
-        if ((value.DealPipelineId.HasValue && value.DealPipelineId.Value != existingEntity.DealPipelineId)
-            || (value.Order.HasValue && value.Order.Value != existingEntity.Order))
+        if (value.Order.HasValue && value.Order.Value != existingEntity.Order)
         {
-            var pipelineId = value.DealPipelineId.HasValue ? value.DealPipelineId.Value : existingEntity.DealPipelineId;
-            var stageOrder = value.Order.HasValue ? value.Order.Value : existingEntity.Order;
-            CheckOrderUnique(pipelineId, stageOrder);
+            CheckOrderUnique(existingEntity.DealPipelineId, value.Order.Value);
         }
 
         return await Patch(existingEntity, value);

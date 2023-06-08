@@ -14,7 +14,7 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    [Migration("20230607094154_Deals")]
+    [Migration("20230608081240_Deals")]
     partial class Deals
     {
         /// <inheritdoc />
@@ -836,7 +836,6 @@ namespace OnlineSales.Migrations
                         .HasColumnName("created_by_user_agent");
 
                     b.Property<string>("DealCurrency")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("deal_currency");
 
@@ -848,7 +847,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("deal_pipeline_stage_id");
 
-                    b.Property<decimal>("DealValue")
+                    b.Property<decimal?>("DealValue")
                         .HasColumnType("numeric")
                         .HasColumnName("deal_value");
 

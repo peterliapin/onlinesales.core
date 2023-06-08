@@ -16,8 +16,8 @@ public class DealPipelineCreateDto
 
 public class DealPipelineUpdateDto
 {
-    [MinLength(1)]
-    public string? Name { get; set; }
+    [Required]
+    public string Name { get; set; } = string.Empty;
 }
 
 public class DealPipelineDetailsDto : DealPipelineCreateDto

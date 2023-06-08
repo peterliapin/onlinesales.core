@@ -25,8 +25,6 @@ public class DealPipelineStageUpdateDto
     [MinLength(1)]
     public string? Name { get; set; }
 
-    public int? DealPipelineId { get; set; }
-
     public int? Order { get; set; }
 }
 
