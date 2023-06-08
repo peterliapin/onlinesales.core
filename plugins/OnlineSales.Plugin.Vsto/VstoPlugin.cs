@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Data;
@@ -50,6 +51,15 @@ public class VstoPlugin : IPlugin, IPluginApplication, IDisposable
             RequestPath = Configuration.Vsto.RequestPath,
             FileProvider = new VstoFileProvider(VstoLocalPath, httpContextHelper, services!),
             ServeUnknownFileTypes = true,
+            OnPrepareResponse = (context) =>
+            {
+                var headers = context.Context.Response.GetTypedHeaders();
+                headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                {
+                    MaxAge = TimeSpan.FromMinutes(30),
+                    Public = true,
+                };
+            },
         });
 
         localLinksWatcher = new VstoLocalLinksWatcher(VstoLocalPath, Configuration.Vsto.RequestPath, services!);
