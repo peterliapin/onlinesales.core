@@ -71,6 +71,7 @@ public class Program
         builder.Services.AddTransient(typeof(QueryProviderFactory<>), typeof(QueryProviderFactory<>));
         builder.Services.AddSingleton<IEmailService, EmailService>();
         builder.Services.AddTransient<CommentableControllerExtension, CommentableControllerExtension>();
+        builder.Services.AddScoped<IDealService, DealService>();
 
         ConfigureCacheProfiles(builder);
 

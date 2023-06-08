@@ -117,6 +117,9 @@ public class Contact : BaseEntity, ICommentable
     [JsonIgnore]
     public virtual ICollection<Order>? Orders { get; set; }
 
+    [JsonIgnore]
+    public virtual ICollection<Deal>? Deals { get; set; }
+
     public static string GetCommentableType()
     {
         return "Contact";
