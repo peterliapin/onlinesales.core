@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Configuration;
 using OnlineSales.Plugin.Vsto.Data;
@@ -54,8 +55,9 @@ public class VstoPlugin : IPlugin, IPluginApplication, IDisposable
             OnPrepareResponse = (context) =>
             {
                 var headers = context.Context.Response.GetTypedHeaders();
-                headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                headers.CacheControl = new CacheControlHeaderValue
                 {
+                    Public = true,
                     NoCache = true,
                     NoStore = true,
                 };
