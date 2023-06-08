@@ -56,8 +56,8 @@ public class VstoPlugin : IPlugin, IPluginApplication, IDisposable
                 var headers = context.Context.Response.GetTypedHeaders();
                 headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
                 {
-                    MaxAge = TimeSpan.FromMinutes(30),
-                    Public = true,
+                    NoCache = true,
+                    NoStore = true,
                 };
             },
         });
