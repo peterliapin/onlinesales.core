@@ -19,7 +19,7 @@ namespace OnlineSales.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class LinksController : BaseController<Link, LinkCreateDto, LinkUpdateDto, LinkDetailsDto>
+public class LinksController : BaseControllerWithImport<Link, LinkCreateDto, LinkUpdateDto, LinkDetailsDto, LinkImportDto>
 {
     public LinksController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<Link> queryProviderFactory)
         : base(dbContext, mapper, esDbContext, queryProviderFactory)

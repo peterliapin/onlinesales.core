@@ -126,6 +126,8 @@ public class AutoMapperProfiles : Profile
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Link, LinkDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<LinkImportDto, Link>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<Domain, DomainCreateDto>().ReverseMap();
         CreateMap<Domain, DomainUpdateDto>()
