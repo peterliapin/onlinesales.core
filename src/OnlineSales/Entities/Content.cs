@@ -47,8 +47,10 @@ public class Content : BaseEntity, ICommentable
     [Required]
     public string Language { get; set; } = string.Empty;
 
+    [Searchable]
     public string Category { get; set; } = string.Empty;
 
+    [Searchable]
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     public bool AllowComments { get; set; } = false;

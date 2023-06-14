@@ -14,21 +14,26 @@ namespace OnlineSales.Entities
     public class EmailTemplate : BaseEntity
     {
         [Required]
+        [Searchable]
         public string Name { get; set; } = string.Empty;
 
         [Required]
+        [Searchable]
         public string Subject { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the HTML template body of the email.
         /// </summary>
         [Required]
+        [Searchable]
         public string BodyTemplate { get; set; } = string.Empty;
 
         [Required]
+        [Searchable]
         public string FromEmail { get; set; } = string.Empty;
 
         [Required]
+        [Searchable]
         public string FromName { get; set; } = string.Empty;
 
         [Required]
@@ -39,6 +44,7 @@ namespace OnlineSales.Entities
         public virtual EmailGroup? EmailGroup { get; set; }
 
         [Required]
+        [Searchable]
         public string Language { get; set; } = string.Empty;
 
         /// <summary>

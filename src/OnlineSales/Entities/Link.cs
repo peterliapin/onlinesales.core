@@ -15,11 +15,14 @@ namespace OnlineSales.Entities;
 public class Link : BaseEntity
 {
     [Required]
+    [Searchable]
     public string Uid { get; set; } = string.Empty;
 
     [Required]
+    [Searchable]
     public string Destination { get; set; } = string.Empty;
 
     [Required]
+    [Searchable]
     public string Name { get; set; } = string.Empty;
 }
