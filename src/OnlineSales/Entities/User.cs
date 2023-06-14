@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Identity;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 public class User : IdentityUser
@@ -13,5 +14,6 @@ public class User : IdentityUser
 
     public DateTime? LastTimeLoggedIn { get; set; }
 
+    [Searchable]
     public string DisplayName { get; set; } = string.Empty;
 }

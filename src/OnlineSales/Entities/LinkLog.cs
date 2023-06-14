@@ -5,6 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
 
@@ -19,6 +20,7 @@ public class LinkLog : BaseCreateByEntity
     public virtual Link? Link { get; set; }
 
     [Required]
+    [Searchable]
     public string Destination { get; set; } = string.Empty;
 
     public string? Referrer { get; set; }
