@@ -21,9 +21,9 @@ namespace OnlineSales.Controllers;
 public class ActivityLogController : ControllerBase
 {    
     private readonly IMapper mapper;
-    private readonly QueryProviderFactory<ActivityLog> queryProviderFactory;
+    private readonly ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory;
 
-    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, QueryProviderFactory<ActivityLog> queryProviderFactory)
+    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory)
     {        
         this.mapper = mapper;
         this.queryProviderFactory = queryProviderFactory;
