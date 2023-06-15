@@ -17,29 +17,29 @@ namespace OnlineSales.Infrastructure
     public class QueryProviderFactory<T>
         where T : BaseEntityWithId, new()
     {
-        private readonly DbSet<T> dbSet;
-        private readonly PgDbContext dbContext;
-        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-        private readonly ElasticClient elasticClient;
-        private readonly IHttpContextHelper httpContextHelper;
+        protected readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
+        protected readonly IHttpContextHelper httpContextHelper;
+        protected readonly PgDbContext dbContext;
+        protected readonly ElasticClient elasticClient;        
 
         public QueryProviderFactory(PgDbContext dbContext, EsDbContext esDbContext, IOptions<ApiSettingsConfig> apiSettingsConfig, IHttpContextHelper? httpContextHelper)
         {
             this.dbContext = dbContext;
             this.apiSettingsConfig = apiSettingsConfig;
 
-            dbSet = dbContext.Set<T>();
             elasticClient = esDbContext.ElasticClient;
 
             ArgumentNullException.ThrowIfNull(httpContextHelper);
             this.httpContextHelper = httpContextHelper;
         }
 
-        public IQueryProvider<T> BuildQueryProvider(int limit = -1)
+        public virtual IQueryProvider<T> BuildQueryProvider(int limit = -1)
         {
             var queryCommands = QueryStringParser.Parse(httpContextHelper.Request.QueryString.HasValue ? HttpUtility.UrlDecode(httpContextHelper.Request.QueryString.ToString()) : string.Empty);
 
             var queryBuilder = new QueryModelBuilder<T>(queryCommands, limit == -1 ? apiSettingsConfig.Value.MaxListSize : limit, dbContext);
+
+            var dbSet = dbContext.Set<T>();
 
             if (typeof(T).GetCustomAttributes(typeof(SupportsElasticAttribute), true).Any() && queryBuilder.SearchData.Count > 0)
             {
