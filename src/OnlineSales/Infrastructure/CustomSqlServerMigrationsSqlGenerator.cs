@@ -7,16 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using Microsoft.EntityFrameworkCore.Update;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Operations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Update.Internal;
-using NpgsqlTypes;
-using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
-using OnlineSales.Entities;
-using OnlineSales.Helpers;
 
 namespace OnlineSales.Infrastructure;
 
@@ -26,6 +19,95 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
     public CustomSqlServerMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlSingletonOptions/*, PgDbContext dbContext*/)
         : base(dependencies, npgsqlSingletonOptions)
     {
+    }
+
+    protected override void Generate(UpdateDataOperation operation, IModel? model, MigrationCommandListBuilder builder)
+    {
+        base.Generate(operation, model, builder);
+
+        var type = GetType(GetIEntityType(model!, operation.Table));
+
+        if (type != null && IsChangeLogSupported(type))
+        {
+            if (operation.KeyColumns.Length == 1 && operation.KeyColumns[0] == "id")
+            {
+                var ids = new List<int>();
+                var deletedItemsCount = operation.KeyValues.GetLength(0);
+
+                for (int i = 0; i < deletedItemsCount; ++i)
+                {
+                    ids.Add((int)operation.KeyValues[i, 0]!);
+                }
+
+                var stringIds = string.Join(", ", ids.ConvertAll(i => i.ToString()));
+
+                var deleteFromChangeLog = new SqlOperation()
+                {
+                    Sql = @$"CREATE OR REPLACE FUNCTION pg_temp.key_underscore_to_camel_case(s text)
+                        RETURNS json
+                        IMMUTABLE
+                        LANGUAGE sql
+                        AS $$
+                        SELECT to_json(substring(s, 1, 1) || substring(replace(initcap(replace(s, '_', ' ')), ' ', ''), 2));
+                        $$;
+
+                        CREATE OR REPLACE FUNCTION pg_temp.json_underscore_to_camel_case(data json)
+                        RETURNS json
+                        IMMUTABLE
+                        LANGUAGE sql
+                        AS $$
+                        SELECT ('{{'||string_agg(key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
+                        FROM json_each(data)
+                        $$;
+
+                        update change_log set data = json_underscore_to_camel_case(row_to_json(subquery_table))
+                        from (select * from {operation.Table} where id in ({stringIds})) as subquery_table
+                        where change_log.object_id = subquery_table.id AND change_log.object_type = '{type.Name}'",
+                };
+
+                Generate(deleteFromChangeLog, model, builder);
+            }
+            else
+            {
+                // TODO: update items not just on id key
+                throw new ChangeLogMigrationException("UpdateDataOperation must containt just id key column. Please, use SqlOperation instead for your purposes");
+            }
+        }
+    }
+
+    protected override void Generate(DeleteDataOperation operation, IModel? model, MigrationCommandListBuilder builder)
+    {
+        base.Generate(operation, model, builder);
+
+        var type = GetType(GetIEntityType(model!, operation.Table));
+
+        if (type != null && IsChangeLogSupported(type))
+        {
+            if (operation.KeyColumns.Length == 1 && operation.KeyColumns[0] == "id")
+            {
+                var ids = new List<int>();
+                var updatedItemsCount = operation.KeyValues.GetLength(0);
+
+                for (int i = 0; i < updatedItemsCount; ++i)
+                {
+                    ids.Add((int)operation.KeyValues[i, 0]!);
+                }
+
+                var stringIds = string.Join(", ", ids.ConvertAll(i => i.ToString()));
+
+                var deleteFromChangeLog = new SqlOperation()
+                {
+                    Sql = $@"DELETE from change_log WHERE object_type = '{type.Name}' AND object_id in ({stringIds})",
+                };
+
+                Generate(deleteFromChangeLog, model, builder);
+            }
+            else
+            {
+                // TODO: delete items not just on id key
+                throw new ChangeLogMigrationException("DeleteDataOperation must containt just id key column. Please, use SqlOperation instead for your purposes");
+            }
+        }
     }
 
     protected override void Generate(RenameColumnOperation operation, IModel? model, MigrationCommandListBuilder builder)
