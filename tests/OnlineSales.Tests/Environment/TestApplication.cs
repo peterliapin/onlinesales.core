@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.Tests.TestServices;
 
@@ -35,6 +36,15 @@ public class TestApplication : WebApplicationFactory<Program>
 
             var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
             esDbContext.ElasticClient.Indices.Delete("*");
+        }
+    }
+
+    public ElasticClient GetElasticClient()
+    {
+        using (var scope = Services.CreateScope())
+        {
+            var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
+            return esDbContext.ElasticClient;
         }
     }
 
