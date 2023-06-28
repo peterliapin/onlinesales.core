@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -90,35 +91,31 @@ namespace OnlineSales.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("{scopeUid}/{fileName}")]
+        [Route("{path}/{to?}/{sub?}/{folder?}/{file?}/{name?}")]
         [ResponseCache(CacheProfileName = "ImageResponse")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
+        public async Task<ActionResult> Get([Required] string path, string? to, string? sub, string? folder, string? file, string? name)
         {
+            // join params to one path string
+            path = string.Join(Path.AltDirectorySeparatorChar, path, to, file, sub, folder, name).TrimEnd(Path.AltDirectorySeparatorChar);
+
+            // decode URI if it contains %2F ('/') or another escaped strings
+            path = Uri.UnescapeDataString(path);
+
+            // get scope (directory name) 
+            var scopeUid = (Path.GetDirectoryName(path) ?? string.Empty).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            // get file name
+            var fileName = Path.GetFileName(path);
+
+            // try get entry with same values
             var uploadedImageData = await pgDbContext!.Media!.Where(upi => upi.ScopeUid == scopeUid && upi.Name == fileName).FirstOrDefaultAsync();
 
             return uploadedImageData == null
                 ? throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}")
                 : (ActionResult)File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("{fullPath}")]
-        [ResponseCache(CacheProfileName = "ImageResponse")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get([Required] string fullPath)
-        {
-            fullPath = Uri.UnescapeDataString(fullPath);
-
-            var scopeUid = (Path.GetDirectoryName(fullPath) ?? string.Empty).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            var fileName = Path.GetFileName(fullPath);
-
-            return await Get(scopeUid, fileName);
         }
     }
 }
