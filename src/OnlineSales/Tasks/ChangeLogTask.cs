@@ -59,7 +59,7 @@ public abstract class ChangeLogTask : BaseTask
 
             var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, loggedType);
 
-            if (changeLogBatch is not null && changeLogBatch!.Any())
+            while (changeLogBatch is not null && changeLogBatch!.Any())
             {
                 var taskLog = AddChangeLogTaskLogRecord(taskAndEntity, changeLogBatch!.First().Id, changeLogBatch!.Last().Id);
 
@@ -76,6 +76,8 @@ public abstract class ChangeLogTask : BaseTask
                     UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
                     throw;
                 }
+
+                changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, loggedType);
             }
         }
 
