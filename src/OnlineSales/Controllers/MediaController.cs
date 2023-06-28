@@ -97,14 +97,28 @@ namespace OnlineSales.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
         {
-            var uploadedImageData = await (from upi in pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            var uploadedImageData = await pgDbContext!.Media!.Where(upi => upi.ScopeUid == scopeUid && upi.Name == fileName).FirstOrDefaultAsync();
 
-            if (uploadedImageData == null)
-            {
-                throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}");
-            }
+            return uploadedImageData == null
+                ? throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}")
+                : (ActionResult)File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
+        }
 
-            return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("{fullPath}")]
+        [ResponseCache(CacheProfileName = "ImageResponse")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Get([Required] string fullPath)
+        {
+            fullPath = Uri.UnescapeDataString(fullPath);
+
+            var scopeUid = (Path.GetDirectoryName(fullPath) ?? string.Empty).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var fileName = Path.GetFileName(fullPath);
+
+            return await Get(scopeUid, fileName);
         }
     }
 }
