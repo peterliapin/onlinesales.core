@@ -27,7 +27,6 @@ namespace OnlineSales.Entities
 
         [Required]
         [Searchable]
-
         public string Data { get; set; } = string.Empty;
     }
 }

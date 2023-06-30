@@ -81,6 +81,30 @@ public class AutoMapperProfiles : Profile
         CreateMap<ContactImportDto, Contact>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
+        CreateMap<DealPipelineCreateDto, DealPipeline>().ReverseMap();
+        CreateMap<DealPipelineUpdateDto, DealPipeline>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DealPipeline, DealPipelineUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DealPipeline, DealPipelineDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<DealCreateDto, Deal>().ReverseMap();
+        CreateMap<DealUpdateDto, Deal>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Deal, DealUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<Deal, DealDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<DealPipelineStageCreateDto, DealPipelineStage>().ReverseMap();
+        CreateMap<DealPipelineStageUpdateDto, DealPipelineStage>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DealPipelineStage, DealPipelineStageUpdateDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<DealPipelineStage, DealPipelineStageDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
         CreateMap<EmailGroupCreateDto, EmailGroup>().ReverseMap();
         CreateMap<EmailGroupUpdateDto, EmailGroup>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
@@ -101,6 +125,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<LinkUpdateDto, Link>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
         CreateMap<Link, LinkDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<LinkImportDto, Link>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
 
         CreateMap<Domain, DomainCreateDto>().ReverseMap();

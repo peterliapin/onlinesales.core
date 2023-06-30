@@ -12,8 +12,10 @@ namespace OnlineSales.Entities
     public class Media : BaseEntity
     {
         [Required]
+        [Searchable]
         public string ScopeUid { get; set; } = string.Empty;
 
+        [Searchable]
         public string Name { get; set; } = string.Empty;
 
         public long Size { get; set; } = 0;

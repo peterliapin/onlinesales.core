@@ -37,27 +37,38 @@ public sealed class VstoFileProvider : IFileProvider
 
     public IFileInfo GetFileInfo(string subpath)
     {
+        // Fix Unix CaseSensetive mode ---------------------------
+        var validFilesByExtension = Directory.GetFiles(Path.Combine(vstoRootPath, Path.GetDirectoryName(subpath)![1..]), $"*{Path.GetExtension(subpath)}", SearchOption.TopDirectoryOnly).ToArray();
+
+        var fileFromDirectory = validFilesByExtension.FirstOrDefault(f => f.ToLower().EndsWith(subpath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar).ToLower()));
+
+        if (string.IsNullOrEmpty(fileFromDirectory))
+        {
+            return new NotFoundFileInfo(subpath);
+        }
+
+        // -------------------------------------------------------
+
+        fileFromDirectory = fileFromDirectory.Substring(fileFromDirectory.Length - subpath.Length);
+        subpath = fileFromDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
         var result = new VstoFileInfo(
             vstoRootPath,
-            subpath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
+            subpath);
 
         if (ParseContext(out var fileType, out var ipAddress, out var version, out var subfolder, subpath))
         {
-            using (var serviceProvider = services!.BuildServiceProvider())
-            {
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var db = PluginDbContextBase.GetPluginDbContext<VstoDbContext>(scope);
+            using var serviceProvider = services!.BuildServiceProvider();
+            using var scope = serviceProvider.CreateScope();
+            var db = PluginDbContextBase.GetPluginDbContext<VstoDbContext>(scope);
 
-                    if (fileType == VstoFileType.Exe)
-                    {
-                        HandleExeRequest(ipAddress, version, subfolder, db!);
-                    }
-                    else if (fileType == VstoFileType.Vsto)
-                    {
-                        HandleManifestRequest(ipAddress, subpath, db!, ref result);
-                    }
-                }
+            if (fileType == VstoFileType.Exe)
+            {
+                HandleExeRequest(ipAddress, version, subfolder, db!);
+            }
+            else if (fileType == VstoFileType.Vsto)
+            {
+                HandleManifestRequest(ipAddress, subpath, db!, ref result);
             }
         }
 
@@ -92,15 +103,7 @@ public sealed class VstoFileProvider : IFileProvider
             var request = httpContextHelper.Request;
 
             string[] verQuery = { "version", "ver", "v" };
-            foreach (var verVariant in verQuery)
-            {
-                StringValues? readVer = request.Query[verVariant];
-                if (!string.IsNullOrEmpty(readVer))
-                {
-                    version = readVer!;
-                    break;
-                }
-            }
+            version = request.Query.FirstOrDefault(q => verQuery.Contains(q.Key)).Value.ToString() ?? string.Empty;
         }
 
         return fileType != VstoFileType.None;
@@ -139,7 +142,7 @@ public sealed class VstoFileProvider : IFileProvider
         if (stat != null)
         {
             var manifestPath = stat.Subfolder;
-            if (!string.IsNullOrEmpty(stat.Version) && stat.ExpireDateTime > DateTime.Now)
+            if (!string.IsNullOrEmpty(stat.Version) && stat.ExpireDateTime > DateTime.UtcNow)
             {
                 manifestPath = Path.Join(
                     manifestPath,
@@ -147,8 +150,15 @@ public sealed class VstoFileProvider : IFileProvider
                         "Application Files",
                         Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')));
             }
+            else
+            {
+                // If version was empty or time expired 
+                // just set raw sub path
+                // to avoid duplicate like '/pro/en/pro/en/XLTools.vsto' as before.
+                //                          ^^^^^^^
+                manifestPath = subpath;
+            }
 
-            manifestPath = Path.Join(manifestPath, subpath);
             result = new VstoFileInfo(vstoRootPath, manifestPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar));
         }
     }

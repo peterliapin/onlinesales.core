@@ -7,11 +7,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Migrations;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
@@ -95,6 +96,12 @@ public class PgDbContext : IdentityDbContext<User>
     public virtual DbSet<Account>? Accounts { get; set; }
 
     public virtual DbSet<Unsubscribe>? Unsubscribes { get; set; }
+
+    public virtual DbSet<Deal>? Deals { get; set; }
+
+    public virtual DbSet<DealPipeline>? DealPipelines { get; set; }
+
+    public virtual DbSet<DealPipelineStage>? DealPipelineStages { get; set; }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
@@ -197,7 +204,8 @@ public class PgDbContext : IdentityDbContext<User>
             optionsBuilder.UseNpgsql(
                 postgresConfig.ConnectionString,
                 b => b.MigrationsHistoryTable("_migrations"))
-            .UseSnakeCaseNamingConvention();
+            .UseSnakeCaseNamingConvention()
+            .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
 
             Console.WriteLine("PgDbContext successfully configured");
         }

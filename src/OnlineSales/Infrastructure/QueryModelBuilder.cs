@@ -120,7 +120,7 @@ namespace OnlineSales.Infrastructure
                 {
                     if (c.Props.ElementAtOrDefault(0) == null || string.IsNullOrEmpty(c.Props[0]))
                     {
-                        throw new QueryException(c.Source, "Fa iled to parse. Check syntax.");
+                        throw new QueryException(c.Source, "Failed to parse. Check syntax.");
                     }
                 });
 
@@ -214,12 +214,12 @@ namespace OnlineSales.Infrastructure
 
                 if (res <= 0)
                 {
-                    throw new QueryException(limitCommand.Source, $"Invalid limit size. (Maximum {maxLimitSize}");
+                    throw new QueryException(limitCommand.Source, $"Invalid limit size. (Maximum {maxLimitSize})");
                 }
 
                 if (res > maxLimitSize)
                 {
-                    throw new QueryException(limitCommand.Source, $"Max limit size exceeded. (Maximum {maxLimitSize}");
+                    throw new QueryException(limitCommand.Source, $"Max limit size exceeded. (Maximum {maxLimitSize})");
                 }
             }
 
