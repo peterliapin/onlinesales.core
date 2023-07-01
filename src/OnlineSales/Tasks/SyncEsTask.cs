@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using Elasticsearch.Net;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -16,6 +17,7 @@ namespace OnlineSales.Tasks
 {
     public class SyncEsTask : ChangeLogTask
     {
+        private readonly string changeLogId = "change_log_id";
         private readonly EsDbContext esDbContext;
         private readonly string prefix = string.Empty;
 
@@ -42,14 +44,16 @@ namespace OnlineSales.Tasks
 
                 if (entityState == EntityState.Added || entityState == EntityState.Modified)
                 {
-                    var createItem = new { index = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
+                    var createItem = new { index = new { _index = GetIndexName(item.ObjectType), _id = item.ObjectId } };
+                    var data = JsonHelper.Deserialize<Dictionary<string, object>>(item.Data);
+                    data!.Add(changeLogId, item.Id);
                     bulkPayload.AppendLine(JsonHelper.Serialize(createItem));
-                    bulkPayload.AppendLine(item.Data);
+                    bulkPayload.AppendLine(JsonHelper.Serialize(data));
                 }
 
                 if (entityState == EntityState.Deleted)
                 {
-                    var deleteItem = new { delete = new { _index = prefix + item.ObjectType.ToLower(), _id = item.ObjectId } };
+                    var deleteItem = new { delete = new { _index = GetIndexName(item.ObjectType), _id = item.ObjectId } };
                     bulkPayload.AppendLine(JsonHelper.Serialize(deleteItem));
                 }
             }
@@ -59,12 +63,49 @@ namespace OnlineSales.Tasks
 
             var bulkResponse = esDbContext.ElasticClient.LowLevel.Bulk<StringResponse>(bulkPayload.ToString(), bulkRequestParameters);
 
+            if (!bulkResponse.Success)
+            {
+                throw new ESSyncTaskException("Cannot write bulk data into elastic");
+            }
+
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
+        }
+
+        protected override int GetMinLogId(ChangeLogTaskLog lastProcessedTask, Type loggedType)
+        {
+            var minLogId = 1;
+
+            if (esDbContext.ElasticClient.Indices.Exists(GetIndexName(loggedType.Name)).Exists)
+            {
+                var requestResponse = esDbContext.ElasticClient.Search<Dictionary<string, object>>(s => s.Query(q => new MatchAllQuery { })
+                .Index(GetIndexName(loggedType.Name))
+                .Sort(s => s.Descending(d => d[changeLogId]))
+                .Size(1));
+                if (requestResponse.IsValid && requestResponse.Documents.Count > 0)
+                {
+                    minLogId = (int)((long)requestResponse.Documents.First()[changeLogId] + 1);
+                }
+            }
+
+            return minLogId;
         }
 
         protected override bool IsTypeSupported(Type type)
         {
             return type.GetCustomAttribute<SupportsElasticAttribute>() != null;
+        }
+
+        private string GetIndexName(string loggedTypeName)
+        {
+            return prefix + loggedTypeName.ToLower();
+        }
+
+        public class ESSyncTaskException : Exception
+        {
+            public ESSyncTaskException(string message)
+                : base(message)
+            {
+            }
         }
     }
 }
