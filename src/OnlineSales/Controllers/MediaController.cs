@@ -90,21 +90,23 @@ namespace OnlineSales.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("{scopeUid}/{fileName}")]
+        [Route("{*pathToFile}")]
         [ResponseCache(CacheProfileName = "ImageResponse")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
+        public async Task<ActionResult> Get([Required] string pathToFile)
         {
-            var uploadedImageData = await (from upi in pgDbContext!.Media! where upi.ScopeUid == scopeUid && upi.Name == fileName select upi).FirstOrDefaultAsync();
+            pathToFile = Uri.UnescapeDataString(pathToFile);
 
-            if (uploadedImageData == null)
-            {
-                throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}");
-            }
+            var scope = Path.GetDirectoryName(pathToFile)!.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var fname = Path.GetFileName(pathToFile);
 
-            return File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
+            var uploadedImageData = await pgDbContext!.Media!.Where(upi => upi.ScopeUid == scope && upi.Name == fname).FirstOrDefaultAsync();
+
+            return uploadedImageData == null
+                ? throw new EntityNotFoundException(nameof(Media), $"{scope}/{fname}")
+                : (ActionResult)File(uploadedImageData!.Data, uploadedImageData.MimeType, fname);
         }
     }
 }
