@@ -70,6 +70,8 @@ public class PgDbContext : IdentityDbContext<User>
 
     public virtual DbSet<Media>? Media { get; set; }
 
+    public virtual DbSet<StoredFile>? StoredFiles { get; set; }
+
     public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
 
     public virtual DbSet<EmailSchedule>? EmailSchedules { get; set; }
