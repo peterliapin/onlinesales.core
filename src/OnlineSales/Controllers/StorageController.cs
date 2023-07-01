@@ -15,7 +15,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Controllers
 {
-    // [Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class StorageController : ControllerBase
     {
@@ -27,7 +27,6 @@ namespace OnlineSales.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(MediaDetailsDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
@@ -91,12 +90,6 @@ namespace OnlineSales.Controllers
         public async Task<ActionResult> Get([Required] string pathToFile)
         {
             pathToFile = Uri.UnescapeDataString(pathToFile);
-            var apiRequestPath = "/api/storage/";
-
-            if (pathToFile.StartsWith(apiRequestPath))
-            {
-                pathToFile = pathToFile[(apiRequestPath.Length!)..];
-            }
 
             var scope = Path.GetDirectoryName(pathToFile)!.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             var fname = Path.GetFileName(pathToFile);
