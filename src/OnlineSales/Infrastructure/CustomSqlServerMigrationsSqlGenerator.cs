@@ -25,14 +25,14 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
     {
         base.Generate(operation, model, builder);
 
-        UpdateChangeLog(operation.Table, operation.KeyColumns, operation.KeyValues, EntityState.Modified, model, builder);    
+        UpdateChangeLog(operation.Table, operation.KeyColumns, operation.KeyValues, EntityState.Modified, model, builder);
     }
 
     protected override void Generate(DeleteDataOperation operation, IModel? model, MigrationCommandListBuilder builder)
     {
-        base.Generate(operation, model, builder);
-
         UpdateChangeLog(operation.Table, operation.KeyColumns, operation.KeyValues, EntityState.Deleted, model, builder);
+
+        base.Generate(operation, model, builder);
     }
 
     protected override void Generate(RenameColumnOperation operation, IModel? model, MigrationCommandListBuilder builder)
@@ -60,7 +60,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
 
         if (type != null && IsChangeLogSupported(type) && operation.OldColumn.ClrType != operation.ClrType)
         {
-            throw new ChangeLogMigrationException("Changing colum type isn't supported. Please use SqlOperation for migrations.");
+            throw new ChangeLogMigrationException("Changing column type isn't supported. Please use SqlOperation for migrations.");
         }
     }
 
@@ -178,12 +178,12 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                         IMMUTABLE
                         LANGUAGE sql
                         AS $$
-                        SELECT ('{{'||string_agg(key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
+                        SELECT ('{{'||string_agg(pg_temp.key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
                         FROM json_each(data)
                         $$;
 
                         insert into change_log (object_type, object_id, entity_state, data, created_at)
-                        select '{type.Name}', {operation.Table}.id, {(int)EntityState.Added}, json_underscore_to_camel_case(row_to_json({operation.Table})), now()
+                        select '{type.Name}', {operation.Table}.id, {(int)EntityState.Added}, pg_temp.json_underscore_to_camel_case(row_to_json({operation.Table})), now()
                         from {operation.Table} where {operation.Table}.id in (select id from {operation.Table} order by id desc limit {insertDataCount})",
             };
             Generate(insertChangeLogData, model, builder);
@@ -198,7 +198,22 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
 
     private static Type? GetType(IEntityType etype)
     {
-        return Assembly.GetEntryAssembly()!.GetType(etype.Name);
+        var res = Assembly.GetExecutingAssembly()!.GetType(etype.Name);
+
+        if (res == null)
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
+            {
+                var tt = assembly.GetType(etype.Name);
+                if (tt != null)
+                {
+                    res = tt;
+                    break;
+                }
+            }
+        }
+
+        return res;
     }
 
     private static string ColumnNameToCamelCase(string columnName)
@@ -246,7 +261,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                         IMMUTABLE
                         LANGUAGE sql
                         AS $$
-                        SELECT ('{{'||string_agg(key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
+                        SELECT ('{{'||string_agg(pg_temp.key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
                         FROM json_each(data)
                         $$;
 
