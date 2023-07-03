@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\src\OnlineSales\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
+    <OutputPath>..\..\tests\OnlineSales.Tests\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
@@ -30,8 +30,4 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="robocopy $(OutputPath) ..\..\tests\OnlineSales.Tests\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName) /is&#xD;&#xA;IF %25ERRORLEVEL%25 LEQ 1 exit 0" />
-  </Target>
-
 </Project>
