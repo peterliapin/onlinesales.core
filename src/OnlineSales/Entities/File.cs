@@ -8,7 +8,7 @@ using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
 {
-    [Table("files")]
+    [Table("file")]
     public class File : BaseEntity
     {
         [Required]
