@@ -293,14 +293,14 @@ public class Program
 
     private static void ConfigureFileUpload(WebApplicationBuilder builder)
     {
-        var imageUploadConfig = builder.Configuration.GetSection("File");
+        var fileUploadConfig = builder.Configuration.GetSection("File");
 
-        if (imageUploadConfig == null)
+        if (fileUploadConfig == null)
         {
             throw new MissingConfigurationException("File Upload configuration is mandatory.");
         }
 
-        builder.Services.Configure<FileConfig>(imageUploadConfig);
+        builder.Services.Configure<FileConfig>(fileUploadConfig);
     }
 
     private static void ConfigureEmailVerification(WebApplicationBuilder builder)
