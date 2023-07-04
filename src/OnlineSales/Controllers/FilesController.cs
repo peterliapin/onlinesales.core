@@ -101,11 +101,11 @@ namespace OnlineSales.Controllers
             var scope = Path.GetDirectoryName(pathToFile)!.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             var fname = Path.GetFileName(pathToFile);
 
-            var uploadedImageData = await pgDbContext!.Files!.Where(e => e.ScopeUid == scope && e.Name == fname).FirstOrDefaultAsync();
+            var uploadedFileData = await pgDbContext!.Files!.Where(e => e.ScopeUid == scope && e.Name == fname).FirstOrDefaultAsync();
 
-            return uploadedImageData == null
-                ? throw new EntityNotFoundException(nameof(Media), $"{pathToFile}")
-                : (ActionResult)File(uploadedImageData!.Data, uploadedImageData.MimeType, uploadedImageData.Name);
+            return uploadedFileData == null
+                ? throw new EntityNotFoundException(nameof(Entities.File), $"{pathToFile}")
+                : (ActionResult)File(uploadedFileData!.Data, uploadedFileData.MimeType, uploadedFileData.Name);
         }
     }
 }
