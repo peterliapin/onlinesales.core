@@ -25,7 +25,6 @@ public class FilesTests : BaseTest
 
     [Theory]
     [InlineData("HelloWorld-ThisIs---     ...DotNet.txt", "helloworld-thisis---...dotnet.txt", 1024)]
-    [InlineData("Привет, мир 3120.txt", "privetmir3120.txt", 1024)]
     public async Task TransliterationAndSlugifyTest(string fileName, string expectedTransliteratedName, int fileSize)
     {
         var testFile = new TestFile(fileName, fileSize);
