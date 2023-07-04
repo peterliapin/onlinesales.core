@@ -1,4 +1,4 @@
-﻿// <copyright file="FliesController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="FilesController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -16,11 +16,11 @@ namespace OnlineSales.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class FliesController : ControllerBase
+    public class FilesController : ControllerBase
     {
         private readonly PgDbContext pgDbContext;
 
-        public FliesController(PgDbContext pgDbContext)
+        public FilesController(PgDbContext pgDbContext)
         {
             this.pgDbContext = pgDbContext;
         }
