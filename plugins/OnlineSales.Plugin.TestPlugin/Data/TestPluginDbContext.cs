@@ -7,123 +7,80 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
-using Nest;
-using Newtonsoft.Json.Linq;
 using OnlineSales.Data;
 using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.TestPlugin.Entities;
 using OnlineSales.Plugin.TestPlugin.TestData;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using OnlineSales.Tests.Interfaces;
 
 namespace OnlineSales.Plugin.TestPlugin.Data;
 
-public class TestPluginDbContext : PluginDbContextBase
+public class TestPluginDbContext : PluginDbContextBase, ITestMigrationService
 {
+    private readonly SortedSet<string> migrations;
+
+    private readonly Dictionary<string, Func<TestPluginDbContext, IMigrator, string, bool>> checkers;
+
     public TestPluginDbContext()
         : base()
     {
+        migrations = new SortedSet<string>();
+        checkers = new Dictionary<string, Func<TestPluginDbContext, IMigrator, string, bool>>();
     }
 
     public TestPluginDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options, configuration, httpContextHelper)
     {
+        migrations = new SortedSet<string>(Database.GetPendingMigrations());
+        checkers = new Dictionary<string, Func<TestPluginDbContext, IMigrator, string, bool>>();
+        checkers.Add("InsertData", (context, migrator, migration) => context.MigrateAndCheckInsertData(migrator, migration));
+        checkers.Add("UpdateData", (context, migrator, migration) => context.MigrateAndCheckUpdateData(migrator, migration));
+        checkers.Add("DeleteData", (context, migrator, migration) => context.MigrateAndCheckDeleteData(migrator, migration));
+        checkers.Add("AddColumn", (context, migrator, migration) => context.MigrateAndCheckAddColumn(migrator, migration));
+        checkers.Add("DropColumn", (context, migrator, migration) => context.MigrateAndCheckDropColumn(migrator, migration));
+        checkers.Add("DropTable", (context, migrator, migration) => context.MigrateAndCheckDropTable(migrator, migration));
     }
 
     public virtual DbSet<TestEntity>? TestEntities { get; set; }
 
-#pragma warning disable S3400
-    public string IsChangeLogMigrationsOk()
+    public (bool, string) MigrateUpToAndCheck(string name)
     {
         var migrator = Database.GetService<IMigrator>();
-        if (migrator == null)
+        var migration = migrations.FirstOrDefault(m => m.Contains(name));
+        if (migration == null)
         {
-            return "Cannot find IMigrator";
+            return (false, $"Cannot find migration with name containig '{name}'");
         }
 
-        var migrations = Database.GetPendingMigrations();
-        var initialMigration = migrations.FirstOrDefault(m => m.Contains("Initial"));
-        if (initialMigration == null)
+        foreach (var m in migrations)
         {
-            return "Cannot find Initial migration";
+            if (m != migration)
+            {
+                migrator.Migrate(m);
+            }
+            else
+            {
+                break;
+            }
         }
 
-        migrator!.Migrate(initialMigration);
+        Func<TestPluginDbContext, IMigrator, string, bool>? checker;
 
-        var insertDataMigration = migrations.FirstOrDefault(m => m.Contains("InsertData"));
-        if (insertDataMigration == null)
+        if (!checkers.TryGetValue(name, out checker))
         {
-            return "Cannot find InsertData migration";
+            return (false, "Cannot find check function for migration with name containig '{name}'");
+        }
+        else
+        {
+            var res = checker(this, migrator, migration);
+            if (!res)
+            {
+                return (false, $"{name} operation is failed");
+            }
         }
 
-        migrator!.Migrate(insertDataMigration);
-        if (!CheckInsertData())
-        {
-            return "Insert data is incorrect";
-        }
-
-        var updateDataMigration = migrations.FirstOrDefault(m => m.Contains("UpdateData"));
-        if (updateDataMigration == null)
-        {
-            return "Cannot find UpdateData migration";
-        }
-
-        migrator!.Migrate(updateDataMigration);
-        if (!CheckUpdateData())
-        {
-            return "Update data is incorrect";
-        }
-
-        var deletedEntities = TestEntities!.Take(ChangeLogMigrationsTestData.NumberOfDeletedEntities).ToList();
-        var deleteDataMigration = migrations.FirstOrDefault(m => m.Contains("DeleteData"));
-        if (deleteDataMigration == null)
-        {
-            return "Cannot find DeleteData migration";
-        }
-
-        migrator!.Migrate(deleteDataMigration);
-        if (!CheckDeleteData(deletedEntities))
-        {
-            return "Delete data is incorrect";
-        }
-
-        var addColumnMigration = migrations.FirstOrDefault(m => m.Contains("AddColumn"));
-        if (addColumnMigration == null)
-        {
-            return "Cannot find AddColumn migration";
-        }
-
-        migrator!.Migrate(addColumnMigration);
-        if (!CheckAddColumn())
-        {
-            return "Add column is incorrect";
-        }
-
-        var dropColumnMigration = migrations.FirstOrDefault(m => m.Contains("DropColumn"));
-        if (dropColumnMigration == null)
-        {
-            return "Cannot find DropColumn migration";
-        }
-
-        migrator!.Migrate(dropColumnMigration);
-        if (!CheckDropColumn())
-        {
-            return "Drop column is incorrect";
-        }
-
-        var dropTableMigration = migrations.FirstOrDefault(m => m.Contains("DropTable"));
-        if (dropTableMigration == null)
-        {
-            return "Cannot find DropTable migration";
-        }
-
-        migrator!.Migrate(dropTableMigration);
-        if (!CheckDropTable())
-        {
-            return "Drop table is incorrect";
-        }
-
-        return string.Empty;
+        return (true, string.Empty);
     }
         
     private static string SnakeCaseToCamelCase(string input)
@@ -156,14 +113,16 @@ public class TestPluginDbContext : PluginDbContextBase
             entry.Reload();
         }
     }
-
-    private bool CheckDropTable()
+        
+    private bool MigrateAndCheckDropTable(IMigrator migrator, string migration)
     {
+        migrator.Migrate(migration);
         return !ChangeLogs!.Any(c => c.ObjectType == "TestEntity");
     }
 
-    private bool CheckDropColumn()
+    private bool MigrateAndCheckDropColumn(IMigrator migrator, string migration)
     {
+        migrator.Migrate(migration);
         ReloadContextData();
 
         var key = SnakeCaseToCamelCase(ChangeLogMigrationsTestData.AddedColumnName);
@@ -179,9 +138,10 @@ public class TestPluginDbContext : PluginDbContextBase
 
         return true;
     }
-
-    private bool CheckAddColumn()
+    
+    private bool MigrateAndCheckAddColumn(IMigrator migrator, string migration)
     {
+        migrator.Migrate(migration);
         ReloadContextData();
 
         var key = SnakeCaseToCamelCase(ChangeLogMigrationsTestData.AddedColumnName);
@@ -199,8 +159,10 @@ public class TestPluginDbContext : PluginDbContextBase
         return true;
     }
 
-    private bool CheckDeleteData(List<TestEntity> deletedEntities)
+    private bool MigrateAndCheckDeleteData(IMigrator migrator, string migration)
     {
+        var deletedEntities = TestEntities!.Take(ChangeLogMigrationsTestData.NumberOfDeletedEntities).ToList();
+        migrator.Migrate(migration);
         ReloadContextData();
 
         var te = TestEntities!.ToList();
@@ -223,8 +185,9 @@ public class TestPluginDbContext : PluginDbContextBase
         return true;
     }
 
-    private bool CheckUpdateData()
+    private bool MigrateAndCheckUpdateData(IMigrator migrator, string migration)
     {
+        migrator.Migrate(migration);
         ReloadContextData();
 
         var te = TestEntities!.ToList();
@@ -247,8 +210,9 @@ public class TestPluginDbContext : PluginDbContextBase
         return true;
     }
 
-    private bool CheckInsertData()
+    private bool MigrateAndCheckInsertData(IMigrator migrator, string migration)
     {
+        migrator.Migrate(migration);
         ReloadContextData();
 
         var te = TestEntities!.ToList();

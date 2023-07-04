@@ -2,31 +2,40 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using OnlineSales.Data;
+using OnlineSales.Tests.Interfaces;
+using Xunit.Abstractions;
 
 namespace OnlineSales.Tests;
 public class ChangeLogMigrationsTests : BaseTest
 {
-    [Fact]
-    public void InsertDataTest()
+    private readonly ITestOutputHelper outputHelper;
+
+    public ChangeLogMigrationsTests(ITestOutputHelper outputHelper)
+    {
+        this.outputHelper = outputHelper;
+    }
+
+    [Theory]
+    [InlineData("InsertData")]
+    [InlineData("DeleteData")]
+    [InlineData("UpdateData")]
+    [InlineData("AddColumn")]
+    [InlineData("DropColumn")]
+    [InlineData("DropTable")]
+    public void ChangeLogMigrationTest(string name)
     {
         using (var scope = App.Services.CreateScope())
         {
-            var pc = scope.ServiceProvider.GetServices<PluginDbContextBase>();
-            pc.Count().Should().Be(1);
-            var ts = pc.First();
-            ts.Should().NotBeNull();
-            var t = ts.GetType();
-            t.Should().NotBeNull();
-            var tp = t.GetMethod("IsChangeLogMigrationsOk");
-            tp.Should().NotBeNull();
-            var res = (string)tp!.Invoke(ts, new object?[0])!;
-            if (res.Length > 0)
+            var migrationService = scope.ServiceProvider.GetService<ITestMigrationService>();
+            migrationService.Should().NotBeNull();
+            var res = migrationService!.MigrateUpToAndCheck(name);
+            if (!res.Item1)
             {
-                Assert.True(false, res);
+                outputHelper.WriteLine(res.Item2);
             }
+
+            res.Item1.Should().BeTrue();
         }
     }
 }

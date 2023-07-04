@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.TestPlugin.Data;
+using OnlineSales.Tests.Interfaces;
 
 namespace OnlineSales.Plugin.TestPlugin
 {
@@ -16,6 +17,7 @@ namespace OnlineSales.Plugin.TestPlugin
         {
             services.AddAutoMapper(typeof(TestPlugin));
 
+            services.AddScoped<ITestMigrationService, TestPluginDbContext>();
             services.AddScoped<PluginDbContextBase, TestPluginDbContext>();
             services.AddScoped<TestPluginDbContext, TestPluginDbContext>();
         }
