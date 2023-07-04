@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Migrations;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
@@ -205,7 +207,8 @@ public class PgDbContext : IdentityDbContext<User>
             optionsBuilder.UseNpgsql(
                 postgresConfig.ConnectionString,
                 b => b.MigrationsHistoryTable("_migrations"))
-            .UseSnakeCaseNamingConvention();
+                        .UseSnakeCaseNamingConvention()
+                        .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
 
             Console.WriteLine("PgDbContext successfully configured");
         }
