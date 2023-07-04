@@ -85,6 +85,7 @@ public class Program
 
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
+        ConfigureFileUpload(builder);
         ConfigureIpDetailsResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
@@ -288,6 +289,18 @@ public class Program
         }
 
         builder.Services.Configure<MediaConfig>(imageUploadConfig);
+    }
+
+    private static void ConfigureFileUpload(WebApplicationBuilder builder)
+    {
+        var imageUploadConfig = builder.Configuration.GetSection("File");
+
+        if (imageUploadConfig == null)
+        {
+            throw new MissingConfigurationException("File Upload configuration is mandatory.");
+        }
+
+        builder.Services.Configure<FileConfig>(imageUploadConfig);
     }
 
     private static void ConfigureEmailVerification(WebApplicationBuilder builder)
