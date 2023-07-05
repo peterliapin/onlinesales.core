@@ -48,18 +48,18 @@ public abstract class ChangeLogTask : BaseTask
 
     public override Task<bool> Execute(TaskExecutionLog currentJob)
     {
-        foreach (var typeName in loggedTypes.Select(type => type.Name))
+        foreach (var loggedType in loggedTypes)
         {
-            var taskAndEntity = Name + "_" + typeName;
+            var taskAndEntity = Name + "_" + loggedType.Name;
 
             if (IsPreviousTaskInProgress(taskAndEntity))
             {
                 return Task.FromResult(true);
             }
 
-            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, typeName);
+            var changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, loggedType);
 
-            if (changeLogBatch is not null && changeLogBatch!.Any())
+            while (changeLogBatch is not null && changeLogBatch!.Any())
             {
                 var taskLog = AddChangeLogTaskLogRecord(taskAndEntity, changeLogBatch!.First().Id, changeLogBatch!.Last().Id);
 
@@ -76,6 +76,8 @@ public abstract class ChangeLogTask : BaseTask
                     UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
                     throw;
                 }
+
+                changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, loggedType);
             }
         }
 
@@ -102,6 +104,11 @@ public abstract class ChangeLogTask : BaseTask
     }
 
     protected abstract bool IsTypeSupported(Type type);
+
+    protected virtual int GetMinLogId(ChangeLogTaskLog lastProcessedTask, Type loggedType)
+    {
+        return lastProcessedTask.ChangeLogIdMax + 1;
+    }
 
     private bool IsChangeLogAttribute(Type type)
     {
@@ -141,7 +148,7 @@ public abstract class ChangeLogTask : BaseTask
         return changeLogTaskLogEntry;
     }
 
-    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName, string entity)
+    private List<ChangeLog> GetNextOrFailedChangeLogBatch(string taskName, Type loggedType)
     {
         var minLogId = 1;
 
@@ -158,18 +165,18 @@ public abstract class ChangeLogTask : BaseTask
             else
             {
                 // If all retries are completed then discontinue.
-                Log.Error($"Error in executing task {taskName} for entity {entity} from Id {lastProcessedTask.ChangeLogIdMin} to {lastProcessedTask.ChangeLogIdMax}");
+                Log.Error($"Error in executing task {taskName} for entity {loggedType.Name} from Id {lastProcessedTask.ChangeLogIdMin} to {lastProcessedTask.ChangeLogIdMax}");
 
                 return Enumerable.Empty<ChangeLog>().ToList();
             }
         }
         else if (lastProcessedTask is not null && lastProcessedTask.State == TaskExecutionState.Completed)
         {
-            minLogId = lastProcessedTask.ChangeLogIdMax + 1;
+            minLogId = GetMinLogId(lastProcessedTask, loggedType);
         }
 
         // 3000000 - tests show that limit of 3 millions records is optimal to split change_log table into the parts with acceptable performance
-        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + 3000000 && c.ObjectType == entity).OrderBy(b => b.Id).Take(ChangeLogBatchSize).ToList();
+        var changeLogList = dbContext.ChangeLogs!.Where(c => c.Id >= minLogId && c.Id < minLogId + 3000000 && c.ObjectType == loggedType.Name).OrderBy(b => b.Id).Take(ChangeLogBatchSize).ToList();
 
         return changeLogList;
     }
