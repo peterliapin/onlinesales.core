@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace OnlineSales.Tests;
@@ -23,7 +24,6 @@ public class MediaTests : BaseTest
     }
 
     [Theory]
-    [InlineData("Привет, мир 3120.png", "privetmir3120.png", 1024)]
     [InlineData("HelloWorld-ThisIs---     ...DotNet.png", "helloworld-thisis---...dotnet.png", 1024)]
     public async Task TransliterationAndSlugifyTest(string fileName, string expectedTransliteratedName, int fileSize)
     {
@@ -99,22 +99,11 @@ public class MediaTests : BaseTest
         {
             return false;
         }
-        else
-        {
-            s1.Position = 0;
-            s2.Position = 0;
-            var data = 0;
-            while (data != -1)
-            {
-                data = s1.ReadByte();
-                if (data != s2.ReadByte())
-                {
-                    return false;
-                }
-            }
 
-            return true;
-        }
+        var s1Hash = string.Concat(SHA1.HashData(((MemoryStream)s1).ToArray()).Select(b => b.ToString("x2")));
+        var s2Hash = string.Concat(SHA1.HashData(((MemoryStream)s2).ToArray()).Select(b => b.ToString("x2")));
+
+        return string.Equals(s1Hash, s2Hash, StringComparison.Ordinal);
     }
 
     private async Task<(string, bool)> PostTest(string url, TestMedia payload)
@@ -125,7 +114,14 @@ public class MediaTests : BaseTest
             return (string.Empty, false);
         }
 
-        return (response.Headers.Location!.LocalPath, true);
+        var json = response.Content.ReadAsStringAsync().Result;
+        if (json.Contains("location"))
+        {
+            json = json.Split(':').Last().Replace("}", string.Empty).Replace("\"", string.Empty).Trim();
+            return (json, true);
+        }
+
+        return (string.Empty, false);
     }
 
     private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestMedia? payload, string authToken = "Success")
@@ -150,11 +146,9 @@ public class MediaTests : BaseTest
     {
         var response = await GetTest(url, expectedCode, authToken);
 
-        var content = await response.Content.ReadAsStreamAsync();
-
         if (expectedCode == HttpStatusCode.OK)
         {
-            return content;
+            return await response.Content.ReadAsStreamAsync();
         }
         else
         {

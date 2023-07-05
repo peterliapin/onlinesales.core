@@ -12,96 +12,100 @@ using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 
-namespace OnlineSales.Controllers
+namespace OnlineSales.Controllers;
+
+[Authorize]
+[Route("api/[controller]")]
+public class MediaController : ControllerBase
 {
-    [Authorize]
-    [Route("api/[controller]")]
-    public class MediaController : ControllerBase
+    private readonly PgDbContext pgDbContext;
+
+    public MediaController(PgDbContext pgDbContext)
     {
-        private readonly PgDbContext pgDbContext;
+        this.pgDbContext = pgDbContext;
+    }
 
-        public MediaController(PgDbContext pgDbContext)
+    [HttpPost]
+    [ProducesResponseType(typeof(MediaDetailsDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Post([FromForm] ImageCreateDto imageCreateDto)
+    {
+        var provider = new FileExtensionContentTypeProvider();
+
+        var incomingFileName = imageCreateDto.Image!.FileName.ToTranslit().Slugify();
+        var incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
+        var incomingFileSize = imageCreateDto.Image!.Length; // bytes
+        var incomingFileMimeType = string.Empty;
+
+        if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
         {
-            this.pgDbContext = pgDbContext;
+            ModelState.AddModelError("FileName", "Unsupported MIME type");
+
+            throw new InvalidModelStateException(ModelState);
         }
 
-        [HttpPost]
-        [ProducesResponseType(typeof(MediaDetailsDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Post([FromForm] ImageCreateDto imageCreateDto)
+        using var fileStream = imageCreateDto.Image.OpenReadStream();
+        var imageInBytes = new byte[incomingFileSize];
+        fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
+
+        var scopeAndFileExists = from i in pgDbContext!.Media!
+                                 where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
+                                 select i;
+        if (scopeAndFileExists.Any())
         {
-            var provider = new FileExtensionContentTypeProvider();
+            var uploadedImage = scopeAndFileExists!.FirstOrDefault();
+            uploadedImage!.Data = imageInBytes;
+            uploadedImage!.Size = incomingFileSize;
 
-            var incomingFileName = imageCreateDto.Image!.FileName.ToTranslit().Slugify();
-            var incomingFileExtension = Path.GetExtension(imageCreateDto.Image!.FileName);
-            var incomingFileSize = imageCreateDto.Image!.Length; // bytes
-            var incomingFileMimeType = string.Empty;
-
-            if (!provider.TryGetContentType(incomingFileName, out incomingFileMimeType))
+            pgDbContext.Media!.Update(uploadedImage);
+        }
+        else
+        {
+            Media uploadedMedia = new()
             {
-                ModelState.AddModelError("FileName", "Unsupported MIME type");
-
-                throw new InvalidModelStateException(ModelState);
-            }
-
-            using var fileStream = imageCreateDto.Image.OpenReadStream();
-            var imageInBytes = new byte[incomingFileSize];
-            fileStream.Read(imageInBytes, 0, (int)imageCreateDto.Image.Length);
-
-            var scopeAndFileExists = from i in pgDbContext!.Media!
-                                     where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
-                                     select i;
-            if (scopeAndFileExists.Any())
-            {
-                var uploadedImage = scopeAndFileExists!.FirstOrDefault();
-                uploadedImage!.Data = imageInBytes;
-                uploadedImage!.Size = incomingFileSize;
-
-                pgDbContext.Media!.Update(uploadedImage);
-            }
-            else
-            {
-                Media uploadedMedia = new()
-                {
-                    Name = incomingFileName,
-                    Size = incomingFileSize,
-                    Data = imageInBytes,
-                    MimeType = incomingFileMimeType!,
-                    ScopeUid = imageCreateDto.ScopeUid.Trim(),
-                    Extension = incomingFileExtension,
-                };
-
-                await pgDbContext.Media!.AddAsync(uploadedMedia);
-            }
-
-            await pgDbContext.SaveChangesAsync();
-
-            Log.Information("Request scheme {0}", HttpContext.Request.Scheme);
-            Log.Information("Request host {0}", HttpContext.Request.Host.Value);
-
-            var fileData = new MediaDetailsDto()
-            {
-                Location = Path.Combine(HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
+                Name = incomingFileName,
+                Size = incomingFileSize,
+                Data = imageInBytes,
+                MimeType = incomingFileMimeType!,
+                ScopeUid = imageCreateDto.ScopeUid.Trim(),
+                Extension = incomingFileExtension,
             };
-            return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
+
+            await pgDbContext.Media!.AddAsync(uploadedMedia);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("{scopeUid}/{*fileName}")]
-        [ResponseCache(CacheProfileName = "ImageResponse")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Get([Required] string scopeUid, [Required] string fileName)
+        await pgDbContext.SaveChangesAsync();
+
+        Log.Information("Request scheme {0}", HttpContext.Request.Scheme);
+        Log.Information("Request host {0}", HttpContext.Request.Host.Value);
+
+        var fileData = new MediaDetailsDto()
         {
-            var uploadedImageData = await pgDbContext!.Media!.Where(upi => upi.ScopeUid == scopeUid && upi.Name == fileName).FirstOrDefaultAsync();
+            Location = Path.Combine(HttpContext.Request.Path, imageCreateDto.ScopeUid, incomingFileName).Replace("\\", "/"),
+        };
+        return CreatedAtAction(nameof(Get), new { scopeUid = imageCreateDto.ScopeUid, fileName = incomingFileName }, fileData);
+    }
 
-            return uploadedImageData == null
-                ? throw new EntityNotFoundException(nameof(Media), $"{scopeUid}/{fileName}")
-                : (ActionResult)File(uploadedImageData!.Data, uploadedImageData.MimeType, fileName);
-        }
+    [HttpGet]
+    [AllowAnonymous]
+    [Route("{*pathToFile}")]
+    [ResponseCache(CacheProfileName = "ImageResponse")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Get([Required] string pathToFile)
+    {
+        pathToFile = Uri.UnescapeDataString(pathToFile);
+
+        var scope = Path.GetDirectoryName(pathToFile)!.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var fname = Path.GetFileName(pathToFile);
+
+        var uploadedImageData = await pgDbContext!.Media!.Where(e => e.ScopeUid == scope && e.Name == fname).FirstOrDefaultAsync();
+
+        return uploadedImageData == null
+            ? throw new EntityNotFoundException(nameof(Media), pathToFile)
+            : (ActionResult)File(uploadedImageData!.Data, uploadedImageData.MimeType, fname);
     }
 }
