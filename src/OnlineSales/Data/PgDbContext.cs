@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
@@ -70,6 +71,8 @@ public class PgDbContext : IdentityDbContext<User>
     public virtual DbSet<TaskExecutionLog>? TaskExecutionLogs { get; set; }
 
     public virtual DbSet<Media>? Media { get; set; }
+
+    public virtual DbSet<Entities.File>? Files { get; set; }
 
     public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
 
@@ -204,8 +207,8 @@ public class PgDbContext : IdentityDbContext<User>
             optionsBuilder.UseNpgsql(
                 postgresConfig.ConnectionString,
                 b => b.MigrationsHistoryTable("_migrations"))
-            .UseSnakeCaseNamingConvention()
-            .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
+                        .UseSnakeCaseNamingConvention()
+                        .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
 
             Console.WriteLine("PgDbContext successfully configured");
         }
