@@ -171,12 +171,12 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                         IMMUTABLE
                         LANGUAGE sql
                         AS $$
-                        SELECT ('{{'||string_agg(key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
+                        SELECT ('{{'||string_agg(pg_temp.key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
                         FROM json_each(data)
                         $$;
 
                         insert into change_log (object_type, object_id, entity_state, data, created_at)
-                        select '{type.Name}', {operation.Table}.id, {(int)EntityState.Added}, json_underscore_to_camel_case(row_to_json({operation.Table})), now()
+                        select '{type.Name}', {operation.Table}.id, {(int)EntityState.Added}, pg_temp.json_underscore_to_camel_case(row_to_json({operation.Table})), now()
                         from {operation.Table} where {operation.Table}.id in (select id from {operation.Table} order by id desc limit {insertDataCount})",
             };
 
