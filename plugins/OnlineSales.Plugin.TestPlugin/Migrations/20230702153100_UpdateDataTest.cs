@@ -12,9 +12,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-#pragma warning disable SA1118
-
-            for (int i = 0; i < ChangeLogMigrationsTestData.InsertionData.Count(); i++)
+            for (int i = 0; i < ChangeLogMigrationsTestData.InsertionData.Count; i++)
             {
                 migrationBuilder.UpdateData(
                     keyColumn: "id",

@@ -10,20 +10,8 @@
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputPath>..\..\tests\OnlineSales.Tests\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(Configuration)'!='Migration'">
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj">
-      <Private>false</Private>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)'!='Migration'">
-    <ProjectReference Include="..\..\tests\OnlineSales.Tests\OnlineSales.Tests.csproj">
       <Private>false</Private>
       <ExcludeAssets>runtime</ExcludeAssets>
     </ProjectReference>

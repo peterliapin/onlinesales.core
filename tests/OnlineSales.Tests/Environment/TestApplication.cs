@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nest;
 using OnlineSales.Data;
+using OnlineSales.Plugin.TestPlugin.Data;
 using OnlineSales.Tests.TestServices;
 
 namespace OnlineSales.Tests.Environment;
@@ -90,6 +91,8 @@ public class TestApplication : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
+            services.AddScoped<TestPluginDbContext, TestPluginDbContext>();
+
             services.AddScoped<IEmailService, TestEmailService>();
             services.AddScoped<IEmailValidationExternalService, TestEmailValidationExternalService>();
             services.AddScoped<IAccountExternalService, TestAccountExternalService>();

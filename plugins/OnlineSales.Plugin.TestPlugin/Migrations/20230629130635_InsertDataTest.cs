@@ -12,8 +12,8 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            var insertData = new object[ChangeLogMigrationsTestData.InsertionData.Count(), 8];
-            for (int i = 0; i < ChangeLogMigrationsTestData.InsertionData.Count(); i++)
+            var insertData = new object[ChangeLogMigrationsTestData.InsertionData.Count, 8];
+            for (int i = 0; i < ChangeLogMigrationsTestData.InsertionData.Count; i++)
             {
                 insertData[i, 0] = i+1;
                 insertData[i, 1] = DateTime.UtcNow;

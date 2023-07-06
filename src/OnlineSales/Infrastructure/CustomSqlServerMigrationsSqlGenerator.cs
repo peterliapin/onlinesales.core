@@ -16,7 +16,7 @@ namespace OnlineSales.Infrastructure;
 public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerator
 {
 #pragma warning disable EF1001 // Internal EF Core API usage.
-    public CustomSqlServerMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlSingletonOptions/*, PgDbContext dbContext*/)
+    public CustomSqlServerMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlSingletonOptions)
         : base(dependencies, npgsqlSingletonOptions)
     {
     }
@@ -202,15 +202,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
 
         if (res == null)
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
-            {
-                var tt = assembly.GetType(etype.Name);
-                if (tt != null)
-                {
-                    res = tt;
-                    break;
-                }
-            }
+            res = AppDomain.CurrentDomain.GetAssemblies().Select(asm => asm.GetType(etype.Name)).FirstOrDefault(t => t is not null);
         }
 
         return res;

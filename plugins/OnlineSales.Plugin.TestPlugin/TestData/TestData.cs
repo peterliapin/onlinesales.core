@@ -7,22 +7,22 @@ using OnlineSales.Plugin.TestPlugin.Entities;
 namespace OnlineSales.Plugin.TestPlugin.TestData;
 public class ChangeLogMigrationsTestData
 {
-    public static readonly int NumberOfDeletedEntities = 3;
+    public const int NumberOfDeletedEntities = 3;
 
-    public static readonly int NumberOfRecords = 10;
+    public const int NumberOfRecords = 10;
 
-    public static readonly string AddedColumnName = "int_field";
+    public const int AddedColumnDefaultValue = 7;
 
-    public static readonly int AddedColumnDefaultValue = 7;
+    public const string AddedColumnName = "int_field";
 
     static ChangeLogMigrationsTestData()
     {
-        InsertionData = new string[NumberOfRecords];
+        InsertionData = new List<string>();
         for (int i = 0; i < NumberOfRecords; ++i)
         {
-            InsertionData[i] = $"StringField{i}";
+            InsertionData.Add($"StringField{i}");
         }
     }
 
-    public static string[] InsertionData { get; }
+    public static List<string> InsertionData { get; }
 }
