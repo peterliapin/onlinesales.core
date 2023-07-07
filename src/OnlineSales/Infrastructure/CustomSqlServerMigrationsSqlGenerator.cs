@@ -7,25 +7,32 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using Microsoft.EntityFrameworkCore.Update;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Operations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Update.Internal;
-using NpgsqlTypes;
-using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
-using OnlineSales.Entities;
-using OnlineSales.Helpers;
 
 namespace OnlineSales.Infrastructure;
 
 public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerator
 {
 #pragma warning disable EF1001 // Internal EF Core API usage.
-    public CustomSqlServerMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlSingletonOptions/*, PgDbContext dbContext*/)
+    public CustomSqlServerMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, INpgsqlSingletonOptions npgsqlSingletonOptions)
         : base(dependencies, npgsqlSingletonOptions)
     {
+    }
+
+    protected override void Generate(UpdateDataOperation operation, IModel? model, MigrationCommandListBuilder builder)
+    {
+        base.Generate(operation, model, builder);
+
+        UpdateChangeLog(operation.Table, operation.KeyColumns, operation.KeyValues, EntityState.Modified, model, builder);
+    }
+
+    protected override void Generate(DeleteDataOperation operation, IModel? model, MigrationCommandListBuilder builder)
+    {
+        UpdateChangeLog(operation.Table, operation.KeyColumns, operation.KeyValues, EntityState.Deleted, model, builder);
+
+        base.Generate(operation, model, builder);
     }
 
     protected override void Generate(RenameColumnOperation operation, IModel? model, MigrationCommandListBuilder builder)
@@ -53,7 +60,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
 
         if (type != null && IsChangeLogSupported(type) && operation.OldColumn.ClrType != operation.ClrType)
         {
-            throw new ChangeLogMigrationException("Changing colum type isn't supported. Please use SqlOperation for migrations.");
+            throw new ChangeLogMigrationException("Changing column type isn't supported. Please use SqlOperation for migrations.");
         }
     }
 
@@ -179,7 +186,6 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                         select '{type.Name}', {operation.Table}.id, {(int)EntityState.Added}, pg_temp.json_underscore_to_camel_case(row_to_json({operation.Table})), now()
                         from {operation.Table} where {operation.Table}.id in (select id from {operation.Table} order by id desc limit {insertDataCount})",
             };
-
             Generate(insertChangeLogData, model, builder);
         }
     }
@@ -192,7 +198,14 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
 
     private static Type? GetType(IEntityType etype)
     {
-        return Assembly.GetEntryAssembly()!.GetType(etype.Name);
+        var res = Assembly.GetExecutingAssembly()!.GetType(etype.Name);
+
+        if (res == null)
+        {
+            res = AppDomain.CurrentDomain.GetAssemblies().Select(asm => asm.GetType(etype.Name)).FirstOrDefault(t => t is not null);
+        }
+
+        return res;
     }
 
     private static string ColumnNameToCamelCase(string columnName)
@@ -205,5 +218,57 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
     private static bool IsChangeLogSupported(Type type)
     {
         return type.GetCustomAttributes<SupportsChangeLogAttribute>().Any();
+    }
+
+    private void UpdateChangeLog(string table, string[] keyColumns, object?[,] keyValues, EntityState state, IModel? model, MigrationCommandListBuilder builder)
+    {
+        var type = GetType(GetIEntityType(model!, table));
+
+        if (type != null && IsChangeLogSupported(type))
+        {
+            if (keyColumns.Length == 1 && keyColumns[0] == "id")
+            {
+                var ids = new List<int>();
+                var updatedItemsCount = keyValues.GetLength(0);
+
+                for (int i = 0; i < updatedItemsCount; ++i)
+                {
+                    ids.Add((int)keyValues[i, 0]!);
+                }
+
+                var stringIds = string.Join(", ", ids.ConvertAll(i => i.ToString()));
+
+                var insertFromChangeLog = new SqlOperation()
+                {
+                    Sql = @$"CREATE OR REPLACE FUNCTION pg_temp.key_underscore_to_camel_case(s text)
+                        RETURNS json
+                        IMMUTABLE
+                        LANGUAGE sql
+                        AS $$
+                        SELECT to_json(substring(s, 1, 1) || substring(replace(initcap(replace(s, '_', ' ')), ' ', ''), 2));
+                        $$;
+
+                        CREATE OR REPLACE FUNCTION pg_temp.json_underscore_to_camel_case(data json)
+                        RETURNS json
+                        IMMUTABLE
+                        LANGUAGE sql
+                        AS $$
+                        SELECT ('{{'||string_agg(pg_temp.key_underscore_to_camel_case(key)||':'||value, ',')||'}}')::json
+                        FROM json_each(data)
+                        $$;
+
+                        insert into change_log (object_type, object_id, entity_state, data, created_at)
+                        select '{type.Name}', subquery_table.id, {(int)state}, pg_temp.json_underscore_to_camel_case(row_to_json(subquery_table)), now()
+                        from (select * from {table} where id in ({stringIds})) as subquery_table",
+                };
+
+                Generate(insertFromChangeLog, model, builder);
+            }
+            else
+            {
+                // TODO: update items not just on id key
+                throw new ChangeLogMigrationException("UpdateDataOperation or DeleteDataOperation must containt just id key column. Please, use SqlOperation instead for your purposes");
+            }
+        }
     }
 }

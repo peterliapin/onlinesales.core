@@ -47,6 +47,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\plugins\OnlineSales.Plugin.TestPlugin\OnlineSales.Plugin.TestPlugin.csproj" />
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
   </ItemGroup>
 
