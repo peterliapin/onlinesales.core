@@ -20,7 +20,7 @@ namespace OnlineSales.Infrastructure
 
         private IQueryable<T> query;
 
-        public MixedQueryProvider(QueryModelBuilder<T> queryBuilder, IQueryable<T> query, ElasticClient elasticClient, string indexPrefix/*, PgDbContext dbContext*/)
+        public MixedQueryProvider(QueryModelBuilder<T> queryBuilder, IQueryable<T> query, ElasticClient elasticClient, string indexPrefix)
         {
             this.queryBuilder = queryBuilder;
             this.elasticClient = elasticClient;
@@ -57,6 +57,13 @@ namespace OnlineSales.Infrastructure
             var dbProvider = new DBQueryProvider<T>(query, queryBuilder);
 
             var dbResult = await dbProvider.GetResult();
+
+            if (dbResult.Records != null && queryBuilder.OrderData.Count == 0)
+            {
+                var existedIds = ids.Where(id => dbResult.Records.Any(r => r.Id == id));
+                var sortedRes = existedIds.Select(id => dbResult.Records.First(r => r.Id == id));
+                dbResult = new QueryResult<T>(sortedRes.ToList(), dbResult.TotalCount);
+            }
 
             return new QueryResult<T>(dbResult.Records, esResult.TotalCount);
         }
