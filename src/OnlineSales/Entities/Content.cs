@@ -55,6 +55,8 @@ public class Content : BaseEntity, ICommentable
 
     public bool AllowComments { get; set; } = false;
 
+    public DateTime? PublishedAt { get; set; } = DateTime.UtcNow;
+
     public static string GetCommentableType()
     {
         return "Content";
