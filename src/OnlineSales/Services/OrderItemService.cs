@@ -17,52 +17,32 @@ namespace OnlineSales.Services
             this.pgDbContext = pgDbContext;
         }
 
-        public async Task AddAsync(Order order, OrderItem orderItem)
+        public void Delete(OrderItem orderItem)
         {
-            orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
-            orderItem.Total = CalculateOrderItemTotal(orderItem, order.ExchangeRate);
-
-            await pgDbContext.AddAsync(orderItem);
-
-            var totals = CalculateTotalsForOrder(orderItem);
-
-            order.CurrencyTotal = totals.currencyTotal;
-            order.Total = totals.total;
-            order.Quantity = totals.quantity;
+            pgDbContext.Remove(orderItem);
+            RecalculateOrder(orderItem);
         }
 
-        public async Task DeleteAsync(Order order, OrderItem orderItem)
+        public async Task SaveAsync(OrderItem orderItem)
         {
-            using (var transaction = await pgDbContext!.Database.BeginTransactionAsync())
+            orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
+            orderItem.Total = CalculateOrderItemTotal(orderItem, orderItem.Order!.ExchangeRate);
+
+            if (orderItem.Id > 0)
             {
-                pgDbContext.Remove(orderItem);
-
-                orderItem.CurrencyTotal = 0;
-                orderItem.Total = 0;
-                orderItem.Quantity = 0;
-
-                var totals = CalculateTotalsForOrder(orderItem);
-
-                order.CurrencyTotal = totals.currencyTotal;
-                order.Total = totals.total;
-
-                pgDbContext.Update(order);
-                await pgDbContext.SaveChangesAsync();
-
-                await transaction.CommitAsync();
+                pgDbContext.OrderItems!.Update(orderItem);
             }
+            else
+            {
+                await pgDbContext.OrderItems!.AddAsync(orderItem);
+            }
+
+            RecalculateOrder(orderItem);
         }
 
-        public void Update(Order order, OrderItem orderItem)
+        public Task SaveRangeAsync(List<OrderItem> items)
         {
-            orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
-            orderItem.Total = CalculateOrderItemTotal(orderItem, order!.ExchangeRate);
-
-            var totals = CalculateTotalsForOrder(orderItem, orderItem.Id);
-
-            order.CurrencyTotal = totals.currencyTotal;
-            order.Total = totals.total;
-            order.Quantity = totals.quantity;
+            throw new NotImplementedException();
         }
 
         private decimal CalculateOrderItemCurrencyTotal(OrderItem orderItem)
@@ -75,25 +55,13 @@ namespace OnlineSales.Services
             return orderItem.CurrencyTotal * exchangeRate;
         }
 
-        private (decimal currencyTotal, decimal total, int quantity) CalculateTotalsForOrder(OrderItem orderItem, int patchId = 0)
+        private void RecalculateOrder(OrderItem orderItem)
         {
-            decimal currencyTotal = 0;
-            decimal total = 0;
-            var quantity = 0;
+            var order = orderItem.Order!;
 
-            var orderItems = patchId == 0
-                ? (from ordItem in pgDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId select ordItem).ToList()
-                : (from ordItem in pgDbContext.OrderItems where ordItem.OrderId == orderItem.OrderId && ordItem.Id != patchId select ordItem).ToList();
-
-            currencyTotal = orderItems.Sum(t => t.CurrencyTotal);
-            total = orderItems.Sum(t => t.Total);
-            quantity = orderItems.Sum(t => t.Quantity);
-
-            currencyTotal += orderItem.CurrencyTotal;
-            total += orderItem.Total;
-            quantity += orderItem.Quantity;
-
-            return (currencyTotal, total, quantity);
+            order.CurrencyTotal = order.OrderItems!.Sum(oi => oi.CurrencyTotal);
+            order.Total = order.CurrencyTotal * order.ExchangeRate;
+            order.Quantity = order.OrderItems!.Sum(oi => oi.Quantity);
         }
     }
 }

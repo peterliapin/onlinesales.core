@@ -6,8 +6,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -35,9 +33,9 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
     {
-        var existOrder = await (from order in dbContext.Orders
-                                where order.Id == value.OrderId
-                                select order).FirstOrDefaultAsync();
+        var existOrder = await dbContext.Orders!
+                            .Include(o => o.OrderItems)
+                            .FirstOrDefaultAsync(o => o.Id == value.OrderId);
 
         if (existOrder == null)
         {
@@ -47,8 +45,9 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
         }
 
         var orderItem = mapper.Map<OrderItem>(value);
+        orderItem.Order = existOrder;
 
-        await orderItemService.AddAsync(existOrder, orderItem);
+        await orderItemService.SaveAsync(orderItem);
 
         await dbContext.SaveChangesAsync();
 
@@ -66,9 +65,9 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     {
         var orderItem = await FindOrThrowNotFound(id);
 
-        var order = await (from o in dbContext.Orders
-                           where o.Id == orderItem.OrderId
-                           select o).FirstOrDefaultAsync();
+        var order = await dbContext.Orders!
+                            .Include(o => o.OrderItems)
+                            .FirstOrDefaultAsync(o => o.Id == orderItem.OrderId);
 
         if (order == null)
         {
@@ -79,7 +78,7 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
 
         mapper.Map(value, orderItem);
 
-        orderItemService.Update(order!, orderItem);
+        await orderItemService.SaveAsync(orderItem);
 
         await dbContext.SaveChangesAsync();
 
@@ -93,13 +92,15 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult> Delete(int id)
     {
-        var existingEntity = await FindOrThrowNotFound(id);
+        var orderItem = await FindOrThrowNotFound(id);
 
-        var existingOrder = await (from order in dbContext.Orders
-                                   where order.Id == existingEntity.OrderId
-                                   select order).FirstOrDefaultAsync();
+        await dbContext.Entry(orderItem)
+                .Reference(oi => oi.Order)
+                .LoadAsync();
 
-        await orderItemService.DeleteAsync(existingOrder!, existingEntity);
+        orderItemService.Delete(orderItem);
+
+        await dbContext.SaveChangesAsync();
 
         return NoContent();
     }

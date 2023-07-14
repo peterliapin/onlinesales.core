@@ -4,11 +4,9 @@
 
 using System.Net.Mail;
 using System.Reflection;
-using System.Text;
 using DnsClient;
 using DnsClient.Protocol;
 using HtmlAgilityPack;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;

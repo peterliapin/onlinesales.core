@@ -6,12 +6,8 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IOrderItemService
+    public interface IOrderItemService : ISaveService<OrderItem>
     {
-        Task AddAsync(Order order, OrderItem orderItem);
-
-        void Update(Order order, OrderItem orderItem);
-
-        Task DeleteAsync(Order order, OrderItem orderItem);
+        void Delete(OrderItem orderItem);
     }
 }

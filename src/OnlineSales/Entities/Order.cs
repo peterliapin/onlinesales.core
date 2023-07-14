@@ -45,11 +45,11 @@ public class Order : BaseEntity, ICommentable
     public string? OrderNumber { get; set; }
 
     /// <summary>
-    /// Gets or sets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and commissions (how much will be paid out to vendor).
+    /// Gets total amount converted to a system currency (or payout currency) like USD without TAXes, discounts and commissions (how much will be paid out to vendor).
     /// </summary>
     [Searchable]
     [Required]
-    public decimal Total { get; set; } = 0;
+    public decimal Total { get; internal set; } = 0;
 
     /// <summary>
     /// Gets or sets the currency ISO code for the payment - ISO 4217. Example: "USD".
@@ -59,17 +59,17 @@ public class Order : BaseEntity, ICommentable
     public string Currency { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets total amount in the payment currency without TAXes, discounts and comissions.
+    /// Gets total amount in the payment currency without TAXes, discounts and comissions.
     /// </summary>
     [Searchable]
     [Required]
-    public decimal CurrencyTotal { get; set; } = 0;
+    public decimal CurrencyTotal { get; internal set; } = 0;
 
     /// <summary>
-    /// Gets or sets total amount of all items in the current order.
+    /// Gets total amount of all items in the current order.
     /// </summary>
     [Searchable]
-    public int Quantity { get; set; }
+    public int Quantity { get; internal set; }
 
     /// <summary>
     /// Gets or sets exchange rate to the payout currency.
@@ -82,6 +82,12 @@ public class Order : BaseEntity, ICommentable
     /// </summary>
     [Searchable]
     public string? AffiliateName { get; set; }
+
+    [Searchable]
+    public decimal Commission { get; set; } = 0;
+
+    [Searchable]
+    public decimal Discount { get; set; } = 0;
 
     /// <summary>
     /// Gets or sets a value indicating whether true for test orders. False of regular orders.
