@@ -92,7 +92,7 @@ namespace OnlineSales.Infrastructure
                 elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
             }
         }
-
+                
         private void AddSortConditions(SearchRequest<T> sr)
         {
             var sortedConditions = new List<ISort>();
@@ -109,7 +109,7 @@ namespace OnlineSales.Infrastructure
             }
             else
             {
-                throw new QueryException(string.Empty, "Sorted properties list must be notempty");
+                sortedConditions.Add(new FieldSort { Field = "_score", Order = Nest.SortOrder.Descending });
             }
 
             sr.Sort = sortedConditions;
@@ -391,7 +391,7 @@ namespace OnlineSales.Infrastructure
                     Fields = searchableTextProperties,
                     Lenient = true,
                     Fuzziness = Fuzziness.Auto,
-                    Operator = Operator.Or,
+                    Operator = Operator.And,
                 };
 
                 sq.Add(tQ);
@@ -401,7 +401,7 @@ namespace OnlineSales.Infrastructure
                     Query = string.Join(" ", queryBuilder.SearchData),
                     Fields = searchableNonTextProperties,
                     Lenient = true,
-                    Operator = Operator.Or,
+                    Operator = Operator.And,
                 };
 
                 sq.Add(ntQ);
