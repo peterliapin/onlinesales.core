@@ -16,6 +16,7 @@ namespace OnlineSales.Migrations
                 table: "content",
                 type: "timestamp with time zone",
                 nullable: true);
+            migrationBuilder.Sql("UPDATE content SET published_at = created_at WHERE published_at IS NULL");
         }
 
         /// <inheritdoc />
