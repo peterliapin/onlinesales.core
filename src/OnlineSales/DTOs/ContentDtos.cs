@@ -44,6 +44,9 @@ public class ContentCreateDto
 
     [Optional]
     public string? Source { get; set; }
+
+    [Optional]
+    public DateTime? PublishedAt { get; set; }
 }
 
 public class ContentUpdateDto
@@ -80,6 +83,8 @@ public class ContentUpdateDto
     public bool? AllowComments { get; set; }
 
     public string? Source { get; set; }
+
+    public DateTime? PublishedAt { get; set; }
 }
 
 public class ContentDetailsDto : ContentCreateDto
@@ -132,4 +137,7 @@ public class ContentImportDto : BaseImportDto
 
     [Optional]
     public bool? AllowComments { get; set; }
+
+    [Optional]
+    public DateTime? PublishedAt { get; set; }
 }
