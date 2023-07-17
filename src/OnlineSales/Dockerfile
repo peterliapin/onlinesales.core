@@ -9,11 +9,16 @@ WORKDIR /src
 COPY ["src/OnlineSales/OnlineSales.csproj", "src/OnlineSales/"]
 RUN dotnet restore "src/OnlineSales/OnlineSales.csproj"
 COPY . .
-WORKDIR "/src/src/OnlineSales"
-RUN dotnet build "OnlineSales.csproj" -c Release -o /app/build
+WORKDIR "/src"
+RUN dotnet build "OnlineSales.sln" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "OnlineSales.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./src/OnlineSales/OnlineSales.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./plugins/OnlineSales.Plugin.EmailSync/OnlineSales.Plugin.EmailSync.csproj" -c Release -o /app/publish/plugins/OnlineSales.Plugin.EmailSync /p:UseAppHost=false
+RUN dotnet publish "./plugins/OnlineSales.Plugin.ReverseProxy/OnlineSales.Plugin.ReverseProxy.csproj" -c Release -o /app/publish/plugins/OnlineSales.Plugin.ReverseProxy /p:UseAppHost=false
+RUN dotnet publish "./plugins/OnlineSales.Plugin.SendGrid/OnlineSales.Plugin.SendGrid.csproj" -c Release -o /app/publish/plugins/OnlineSales.Plugin.SendGrid /p:UseAppHost=false
+RUN dotnet publish "./plugins/OnlineSales.Plugin.Sms/OnlineSales.Plugin.Sms.csproj" -c Release -o /app/publish/plugins/OnlineSales.Plugin.Sms /p:UseAppHost=false
+RUN dotnet publish "./plugins/OnlineSales.Plugin.Vsto/OnlineSales.Plugin.Vsto.csproj" -c Release -o /app/publish/plugins/OnlineSales.Plugin.Vsto /p:UseAppHost=false
 
 FROM base AS final
 RUN apk add --no-cache icu-libs
