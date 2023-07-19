@@ -52,8 +52,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OnlineSales.Plugin.EmailSyn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.TestPlugin", "plugins\OnlineSales.Plugin.TestPlugin\OnlineSales.Plugin.TestPlugin.csproj", "{5F7301E4-CD13-4F21-A289-683C6D962D13}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.XLTools", "..\..\XLTools\plugin-xltools\OnlineSales.Plugin.XLTools.csproj", "{4FDB93D1-EF79-48F5-A968-5A2781BBC4C2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
