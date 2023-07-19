@@ -11,16 +11,18 @@ namespace OnlineSales.Services
     public class OrderItemService : IOrderItemService
     {
         private readonly PgDbContext pgDbContext;
+        private readonly OrderService orderService;
 
-        public OrderItemService(PgDbContext pgDbContext)
+        public OrderItemService(PgDbContext pgDbContext, OrderService orderService)
         {
             this.pgDbContext = pgDbContext;
+            this.orderService = orderService;
         }
 
         public void Delete(OrderItem orderItem)
         {
             pgDbContext.Remove(orderItem);
-            RecalculateOrder(orderItem);
+            orderService.RecalculateOrder(orderItem.Order!);
         }
 
         public async Task SaveAsync(OrderItem orderItem)
@@ -37,7 +39,7 @@ namespace OnlineSales.Services
                 await pgDbContext.OrderItems!.AddAsync(orderItem);
             }
 
-            RecalculateOrder(orderItem);
+            orderService.RecalculateOrder(orderItem.Order!);
         }
 
         public Task SaveRangeAsync(List<OrderItem> items)
@@ -53,15 +55,6 @@ namespace OnlineSales.Services
         private decimal CalculateOrderItemTotal(OrderItem orderItem, decimal exchangeRate)
         {
             return orderItem.CurrencyTotal * exchangeRate;
-        }
-
-        private void RecalculateOrder(OrderItem orderItem)
-        {
-            var order = orderItem.Order!;
-
-            order.CurrencyTotal = order.OrderItems!.Sum(oi => oi.CurrencyTotal);
-            order.Total = order.CurrencyTotal * order.ExchangeRate;
-            order.Quantity = order.OrderItems!.Sum(oi => oi.Quantity);
         }
     }
 }

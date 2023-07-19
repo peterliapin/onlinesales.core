@@ -70,4 +70,10 @@ public class OrderItem : BaseEntity
     /// </summary>
     [Searchable]
     public decimal UnitPrice { get; set; }
+
+    public int? DiscountId { get; set; }
+
+    [JsonIgnore]
+    [ForeignKey("DiscountId")]
+    public virtual Discount? Discount { get; set; }
 }

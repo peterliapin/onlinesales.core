@@ -87,7 +87,7 @@ public class Order : BaseEntity, ICommentable
     public decimal Commission { get; set; } = 0;
 
     [Searchable]
-    public decimal Discount { get; set; } = 0;
+    public decimal Refund { get; set; } = 0;
 
     /// <summary>
     /// Gets or sets a value indicating whether true for test orders. False of regular orders.
@@ -99,6 +99,9 @@ public class Order : BaseEntity, ICommentable
 
     [JsonIgnore]
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
+
+    [JsonIgnore]
+    public virtual IList<Discount>? Discounts { get; set; }
 
     public static string GetCommentableType()
     {
