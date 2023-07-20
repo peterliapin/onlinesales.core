@@ -71,9 +71,6 @@ public class OrderItem : BaseEntity
     [Searchable]
     public decimal UnitPrice { get; set; }
 
-    public int? DiscountId { get; set; }
-
     [JsonIgnore]
-    [ForeignKey("DiscountId")]
     public virtual Discount? Discount { get; set; }
 }

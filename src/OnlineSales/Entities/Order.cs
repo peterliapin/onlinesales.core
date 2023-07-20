@@ -65,6 +65,10 @@ public class Order : BaseEntity, ICommentable
     [Required]
     public decimal CurrencyTotal { get; internal set; } = 0;
 
+    [Searchable]
+    [Required]
+    public decimal ItemsCurrencyTotal { get; internal set; } = 0;
+
     /// <summary>
     /// Gets total amount of all items in the current order.
     /// </summary>

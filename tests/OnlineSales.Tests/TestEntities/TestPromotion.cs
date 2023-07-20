@@ -8,7 +8,7 @@ public class TestPromotion : PromotionCreateDto
 {
     public TestPromotion(string uid)
     {
-        PromotionCode = "PromotionCode_" + uid;
+        Code = "PromotionCode_" + uid;
         Name = "Name_" + uid;
     }
 }

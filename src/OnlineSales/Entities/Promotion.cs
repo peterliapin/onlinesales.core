@@ -4,34 +4,26 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
-public enum PromotionType
-{
-    Percent = 0,
-    Fixed = 1,
-}
 
 [Table("promotion")]
 [SupportsElastic]
 [SupportsChangeLog]
-[Index(nameof(PromotionCode), IsUnique = true)]
+[Index(nameof(Code), IsUnique = true)]
 
-public class Promotion : BaseEntity
+public class Promotion : BaseEntity 
 {
     [Required]
-    public string PromotionCode { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
 
     [Required]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
-    public DateTime StartDate { get; set; }
+    public DateTime? StartDate { get; set; }
 
-    [Required]
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 }
