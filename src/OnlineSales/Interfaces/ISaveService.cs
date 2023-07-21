@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+using OnlineSales.Data;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
@@ -13,5 +13,7 @@ namespace OnlineSales.Interfaces
         Task SaveAsync(T item);
 
         Task SaveRangeAsync(List<T> items);
+
+        void SetDBContext(PgDbContext pgDbContext);
     }
 }
