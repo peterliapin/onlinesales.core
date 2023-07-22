@@ -30,8 +30,6 @@ namespace OnlineSales.Services
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, orderItem.Order!.ExchangeRate);
 
-            orderService.RecalculateOrder(orderItem.Order!);
-
             if (orderItem.Id > 0)
             {
                 pgDbContext.OrderItems!.Update(orderItem);
@@ -39,7 +37,9 @@ namespace OnlineSales.Services
             else
             {
                 await pgDbContext.OrderItems!.AddAsync(orderItem);
-            }            
+            }
+
+            orderService.RecalculateOrder(orderItem.Order!);
         }
 
         public Task SaveRangeAsync(List<OrderItem> items)
