@@ -11,7 +11,7 @@ namespace OnlineSales.Services;
 
 public class DealService : IDealService
 {
-    private readonly PgDbContext pgDbContext;
+    private PgDbContext pgDbContext;
 
     public DealService(PgDbContext pgDbContext)
     {
@@ -80,6 +80,11 @@ public class DealService : IDealService
                 await pgDbContext.AddRangeAsync(deal.ToList());
             }
         }
+    }
+
+    public void SetDBContext(PgDbContext pgDbContext)
+    {
+        this.pgDbContext = pgDbContext;
     }
 
     private void CheckPipelineAndStage(int pipelineId, int stageId)

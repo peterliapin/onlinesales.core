@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
-using OnlineSales.Data;
 using OnlineSales.Exceptions;
 using OnlineSales.Plugin.EmailSync.Data;
 using OnlineSales.Plugin.EmailSync.DTOs;
@@ -25,7 +22,7 @@ public class ImapAccountsController : ControllerBase
     private readonly EmailSyncDbContext dbContext;
     private readonly IMapper mapper;
 
-    public ImapAccountsController(EmailSyncDbContext dbContext, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext)    
+    public ImapAccountsController(EmailSyncDbContext dbContext, IMapper mapper)
     {
         this.dbContext = dbContext;
         this.mapper = mapper;

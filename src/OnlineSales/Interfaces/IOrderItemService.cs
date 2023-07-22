@@ -6,7 +6,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IOrderItemService : ISaveService<OrderItem>
+    public interface IOrderItemService : IEntityService<OrderItem>
     {
         void Delete(OrderItem orderItem);
     }

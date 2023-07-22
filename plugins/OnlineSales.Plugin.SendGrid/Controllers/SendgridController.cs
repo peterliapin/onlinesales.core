@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 using OnlineSales.Interfaces;
@@ -31,10 +29,11 @@ public class SendgridController : ControllerBase
 
     private readonly IContactService contactService;
 
-    public SendgridController(SendgridDbContext dbContext, EsDbContext esDbContext, IConfiguration configuration, IContactService contactService)
+    public SendgridController(SendgridDbContext dbContext, IContactService contactService)
     {
         this.dbContext = dbContext;
         this.contactService = contactService;
+        this.contactService.SetDBContext(this.dbContext);
     }
 
     [HttpPost]

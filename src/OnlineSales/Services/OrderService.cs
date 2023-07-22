@@ -4,12 +4,13 @@
 
 using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services
 {
-    public class OrderService 
+    public class OrderService : IOrderService
     {
-        private readonly PgDbContext pgDbContext;
+        private PgDbContext pgDbContext;
 
         public OrderService(PgDbContext pgDbContext)
         {
@@ -33,6 +34,30 @@ namespace OnlineSales.Services
 
             order.Total = order.CurrencyTotal * order.ExchangeRate;
             order.Quantity = order.OrderItems!.Sum(oi => oi.Quantity);
+        }
+
+        public async Task SaveAsync(Order order)
+        {
+            RecalculateOrder(order);
+
+            if (order.Id > 0)
+            {
+                pgDbContext.Orders!.Update(order);
+            }
+            else
+            {
+                await pgDbContext.Orders!.AddAsync(order);
+            }
+        }
+
+        public Task SaveRangeAsync(List<Order> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetDBContext(PgDbContext pgDbContext)
+        {
+            this.pgDbContext = pgDbContext;
         }
     }
 }

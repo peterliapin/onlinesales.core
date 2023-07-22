@@ -6,7 +6,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IContactService : ISaveService<Contact>
+    public interface IContactService : IEntityService<Contact>
     {
         Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip);
     }

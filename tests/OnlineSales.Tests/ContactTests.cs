@@ -52,6 +52,36 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
     }
 
     [Fact]
+
+    public async Task GetWithSearchEmailTest()
+    {
+        var item = TestData.Generate<TestContact>();
+        var firstPart = "abcd";
+        var secondPart = "gmail.com";
+        item.Email = $"{firstPart}@{secondPart}";
+        item.LastName = "Some last name";
+        await PostTest(itemsUrl, item);
+
+        await SyncElasticSearch();
+
+        var result = await GetTest<List<Contact>>(itemsUrl + $"?query={firstPart}");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(0);
+
+        result = await GetTest<List<Contact>>(itemsUrl + $"?query={secondPart}");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(0);
+
+        result = await GetTest<List<Contact>>(itemsUrl + $"?query={item.Email}");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+
+        result = await GetTest<List<Contact>>(itemsUrl + $"?query=Some");
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+    }
+
+    [Fact]
     public async Task CheckInsertedItemDomain()
     {
         var testCreateItem = await CreateItem();

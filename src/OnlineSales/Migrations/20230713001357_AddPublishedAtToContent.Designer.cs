@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230713001357_AddPublishedAtToContent")]
+    partial class AddPublishedAtToContent
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1002,75 +1005,6 @@ namespace OnlineSales.Migrations
                     b.ToTable("deal_pipeline_stage", (string)null);
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Discount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_id");
-
-                    b.Property<int?>("OrderItemId")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_item_id");
-
-                    b.Property<int>("PromotionId")
-                        .HasColumnType("integer")
-                        .HasColumnName("promotion_id");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text")
-                        .HasColumnName("source");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("numeric")
-                        .HasColumnName("value");
-
-                    b.HasKey("Id")
-                        .HasName("pk_discount");
-
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_discount_order_id");
-
-                    b.HasIndex("OrderItemId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_discount_order_item_id");
-
-                    b.HasIndex("PromotionId")
-                        .HasDatabaseName("ix_discount_promotion_id");
-
-                    b.ToTable("discount", (string)null);
-                });
-
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
                 {
                     b.Property<int>("Id")
@@ -1745,10 +1679,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("affiliate_name");
 
-                    b.Property<decimal>("Commission")
-                        .HasColumnType("numeric")
-                        .HasColumnName("commission");
-
                     b.Property<int>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
@@ -1798,10 +1728,6 @@ namespace OnlineSales.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("ref_no");
-
-                    b.Property<decimal>("Refund")
-                        .HasColumnType("numeric")
-                        .HasColumnName("refund");
 
                     b.Property<string>("Source")
                         .HasColumnType("text")
@@ -1870,6 +1796,11 @@ namespace OnlineSales.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("currency_total");
 
+                    b.Property<string>("LicenseCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("license_code");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
@@ -1914,71 +1845,6 @@ namespace OnlineSales.Migrations
                         .HasDatabaseName("ix_order_item_order_id");
 
                     b.ToTable("order_item", (string)null);
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.Promotion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("code");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("end_date");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text")
-                        .HasColumnName("source");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("start_date");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_promotion");
-
-                    b.HasIndex("Code")
-                        .IsUnique()
-                        .HasDatabaseName("ix_promotion_code");
-
-                    b.ToTable("promotion", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
@@ -2356,32 +2222,6 @@ namespace OnlineSales.Migrations
                     b.Navigation("DealPipeline");
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Discount", b =>
-                {
-                    b.HasOne("OnlineSales.Entities.Order", "Order")
-                        .WithMany("Discounts")
-                        .HasForeignKey("OrderId")
-                        .HasConstraintName("fk_discount_order_order_id");
-
-                    b.HasOne("OnlineSales.Entities.OrderItem", "OrderItem")
-                        .WithOne("Discount")
-                        .HasForeignKey("OnlineSales.Entities.Discount", "OrderItemId")
-                        .HasConstraintName("fk_discount_order_item_order_item_id");
-
-                    b.HasOne("OnlineSales.Entities.Promotion", "Promotion")
-                        .WithMany()
-                        .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_discount_promotion_promotion_id");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("OrderItem");
-
-                    b.Navigation("Promotion");
-                });
-
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
@@ -2494,14 +2334,7 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
-                    b.Navigation("Discounts");
-
                     b.Navigation("OrderItems");
-                });
-
-            modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
-                {
-                    b.Navigation("Discount");
                 });
 #pragma warning restore 612, 618
         }

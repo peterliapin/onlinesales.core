@@ -38,13 +38,24 @@ namespace OnlineSales.Tasks
         {
             var bulkPayload = new StringBuilder();
 
+            var existedIndices = GetExistedIndices();
+
+            var newIndexNames = new HashSet<string>();
+
             foreach (var item in nextBatch)
             {
                 var entityState = item.EntityState;
 
+                var indexName = GetIndexName(item.ObjectType);
+
+                if (!existedIndices.Contains(indexName))
+                {
+                    newIndexNames.Add(indexName);
+                }
+
                 if (entityState == EntityState.Added || entityState == EntityState.Modified)
                 {
-                    var createItem = new { index = new { _index = GetIndexName(item.ObjectType), _id = item.ObjectId } };
+                    var createItem = new { index = new { _index = indexName, _id = item.ObjectId } };
                     var data = JsonHelper.Deserialize<Dictionary<string, object>>(item.Data);
                     data!.Add(changeLogId, item.Id);
                     bulkPayload.AppendLine(JsonHelper.Serialize(createItem));
@@ -53,8 +64,17 @@ namespace OnlineSales.Tasks
 
                 if (entityState == EntityState.Deleted)
                 {
-                    var deleteItem = new { delete = new { _index = GetIndexName(item.ObjectType), _id = item.ObjectId } };
+                    var deleteItem = new { delete = new { _index = indexName, _id = item.ObjectId } };
                     bulkPayload.AppendLine(JsonHelper.Serialize(deleteItem));
+                }
+            }
+
+            foreach (var indexName in newIndexNames)
+            {
+                var resp = esDbContext.ElasticClient.Indices.Create(indexName, c => c.Settings(s => s.Analysis(a => a.Analyzers(an => an.Custom("default", ca => ca.Tokenizer("uax_url_email").Filters("lowercase"))))));
+                if (!resp.IsValid)
+                {
+                    throw new ESSyncTaskException($"Cannot create index {indexName}");
                 }
             }
 
@@ -98,6 +118,17 @@ namespace OnlineSales.Tasks
         private string GetIndexName(string loggedTypeName)
         {
             return prefix + loggedTypeName.ToLower();
+        }
+
+        private HashSet<string> GetExistedIndices()
+        {
+            var response = esDbContext.ElasticClient.Indices.GetAlias(Indices.All);
+            if (!response.IsValid)
+            {
+                throw new ESSyncTaskException("Cannot get existed indices list");
+            }
+
+            return response.Indices.Keys.Select(k => k.Name).ToHashSet();
         }
 
         public class ESSyncTaskException : Exception

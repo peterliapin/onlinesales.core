@@ -5,12 +5,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.2.9-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.12-pre</ReleaseVersion>
+    <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\src\OnlineSales\bin\$(Configuration)\$(TargetFramework)\plugins\$(AssemblyName)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <ConsolePause>true</ConsolePause>
+    <Commandlineparameters></Commandlineparameters>
+    <LangVersion>Default</LangVersion>
+    <NoStdLib>true</NoStdLib>
+    <WarningsNotAsErrors></WarningsNotAsErrors>
+    <Optimize>true</Optimize>
+    <NoStdLib>true</NoStdLib>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="pluginsettings.json">

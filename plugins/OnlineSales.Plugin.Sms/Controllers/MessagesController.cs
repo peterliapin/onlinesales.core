@@ -67,7 +67,7 @@ public class MessagesController : Controller
                 Sender = smsService.GetSender(recipient),
                 Recipient = smsDetails.Recipient,
                 Message = smsDetails.Message,
-                Status = Entities.SmsLog.SmsStatus.NotSent,
+                Status = SmsLog.SmsStatus.NotSent,
             };
 
             dbContext.SmsLogs!.Add(smsLog);

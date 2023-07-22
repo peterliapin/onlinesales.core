@@ -6,7 +6,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IDealService : ISaveService<Deal>
+    public interface IDealService : IEntityService<Deal>
     {
     }
 }

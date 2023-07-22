@@ -19,10 +19,10 @@ namespace OnlineSales.Services
 
         private static HashSet<string> disposableDomains = InitDomainsList("disposable_domains.txt");
 
-        private readonly PgDbContext pgDbContext;
-
         private readonly LookupClient lookupClient;
         private readonly IMxVerifyService mxVerifyService;
+
+        private PgDbContext pgDbContext;
 
         public DomainService(PgDbContext pgDbContext, IMxVerifyService mxVerifyService)
         {
@@ -118,6 +118,11 @@ namespace OnlineSales.Services
                 Log.Error(ex.Message);
                 return string.Empty;
             }
+        }
+
+        public void SetDBContext(PgDbContext pgDbContext)
+        {
+            this.pgDbContext = pgDbContext;
         }
 
         private static HashSet<string> InitDomainsList(string filename)

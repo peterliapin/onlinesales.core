@@ -9,9 +9,9 @@ using OnlineSales.Interfaces;
 namespace OnlineSales.Services
 {
     public class OrderItemService : IOrderItemService
-    {
-        private readonly PgDbContext pgDbContext;
+    {        
         private readonly OrderService orderService;
+        private PgDbContext pgDbContext;
 
         public OrderItemService(PgDbContext pgDbContext, OrderService orderService)
         {
@@ -30,6 +30,8 @@ namespace OnlineSales.Services
             orderItem.CurrencyTotal = CalculateOrderItemCurrencyTotal(orderItem);
             orderItem.Total = CalculateOrderItemTotal(orderItem, orderItem.Order!.ExchangeRate);
 
+            orderService.RecalculateOrder(orderItem.Order!);
+
             if (orderItem.Id > 0)
             {
                 pgDbContext.OrderItems!.Update(orderItem);
@@ -37,14 +39,17 @@ namespace OnlineSales.Services
             else
             {
                 await pgDbContext.OrderItems!.AddAsync(orderItem);
-            }
-
-            orderService.RecalculateOrder(orderItem.Order!);
+            }            
         }
 
         public Task SaveRangeAsync(List<OrderItem> items)
         {
             throw new NotImplementedException();
+        }
+
+        public void SetDBContext(PgDbContext pgDbContext)
+        {
+            this.pgDbContext = pgDbContext;
         }
 
         private decimal CalculateOrderItemCurrencyTotal(OrderItem orderItem)

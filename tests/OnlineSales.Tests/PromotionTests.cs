@@ -5,7 +5,7 @@
 using OnlineSales.Tests.TestEntities;
 
 namespace OnlineSales.Tests;
-public class PromotionTests : SimpleTableTests<Promotion, TestPromotion, PromotionUpdateDto, ISaveService<Promotion>>
+public class PromotionTests : SimpleTableTests<Promotion, TestPromotion, PromotionUpdateDto, IEntityService<Promotion>>
 {
     public PromotionTests()
         : base("/api/promotion")

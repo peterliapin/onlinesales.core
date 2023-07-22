@@ -5,7 +5,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.2.9-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.12-pre</ReleaseVersion>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
@@ -27,9 +27,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.67" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.13.11" />
-    <PackageReference Include="Twilio" Version="6.6.1" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.200.3" />
+    <PackageReference Include="libphonenumber-csharp" Version="8.13.16" />
+    <PackageReference Include="Twilio" Version="6.10.0" />
     <!-- Insert additional references above this line -->
   </ItemGroup>
 
