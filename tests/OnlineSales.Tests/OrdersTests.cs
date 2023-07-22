@@ -11,7 +11,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
-public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, ISaveService<Order>>
+public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IEntityService<Order>>
 {
     public OrdersTests()
         : base("/api/orders")
@@ -35,7 +35,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te1st 4 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
-        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
+        App.PopulateBulkData<Order, IEntityService<Order>>(bulkEntitiesList);
 
         await SyncElasticSearch();
 
@@ -62,7 +62,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("5", tc => tc.AffiliateName = "Test1 Test2 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
-        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
+        App.PopulateBulkData<Order, IEntityService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][ContactIp][eq]=&query=q");
@@ -102,7 +102,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("1", tc => tc.AffiliateName = "Test1 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
-        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
+        App.PopulateBulkData<Order, IEntityService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][CreatedAt][gt]=&query=q", HttpStatusCode.BadRequest);
@@ -134,7 +134,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = "Te*st 3 q", fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
 
-        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
+        App.PopulateBulkData<Order, IEntityService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
         var result = await GetTest<List<Order>>(itemsUrl + "?filter[where][AffiliateName][contains]=*Te\\*st*&query=q");
@@ -157,8 +157,8 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
 
         var fkItem = CreateFKItem().Result;
         var fkId = fkItem.Item1;
-        App.PopulateBulkData<Order, ISaveService<Order>>(mapper.Map<Order>(TestData.GenerateAndPopulateAttributes<TestOrder>("1", o => o.AffiliateName = affName, fkId)));
-        App.PopulateBulkData<Order, ISaveService<Order>>(mapper.Map<List<OrderItem>>(TestData.GenerateAndPopulateAttributes<TestOrderItem>(numberOfOrderItems, null, 1)));
+        App.PopulateBulkData<Order, IEntityService<Order>>(mapper.Map<Order>(TestData.GenerateAndPopulateAttributes<TestOrder>("1", o => o.AffiliateName = affName, fkId)));
+        App.PopulateBulkData<Order, IEntityService<Order>>(mapper.Map<List<OrderItem>>(TestData.GenerateAndPopulateAttributes<TestOrderItem>(numberOfOrderItems, null, 1)));
         await SyncElasticSearch();
 
         var orderWithContactAndItems = await GetTest<List<OrderDetailsDto>>(itemsUrl + $"?query={affName}&filter[include]=Contact&filter[include]=OrderItems&filter[where][Id]=1");
@@ -205,7 +205,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
         bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>("4", tc => tc.AffiliateName = testAN, fkId);
         bulkEntitiesList.Add(mapper.Map<Order>(bulkList));
-        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
+        App.PopulateBulkData<Order, IEntityService<Order>>(bulkEntitiesList);
         await SyncElasticSearch();
 
         var result = await GetTest<List<Order>>(itemsUrl + "?query=fatefully&filter[order]=Id");
@@ -241,7 +241,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IS
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>(entitiesNumber, to => to.AffiliateName = "AffiliateName", fkId);
         var bulkEntitiesList = mapper.Map<List<Order>>(bulkList);
 
-        App.PopulateBulkData<Order, ISaveService<Order>>(bulkEntitiesList);
+        App.PopulateBulkData<Order, IEntityService<Order>>(bulkEntitiesList);
 
         var totalCountHeader = string.Empty;
         while (totalCountHeader != $"{entitiesNumber}")

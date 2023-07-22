@@ -106,6 +106,10 @@ public class PgDbContext : IdentityDbContext<User>
 
     public virtual DbSet<DealPipelineStage>? DealPipelineStages { get; set; }
 
+    public virtual DbSet<Promotion>? Promotions { get; set; }
+
+    public virtual DbSet<Discount>? Discounts { get; set; }
+
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         var result = 0;

@@ -5,7 +5,7 @@
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Tests;
-public class DealPipelinesTests : SimpleTableTests<DealPipeline, TestDealPipeline, DealPipelineUpdateDto, ISaveService<DealPipeline>>
+public class DealPipelinesTests : SimpleTableTests<DealPipeline, TestDealPipeline, DealPipelineUpdateDto, IEntityService<DealPipeline>>
 {
     public DealPipelinesTests()
         : base("/api/deal-pipelines")

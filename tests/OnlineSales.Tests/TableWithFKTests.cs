@@ -8,7 +8,7 @@ public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, 
     where T : BaseEntity
     where TC : class
     where TU : new()
-    where TS : ISaveService<T>
+    where TS : IEntityService<T>
 {
     protected TableWithFKTests(string url)
         : base(url)

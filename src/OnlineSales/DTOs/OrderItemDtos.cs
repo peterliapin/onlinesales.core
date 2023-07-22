@@ -18,9 +18,6 @@ public class OrderItemCreateDto
     public string ProductName { get; set; } = string.Empty;
 
     [Required]
-    public string LicenseCode { get; set; } = string.Empty;
-
-    [Required]
     public decimal UnitPrice { get; set; } = 0;
 
     [CurrencyCode]

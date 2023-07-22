@@ -6,7 +6,7 @@ using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Tests;
 
-public class DealPipelineStagesTests : TableWithFKTests<DealPipelineStage, TestPipelineStage, DealPipelineStageUpdateDto, ISaveService<DealPipelineStage>>
+public class DealPipelineStagesTests : TableWithFKTests<DealPipelineStage, TestPipelineStage, DealPipelineStageUpdateDto, IEntityService<DealPipelineStage>>
 {
     public DealPipelineStagesTests()
         : base("/api/deal-pipeline-stages")

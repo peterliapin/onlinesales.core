@@ -51,7 +51,7 @@ public class TestApplication : WebApplicationFactory<Program>
 
     public void PopulateBulkData<T, TS>(dynamic bulkItems)
         where T : BaseEntityWithId
-        where TS : ISaveService<T>
+        where TS : IEntityService<T>
     {
         using (var scope = Services.CreateScope())
         {

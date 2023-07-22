@@ -1,10 +1,8 @@
-﻿// <copyright file="BaseImportDto.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="BaseImportDtos.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
-using OnlineSales.Entities;
 
 namespace OnlineSales.DTOs;
 
