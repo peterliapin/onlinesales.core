@@ -28,8 +28,8 @@ namespace OnlineSales.Services
                 pgDbContext.Entry(order).Collection(o => o.Discounts!).Load();
             }
 
-            order.ItemsCurrencyTotal = order.OrderItems!.Sum(oi => oi.CurrencyTotal);
-            order.CurrencyTotal = order.ItemsCurrencyTotal - order.Discounts!.Sum(d => d.Value) - order.Refund;
+            var itemsCurrencyTotalSum = order.OrderItems!.Sum(oi => oi.CurrencyTotal);
+            order.CurrencyTotal = itemsCurrencyTotalSum - order.Discounts!.Sum(d => d.Value) - order.Refund;
 
             order.Total = order.CurrencyTotal * order.ExchangeRate;
             order.Quantity = order.OrderItems!.Sum(oi => oi.Quantity);

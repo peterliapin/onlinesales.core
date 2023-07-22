@@ -1782,10 +1782,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("exchange_rate");
 
-                    b.Property<decimal>("ItemsCurrencyTotal")
-                        .HasColumnType("numeric")
-                        .HasColumnName("items_currency_total");
-
                     b.Property<string>("OrderNumber")
                         .HasColumnType("text")
                         .HasColumnName("order_number");
