@@ -1879,10 +1879,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
-                    b.Property<string>("RefNo")
-                        .HasColumnType("text")
-                        .HasColumnName("ref_no");
-
                     b.Property<string>("Source")
                         .HasColumnType("text")
                         .HasColumnName("source");

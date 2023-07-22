@@ -14,8 +14,8 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    [Migration("20230719121326_Promotions")]
-    partial class Promotions
+    [Migration("20230722210218_AddPromotionsAndDiscounts")]
+    partial class AddPromotionsAndDiscounts
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1026,6 +1026,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
 
+                    b.Property<int?>("OrderItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("order_item_id");
+
                     b.Property<int>("PromotionId")
                         .HasColumnType("integer")
                         .HasColumnName("promotion_id");
@@ -1055,6 +1059,10 @@ namespace OnlineSales.Migrations
 
                     b.HasIndex("OrderId")
                         .HasDatabaseName("ix_discount_order_id");
+
+                    b.HasIndex("OrderItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_discount_order_item_id");
 
                     b.HasIndex("PromotionId")
                         .HasDatabaseName("ix_discount_promotion_id");
@@ -1861,10 +1869,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("currency_total");
 
-                    b.Property<int?>("DiscountId")
-                        .HasColumnType("integer")
-                        .HasColumnName("discount_id");
-
                     b.Property<int>("OrderId")
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
@@ -1877,10 +1881,6 @@ namespace OnlineSales.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
-
-                    b.Property<string>("RefNo")
-                        .HasColumnType("text")
-                        .HasColumnName("ref_no");
 
                     b.Property<string>("Source")
                         .HasColumnType("text")
@@ -1909,9 +1909,6 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_order_item");
 
-                    b.HasIndex("DiscountId")
-                        .HasDatabaseName("ix_order_item_discount_id");
-
                     b.HasIndex("OrderId")
                         .HasDatabaseName("ix_order_item_order_id");
 
@@ -1927,6 +1924,11 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -1939,7 +1941,7 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_date");
 
@@ -1948,16 +1950,11 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<string>("PromotionCode")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("promotion_code");
-
                     b.Property<string>("Source")
                         .HasColumnType("text")
                         .HasColumnName("source");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_date");
 
@@ -1976,9 +1973,9 @@ namespace OnlineSales.Migrations
                     b.HasKey("Id")
                         .HasName("pk_promotion");
 
-                    b.HasIndex("PromotionCode")
+                    b.HasIndex("Code")
                         .IsUnique()
-                        .HasDatabaseName("ix_promotion_promotion_code");
+                        .HasDatabaseName("ix_promotion_code");
 
                     b.ToTable("promotion", (string)null);
                 });
@@ -2360,10 +2357,15 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.Discount", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Order", null)
+                    b.HasOne("OnlineSales.Entities.Order", "Order")
                         .WithMany("Discounts")
                         .HasForeignKey("OrderId")
                         .HasConstraintName("fk_discount_order_order_id");
+
+                    b.HasOne("OnlineSales.Entities.OrderItem", "OrderItem")
+                        .WithOne("Discount")
+                        .HasForeignKey("OnlineSales.Entities.Discount", "OrderItemId")
+                        .HasConstraintName("fk_discount_order_item_order_item_id");
 
                     b.HasOne("OnlineSales.Entities.Promotion", "Promotion")
                         .WithMany()
@@ -2371,6 +2373,10 @@ namespace OnlineSales.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_discount_promotion_promotion_id");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("OrderItem");
 
                     b.Navigation("Promotion");
                 });
@@ -2436,19 +2442,12 @@ namespace OnlineSales.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.Discount", "Discount")
-                        .WithMany()
-                        .HasForeignKey("DiscountId")
-                        .HasConstraintName("fk_order_item_discount_discount_id");
-
                     b.HasOne("OnlineSales.Entities.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_order_item_order_order_id");
-
-                    b.Navigation("Discount");
 
                     b.Navigation("Order");
                 });
@@ -2497,6 +2496,11 @@ namespace OnlineSales.Migrations
                     b.Navigation("Discounts");
 
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
+                {
+                    b.Navigation("Discount");
                 });
 #pragma warning restore 612, 618
         }

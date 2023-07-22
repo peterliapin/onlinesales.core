@@ -34,14 +34,14 @@ namespace OnlineSales.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_files", x => x.id);
+                    table.PrimaryKey("pk_file", x => x.id);
                 });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "files");
+            migrationBuilder.DropTable(name: "file");
         }
     }
 }

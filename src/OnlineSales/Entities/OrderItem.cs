@@ -21,12 +21,6 @@ public class OrderItem : BaseEntity
     [Required]
     public int OrderId { get; set; }
 
-    /// <summary>
-    /// Gets or sets a unique reference numbers for order item.
-    /// </summary>
-    [Searchable]
-    public string? RefNo { get; set; } = string.Empty;
-
     [JsonIgnore]
     [ForeignKey("OrderId")]
     public virtual Order? Order { get; set; }

@@ -1439,9 +1439,9 @@ namespace OnlineSales.Migrations
                         .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
-                        .HasName("pk_files");
+                        .HasName("pk_file");
 
-                    b.ToTable("files", (string)null);
+                    b.ToTable("file", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.IpDetails", b =>
