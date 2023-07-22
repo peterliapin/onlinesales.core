@@ -73,7 +73,7 @@ public class Program
         builder.Services.AddSingleton<IEmailService, EmailService>();
         builder.Services.AddTransient<CommentableControllerExtension, CommentableControllerExtension>();
         builder.Services.AddScoped<IDealService, DealService>();
-        builder.Services.AddTransient<OrderService, OrderService>();
+        builder.Services.AddTransient<IOrderService, OrderService>();
 
         ConfigureCacheProfiles(builder);
 
