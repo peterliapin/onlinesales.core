@@ -10,10 +10,10 @@ namespace OnlineSales.Services
 {
     public class OrderItemService : IOrderItemService
     {        
-        private readonly OrderService orderService;
+        private readonly IOrderService orderService;
         private PgDbContext pgDbContext;
 
-        public OrderItemService(PgDbContext pgDbContext, OrderService orderService)
+        public OrderItemService(PgDbContext pgDbContext, IOrderService orderService)
         {
             this.pgDbContext = pgDbContext;
             this.orderService = orderService;
