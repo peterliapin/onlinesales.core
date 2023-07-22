@@ -2,11 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.ComponentModel.DataAnnotations;
-using CsvHelper.Configuration.Attributes;
-using OnlineSales.DataAnnotations;
-using OnlineSales.Entities;
-
 namespace OnlineSales.DTOs;
 
 public class ActivityLogDetailsDto

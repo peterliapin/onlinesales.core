@@ -1,4 +1,4 @@
-﻿// <copyright file="PromotionDto.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="PromotionDtos.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 

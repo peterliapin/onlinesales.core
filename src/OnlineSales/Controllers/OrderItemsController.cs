@@ -33,11 +33,11 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<OrderItemDetailsDto>> Post([FromBody] OrderItemCreateDto value)
     {
-        var existOrder = await dbContext.Orders!
+        var order = await dbContext.Orders!
                             .Include(o => o.OrderItems)
                             .FirstOrDefaultAsync(o => o.Id == value.OrderId);
 
-        if (existOrder == null)
+        if (order == null)
         {
             ModelState.AddModelError("OrderId", "The referenced order was not found");
 
@@ -45,7 +45,7 @@ public class OrderItemsController : BaseControllerWithImport<OrderItem, OrderIte
         }
 
         var orderItem = mapper.Map<OrderItem>(value);
-        orderItem.Order = existOrder;
+        orderItem.Order = order;
 
         await orderItemService.SaveAsync(orderItem);
 

@@ -1,29 +1,34 @@
-﻿// <copyright file="EmailGroupDto.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="DealPipelineStageDtos.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using CsvHelper.Configuration.Attributes;
 using OnlineSales.DataAnnotations;
-using OnlineSales.Entities;
-using static OnlineSales.Helpers.JsonHelper;
 
 namespace OnlineSales.DTOs;
 
-public class EmailGroupCreateDto
+public class DealPipelineStageCreateDto
 {
     [Required]
     public string Name { get; set; } = string.Empty;
+
+    [Required]
+    public int DealPipelineId { get; set; }
+
+    [Required]
+    public int Order { get; set; }
 }
 
-public class EmailGroupUpdateDto
+public class DealPipelineStageUpdateDto
 {
     [MinLength(1)]
     public string? Name { get; set; }
+
+    public int? Order { get; set; }
 }
 
-public class EmailGroupDetailsDto : EmailGroupCreateDto
+public class DealPipelineStageDetailsDto : DealPipelineStageCreateDto
 {
     public int Id { get; set; }
 
@@ -32,5 +37,5 @@ public class EmailGroupDetailsDto : EmailGroupCreateDto
     public DateTime? UpdatedAt { get; set; }
 
     [Ignore]
-    public List<EmailTemplateDetailsDto>? EmailTemplates { get; set; }
+    public DealPipelineDetailsDto? DealPipeline { get; set; }
 }
