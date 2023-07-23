@@ -50,6 +50,7 @@ namespace OnlineSales.Services
         public void SetDBContext(PgDbContext pgDbContext)
         {
             this.pgDbContext = pgDbContext;
+            orderService.SetDBContext(pgDbContext);
         }
 
         private decimal CalculateOrderItemCurrencyTotal(OrderItem orderItem)
