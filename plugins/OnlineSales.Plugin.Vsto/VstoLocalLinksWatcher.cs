@@ -32,10 +32,12 @@ public class VstoLocalLinksWatcher : IDisposable
 
         if (Directory.Exists(vstoLocalPath))
         {
-            exeWatcher = new FileSystemWatcher(vstoLocalPath);
-            exeWatcher.NotifyFilter = NotifyFilters.FileName;
-            exeWatcher.IncludeSubdirectories = true;
-            exeWatcher.Filter = "*.exe";
+            exeWatcher = new FileSystemWatcher(vstoLocalPath)
+            {
+                NotifyFilter = NotifyFilters.FileName,
+                IncludeSubdirectories = true,
+                Filter = "*.exe",
+            };
             exeWatcher.Created += HandleChanged;
             exeWatcher.Deleted += HandleChanged;
             exeWatcher.Renamed += HandleRenamed;

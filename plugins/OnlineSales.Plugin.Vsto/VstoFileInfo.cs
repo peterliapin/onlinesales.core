@@ -27,7 +27,7 @@ public class VstoFileInfo : IFileInfo
     {
         get
         {
-            return File.GetLastWriteTime(FullPath);
+            return new FileInfo(FullPath).LastWriteTime; // File.GetLastWriteTime(FullPath);
         }
     }
 
@@ -35,7 +35,7 @@ public class VstoFileInfo : IFileInfo
     {
         get
         {
-            return File.ReadAllBytes(FullPath).Length;
+            return new FileInfo(FullPath).Length; // File.ReadAllBytes(FullPath).Length;
         }
     }
 

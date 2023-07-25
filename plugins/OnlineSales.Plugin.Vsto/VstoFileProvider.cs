@@ -38,19 +38,22 @@ public sealed class VstoFileProvider : IFileProvider
     public IFileInfo GetFileInfo(string subpath)
     {
         // Fix Unix CaseSensetive mode ---------------------------
-        var validFilesByExtension = Directory.GetFiles(Path.Combine(vstoRootPath, Path.GetDirectoryName(subpath)![1..]), $"*{Path.GetExtension(subpath)}", SearchOption.TopDirectoryOnly).ToArray();
-
-        var fileFromDirectory = validFilesByExtension.FirstOrDefault(f => f.ToLower().EndsWith(subpath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar).ToLower()));
+        var targetPath = Path.Combine(vstoRootPath, Path.GetDirectoryName(subpath)![1..]);
+        var targetName = Path.GetFileName(subpath);
+        var validFilesByExtension = Directory.GetFiles(targetPath, $"*{Path.GetExtension(subpath)}", SearchOption.AllDirectories).ToArray();
+        var fileFromDirectory = validFilesByExtension.FirstOrDefault(f => f.ToLower().EndsWith(targetName.ToLower()));
 
         if (string.IsNullOrEmpty(fileFromDirectory))
         {
             return new NotFoundFileInfo(subpath);
         }
+        else
+        {
+            fileFromDirectory = fileFromDirectory[vstoRootPath.Length..];
+            subpath = fileFromDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
 
         // -------------------------------------------------------
-
-        fileFromDirectory = fileFromDirectory.Substring(fileFromDirectory.Length - subpath.Length);
-        subpath = fileFromDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         var result = new VstoFileInfo(
             vstoRootPath,
@@ -82,7 +85,7 @@ public sealed class VstoFileProvider : IFileProvider
 
     private bool ParseContext(out VstoFileType fileType, out string ipAddress, out string version, out string subfolder, string subpath)
     {
-        if (!Enum.TryParse(System.IO.Path.GetExtension(subpath).Replace(".", string.Empty), true, out fileType))
+        if (!Enum.TryParse(Path.GetExtension(subpath).Replace(".", string.Empty), true, out fileType))
         {
             fileType = VstoFileType.None;
         }
@@ -97,13 +100,23 @@ public sealed class VstoFileProvider : IFileProvider
             subfolder = Path.GetDirectoryName(subpath) ?? string.Empty;
             if (subfolder[0] == Path.DirectorySeparatorChar)
             {
-                subfolder = subfolder.Substring(1);
+                subfolder = subfolder[1..];
             }
 
             var request = httpContextHelper.Request;
 
             string[] verQuery = { "version", "ver", "v" };
             version = request.Query.FirstOrDefault(q => verQuery.Contains(q.Key)).Value.ToString() ?? string.Empty;
+
+            // find version if link looks like "/vsto/pro/en/XLTools.exe?=5.8.0.21596"
+            if ((request.QueryString.Value?.StartsWith("?=") ?? false) && request.Query[string.Empty].FirstOrDefault()?.Length > 0) 
+            {
+                var verVal = request.Query[string.Empty].FirstOrDefault();
+                if (Version.TryParse(verVal, out var parsed))
+                {
+                    version = parsed.ToString(); // tested - OK
+                }
+            }
         }
 
         return fileType != VstoFileType.None;
@@ -144,11 +157,7 @@ public sealed class VstoFileProvider : IFileProvider
             var manifestPath = stat.Subfolder;
             if (!string.IsNullOrEmpty(stat.Version) && stat.ExpireDateTime > DateTime.UtcNow)
             {
-                manifestPath = Path.Join(
-                    manifestPath,
-                    Path.Join(
-                        "Application Files",
-                        Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')));
+                manifestPath = Path.Join(manifestPath, Path.Join("Application Files", Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')), result.Name);
             }
             else
             {
