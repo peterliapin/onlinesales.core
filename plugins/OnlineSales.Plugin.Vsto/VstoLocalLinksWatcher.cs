@@ -4,9 +4,12 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Data;
+
 using Quartz.Util;
+
 using Serilog;
 
 namespace OnlineSales.Plugin.Vsto;

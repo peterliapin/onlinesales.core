@@ -5,6 +5,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
+
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Data;
 

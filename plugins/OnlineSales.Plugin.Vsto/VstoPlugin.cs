@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
+
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Configuration;
 using OnlineSales.Plugin.Vsto.Data;

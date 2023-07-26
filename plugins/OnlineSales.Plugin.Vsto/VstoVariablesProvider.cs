@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace OnlineSales.Plugin.Vsto;
 
 public class VstoVariablesProvider : IVariablesProvider
