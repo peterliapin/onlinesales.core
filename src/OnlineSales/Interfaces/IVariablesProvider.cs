@@ -7,4 +7,6 @@ namespace OnlineSales.Interfaces;
 public interface IVariablesProvider
 {
     public Dictionary<string, string> GetVariables(string language);
+
+    public string[] GetProjectVersionsList(string project, string version, string language);
 }
