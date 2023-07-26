@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Mvc;
+
 namespace OnlineSales.Plugin.Vsto;
 
 public class VstoVariablesProvider : IVariablesProvider
@@ -21,5 +23,24 @@ public class VstoVariablesProvider : IVariablesProvider
         }
 
         return variables;
+    }
+
+    public string[] GetProjectVersionsList(string project, string version, string language)
+    {
+        var ver = version.Replace(".", "_");
+
+        var dirs = Directory.GetDirectories(VstoPlugin.VstoLocalPath, $"{project}_{ver}*", SearchOption.AllDirectories);
+        if (dirs.Length == 0)
+        {
+            return Array.Empty<string>();
+        }
+
+        // filter by language
+        dirs = dirs.Where(d => d.Contains($"/{language}/") || d.Contains($"\\{language}\\")).ToArray()!;
+
+        // select versions from full directory path
+        dirs = dirs.Select(d => Path.GetFileName(d)[project.Length..].Trim('_')).ToArray();
+
+        return dirs;
     }
 }
