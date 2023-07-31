@@ -16,18 +16,6 @@ public class VariablesService : IVariablesService
         this.variableProviders = variableProviders;
     }
 
-    public string[] GetProjectVersionsList(string project, string version, string language)
-    {
-        var variables = new List<string>();
-
-        foreach (var variableProvider in variableProviders)
-        {
-            variables.AddRange(variableProvider.GetProjectVersionsList(project, version, language));
-        }
-
-        return variables.ToArray();
-    }
-
     public Dictionary<string, string> GetVariables(string language)
     {
         var variables = new Dictionary<string, string>();

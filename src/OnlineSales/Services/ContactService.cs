@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -12,18 +13,21 @@ namespace OnlineSales.Services
     public class ContactService : IContactService
     {
         private readonly IDomainService domainService;
+        private readonly IHttpContextHelper httpContextHelper;
         private PgDbContext pgDbContext;        
 
-        public ContactService(PgDbContext pgDbContext, IDomainService domainService)
+        public ContactService(PgDbContext pgDbContext, IDomainService domainService, IHttpContextHelper httpContextHelper)
         {
             this.pgDbContext = pgDbContext;
             this.domainService = domainService;
+            this.httpContextHelper = httpContextHelper;
         }
 
         public async Task SaveAsync(Contact contact)
         {
             await EnrichWithDomainId(contact);
             EnrichWithAccountId(contact);
+            EnrichWithIp(contact);
 
             if (contact.Id > 0)
             {
@@ -190,6 +194,27 @@ namespace OnlineSales.Services
             {
                 contact.AccountId = domain.AccountId;
             }
+        }
+
+        private void EnrichWithIp(Contact contact)
+        { 
+            var ipAddress = httpContextHelper!.IpAddressV4;
+
+            var found = pgDbContext.ContactIp!.FirstOrDefault(c => c.ContactId == contact.Id && c.IpAddress == ipAddress);
+
+            if (found is not null)
+            {
+                return;
+            }
+
+            found = new ContactIP
+            {
+                Contact = contact,
+                IpAddress = ipAddress!,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            _ = pgDbContext.ContactIp!.Add(found);
         }
     }
 }

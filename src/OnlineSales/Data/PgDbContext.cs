@@ -64,6 +64,8 @@ public class PgDbContext : IdentityDbContext<User>
 
     public virtual DbSet<Contact>? Contacts { get; set; }
 
+    public virtual DbSet<ContactIP>? ContactIp { get; set; }
+
     public virtual DbSet<Order>? Orders { get; set; }
 
     public virtual DbSet<OrderItem>? OrderItems { get; set; }

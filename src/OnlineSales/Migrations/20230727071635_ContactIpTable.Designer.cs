@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230727071635_ContactIpTable")]
+    partial class ContactIpTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -714,14 +717,6 @@ namespace OnlineSales.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
                     b.Property<string>("IpAddress")
                         .IsRequired()
                         .HasColumnType("text")
@@ -734,14 +729,6 @@ namespace OnlineSales.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
 
                     b.HasKey("Id")
                         .HasName("pk_contact_ip");
