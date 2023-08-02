@@ -1,4 +1,4 @@
-﻿// <copyright file="ContactIP.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="ContactIp.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -14,7 +14,7 @@ namespace OnlineSales.Entities;
 [Table("contact_ip")]
 [SupportsElastic]
 [SupportsChangeLog]
-public class ContactIP : BaseEntity
+public class ContactIp : BaseEntity
 {
     /// <summary>
     /// Gets or sets reference to the contact table.

@@ -1,4 +1,4 @@
-﻿// <copyright file="IContactService.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="IContactIpService.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -6,10 +6,8 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IContactService : IEntityService<Contact>
+    public interface IContactIpService : IEntityService<Contact>
     {
-        Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip);
-
         /// <summary>
         /// Update <see cref="Contact.LastIp"/> and return new <see  langword="IpAddress"/> back.
         /// </summary>

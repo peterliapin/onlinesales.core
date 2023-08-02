@@ -13,21 +13,21 @@ namespace OnlineSales.Services
     public class ContactService : IContactService
     {
         private readonly IDomainService domainService;
-        private readonly IHttpContextHelper httpContextHelper;
-        private PgDbContext pgDbContext;        
+        private readonly IContactIpService contactIpService;
+        private PgDbContext pgDbContext;
 
-        public ContactService(PgDbContext pgDbContext, IDomainService domainService, IHttpContextHelper httpContextHelper)
+        public ContactService(PgDbContext pgDbContext, IDomainService domainService, IContactIpService contactIpService)
         {
             this.pgDbContext = pgDbContext;
             this.domainService = domainService;
-            this.httpContextHelper = httpContextHelper;
+            this.contactIpService = contactIpService;
         }
 
         public async Task SaveAsync(Contact contact)
         {
             await EnrichWithDomainId(contact);
             EnrichWithAccountId(contact);
-            EnrichWithIp(contact);
+            await SaveIp(contact);
 
             if (contact.Id > 0)
             {
@@ -43,6 +43,7 @@ namespace OnlineSales.Services
         {
             await EnrichWithDomainIdAsync(contacts);
             EnrichWithAccountId(contacts);
+            await SaveIpRange(contacts);
 
             var sortedContacts = contacts.GroupBy(c => c.Id > 0);
 
@@ -86,6 +87,16 @@ namespace OnlineSales.Services
         {
             this.pgDbContext = pgDbContext;
             domainService.SetDBContext(pgDbContext);
+            contactIpService.SetDBContext(pgDbContext);
+        }
+
+        /// <summary>
+        /// Update <see cref="Contact.LastIp"/> and return new <see  langword="IpAddress"/> back.
+        /// </summary>
+        /// <param name="contact">Entity to update.</param>
+        public string? UpdateContactIp(Contact contact)
+        {
+            return contactIpService.UpdateContactIp(contact);
         }
 
         private async Task EnrichWithDomainId(Contact contact)
@@ -196,25 +207,14 @@ namespace OnlineSales.Services
             }
         }
 
-        private void EnrichWithIp(Contact contact)
-        { 
-            var ipAddress = httpContextHelper!.IpAddressV4;
+        private async Task SaveIp(Contact contact)
+        {
+            await contactIpService.SaveAsync(contact);
+        }
 
-            var found = pgDbContext.ContactIp!.FirstOrDefault(c => c.ContactId == contact.Id && c.IpAddress == ipAddress);
-
-            if (found is not null)
-            {
-                return;
-            }
-
-            found = new ContactIP
-            {
-                Contact = contact,
-                IpAddress = ipAddress!,
-                CreatedAt = DateTime.UtcNow,
-            };
-
-            _ = pgDbContext.ContactIp!.Add(found);
+        private async Task SaveIpRange(List<Contact> contacts)
+        {
+            await contactIpService.SaveRangeAsync(contacts);
         }
     }
 }

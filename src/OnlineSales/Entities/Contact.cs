@@ -120,6 +120,8 @@ public class Contact : BaseEntity, ICommentable
     [JsonIgnore]
     public virtual ICollection<Deal>? Deals { get; set; }
 
+    public string? LastIp { get; set; }
+
     public static string GetCommentableType()
     {
         return "Contact";
