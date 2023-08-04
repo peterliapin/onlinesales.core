@@ -28,6 +28,11 @@ namespace OnlineSales.Services
                 _ = UpdateContactIp(c);
             }
 
+            if(c.LastIp is null)
+            {
+                return;
+            }
+
             if (c.Id == 0 || pgDbContext.ContactIp!.Any(i => i.ContactId == c.Id && i.IpAddress == c.LastIp))
             {
                 await pgDbContext.ContactIp!.AddAsync(new ContactIp { IpAddress = c.LastIp!, Contact = c });
@@ -46,7 +51,7 @@ namespace OnlineSales.Services
                             _ = UpdateContactIp(c);
                         }
 
-                        return true;
+                        return c.LastIp is not null;
                     }
                     else
                     {
