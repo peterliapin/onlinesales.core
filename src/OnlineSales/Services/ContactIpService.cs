@@ -23,45 +23,28 @@ namespace OnlineSales.Services
 
         public async Task SaveAsync(Contact c)
         {
-            if (string.IsNullOrEmpty(c.LastIp))
-            {
-                _ = UpdateContactIp(c);
-            }
-
-            if(c.LastIp is null)
-            {
-                return;
-            }
-
-            if (c.Id == 0 || pgDbContext.ContactIp!.Any(i => i.ContactId == c.Id && i.IpAddress == c.LastIp))
-            {
-                await pgDbContext.ContactIp!.AddAsync(new ContactIp { IpAddress = c.LastIp!, Contact = c });
-            }
+            await SaveRangeAsync(new List<Contact>() { c });
         }
 
         public async Task SaveRangeAsync(List<Contact> contacts)
         {
-            var toAdd = contacts
-                .Where(c =>
-                {
-                    if (c.Id == 0)
-                    {
-                        if (string.IsNullOrEmpty(c.LastIp))
-                        {
-                            _ = UpdateContactIp(c);
-                        }
+            // Select all ContactIps as anonymous type { ip, id, contact } 
+            var all = pgDbContext.ContactIp!
+                .Select(c => new { ip = c.IpAddress, id = c.Id, contact = c.Contact! });
 
-                        return c.LastIp is not null;
-                    }
-                    else
-                    {
-                        return !pgDbContext.ContactIp!.Any(i => i.ContactId == c.Id && i.IpAddress == c.LastIp);
-                    }
-                })
-                .Select(c => new ContactIp { IpAddress = c.LastIp!, Contact = c })
-                .ToList();
+            var ex = contacts
+                /* Skip cantacts with empty LastIp */
+                .Where(c => !string.IsNullOrEmpty(c.LastIp))
+                /* Select all contacts as anonymous type { ip, id, contact } */
+                .Select(c => new { ip = c.LastIp, id = c.Id, contact = c })
+                /* skip all exists in database */
+                .Except(all!)
+                /* Select anonymous type as ContactIp */
+                .Select(a => new ContactIp { IpAddress = a.ip!, Contact = a.contact })
+                /* as array of ContactIp */
+                .ToArray();
 
-            await pgDbContext.ContactIp!.AddRangeAsync(toAdd);
+            await pgDbContext.ContactIp!.AddRangeAsync(ex);
         }
 
         public void SetDBContext(PgDbContext pgDbContext)

@@ -46,6 +46,7 @@ public abstract class BaseContactDto
 
     public int? Timezone { get; set; }
 
+    [LanguageCode(true)]
     public string? Language { get; set; }
 
     public Dictionary<string, string>? SocialMedia { get; set; }

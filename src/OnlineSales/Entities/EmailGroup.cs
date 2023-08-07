@@ -22,6 +22,7 @@ namespace OnlineSales.Entities
 
         [Required]
         [Searchable]
+        [LanguageCode]
         public string Language { get; set; } = string.Empty;
 
         [JsonIgnore]

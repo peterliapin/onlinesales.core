@@ -5,6 +5,8 @@
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
 
+using OnlineSales.DataAnnotations;
+
 namespace OnlineSales.DTOs;
 
 public class EmailTemplateCreateDto
@@ -26,6 +28,7 @@ public class EmailTemplateCreateDto
     public string FromName { get; set; } = string.Empty;
 
     [Required]
+    [LanguageCode]
     public string Language { get; set; } = string.Empty;
 
     [Required]

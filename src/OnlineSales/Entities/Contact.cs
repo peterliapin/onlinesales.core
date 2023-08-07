@@ -86,6 +86,7 @@ public class Contact : BaseEntity, ICommentable
     public int? Timezone { get; set; }
 
     [Searchable]
+    [LanguageCode]
     public string? Language { get; set; }
 
     [Searchable]

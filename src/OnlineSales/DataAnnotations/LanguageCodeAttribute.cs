@@ -4,9 +4,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace OnlineSales.DataAnnotations;
 
+/// <summary>
+/// Trust a property value must be like a 4 letter language string.
+/// </summary>
 public class LanguageCodeAttribute : ValidationAttribute
 {
     private readonly bool nullAllowed;
@@ -25,11 +29,13 @@ public class LanguageCodeAttribute : ValidationAttribute
 
         var languageCode = value as string;
 
-        if (CultureInfo.GetCultures(CultureTypes.AllCultures).FirstOrDefault(culture => culture.Name == languageCode) == null)
+        if (string.IsNullOrEmpty(languageCode) || !Regex.IsMatch(languageCode, "[a-z]{2}-[A-Z]{2}"))
         {
-            return new ValidationResult("Culture not found");
+            return new ValidationResult($"Language code '{languageCode}' is not match '[a-z]{{2}}-[A-Z]{{2}}' format.");
         }
 
-        return ValidationResult.Success;
+        return CultureInfo.GetCultureInfo(languageCode!, true) == null
+                ? new ValidationResult("Culture not found")
+                : ValidationResult.Success;
     }
 }

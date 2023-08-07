@@ -45,6 +45,7 @@ public class Content : BaseEntity, ICommentable
 
     [Searchable]
     [Required]
+    [LanguageCode]
     public string Language { get; set; } = string.Empty;
 
     [Searchable]

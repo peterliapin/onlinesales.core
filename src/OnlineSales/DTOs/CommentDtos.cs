@@ -17,15 +17,8 @@ public class CommentCreateBaseDto
     [EmailAddress]
     public string AuthorEmail
     {
-        get
-        {
-            return authorEmail;
-        }
-
-        set
-        {
-            authorEmail = value.ToLower();
-        }
+        get => authorEmail;
+        set => authorEmail = value.ToLower();
     }
 
     public string AuthorName { get; set; } = string.Empty;
@@ -40,6 +33,7 @@ public class CommentCreateBaseDto
     [Optional]
     public string? Source { get; set; }
 
+    [LanguageCode]
     public string Language { get; set; } = string.Empty;
 }
 
@@ -78,6 +72,7 @@ public class AnonymousCommentDetailsDto
 
     public string AvatarUrl { get; set; } = string.Empty;
 
+    [LanguageCode]
     public string Language { get; set; } = string.Empty;
 
     [Ignore]
@@ -115,15 +110,8 @@ public class CommentImportDto : BaseImportDto
     [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
     public string? AuthorEmail
     {
-        get
-        {
-            return authorEmail;
-        }
-
-        set
-        {
-            authorEmail = string.IsNullOrEmpty(value) ? null : value.ToLower();
-        }
+        get => authorEmail;
+        set => authorEmail = string.IsNullOrEmpty(value) ? null : value.ToLower();
     }
 
     [Optional]

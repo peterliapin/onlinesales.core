@@ -31,15 +31,8 @@ public class Domain : BaseEntityWithIdAndDates
     [Searchable]
     public string Name
     {
-        get
-        {
-            return name;
-        }
-
-        set
-        {
-            name = value.ToLower();
-        }
+        get => name;
+        set => name = value.ToLower();
     }
 
     [Searchable]
