@@ -28,7 +28,7 @@ public class EmailTemplateCreateDto
     public string FromName { get; set; } = string.Empty;
 
     [Required]
-    [LanguageCode]
+    [LanguageCode(true)]
     public string Language { get; set; } = string.Empty;
 
     [Required]

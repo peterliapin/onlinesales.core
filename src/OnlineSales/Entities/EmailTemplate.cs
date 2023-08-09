@@ -45,7 +45,7 @@ namespace OnlineSales.Entities
 
         [Required]
         [Searchable]
-        [LanguageCode]
+        [LanguageCode(true)]
         public string Language { get; set; } = string.Empty;
 
         /// <summary>

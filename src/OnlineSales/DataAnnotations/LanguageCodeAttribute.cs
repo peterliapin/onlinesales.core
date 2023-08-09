@@ -22,7 +22,7 @@ public class LanguageCodeAttribute : ValidationAttribute
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
-        if (nullAllowed && value == null)
+        if (nullAllowed && string.IsNullOrEmpty(value as string)) 
         {
             return ValidationResult.Success;
         }

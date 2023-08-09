@@ -13,7 +13,7 @@ public class TestEmailTemplate : EmailTemplateCreateDto
         this.BodyTemplate = $"TestEmailTemaplteSubjectBodyTemplate{uid}";
         this.FromEmail = $"test{uid}@test.net";
         this.FromName = "TestEmailTemaplteFromName";
-        this.Language = "en";
+        this.Language = "en-US";
         this.EmailGroupId = groupId;
     }
 }

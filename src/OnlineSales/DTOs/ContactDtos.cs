@@ -65,15 +65,8 @@ public class ContactCreateDto : BaseContactDto
     [EmailAddress]
     public string Email
     {
-        get
-        {
-            return email;
-        }
-
-        set
-        {
-            email = value.ToLower();
-        }
+        get => email;
+        set => email = value.ToLower();
     }
 }
 
@@ -84,15 +77,8 @@ public class ContactUpdateDto : BaseContactDto
     [EmailAddress]
     public string? Email
     {
-        get
-        {
-            return email;
-        }
-
-        set
-        {
-            email = value == null ? null : value.ToLower();
-        }
+        get => email;
+        set => email = value == null ? null : value.ToLower();
     }
 }
 
@@ -129,15 +115,8 @@ public class ContactImportDto : BaseImportDto
     [SwaggerUnique]
     public string? Email
     {
-        get
-        {
-            return email;
-        }
-
-        set
-        {
-            email = value == null ? null : value.ToLower();
-        }
+        get => email;
+        set => email = value == null ? null : value.ToLower();
     }
 
     [Optional]

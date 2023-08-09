@@ -37,17 +37,11 @@ public class Contact : BaseEntity, ICommentable
 
     [Required]
     [Searchable]
+    [EmailAddress]
     public string Email
     {
-        get
-        {
-            return email;
-        }
-
-        set
-        {
-            email = value.ToLower();
-        }
+        get => email;
+        set => email = value.ToLower();
     }
 
     [Searchable]
@@ -86,7 +80,7 @@ public class Contact : BaseEntity, ICommentable
     public int? Timezone { get; set; }
 
     [Searchable]
-    [LanguageCode]
+    [LanguageCode(true)]
     public string? Language { get; set; }
 
     [Searchable]

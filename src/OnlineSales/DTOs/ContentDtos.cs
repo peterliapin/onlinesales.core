@@ -33,7 +33,7 @@ public class ContentCreateDto
     public string Author { get; set; } = string.Empty;
 
     [Required]
-    [LanguageCode]
+    [LanguageCode(true)]
     public string Language { get; set; } = string.Empty;
 
     public string Category { get; set; } = string.Empty;
@@ -73,7 +73,7 @@ public class ContentUpdateDto
     public string? Author { get; set; }
 
     [MinLength(1)]
-    [LanguageCode(nullAllowed: true)]
+    [LanguageCode(true)]
     public string? Language { get; set; }
 
     public string? Category { get; set; }

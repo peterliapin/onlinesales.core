@@ -44,7 +44,10 @@ namespace OnlineSales.Services
                 /* as array of ContactIp */
                 .ToArray();
 
-            await pgDbContext.ContactIp!.AddRangeAsync(ex);
+            if (ex is not null && ex.Length > 0)
+            {
+                await pgDbContext.ContactIp!.AddRangeAsync(ex);
+            }
         }
 
         public void SetDBContext(PgDbContext pgDbContext)

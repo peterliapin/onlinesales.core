@@ -59,7 +59,7 @@ public class Comment : BaseEntity
 
     [Searchable]
     [Required]
-    [LanguageCode]
+    [LanguageCode(true)]
     public string Language { get; set; } = string.Empty;
 
     public CommentStatus Status { get; set; } = CommentStatus.NotApproved;

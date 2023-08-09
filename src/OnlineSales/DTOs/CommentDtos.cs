@@ -33,7 +33,7 @@ public class CommentCreateBaseDto
     [Optional]
     public string? Source { get; set; }
 
-    [LanguageCode]
+    [LanguageCode(true)]
     public string Language { get; set; } = string.Empty;
 }
 
@@ -72,7 +72,7 @@ public class AnonymousCommentDetailsDto
 
     public string AvatarUrl { get; set; } = string.Empty;
 
-    [LanguageCode]
+    [LanguageCode(true)]
     public string Language { get; set; } = string.Empty;
 
     [Ignore]
