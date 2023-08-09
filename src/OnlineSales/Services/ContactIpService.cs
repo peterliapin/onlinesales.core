@@ -29,10 +29,10 @@ namespace OnlineSales.Services
         public async Task SaveRangeAsync(List<Contact> contacts)
         {
             var ex = from contact in contacts
-                                 where !string.IsNullOrEmpty(contact.LastIp)
-                                 join cip in pgDbContext.ContactIp! on contact.Id equals cip.Contact?.Id ?? cip.ContactId into cIp
-                                 where !cIp.Any(c => c.IpAddress == contact.LastIp)
-                                 select new ContactIp { Contact = contact, IpAddress = contact.LastIp! };
+                     where !string.IsNullOrEmpty(contact.LastIp)
+                     join cip in pgDbContext.ContactIp! on contact.Id equals cip.Contact?.Id ?? cip.ContactId into cIp
+                     where !cIp.Any(c => c.IpAddress == contact.LastIp)
+                     select new ContactIp { Contact = contact, IpAddress = contact.LastIp! };
 
             if (ex is not null && ex.Any())
             {
