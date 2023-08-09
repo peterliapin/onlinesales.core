@@ -28,23 +28,13 @@ namespace OnlineSales.Services
 
         public async Task SaveRangeAsync(List<Contact> contacts)
         {
-            // Select all ContactIps as anonymous type { ip, id, contact } 
-            var all = pgDbContext.ContactIp!
-                .Select(c => new { ip = c.IpAddress, id = c.Id, contact = c.Contact! });
+            var ex = from contact in contacts
+                                 where !string.IsNullOrEmpty(contact.LastIp)
+                                 join cip in pgDbContext.ContactIp! on contact.Id equals cip.Contact?.Id ?? cip.ContactId into cIp
+                                 where !cIp.Any(c => c.IpAddress == contact.LastIp)
+                                 select new ContactIp { Contact = contact, IpAddress = contact.LastIp! };
 
-            var ex = contacts
-                /* Skip cantacts with empty LastIp */
-                .Where(c => !string.IsNullOrEmpty(c.LastIp))
-                /* Select all contacts as anonymous type { ip, id, contact } */
-                .Select(c => new { ip = c.LastIp, id = c.Id, contact = c })
-                /* skip all exists in database */
-                .Except(all!)
-                /* Select anonymous type as ContactIp */
-                .Select(a => new ContactIp { IpAddress = a.ip!, Contact = a.contact })
-                /* as array of ContactIp */
-                .ToArray();
-
-            if (ex is not null && ex.Length > 0)
+            if (ex is not null && ex.Any())
             {
                 await pgDbContext.ContactIp!.AddRangeAsync(ex);
             }
