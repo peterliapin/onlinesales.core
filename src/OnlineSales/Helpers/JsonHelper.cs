@@ -4,10 +4,6 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
-using CsvHelper.TypeConversion;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using OnlineSales.Configuration;
 
 namespace OnlineSales.Helpers;

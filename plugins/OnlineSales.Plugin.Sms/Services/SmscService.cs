@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Reflection;
 using System.Web;
 using Newtonsoft.Json;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Exceptions;
-using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Services;
 
