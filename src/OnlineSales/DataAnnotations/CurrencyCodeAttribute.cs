@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
-using Npgsql.Internal.TypeHandlers.NetworkHandlers;
 
 namespace OnlineSales.DataAnnotations;
 
