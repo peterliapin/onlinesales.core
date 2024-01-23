@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.TestPlugin.Entities;
@@ -23,8 +25,8 @@ public class TestPluginDbContext : PluginDbContextBase
         migrations = new SortedSet<string>();
     }
 
-    public TestPluginDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
-        : base(options, configuration, httpContextHelper)
+    public TestPluginDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+        : base(options, configuration, httpContextHelper, dataSource)
     {
         migrations = new SortedSet<string>(Database.GetPendingMigrations());
     }

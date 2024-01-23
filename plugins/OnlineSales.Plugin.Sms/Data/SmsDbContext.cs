@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Sms.Entities;
 
@@ -11,8 +12,8 @@ namespace OnlineSales.Plugin.Sms.Data;
 
 public class SmsDbContext : PluginDbContextBase
 {
-    public SmsDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
-        : base(options, configuration, httpContextHelper)
+    public SmsDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+        : base(options, configuration, httpContextHelper, dataSource)
     {
     }
 

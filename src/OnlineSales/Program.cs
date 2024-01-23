@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Formatters.Csv;
@@ -46,8 +47,10 @@ public class Program
         {
             builder.Configuration.AddJsonFile(path, false, true);
         });
-
+       
         ConfigureLogs(builder);
+
+        ConfigurePgDataSource(builder);
         PluginManager.Init(builder.Configuration);
 
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
@@ -154,6 +157,22 @@ public class Program
         });
 
         app.Run();
+    }
+
+    private static void ConfigurePgDataSource(WebApplicationBuilder builder)
+    {
+        var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+        if (postgresConfig == null)
+        {
+            throw new MissingConfigurationException("Postgres configuration is mandatory.");
+        }
+
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
+        dataSourceBuilder.EnableDynamicJson();
+        var dataSource = dataSourceBuilder.Build();
+
+        builder.Services.AddSingleton(dataSource);
     }
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
