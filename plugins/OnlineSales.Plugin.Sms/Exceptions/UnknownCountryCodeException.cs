@@ -22,10 +22,5 @@ namespace OnlineSales.Plugin.Sms.Exceptions
             : base(message, innerException)
         {
         }
-
-        protected UnknownCountryCodeException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
     }
 }

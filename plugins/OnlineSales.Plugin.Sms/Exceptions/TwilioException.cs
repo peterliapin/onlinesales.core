@@ -22,10 +22,5 @@ namespace OnlineSales.Plugin.Sms.Exceptions
             : base(message, innerException)
         {
         }
-
-        protected TwilioException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
     }
 }

@@ -38,8 +38,8 @@ public class ActivityLogController : ControllerBase
         var qp = queryProviderFactory.BuildQueryProvider();
 
         var result = await qp.GetResult();
-        Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
-        Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+        Response.Headers.Append(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
+        Response.Headers.Append(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
         return Ok(mapper.Map<List<ActivityLogDetailsDto>>(result.Records));
     }
 }

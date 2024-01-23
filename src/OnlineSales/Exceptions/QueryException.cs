@@ -19,11 +19,6 @@ namespace OnlineSales.Exceptions
             FailedCommands = innerExceptions.SelectMany(e => e.FailedCommands).ToList();
         }
 
-        protected QueryException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
         public List<KeyValuePair<string, string>> FailedCommands { get; init; } = new List<KeyValuePair<string, string>>();
     }
 }

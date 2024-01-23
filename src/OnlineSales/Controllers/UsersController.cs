@@ -38,8 +38,8 @@ public class UsersController : ControllerBase
     {
         var allUsers = await userManager.Users.ToListAsync();
         var resultsToClient = mapper.Map<UserDetailsDto[]>(allUsers).ToArray();
-        Response.Headers.Add(ResponseHeaderNames.TotalCount, resultsToClient.Count().ToString());
-        Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+        Response.Headers.Append(ResponseHeaderNames.TotalCount, resultsToClient.Count().ToString());
+        Response.Headers.Append(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
         return Ok(resultsToClient);
     }
 

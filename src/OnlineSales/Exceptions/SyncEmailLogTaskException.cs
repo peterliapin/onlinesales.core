@@ -22,10 +22,5 @@ namespace OnlineSales.Exceptions
             : base(message, innerException)
         {
         }
-
-        protected SyncEmailLogTaskException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
     }
 }

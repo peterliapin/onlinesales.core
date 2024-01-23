@@ -27,10 +27,5 @@ namespace OnlineSales.Plugin.Sms.Exceptions
             : base(message, innerException)
         {
         }
-
-        protected AwsSnsException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
     }
 }

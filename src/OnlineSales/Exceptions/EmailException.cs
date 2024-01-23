@@ -22,9 +22,4 @@ public class EmailException : Exception
         : base(message, innerException)
     {
     }
-
-    protected EmailException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }

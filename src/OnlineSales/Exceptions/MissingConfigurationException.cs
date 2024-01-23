@@ -22,9 +22,4 @@ public class MissingConfigurationException : Exception
         : base(message, innerException)
     {
     }
-
-    protected MissingConfigurationException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }

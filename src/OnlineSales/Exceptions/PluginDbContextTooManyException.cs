@@ -25,9 +25,4 @@ public class PluginDbContextTooManyException : PluginDbContextException
         : base(HardcodedMessage, unregisteredDbContext, innerException)
     {
     }
-
-    protected PluginDbContextTooManyException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }

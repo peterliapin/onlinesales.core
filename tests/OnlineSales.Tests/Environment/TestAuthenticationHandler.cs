@@ -14,8 +14,8 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
 {
     public const string SchemeName = "TestScheme";
 
-    public TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-        : base(options, logger, encoder, clock)
+    public TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+        : base(options, logger, encoder)
     {
     }
 
