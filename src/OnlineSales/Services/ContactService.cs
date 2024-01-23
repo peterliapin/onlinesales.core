@@ -144,7 +144,7 @@ namespace OnlineSales.Services
                                              where newDomain.Key == contactWithDomainInfo.DomainName
                                              select newDomain;
 
-                        if (existingDomain.Any() is false)
+                        if (!existingDomain.Any())
                         {
                             var domain = new Domain()
                             {

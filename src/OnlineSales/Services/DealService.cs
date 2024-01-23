@@ -60,7 +60,7 @@ public class DealService : IDealService
             }
             else
             {
-                if (!stages.Any(s => s.Id == item.DealPipelineStageId && s.DealPipelineId == item.DealPipelineId))
+                if (!stages.Exists(s => s.Id == item.DealPipelineStageId && s.DealPipelineId == item.DealPipelineId))
                 {
                     throw new DealPipelineStageException($"Pipeline with id = {item.DealPipelineId} doesn't contain stage with Id = {item.DealPipelineStageId}");
                 }

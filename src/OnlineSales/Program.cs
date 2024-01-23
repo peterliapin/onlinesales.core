@@ -404,7 +404,7 @@ public class Program
 
         builder.Services.AddQuartz(q =>
         {
-            q.UseMicrosoftDependencyInjectionJobFactory();
+            // q.UseMicrosoftDependencyInjectionJobFactory(); -- obsolete and no longer needed
 
             q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 

@@ -224,7 +224,7 @@ public class BaseTest : IDisposable
     {
         if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
         {
-            var isCollection = content.StartsWith("[");
+            var isCollection = content.StartsWith('[');
 
             if (isCollection)
             {

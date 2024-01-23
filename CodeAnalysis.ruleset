@@ -18,5 +18,10 @@
     <Rule Id="S3881" Action="None" /> <!-- Fix this implementation of 'IDisposable' to conform to the dispose pattern -->
     <Rule Id="S3925" Action="None" /> <!-- Update this implementation of 'ISerializable' to conform to the recommended serialization pattern. -->
     <Rule Id="SA1011" Action="None" /> <!-- This is not working properly with Arrays ClosingSquareBracketsMustBeSpacedCorrectly -->
+    <Rule Id="S6602" Action="None" /> <!-- "Find" method should be used instead of the "FirstOrDefault" extension method. -->
+    <Rule Id="S6608" Action="None" /> <!-- Indexing at 0 should be used instead of the "Enumerable" extension method "First". -->
+    <Rule Id="S6580" Action="None" /> <!-- Use a format provider when parsing date and time. -->
+    <Rule Id="S1075" Action="None" /> <!-- Refactor your code not to use hardcoded absolute paths or URIs. -->
+    <Rule Id="S6562" Action="None" /> <!-- Provide the "DateTimeKind" when creating this object. -->
   </Rules>
 </RuleSet>

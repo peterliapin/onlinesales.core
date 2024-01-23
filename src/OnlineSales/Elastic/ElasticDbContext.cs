@@ -33,7 +33,7 @@ public abstract class ElasticDbContext
         {
             var migration = (ElasticMigration)Activator.CreateInstance(type)!;
 
-            if (pastMigrationIds.Contains(migration.MigrationId) is false)
+            if (!pastMigrationIds.Contains(migration.MigrationId))
             {
                 migration.Up(this).Wait();
                 ElasticClient.Index<ElasticMigration>(migration, s => s);

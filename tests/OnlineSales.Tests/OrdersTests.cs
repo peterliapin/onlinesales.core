@@ -21,7 +21,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
     [Fact]
     public async Task GetWithWhereLikeTest()
     {
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
@@ -46,7 +46,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
     [Fact]
     public async Task GetWithWhereEqualTest()
     {
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
@@ -94,7 +94,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
     [Fact]
     public async Task GetWithWhereDateComparisonTest()
     {
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
@@ -120,7 +120,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
     [Fact]
     public async Task GetWithWhereContainTest()
     {
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
@@ -155,7 +155,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
         int numberOfOrderItems = 10;
         string affName = "Aff";
 
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
         App.PopulateBulkData<Order, IEntityService<Order>>(mapper.Map<Order>(TestData.GenerateAndPopulateAttributes<TestOrder>("1", o => o.AffiliateName = affName, fkId)));
         App.PopulateBulkData<Order, IEntityService<Order>>(mapper.Map<List<OrderItem>>(TestData.GenerateAndPopulateAttributes<TestOrderItem>(numberOfOrderItems, null, 1)));
@@ -189,7 +189,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
     [Fact]
     public async Task GetWithSearchTest()
     {
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
 
         var bulkEntitiesList = new List<Order>();
@@ -235,7 +235,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
     public async Task GetWithSearchWithBigLimitTest()
     {
         var entitiesNumber = 13000;
-        var fkItem = CreateFKItem().Result;
+        var fkItem = await CreateFKItem();
         var fkId = fkItem.Item1;
 
         var bulkList = TestData.GenerateAndPopulateAttributes<TestOrder>(entitiesNumber, to => to.AffiliateName = "AffiliateName", fkId);

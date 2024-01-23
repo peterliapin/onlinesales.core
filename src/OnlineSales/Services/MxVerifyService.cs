@@ -170,7 +170,7 @@ public class MxVerifyService : IMxVerifyService
         {
             // catch all unprocessed emails and generate result
             var notProcessed = emails
-                .Where(e => !returnResults.Any(email => email.Email == e))
+                .Where(e => !returnResults.Exists(email => email.Email == e))
                 .Select(e => new MxCheckResult(mxValue, e, MxResultCode.GeneralException, ex.Message, false))
                 .ToArray();
 

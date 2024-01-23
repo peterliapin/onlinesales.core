@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.2.13-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.14-pre</ReleaseVersion>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 
@@ -28,7 +28,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.0.1" />
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)'!='Migration'">
