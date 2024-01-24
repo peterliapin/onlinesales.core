@@ -22,7 +22,7 @@ namespace OnlineSales.Controllers
         protected readonly DbSet<T> dbSet;
         protected readonly PgDbContext dbContext;
         protected readonly IMapper mapper;
-        private readonly QueryProviderFactory<T> queryProviderFactory;
+        protected readonly QueryProviderFactory<T> queryProviderFactory;
 
         public BaseController(PgDbContext dbContext, IMapper mapper, EsDbContext esDbContext, QueryProviderFactory<T> queryProviderFactory)
         {
