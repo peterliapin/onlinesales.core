@@ -2,14 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DataAnnotations;
 using OnlineSales.DTOs;

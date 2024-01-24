@@ -15,7 +15,7 @@ public class ElasticHelper
 
         var migrationIndexName = GetIndexName(dbContext.IndexPrefix, typeof(ElasticMigration));
 
-        if (elasticClient.Indices.Exists(migrationIndexName).Exists is false)
+        if (!elasticClient.Indices.Exists(migrationIndexName).Exists)
         {
             elasticClient.Indices.Create(migrationIndexName, f => f
                 .Map(mapping => mapping
@@ -60,7 +60,7 @@ public class ElasticHelper
                 return r;
             });
 
-            if (reindexResponse.IsValid is false)
+            if (!reindexResponse.IsValid)
             {
                 throw reindexResponse.OriginalException;
             }

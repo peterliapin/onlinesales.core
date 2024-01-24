@@ -19,7 +19,7 @@ public enum CommentStatus
 [Table("comment")]
 [SupportsElastic]
 [SupportsChangeLog]
-[SurrogateIdentityAttribute(nameof(Key))]
+[SurrogateIdentity(nameof(Key))]
 public class Comment : BaseEntity
 {
     private string authorEmail = string.Empty;

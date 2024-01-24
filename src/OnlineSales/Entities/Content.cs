@@ -4,7 +4,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Nest;
 using OnlineSales.DataAnnotations;
@@ -54,6 +53,8 @@ public class Content : BaseEntity, ICommentable
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     public bool AllowComments { get; set; } = false;
+
+    public DateTime? PublishedAt { get; set; } = DateTime.UtcNow;
 
     public static string GetCommentableType()
     {

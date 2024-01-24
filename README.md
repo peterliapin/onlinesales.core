@@ -76,7 +76,7 @@ OnlineSales platform integrates with two databases initially.
 
 3. Open a command line tool in the same folder location.
 
-4. Run `docker compose up` command.
+4. Run `docker compose -f docker-compose.tests.yml up` command.
 
 5. Open docker desktop and verify Postgres and Elastic containers are up and running.
 
@@ -84,11 +84,11 @@ OnlineSales platform integrates with two databases initially.
 
 1. Navigate to `docker-compose` folder in the solution.
 
-2. Open `docker-compose.development.yml` docker file and update if necessary.
+2. Open `docker-compose.develop.yml` docker file and update if necessary.
 
 3. Open a command line tool in the same folder location.
 
-4. Run `docker compose up` command.
+4. Run `docker compose -f docker-compose.develop.yml up` command.
 
 5. Open docker desktop and verify Postgres and Elastic containers are up and running.
 

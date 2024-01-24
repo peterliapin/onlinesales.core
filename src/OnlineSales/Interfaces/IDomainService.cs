@@ -6,7 +6,7 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces
 {
-    public interface IDomainService : ISaveService<Domain>
+    public interface IDomainService : IEntityService<Domain>
     {
         public Task Verify(Domain domain);
 

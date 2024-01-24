@@ -74,7 +74,7 @@ public class TaskTests : BaseTest
         config.Should().NotBeNull();
         var esSyncBatchSize = config.GetSection("Tasks:SyncEsTask")!.Get<TaskWithBatchConfig>()!.BatchSize;
 
-        App.PopulateBulkData<DealPipeline, ISaveService<DealPipeline>>(mapper.Map<List<DealPipeline>>(TestData.GenerateAndPopulateAttributes<TestDealPipeline>(esSyncBatchSize * 2, null)));
+        App.PopulateBulkData<DealPipeline, IEntityService<DealPipeline>>(mapper.Map<List<DealPipeline>>(TestData.GenerateAndPopulateAttributes<TestDealPipeline>(esSyncBatchSize * 2, null)));
 
         await SyncElasticSearch();
 
@@ -88,7 +88,7 @@ public class TaskTests : BaseTest
 
         await CheckIfTaskNotRunning("SyncEsTask");
 
-        App.PopulateBulkData<DealPipeline, ISaveService<DealPipeline>>(mapper.Map<List<DealPipeline>>(TestData.GenerateAndPopulateAttributes<TestDealPipeline>(dataSize, null)));
+        App.PopulateBulkData<DealPipeline, IEntityService<DealPipeline>>(mapper.Map<List<DealPipeline>>(TestData.GenerateAndPopulateAttributes<TestDealPipeline>(dataSize, null)));
 
         await SyncElasticSearch();
 

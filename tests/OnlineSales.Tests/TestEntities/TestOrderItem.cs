@@ -11,7 +11,6 @@ public class TestOrderItem : OrderItemCreateDto
     public TestOrderItem(string uid = "", int orderId = 0)
     {
         Currency = "USD";
-        LicenseCode = $"LicenseCode{uid}";
         ProductName = $"ProductName{uid}";
         UnitPrice = 1.99m;
         Quantity = 1;

@@ -40,7 +40,8 @@ namespace OnlineSales.Infrastructure
                     }
 
                     var type = match.Groups["property"].Captures[0].Value.ToLowerInvariant();
-                    if (type == null || string.IsNullOrWhiteSpace(type) || !QueryCommand.FilterMappings.ContainsKey(type))
+
+                    if (string.IsNullOrEmpty(type) || string.IsNullOrWhiteSpace(type) || !QueryCommand.FilterMappings.ContainsKey(type))
                     {
                         errorList.Add(new QueryException(cmd, $"Failed to parse command. Operator '{type}' not found. Available operators: {QueryCommand.AvailableCommandString}"));
                         continue;

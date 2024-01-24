@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace OnlineSales.Tests;
 
-public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, ISaveService<OrderItem>>
+public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, OrderItemUpdateDto, IEntityService<OrderItem>>
 {
     public OrdersItemsTests()
         : base("/api/order-items")

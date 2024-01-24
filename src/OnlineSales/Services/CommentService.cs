@@ -3,7 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -12,8 +11,8 @@ namespace OnlineSales.Services;
 
 public class CommentService : ICommentService
 {
-    private readonly PgDbContext pgDbContext;
     private readonly IContactService contactsService;
+    private PgDbContext pgDbContext;    
 
     public CommentService(PgDbContext pgDbContext, IContactService contactsService)
     {
@@ -52,6 +51,12 @@ public class CommentService : ICommentService
                 await pgDbContext.AddRangeAsync(group.ToList());
             }
         }
+    }
+
+    public void SetDBContext(PgDbContext pgDbContext)
+    {
+        this.pgDbContext = pgDbContext;
+        contactsService.SetDBContext(pgDbContext);
     }
 
     private async Task EnrichWithContactId(Comment comment)

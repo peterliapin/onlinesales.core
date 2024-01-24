@@ -47,6 +47,13 @@ public class MediaConfig
     public string? CacheTime { get; set; }
 }
 
+public class FileConfig
+{
+    public string[] Extensions { get; set; } = Array.Empty<string>();
+
+    public ExtensionConfig[] MaxSize { get; set; } = Array.Empty<ExtensionConfig>();
+}
+
 public class EmailVerificationApiConfig
 {
     public string Url { get; set; } = string.Empty;

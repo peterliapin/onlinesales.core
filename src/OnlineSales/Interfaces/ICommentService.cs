@@ -6,6 +6,6 @@ using OnlineSales.Entities;
 
 namespace OnlineSales.Interfaces;
 
-public interface ICommentService : ISaveService<Comment>
+public interface ICommentService : IEntityService<Comment>
 {
 }

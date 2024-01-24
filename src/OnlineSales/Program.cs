@@ -73,6 +73,8 @@ public class Program
         builder.Services.AddSingleton<IEmailService, EmailService>();
         builder.Services.AddTransient<CommentableControllerExtension, CommentableControllerExtension>();
         builder.Services.AddScoped<IDealService, DealService>();
+        builder.Services.AddTransient<IOrderService, OrderService>();
+        builder.Services.AddTransient<IDiscountService, DiscountService>();
 
         ConfigureCacheProfiles(builder);
 
@@ -85,6 +87,7 @@ public class Program
 
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
+        ConfigureFileUpload(builder);
         ConfigureIpDetailsResolver(builder);
         ConfigureEmailServices(builder);
         ConfigureTasks(builder);
@@ -290,6 +293,18 @@ public class Program
         builder.Services.Configure<MediaConfig>(imageUploadConfig);
     }
 
+    private static void ConfigureFileUpload(WebApplicationBuilder builder)
+    {
+        var fileUploadConfig = builder.Configuration.GetSection("File");
+
+        if (fileUploadConfig == null)
+        {
+            throw new MissingConfigurationException("File Upload configuration is mandatory.");
+        }
+
+        builder.Services.Configure<FileConfig>(fileUploadConfig);
+    }
+
     private static void ConfigureEmailVerification(WebApplicationBuilder builder)
     {
         var emailVerificationConfig = builder.Configuration.GetSection("EmailVerificationApi");
@@ -389,7 +404,7 @@ public class Program
 
         builder.Services.AddQuartz(q =>
         {
-            q.UseMicrosoftDependencyInjectionJobFactory();
+            // q.UseMicrosoftDependencyInjectionJobFactory(); -- obsolete and no longer needed
 
             q.AddJob<TaskRunner>(opts => opts.WithIdentity("TaskRunner"));
 

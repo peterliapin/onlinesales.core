@@ -3,8 +3,6 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Nest;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -13,10 +11,10 @@ namespace OnlineSales.Services
 {
     public class ContactService : IContactService
     {
-        private readonly PgDbContext pgDbContext;
         private readonly IDomainService domainService;
+        private PgDbContext pgDbContext;        
 
-        public ContactService(PgDbContext pgDbContext, IDomainService domainService, IAccountExternalService accountExternalService, IEmailVerifyService emailVerifyService)
+        public ContactService(PgDbContext pgDbContext, IDomainService domainService)
         {
             this.pgDbContext = pgDbContext;
             this.domainService = domainService;
@@ -80,6 +78,12 @@ namespace OnlineSales.Services
             }
         }
 
+        public void SetDBContext(PgDbContext pgDbContext)
+        {
+            this.pgDbContext = pgDbContext;
+            domainService.SetDBContext(pgDbContext);
+        }
+
         private async Task EnrichWithDomainId(Contact contact)
         {
             var domainName = domainService.GetDomainNameByEmail(contact.Email);
@@ -140,7 +144,7 @@ namespace OnlineSales.Services
                                              where newDomain.Key == contactWithDomainInfo.DomainName
                                              select newDomain;
 
-                        if (existingDomain.Any() is false)
+                        if (!existingDomain.Any())
                         {
                             var domain = new Domain()
                             {

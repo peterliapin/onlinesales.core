@@ -77,7 +77,7 @@ jobs:
         context: ./
         file: src/OnlineSales/Dockerfile
         push: true
-        tags: wavepoint/onlinesales:${{ steps.branch_name.outputs.value }}
+        tags: wavepoint/onlinesales:develop, wavepoint/onlinesales:${{ steps.branch_name.outputs.value }}
     
     - name: Publish to NuGet
       if: success()

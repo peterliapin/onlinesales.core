@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests;
 
-public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, ISaveService<EmailTemplate>>
+public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemplate, EmailTemplateUpdateDto, IEntityService<EmailTemplate>>
 {
     public EmailTemplatesTests()
         : base("/api/email-templates")

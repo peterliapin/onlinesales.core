@@ -15,7 +15,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     where T : BaseEntityWithId
     where TC : class
     where TU : new()
-    where TS : ISaveService<T>
+    where TS : IEntityService<T>
 {
     protected readonly string itemsUrl;
     protected readonly string itemsUrlNotFound;

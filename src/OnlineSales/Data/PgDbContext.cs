@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
@@ -71,6 +72,8 @@ public class PgDbContext : IdentityDbContext<User>
 
     public virtual DbSet<Media>? Media { get; set; }
 
+    public virtual DbSet<Entities.File>? Files { get; set; }
+
     public virtual DbSet<EmailGroup>? EmailGroups { get; set; }
 
     public virtual DbSet<EmailSchedule>? EmailSchedules { get; set; }
@@ -102,6 +105,10 @@ public class PgDbContext : IdentityDbContext<User>
     public virtual DbSet<DealPipeline>? DealPipelines { get; set; }
 
     public virtual DbSet<DealPipelineStage>? DealPipelineStages { get; set; }
+
+    public virtual DbSet<Promotion>? Promotions { get; set; }
+
+    public virtual DbSet<Discount>? Discounts { get; set; }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
@@ -204,8 +211,8 @@ public class PgDbContext : IdentityDbContext<User>
             optionsBuilder.UseNpgsql(
                 postgresConfig.ConnectionString,
                 b => b.MigrationsHistoryTable("_migrations"))
-            .UseSnakeCaseNamingConvention()
-            .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
+                        .UseSnakeCaseNamingConvention()
+                        .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
 
             Console.WriteLine("PgDbContext successfully configured");
         }

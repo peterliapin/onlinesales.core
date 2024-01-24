@@ -11,7 +11,7 @@ namespace OnlineSales.Services;
 
 public class DealService : IDealService
 {
-    private readonly PgDbContext pgDbContext;
+    private PgDbContext pgDbContext;
 
     public DealService(PgDbContext pgDbContext)
     {
@@ -60,7 +60,7 @@ public class DealService : IDealService
             }
             else
             {
-                if (!stages.Any(s => s.Id == item.DealPipelineStageId && s.DealPipelineId == item.DealPipelineId))
+                if (!stages.Exists(s => s.Id == item.DealPipelineStageId && s.DealPipelineId == item.DealPipelineId))
                 {
                     throw new DealPipelineStageException($"Pipeline with id = {item.DealPipelineId} doesn't contain stage with Id = {item.DealPipelineStageId}");
                 }
@@ -80,6 +80,11 @@ public class DealService : IDealService
                 await pgDbContext.AddRangeAsync(deal.ToList());
             }
         }
+    }
+
+    public void SetDBContext(PgDbContext pgDbContext)
+    {
+        this.pgDbContext = pgDbContext;
     }
 
     private void CheckPipelineAndStage(int pipelineId, int stageId)
