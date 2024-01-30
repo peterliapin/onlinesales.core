@@ -19,6 +19,7 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using SwaggerFilters;
 
 namespace OnlineSales;
 
@@ -95,7 +96,7 @@ public class Program
         ConfigureImportSizeLimit(builder);
         ConfigureEmailVerification(builder);
         ConfigureAccountDetails(builder);
-        
+
         builder.Services.AddAutoMapper(x =>
         {
             x.AddProfile(new AutoMapperProfiles());
@@ -395,6 +396,9 @@ public class Program
             config.UseInlineDefinitionsForEnums();
 
             config.SwaggerDoc("v1", openApiInfo);
+
+            var conf = builder.Configuration.GetSection("Entities").Get<EntitiesConfig>();
+            config.DocumentFilter<SwaggerEntitiesFilter>(conf);
         });
     }
 
