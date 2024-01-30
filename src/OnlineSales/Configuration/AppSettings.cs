@@ -4,6 +4,13 @@
 
 namespace OnlineSales.Configuration;
 
+public class EntitiesConfig
+{
+    public string[] IncludeEntities { get; set; } = Array.Empty<string>();
+
+    public string[] ExcludeEntities { get; set; } = Array.Empty<string>();
+}
+
 public class BaseServiceConfig
 {
     public string Server { get; set; } = string.Empty;

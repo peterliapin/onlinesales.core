@@ -19,6 +19,7 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using SwaggerFilters;
 
 namespace OnlineSales;
 
@@ -47,6 +48,7 @@ public class Program
             builder.Configuration.AddJsonFile(path, false, true);
         });
 
+        ConfigureSwaggerFilters(builder);
         ConfigureLogs(builder);
         PluginManager.Init(builder.Configuration);
 
@@ -95,7 +97,7 @@ public class Program
         ConfigureImportSizeLimit(builder);
         ConfigureEmailVerification(builder);
         ConfigureAccountDetails(builder);
-        
+
         builder.Services.AddAutoMapper(x =>
         {
             x.AddProfile(new AutoMapperProfiles());
@@ -395,7 +397,16 @@ public class Program
             config.UseInlineDefinitionsForEnums();
 
             config.SwaggerDoc("v1", openApiInfo);
+
+            config.DocumentFilter<SwaggerExcludeSchemaFilter>();
+            config.DocumentFilter<SwaggerExcludeOperationFilter>();
         });
+    }
+
+    private static void ConfigureSwaggerFilters(WebApplicationBuilder builder)
+    {
+        SwaggerExcludeOperationFilter.Configure(builder.Configuration);
+        SwaggerExcludeSchemaFilter.Configure(builder.Configuration);
     }
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
