@@ -77,7 +77,6 @@
     <Folder Include="Formatters\Csv\" />
     <Folder Include="Elastic\" />
     <Folder Include="Elastic\Migrations\" />
-    <Folder Include="Filters\" />
   </ItemGroup>
   
   <ItemGroup>

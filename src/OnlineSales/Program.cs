@@ -48,7 +48,6 @@ public class Program
             builder.Configuration.AddJsonFile(path, false, true);
         });
 
-        ConfigureSwaggerFilters(builder);
         ConfigureLogs(builder);
         PluginManager.Init(builder.Configuration);
 
@@ -398,15 +397,9 @@ public class Program
 
             config.SwaggerDoc("v1", openApiInfo);
 
-            config.DocumentFilter<SwaggerExcludeSchemaFilter>();
-            config.DocumentFilter<SwaggerExcludeOperationFilter>();
+            var conf = builder.Configuration.GetSection("Entities").Get<EntitiesConfig>();
+            config.DocumentFilter<SwaggerEntitiesFilter>(conf);
         });
-    }
-
-    private static void ConfigureSwaggerFilters(WebApplicationBuilder builder)
-    {
-        SwaggerExcludeOperationFilter.Configure(builder.Configuration);
-        SwaggerExcludeSchemaFilter.Configure(builder.Configuration);
     }
 
     private static void ConfigureQuartz(WebApplicationBuilder builder)
