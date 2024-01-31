@@ -7,7 +7,7 @@
     <RootNamespace>OnlineSales</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>98270385-43f2-4d3c-98d5-02d0d77fc2d9</UserSecretsId>
-    <ReleaseVersion>1.2.14-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.15-pre</ReleaseVersion>
     <AssemblyName>OnlineSales</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>OnlineSales</PackageId>
