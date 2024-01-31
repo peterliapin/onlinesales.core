@@ -19,6 +19,7 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using SwaggerFilters;
 
 namespace OnlineSales;
 
@@ -84,7 +85,7 @@ public class Program
 
         builder.Services.AddDbContext<PgDbContext>();
         builder.Services.AddSingleton<EsDbContext>();
-
+        
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureFileUpload(builder);
@@ -95,7 +96,8 @@ public class Program
         ConfigureImportSizeLimit(builder);
         ConfigureEmailVerification(builder);
         ConfigureAccountDetails(builder);
-        
+        ConfigureIdentity(builder);
+
         builder.Services.AddAutoMapper(x =>
         {
             x.AddProfile(new AutoMapperProfiles());
@@ -317,6 +319,18 @@ public class Program
         builder.Services.Configure<EmailVerificationApiConfig>(emailVerificationConfig);
     }
 
+    private static void ConfigureIdentity(WebApplicationBuilder builder)
+    {
+        var jwtConfig = builder.Configuration.GetSection("Jwt");
+
+        if (jwtConfig == null)
+        {
+            throw new MissingConfigurationException("Jwt configuration is mandatory.");
+        }
+
+        builder.Services.Configure<JwtConfig>(jwtConfig);
+    }
+
     private static void ConfigureAccountDetails(WebApplicationBuilder builder)
     {
         var accountDetailsApiConfig = builder.Configuration.GetSection("AccountDetailsApi");
@@ -395,6 +409,9 @@ public class Program
             config.UseInlineDefinitionsForEnums();
 
             config.SwaggerDoc("v1", openApiInfo);
+
+            var conf = builder.Configuration.GetSection("Entities").Get<EntitiesConfig>();
+            config.DocumentFilter<SwaggerEntitiesFilter>(conf);
         });
     }
 

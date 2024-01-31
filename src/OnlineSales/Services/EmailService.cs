@@ -6,14 +6,10 @@ using System.Net;
 using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using MimeKit;
 using OnlineSales.Configuration;
 using OnlineSales.DTOs;
-using OnlineSales.Exceptions;
 using OnlineSales.Interfaces;
-using Serilog;
 
 namespace OnlineSales.Services;
 
