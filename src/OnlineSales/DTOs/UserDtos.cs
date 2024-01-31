@@ -15,6 +15,8 @@ public class UserCreateDto
 
     [Required]
     public string DisplayName { get; set; } = string.Empty;
+
+    public Dictionary<string, object>? Data { get; set; }
 }
 
 public class UserUpdateDto
@@ -26,6 +28,8 @@ public class UserUpdateDto
     public string? DisplayName { get; set; }
 
     public string? AvatarUrl { get; set; }
+
+    public Dictionary<string, object>? Data { get; set; }
 }
 
 public class UserDetailsDto : UserCreateDto
