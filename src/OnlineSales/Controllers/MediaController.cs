@@ -53,6 +53,7 @@ public class MediaController : ControllerBase
         var scopeAndFileExists = from i in pgDbContext!.Media!
                                  where i.ScopeUid == imageCreateDto.ScopeUid.Trim() && i.Name == incomingFileName
                                  select i;
+
         if (scopeAndFileExists.Any())
         {
             var uploadedImage = scopeAndFileExists!.FirstOrDefault();

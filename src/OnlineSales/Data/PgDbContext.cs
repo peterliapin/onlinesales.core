@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
@@ -235,6 +234,8 @@ public class PgDbContext : IdentityDbContext<User>
         builder.Entity<IdentityUserLogin<string>>(entity => { entity.ToTable("user_logins"); });
         builder.Entity<IdentityUserToken<string>>(entity => { entity.ToTable("user_tokens"); });
         builder.Entity<IdentityRoleClaim<string>>(entity => { entity.ToTable("role_claims"); });
+
+        builder.Entity<User>().Property(u => u.Data).HasColumnType("jsonb");
     }
 
     private DateTime GetDateWithKind(DateTime date)

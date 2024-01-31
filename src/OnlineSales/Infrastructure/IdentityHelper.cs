@@ -22,7 +22,8 @@ namespace OnlineSales.Infrastructure
             var azureAdConfig = builder.Configuration.GetSection("AzureAd").Get<AzureADConfig>();
 
             builder.Services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<PgDbContext>();
+                .AddEntityFrameworkStores<PgDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.ConfigureApplicationCookie(options =>
                 {
@@ -40,21 +41,22 @@ namespace OnlineSales.Infrastructure
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 });
 
-            if (jwtConfig != null && jwtConfig.Key != "$JWT___KEY")
+            if (jwtConfig != null && jwtConfig.Secret != "$JWT__SECRET")
             {
                 authBuilder.AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    options.SaveToken = true;
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtConfig.Issuer,
                         ValidAudience = jwtConfig.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Key)),
+                        ValidIssuer = jwtConfig.Issuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret)),
                     };
                 });
             }
@@ -103,6 +105,7 @@ namespace OnlineSales.Infrastructure
                     CreatedAt = DateTime.UtcNow,
                     DisplayName = userEmail,
                 };
+
                 await userManager.CreateAsync(user);
             }
 

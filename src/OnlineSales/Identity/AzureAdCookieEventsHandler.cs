@@ -8,6 +8,7 @@ using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Identity;
+
 public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
 {
     public override async Task SigningIn(CookieSigningInContext context)

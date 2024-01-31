@@ -23,7 +23,6 @@ public class IdentityController : ControllerBase
     public ActionResult ExternalLogin(string returnUrl)
     {
         const string provider = "OpenIdConnect";
-        // var redirectUrl = Url.Action("ExternalLoginCallback");
         var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, returnUrl);
         return new ChallengeResult(provider, properties);
     }
@@ -42,6 +41,7 @@ public class IdentityController : ControllerBase
             info.ProviderKey,
             isPersistent: false,
             bypassTwoFactor: true);
+
         if (!result.Succeeded)
         {
             if (result.IsLockedOut)

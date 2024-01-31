@@ -139,7 +139,7 @@ public class JwtConfig
 
     public string Audience { get; set; } = string.Empty;
 
-    public string Key { get; set; } = string.Empty;
+    public string Secret { get; set; } = string.Empty;
 }
 
 public class AzureADConfig
