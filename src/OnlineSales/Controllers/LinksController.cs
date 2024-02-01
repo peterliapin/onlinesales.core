@@ -6,9 +6,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Nest;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -17,7 +14,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class LinksController : BaseControllerWithImport<Link, LinkCreateDto, LinkUpdateDto, LinkDetailsDto, LinkImportDto>
 {
