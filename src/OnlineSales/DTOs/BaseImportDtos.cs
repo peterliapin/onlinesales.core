@@ -30,10 +30,16 @@ public class BaseImportDto : BaseImportDtoWithDates
     public string? CreatedByIp { get; set; }
 
     [Optional]
+    public string? CreatedById { get; set; }
+
+    [Optional]
     public string? CreatedByUserAgent { get; set; }
 
     [Optional]
     public string? UpdatedByIp { get; set; }
+
+    [Optional]
+    public string? UpdatedById { get; set; }
 
     [Optional]
     public string? UpdatedByUserAgent { get; set; }

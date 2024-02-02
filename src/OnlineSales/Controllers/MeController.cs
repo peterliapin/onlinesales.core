@@ -34,12 +34,7 @@ public class MeController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<UserDetailsDto>> GetSelf()
     {
-        var user = await UserHelper.GetCurrentUserAsync(userManager, User);
-
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException();
-        }
+        var user = await UserHelper.GetCurrentUserOrThrowAsync(userManager, User);
 
         return Ok(mapper.Map<UserDetailsDto>(user));
     }
@@ -52,12 +47,7 @@ public class MeController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public virtual async Task<ActionResult<UserDetailsDto>> Patch([FromBody] UserUpdateDto value)
     {
-        var user = await UserHelper.GetCurrentUserAsync(userManager, User);
-
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException();
-        }
+        var user = await UserHelper.GetCurrentUserOrThrowAsync(userManager, User);
             
         mapper.Map(value, user);
 
