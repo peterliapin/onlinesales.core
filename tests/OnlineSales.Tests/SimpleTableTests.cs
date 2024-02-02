@@ -300,7 +300,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         result.Should().BeEquivalentTo(expected);
     }
 
-    protected virtual async Task<(TC, string)> CreateItem(string authToken = "Success")
+    protected virtual async Task<(TC, string)> CreateItem(string authToken = "Admin")
     {
         var testCreateItem = TestData.Generate<TC>();
 
@@ -317,7 +317,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         App.PopulateBulkData<T, TS>(bulkEntitiesList);
     }
 
-    protected async Task GetAllWithAuthentification(string getAuthToken = "Success")
+    protected async Task GetAllWithAuthentification(string getAuthToken = "Admin")
     {
         const int numberOfItems = 10;
 
@@ -329,7 +329,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         items!.Count.Should().Be(numberOfItems);
     }
 
-    protected async Task CreateAndGetItemWithAuthentification(string authToken = "Success")
+    protected async Task CreateAndGetItemWithAuthentification(string authToken = "Admin")
     {
         var testCreateItem = await CreateItem();
 
@@ -351,7 +351,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         return (testCreateItem, testUpdateItem);
     }
 
-    private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     where TRet : class
     {
         var response = await GetTest(url, expectedCode, authToken);

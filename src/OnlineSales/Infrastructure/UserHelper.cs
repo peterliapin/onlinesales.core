@@ -10,23 +10,47 @@ namespace OnlineSales.Infrastructure
 {
     public static class UserHelper
     {
-        public static async Task<User?> GetCurrentUserAsync(UserManager<User> userManager, ClaimsPrincipal user)
+        public static async Task<string?> GetCurrentUserIdAsync(UserManager<User> userManager, ClaimsPrincipal? claimsPrincipal)
         {
-            if (user.Identity == null)
+            if (claimsPrincipal == null)
             {
                 return null;
             }
 
-            if (user.Identity.IsAuthenticated && !user.Identity!.AuthenticationType!.Contains("Federation"))
+            var userId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
             {
-                return await userManager.FindByNameAsync(user.Identity.Name!);
+                return userId;
             }
 
-            var userEmail = user.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
+            var user = await GetCurrentUserAsync(userManager, claimsPrincipal);
+
+            if (user != null)
+            {
+                return user.Id;
+            }
+
+            return null;
+        }
+
+        public static async Task<User?> GetCurrentUserAsync(UserManager<User> userManager, ClaimsPrincipal? claimsPrincipal)
+        {
+            if (claimsPrincipal == null || claimsPrincipal.Identity == null)
+            {
+                return null;
+            }
+
+            if (claimsPrincipal.Identity.IsAuthenticated && !claimsPrincipal.Identity!.AuthenticationType!.Contains("Federation"))
+            {
+                return await userManager.FindByNameAsync(claimsPrincipal.Identity.Name!);
+            }
+
+            var userEmail = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(userEmail))
             {
-                throw new UnauthorizedAccessException();
+                return null;                
             }
 
             return await userManager.FindByEmailAsync(userEmail);

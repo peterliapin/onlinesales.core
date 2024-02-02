@@ -138,6 +138,7 @@ public class PgDbContext : IdentityDbContext<User>
 
                     if (createdByEntity is not null)
                     {
+                        createdByEntity.CreatedById = await httpContextHelper!.GetCurrentUserIdAsync();
                         createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? httpContextHelper!.IpAddressV4 : createdByEntity.CreatedByIp;
                         createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : createdByEntity.CreatedByUserAgent;
                     }
@@ -156,6 +157,7 @@ public class PgDbContext : IdentityDbContext<User>
 
                     if (updatedByEntity is not null)
                     {
+                        updatedByEntity.UpdatedById = await httpContextHelper!.GetCurrentUserIdAsync();
                         updatedByEntity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : httpContextHelper!.IpAddressV4;
                         updatedByEntity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
                     }

@@ -14,7 +14,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class MediaController : ControllerBase
 {

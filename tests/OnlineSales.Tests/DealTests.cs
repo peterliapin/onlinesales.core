@@ -18,10 +18,10 @@ public class DealTests : SimpleTableTests<Deal, TestDeal, DealUpdateDto, IDealSe
     {
         // successful creation
         var testContacts = new List<TestContact>() { new TestContact("1"), new TestContact("2") };
-        var fkData = await CreateFKItems(testContacts, "Success");
+        var fkData = await CreateFKItems(testContacts, "Admin");
         var dealCreate = new TestDeal(string.Empty, fkData.ContactIds, fkData.AccountId, fkData.PipelineId, fkData.UserId);
         var url = await PostTest(itemsUrl, dealCreate);
-        var items = await GetTest<List<DealDetailsDto>>("/api/deals?filter[include]=Contacts", HttpStatusCode.OK, "Success");
+        var items = await GetTest<List<DealDetailsDto>>("/api/deals?filter[include]=Contacts", HttpStatusCode.OK, "Admin");
         items!.Count.Should().Be(1);
         items[0].Contacts!.Select(c => c.Email).Should().BeEquivalentTo(testContacts.Select(tc => tc.Email));
         var existedContactsIds = items[0].Contacts!.Select(c => c.Id).ToList();
@@ -34,7 +34,7 @@ public class DealTests : SimpleTableTests<Deal, TestDeal, DealUpdateDto, IDealSe
         fkData.ContactIds.Remove(fkData.ContactIds.First());
         var dealUpdate = new DealUpdateDto() { ContactIds = fkData.ContactIds };
         await PatchTest(url, dealUpdate);
-        items = await GetTest<List<DealDetailsDto>>("/api/deals?filter[include]=Contacts", HttpStatusCode.OK, "Success");
+        items = await GetTest<List<DealDetailsDto>>("/api/deals?filter[include]=Contacts", HttpStatusCode.OK, "Admin");
         items!.Count.Should().Be(1);
         items[0].Contacts!.Select(c => c.Id).Should().BeEquivalentTo(fkData.ContactIds);
 
@@ -43,7 +43,7 @@ public class DealTests : SimpleTableTests<Deal, TestDeal, DealUpdateDto, IDealSe
         await PatchTest(url, dealUpdate, HttpStatusCode.NotFound);
     }
 
-    protected override async Task<(TestDeal, string)> CreateItem(string authToken = "Success")
+    protected override async Task<(TestDeal, string)> CreateItem(string authToken = "Admin")
     {
         var fkData = await CreateFKItems(new List<TestContact>(), authToken);
 
@@ -93,7 +93,7 @@ public class DealTests : SimpleTableTests<Deal, TestDeal, DealUpdateDto, IDealSe
     private async Task<string> PostUserTest(object payload)
     {
         var url = "/api/users";
-        var response = await Request(HttpMethod.Post, url, payload, "Success");
+        var response = await Request(HttpMethod.Post, url, payload, "Admin");
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var location = response.Headers?.Location?.LocalPath ?? string.Empty;
@@ -107,7 +107,7 @@ public class DealTests : SimpleTableTests<Deal, TestDeal, DealUpdateDto, IDealSe
         return location;
     }
 
-    private async Task<FKData> CreateFKItems(List<TestContact> testContacts, string authToken = "Success")
+    private async Task<FKData> CreateFKItems(List<TestContact> testContacts, string authToken = "Admin")
     {
         var result = new FKData();
 

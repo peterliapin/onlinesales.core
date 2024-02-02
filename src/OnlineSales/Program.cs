@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.Entities;
 using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
@@ -39,7 +41,7 @@ public class Program
         AppSettingsFiles.Add(path);
     }
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +105,7 @@ public class Program
             x.AddProfile(new AutoMapperProfiles());
             x.AllowNullCollections = true;
         });
+
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddControllers(options =>
@@ -134,7 +137,7 @@ public class Program
         app.UseExceptionHandler("/error");
         app.UseForwardedHeaders();
 
-        MigrateOnStartIfRequired(app, builder);
+        await MigrateOnStartIfRequired(app, builder);
 
         app.UseSwagger();
         app.UseSwaggerUI();
@@ -211,7 +214,7 @@ public class Program
         };
     }
 
-    private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
+    private static async Task MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
     {
         var migrateOnStart = builder.Configuration.GetValue<bool>("MigrateOnStart");
 
@@ -237,6 +240,44 @@ public class Program
                     }
 
                     // var elasticClient = scope.ServiceProvider.GetRequiredService<ElasticClient>();
+
+                    var defaultRoles = builder.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>() !;
+
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                    foreach (var defaultRole in defaultRoles)
+                    {
+                        if (!await roleManager.RoleExistsAsync(defaultRole))
+                        {
+                            await roleManager.CreateAsync(new IdentityRole(defaultRole));
+                        }
+                    }
+
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+                    var defaultUsers = builder.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>() !;
+
+                    foreach (var defaultUser in defaultUsers)
+                    {
+                        var user = new User
+                        {
+                            CreatedAt = DateTime.UtcNow,
+                            DisplayName = defaultUser.UserName,
+                            UserName = defaultUser.UserName,
+                            Email = defaultUser.Email,
+                            EmailConfirmed = true,
+                        };
+
+                        if (await userManager.FindByEmailAsync(user.Email) == null)
+                        {
+                            var result = await userManager.CreateAsync(user, defaultUser.Password);
+
+                            if (result.Succeeded)
+                            {
+                                await userManager.AddToRolesAsync(user, defaultUser.Roles);
+                            }
+                        }
+                    }
                 }
             }
         }

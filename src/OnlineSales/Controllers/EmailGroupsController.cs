@@ -12,7 +12,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class EmailGroupsController : BaseController<EmailGroup, EmailGroupCreateDto, EmailGroupUpdateDto, EmailGroupDetailsDto>
 {

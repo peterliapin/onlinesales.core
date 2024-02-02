@@ -5,7 +5,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using OnlineSales.Entities;
 using OnlineSales.Helpers;
 using OnlineSales.Plugin.TestPlugin.Data;
 using OnlineSales.Plugin.TestPlugin.Entities;

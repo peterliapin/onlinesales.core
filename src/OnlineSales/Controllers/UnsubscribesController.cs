@@ -5,8 +5,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -15,7 +13,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class UnsubscribesController : BaseControllerWithImport<Unsubscribe, UnsubscribeDto, UnsubscribeDto, UnsubscribeDetailsDto, UnsubscribeImportDto>
 {

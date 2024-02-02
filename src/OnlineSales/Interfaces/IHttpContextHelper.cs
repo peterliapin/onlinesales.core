@@ -2,6 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using Microsoft.AspNetCore.Identity;
+using OnlineSales.Entities;
+
 namespace OnlineSales.Interfaces
 {
     public interface IHttpContextHelper
@@ -15,5 +18,9 @@ namespace OnlineSales.Interfaces
         public string? IpAddressV6 { get; }
 
         public string? UserAgent { get; }
+
+        public Task<User?> GetCurrentUserAsync();
+
+        public Task<string?> GetCurrentUserIdAsync();
     }
 }

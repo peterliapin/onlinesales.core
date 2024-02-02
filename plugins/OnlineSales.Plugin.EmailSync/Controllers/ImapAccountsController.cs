@@ -15,7 +15,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace OnlineSales.Plugin.EmailSync.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/users")]
 public class ImapAccountsController : ControllerBase
 {

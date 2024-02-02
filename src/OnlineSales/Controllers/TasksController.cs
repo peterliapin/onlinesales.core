@@ -10,7 +10,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class TasksController : ControllerBase
 {

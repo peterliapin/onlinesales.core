@@ -23,11 +23,23 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
     {
         AuthenticateResult result;
 
-        if (Context.Request.Headers["Authorization"] == "Bearer Success")
+        var authHeader = Context.Request.Headers["Authorization"].ToString();
+
+        if (authHeader.Contains("Success") || authHeader.Contains("Admin"))
         {
-            var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, "Test user"),
+            };
+
+            if (authHeader.Contains("Admin"))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            }
+
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
+
             var ticket = new AuthenticationTicket(principal, SchemeName);
 
             result = AuthenticateResult.Success(ticket);

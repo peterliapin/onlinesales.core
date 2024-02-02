@@ -66,7 +66,8 @@ public class FilesTests : BaseTest
     public async Task CreateFileAnonymousTest()
     {
         var testFile = new TestFile("zip-1mb.zip", 1024 * 1024);
-        await PostTest("/api/files", testFile, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
+
+        await PostTest("/api/files", testFile, HttpStatusCode.Unauthorized, "Anonymous");
     }
 
     [Fact]
@@ -77,7 +78,7 @@ public class FilesTests : BaseTest
         var postResult = await PostTest("/api/files", testFile);
         postResult.Item2.Should().BeTrue();
 
-        var fileStream = await GetFileTest(postResult.Item1, HttpStatusCode.OK, "NonSuccessAuthentification");
+        var fileStream = await GetFileTest(postResult.Item1, HttpStatusCode.OK, "Anonymous");
         fileStream.Should().NotBeNull();
 
         CompareStreams(testFile.DataBuffer, fileStream!).Should().BeTrue();
@@ -133,7 +134,7 @@ public class FilesTests : BaseTest
         return (string.Empty, false);
     }
 
-    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestFile? payload, string authToken = "Success")
+    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestFile? payload, string authToken = "Admin")
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -151,7 +152,7 @@ public class FilesTests : BaseTest
         return client.SendAsync(request);
     }
 
-    private async Task<Stream?> GetFileTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    private async Task<Stream?> GetFileTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await GetTest(url, expectedCode, authToken);
 

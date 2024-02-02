@@ -154,3 +154,22 @@ public class AzureADConfig
 
     public string ClientSecret { get; set; } = string.Empty;
 }
+
+public class DefaultRolesConfig : List<string>
+{
+}
+
+public class DefaultUserConfig
+{
+    public string UserName { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public DefaultRolesConfig Roles { get; set; } = new DefaultRolesConfig();
+}
+
+public class DefaultUsersConfig : List<DefaultUserConfig>
+{
+}

@@ -14,6 +14,8 @@ public class BaseEntity : BaseCreateByEntity, IHasUpdatedAt, IHasUpdatedBy
 
     public string? UpdatedByIp { get; set; }
 
+    public string? UpdatedById { get; set; }
+
     public string? UpdatedByUserAgent { get; set; }
 }
 
@@ -23,6 +25,8 @@ public class BaseCreateByEntity : BaseEntityWithId, IHasCreatedAt, IHasCreatedBy
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public string? CreatedByIp { get; set; }
+
+    public string? CreatedById { get; set; }
 
     public string? CreatedByUserAgent { get; set; }
 }
@@ -59,12 +63,16 @@ public interface IHasCreatedBy
 {
     public string? CreatedByIp { get; set; }
 
+    public string? CreatedById { get; set; }
+
     public string? CreatedByUserAgent { get; set; }
 }
 
 public interface IHasUpdatedBy
 {
     public string? UpdatedByIp { get; set; }
+
+    public string? UpdatedById { get; set; }
 
     public string? UpdatedByUserAgent { get; set; }
 }

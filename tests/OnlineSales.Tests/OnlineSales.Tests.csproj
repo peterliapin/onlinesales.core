@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
-    <ReleaseVersion>1.2.15-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.16-pre</ReleaseVersion>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
 
@@ -27,7 +27,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.9" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="CsvHelper" Version="30.0.1" />
+    <PackageReference Include="CsvHelper" Version="30.1.0" />
   </ItemGroup>
 
   <ItemGroup>

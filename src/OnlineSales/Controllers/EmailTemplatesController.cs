@@ -12,7 +12,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class EmailTemplatesController : BaseController<EmailTemplate, EmailTemplateCreateDto, EmailTemplateUpdateDto, EmailTemplateDetailsDto>
 {

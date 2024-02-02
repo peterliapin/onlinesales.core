@@ -13,7 +13,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
@@ -28,7 +28,6 @@ public class UsersController : ControllerBase
         this.userManager = userManager;
     }
 
-    // GET api/user/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -43,19 +42,6 @@ public class UsersController : ControllerBase
         return Ok(resultsToClient);
     }
 
-    // GET api/user/me
-    [HttpGet("me")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<UserDetailsDto>> GetSelf()
-    {
-        var user = await UserHelper.GetCurrentUserAsync(userManager, User);
-        return Ok(mapper.Map<UserDetailsDto>(user));
-    }
-
-    // GET api/user/5
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -72,7 +58,6 @@ public class UsersController : ControllerBase
         return Ok(mapper.Map<UserDetailsDto>(existingEntity));
     }
 
-    // PATCH api/user/5
     [HttpPatch("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -98,7 +83,6 @@ public class UsersController : ControllerBase
         return Ok(resultsToClient);
     }
 
-    // DELETE api/user/5
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -120,7 +104,6 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
-    // POST api/{entity}s
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
