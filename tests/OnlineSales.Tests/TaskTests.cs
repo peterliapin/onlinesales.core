@@ -2,15 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Xml.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
 using OnlineSales.Configuration;
-using OnlineSales.Data;
 using OnlineSales.Helpers;
-using OnlineSales.Interfaces;
-using static Azure.Core.HttpHeader;
 
 namespace OnlineSales.Tests;
 
@@ -33,7 +29,7 @@ public class TaskTests : BaseTest
     [Fact]
     public async Task GetByNameFailureTest()
     {
-        await GetTest(tasksUrl + "/SomeUnexistedTask", HttpStatusCode.NotFound, "Success");
+        await GetTest(tasksUrl + "/SomeUnexistedTask", HttpStatusCode.NotFound, "Admin");
     }
 
     [Fact]
@@ -78,7 +74,7 @@ public class TaskTests : BaseTest
 
         await SyncElasticSearch();
 
-        CountDocumentsInIndex("onlinesales-dealpipeline").Should().Be(esSyncBatchSize * 2);
+        CountDocumentsInIndex("onlinesales-test-dealpipeline").Should().Be(esSyncBatchSize * 2);
     }
 
     [Fact]
@@ -92,13 +88,13 @@ public class TaskTests : BaseTest
 
         await SyncElasticSearch();
 
-        CountDocumentsInIndex("onlinesales-dealpipeline").Should().Be(dataSize);
+        CountDocumentsInIndex("onlinesales-test-dealpipeline").Should().Be(dataSize);
 
-        App.GetElasticClient().Indices.Delete("onlinesales-dealpipeline");
+        App.GetElasticClient().Indices.Delete("onlinesales-test-dealpipeline");
 
         await SyncElasticSearch();
 
-        CountDocumentsInIndex("onlinesales-dealpipeline").Should().Be(dataSize);
+        CountDocumentsInIndex("onlinesales-test-dealpipeline").Should().Be(dataSize);
     }
 
     private async Task CheckIfTaskNotRunning(string taskName)

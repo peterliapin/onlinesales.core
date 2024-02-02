@@ -61,7 +61,7 @@ public class MediaTests : BaseTest
     public async Task CreateImageAnonymousTest()
     {
         var testMedia = new TestMedia("test1.png", 1024);
-        await PostTest("/api/media", testMedia, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
+        await PostTest("/api/media", testMedia, HttpStatusCode.Unauthorized, "Anonymous");
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class MediaTests : BaseTest
         var testMedia = new TestMedia("test1.png", 1024);
         var postResult = await PostTest("/api/media", testMedia);
         postResult.Item2.Should().BeTrue();
-        var imageStream = await GetImageTest(postResult.Item1, HttpStatusCode.OK, "NonSuccessAuthentification");
+        var imageStream = await GetImageTest(postResult.Item1, HttpStatusCode.OK, "Anonymous");
         imageStream.Should().NotBeNull();
         CompareStreams(testMedia.DataBuffer, imageStream!).Should().BeTrue();
     }
@@ -124,7 +124,7 @@ public class MediaTests : BaseTest
         return (string.Empty, false);
     }
 
-    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestMedia? payload, string authToken = "Success")
+    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestMedia? payload, string authToken = "Admin")
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -142,7 +142,7 @@ public class MediaTests : BaseTest
         return client.SendAsync(request);
     }
 
-    private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await GetTest(url, expectedCode, authToken);
 

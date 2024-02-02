@@ -50,7 +50,7 @@ namespace OnlineSales.Infrastructure
 
             if (string.IsNullOrWhiteSpace(userEmail))
             {
-                throw new UnauthorizedAccessException();
+                return null;                
             }
 
             return await userManager.FindByEmailAsync(userEmail);

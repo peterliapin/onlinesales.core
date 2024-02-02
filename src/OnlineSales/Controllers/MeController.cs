@@ -35,6 +35,12 @@ public class MeController : ControllerBase
     public async Task<ActionResult<UserDetailsDto>> GetSelf()
     {
         var user = await UserHelper.GetCurrentUserAsync(userManager, User);
+
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
         return Ok(mapper.Map<UserDetailsDto>(user));
     }
 
@@ -50,7 +56,7 @@ public class MeController : ControllerBase
 
         if (user == null)
         {
-            throw new EntityNotFoundException(typeof(User).Name, "CurrentUser");
+            throw new UnauthorizedAccessException();
         }
             
         mapper.Map(value, user);

@@ -8,7 +8,7 @@ jobs:
   report:
     runs-on: ubuntu-latest
     steps: 
-      - uses: dorny/test-reporter@v1.6.0
+      - uses: dorny/test-reporter@v1.8.0
         with:   
           name: TRX Tests
           artifact: test-results                                                          # artifact name
