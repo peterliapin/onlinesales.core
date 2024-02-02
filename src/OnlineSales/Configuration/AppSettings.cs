@@ -132,3 +132,44 @@ public class EmailConfig : BaseServiceConfig
 {
     public bool UseSsl { get; set; }
 }
+
+public class JwtConfig
+{
+    public string Issuer { get; set; } = string.Empty;
+
+    public string Audience { get; set; } = string.Empty;
+
+    public string Secret { get; set; } = string.Empty;
+}
+
+public class AzureADConfig
+{
+    public string Instance { get; set; } = string.Empty;
+
+    public string TenantId { get; set; } = string.Empty;
+
+    public string Domain { get; set; } = string.Empty;
+
+    public string ClientId { get; set; } = string.Empty;
+
+    public string ClientSecret { get; set; } = string.Empty;
+}
+
+public class DefaultRolesConfig : List<string>
+{
+}
+
+public class DefaultUserConfig
+{
+    public string UserName { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public DefaultRolesConfig Roles { get; set; } = new DefaultRolesConfig();
+}
+
+public class DefaultUsersConfig : List<DefaultUserConfig>
+{
+}

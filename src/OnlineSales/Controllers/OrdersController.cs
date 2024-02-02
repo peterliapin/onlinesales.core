@@ -13,7 +13,7 @@ using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, OrderUpdateDto, OrderDetailsDto, OrderImportDto>
 {
@@ -25,8 +25,8 @@ public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, 
         this.commentableControllerExtension = commentableControllerExtension;
     }
 
-    [HttpGet("{id}/comments")]
     [AllowAnonymous]
+    [HttpGet("{id}/comments")]    
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -36,8 +36,8 @@ public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, 
         return commentableControllerExtension.ReturnComments(await commentableControllerExtension.GetCommentsForICommentable<Order>(id), this);
     }
 
-    [HttpPost("{id}/comments")]
     [AllowAnonymous]
+    [HttpPost("{id}/comments")]    
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]

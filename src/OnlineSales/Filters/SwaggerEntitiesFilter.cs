@@ -4,6 +4,7 @@
 
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using Nest;
 using OnlineSales.Configuration;
 using Swashbuckle.AspNetCore.SwaggerGen;
 

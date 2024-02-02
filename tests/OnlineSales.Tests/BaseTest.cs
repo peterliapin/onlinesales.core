@@ -61,12 +61,12 @@ public class BaseTest : IDisposable
         task!.Completed.Should().BeTrue();
     }
 
-    protected Task<HttpResponseMessage> GetRequest(string url, string authToken = "Success")
+    protected Task<HttpResponseMessage> GetRequest(string url, string authToken = "Admin")
     {
         return Request(HttpMethod.Get, url, null, authToken);
     }
 
-    protected Task<HttpResponseMessage> Request(HttpMethod method, string url, object? payload, string authToken = "Success")
+    protected Task<HttpResponseMessage> Request(HttpMethod method, string url, object? payload, string authToken = "Admin")
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -80,7 +80,7 @@ public class BaseTest : IDisposable
         return client.SendAsync(request);
     }
 
-    protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await GetRequest(url, authToken);
 
@@ -89,7 +89,7 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
         where T : class
     {
         var response = await GetTest(url, expectedCode, authToken);
@@ -108,7 +108,7 @@ public class BaseTest : IDisposable
         }
     }
 
-    protected async Task<List<TI>?> GetTestCSV<TI>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async Task<List<TI>?> GetTestCSV<TI>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     where TI : class
     {
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -138,7 +138,7 @@ public class BaseTest : IDisposable
         }
     }
 
-    protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Success")
+    protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Admin")
     {
         var response = await Request(HttpMethod.Post, url, payload, authToken);
 
@@ -160,7 +160,7 @@ public class BaseTest : IDisposable
         return location;
     }
 
-    protected async virtual Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async virtual Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName, authToken);
 
@@ -171,13 +171,13 @@ public class BaseTest : IDisposable
         return JsonHelper.Deserialize<ImportResult>(content)!;
     }
 
-    protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Success")
+    protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Admin")
     {
         var response = await Request(HttpMethod.Patch, url, payload, authToken);
         return response;
     }
 
-    protected async Task<HttpResponseMessage> PatchTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    protected async Task<HttpResponseMessage> PatchTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await Patch(url, payload, authToken);
 
@@ -186,7 +186,7 @@ public class BaseTest : IDisposable
         return response;
     }
 
-    protected async Task<HttpResponseMessage> DeleteTest(string url, HttpStatusCode expectedCode = HttpStatusCode.NoContent, string authToken = "Success")
+    protected async Task<HttpResponseMessage> DeleteTest(string url, HttpStatusCode expectedCode = HttpStatusCode.NoContent, string authToken = "Admin")
     {
         var response = await Request(HttpMethod.Delete, url, null, authToken);
 
@@ -250,7 +250,7 @@ public class BaseTest : IDisposable
         }
     }
 
-    private Task<HttpResponseMessage> ImportRequest(HttpMethod method, string url, string importFileName, string authToken = "Success")
+    private Task<HttpResponseMessage> ImportRequest(HttpMethod method, string url, string importFileName, string authToken = "Admin")
     {
         StringContent content;
 

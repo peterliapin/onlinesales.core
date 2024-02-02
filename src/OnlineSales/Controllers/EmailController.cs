@@ -6,13 +6,12 @@ using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     public class EmailController : ControllerBase
     {

@@ -285,7 +285,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         return from;
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Admin")
     {
         var contactCreate = new TestContact();
 

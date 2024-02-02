@@ -9,11 +9,10 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using OnlineSales.Services;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class DealPipelineStagesController : BaseController<DealPipelineStage, DealPipelineStageCreateDto, DealPipelineStageUpdateDto, DealPipelineStageDetailsDto>
 {

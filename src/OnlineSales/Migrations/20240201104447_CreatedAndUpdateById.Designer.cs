@@ -3,19 +3,22 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using OnlineSales.Data;
 using OnlineSales.Entities;
-using OnlineSales.Plugin.TestPlugin.Data;
 
 #nullable disable
 
-namespace OnlineSales.Plugin.TestPlugin.Migrations
+namespace OnlineSales.Migrations
 {
-    [DbContext(typeof(TestPluginDbContext))]
-    partial class TestPluginDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PgDbContext))]
+    [Migration("20240201104447_CreatedAndUpdateById")]
+    partial class CreatedAndUpdateById
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,10 +74,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("roles", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -105,10 +105,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("RoleId")
                         .HasDatabaseName("ix_role_claims_role_id");
 
-                    b.ToTable("role_claims", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("role_claims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -139,10 +136,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_claims_user_id");
 
-                    b.ToTable("user_claims", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("user_claims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -170,10 +164,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_user_logins_user_id");
 
-                    b.ToTable("user_logins", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("user_logins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -192,10 +183,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("RoleId")
                         .HasDatabaseName("ix_user_roles_role_id");
 
-                    b.ToTable("user_roles", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("user_roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -219,10 +207,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name")
                         .HasName("pk_user_tokens");
 
-                    b.ToTable("user_tokens", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("user_tokens", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Account", b =>
@@ -326,10 +311,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_account_name");
 
-                    b.ToTable("account", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("account", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ChangeLog", b =>
@@ -370,10 +352,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_change_log");
 
-                    b.ToTable("change_log", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("change_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ChangeLogTaskLog", b =>
@@ -421,10 +400,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_change_log_task_log");
 
-                    b.ToTable("change_log_task_log", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("change_log_task_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Comment", b =>
@@ -527,10 +503,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_comment_parent_id");
 
-                    b.ToTable("comment", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("comment", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
@@ -687,10 +660,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("UnsubscribeId")
                         .HasDatabaseName("ix_contact_unsubscribe_id");
 
-                    b.ToTable("contact", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("contact", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.ContactEmailSchedule", b =>
@@ -759,10 +729,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("ScheduleId")
                         .HasDatabaseName("ix_contact_email_schedule_schedule_id");
 
-                    b.ToTable("contact_email_schedule", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("contact_email_schedule", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Content", b =>
@@ -880,10 +847,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_content_slug");
 
-                    b.ToTable("content", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("content", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Deal", b =>
@@ -979,10 +943,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_deal_user_id");
 
-                    b.ToTable("deal", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("deal", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.DealPipeline", b =>
@@ -1038,10 +999,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_deal_pipeline");
 
-                    b.ToTable("deal_pipeline", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("deal_pipeline", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.DealPipelineStage", b =>
@@ -1108,10 +1066,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("DealPipelineId")
                         .HasDatabaseName("ix_deal_pipeline_stage_deal_pipeline_id");
 
-                    b.ToTable("deal_pipeline_stage", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("deal_pipeline_stage", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Discount", b =>
@@ -1188,10 +1143,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("PromotionId")
                         .HasDatabaseName("ix_discount_promotion_id");
 
-                    b.ToTable("discount", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("discount", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
@@ -1282,10 +1234,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_domain_name");
 
-                    b.ToTable("domain", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("domain", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
@@ -1346,10 +1295,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_group");
 
-                    b.ToTable("email_group", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("email_group", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailLog", b =>
@@ -1441,10 +1387,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_log");
 
-                    b.ToTable("email_log", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("email_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
@@ -1507,10 +1450,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("GroupId")
                         .HasDatabaseName("ix_email_schedule_group_id");
 
-                    b.ToTable("email_schedule", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("email_schedule", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
@@ -1606,10 +1546,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("EmailGroupId")
                         .HasDatabaseName("ix_email_template_email_group_id");
 
-                    b.ToTable("email_template", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("email_template", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.File", b =>
@@ -1689,10 +1626,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_file");
 
-                    b.ToTable("file", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("file", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.IpDetails", b =>
@@ -1729,10 +1663,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_ip_details_ip");
 
-                    b.ToTable("ip_details", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("ip_details", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Link", b =>
@@ -1802,10 +1733,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_link_uid");
 
-                    b.ToTable("link", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("link", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
@@ -1856,10 +1784,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("LinkId")
                         .HasDatabaseName("ix_link_log_link_id");
 
-                    b.ToTable("link_log", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("link_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Media", b =>
@@ -1939,10 +1864,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_media");
 
-                    b.ToTable("media", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("media", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
@@ -2058,10 +1980,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_order_ref_no");
 
-                    b.ToTable("order", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("order", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
@@ -2145,10 +2064,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("OrderId")
                         .HasDatabaseName("ix_order_item_order_id");
 
-                    b.ToTable("order_item", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("order_item", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Promotion", b =>
@@ -2221,10 +2137,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_promotion_code");
 
-                    b.ToTable("promotion", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("promotion", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.TaskExecutionLog", b =>
@@ -2267,10 +2180,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasKey("Id")
                         .HasName("pk_task_execution_log");
 
-                    b.ToTable("task_execution_log", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("task_execution_log", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Unsubscribe", b =>
@@ -2317,10 +2227,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     b.HasIndex("ContactId")
                         .HasDatabaseName("ix_unsubscribe_contact_id");
 
-                    b.ToTable("unsubscribe", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("unsubscribe", (string)null);
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.User", b =>
@@ -2422,66 +2329,7 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("users", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("OnlineSales.Plugin.TestPlugin.Entities.TestEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_id");
-
-                    b.Property<string>("CreatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_ip");
-
-                    b.Property<string>("CreatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("created_by_user_agent");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("text")
-                        .HasColumnName("source");
-
-                    b.Property<string>("StringField")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("string_field");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedById")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_id");
-
-                    b.Property<string>("UpdatedByIp")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_ip");
-
-                    b.Property<string>("UpdatedByUserAgent")
-                        .HasColumnType("text")
-                        .HasColumnName("updated_by_user_agent");
-
-                    b.HasKey("Id")
-                        .HasName("pk_test_entity");
-
-                    b.ToTable("test_entity", (string)null);
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("ContactDeal", b =>

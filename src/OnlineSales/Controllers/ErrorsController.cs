@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Controllers;
 
-[ApiExplorerSettings(IgnoreApi = true)]
 [AllowAnonymous]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorsController : Controller
 {
     [Route("/error")]

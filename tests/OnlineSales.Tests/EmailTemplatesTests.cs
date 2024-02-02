@@ -20,7 +20,7 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
         return (emailTemplate, emailTemplateUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Admin")
     {
         var fkItemCreate = new TestEmailGroup();
 

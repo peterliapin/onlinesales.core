@@ -223,7 +223,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         return (testComment, newCommentUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
+    protected override async Task<(int, string)> CreateFKItem(string authToken = "Admin")
     {
         var fkItemCreate = new TestContent();
 

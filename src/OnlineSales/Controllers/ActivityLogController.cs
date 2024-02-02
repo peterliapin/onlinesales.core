@@ -2,28 +2,23 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Web;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Nest;
-using OnlineSales.Configuration;
-using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class ActivityLogController : ControllerBase
 {    
     private readonly IMapper mapper;
     private readonly ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory;
 
-    public ActivityLogController(PgDbContext dbContext, IConfiguration configuration, IMapper mapper, IOptions<ApiSettingsConfig> apiSettingsConfig, EsDbContext esDbContext, ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory)
+    public ActivityLogController(IMapper mapper, ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory)
     {        
         this.mapper = mapper;
         this.queryProviderFactory = queryProviderFactory;
