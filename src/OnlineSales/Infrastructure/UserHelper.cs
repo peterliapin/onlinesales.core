@@ -34,6 +34,13 @@ namespace OnlineSales.Infrastructure
             return null;
         }
 
+        public static async Task<User> GetCurrentUserOrThrowAsync(UserManager<User> userManager, ClaimsPrincipal? claimsPrincipal)
+        {
+            var user = await GetCurrentUserAsync(userManager, claimsPrincipal);
+
+            return user == null ? throw new UnauthorizedAccessException() : user;
+        }
+
         public static async Task<User?> GetCurrentUserAsync(UserManager<User> userManager, ClaimsPrincipal? claimsPrincipal)
         {
             if (claimsPrincipal == null || claimsPrincipal.Identity == null)
