@@ -23,9 +23,11 @@ namespace OnlineSales.Plugin.TestPlugin.Migrations
                     source = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_by_ip = table.Column<string>(type: "text", nullable: true),
+                    created_by_id = table.Column<string>(type: "text", nullable: true),
                     created_by_user_agent = table.Column<string>(type: "text", nullable: true),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     updated_by_ip = table.Column<string>(type: "text", nullable: true),
+                    updated_by_id = table.Column<string>(type: "text", nullable: true),
                     updated_by_user_agent = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>

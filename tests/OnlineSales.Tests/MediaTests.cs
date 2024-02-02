@@ -124,7 +124,7 @@ public class MediaTests : BaseTest
         return (string.Empty, false);
     }
 
-    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestMedia? payload, string authToken = "Success")
+    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestMedia? payload, string authToken = "Admin")
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -142,7 +142,7 @@ public class MediaTests : BaseTest
         return client.SendAsync(request);
     }
 
-    private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await GetTest(url, expectedCode, authToken);
 

@@ -133,7 +133,7 @@ public class FilesTests : BaseTest
         return (string.Empty, false);
     }
 
-    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestFile? payload, string authToken = "Success")
+    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestFile? payload, string authToken = "Admin")
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -151,7 +151,7 @@ public class FilesTests : BaseTest
         return client.SendAsync(request);
     }
 
-    private async Task<Stream?> GetFileTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    private async Task<Stream?> GetFileTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
     {
         var response = await GetTest(url, expectedCode, authToken);
 
