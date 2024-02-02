@@ -5,7 +5,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -33,32 +32,5 @@ public class LinksController : BaseControllerWithImport<Link, LinkCreateDto, Lin
         }
 
         return base.Post(link);
-    }
-
-    [HttpGet]
-    [AllowAnonymous]
-    [Route("/go/{uid}")]
-    public async Task<ActionResult> Follow(string uid)
-    {
-        var link = await (from l in dbContext.Links
-                          where l.Uid == uid
-                          select l).FirstOrDefaultAsync();
-
-        if (link == null)
-        {
-            throw new EntityNotFoundException(typeof(Link).Name, uid.ToString());
-        }
-
-        var linkLog = new LinkLog
-        {
-            Destination = link.Destination,
-            Referrer = Request.Headers.Referer.ToString(),
-            LinkId = link.Id,
-        };
-
-        await dbContext.LinkLogs!.AddAsync(linkLog);
-        await dbContext.SaveChangesAsync();
-
-        return new RedirectResult(linkLog.Destination, false, true);
     }
 }
