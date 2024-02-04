@@ -102,10 +102,10 @@ public class IdentityController : ControllerBase
 
         var token = GetToken(authClaims);
 
-        return Ok(new
+        return Ok(new JWTokenDto()
         {
-            token = new JwtSecurityTokenHandler().WriteToken(token),
-            expiration = token.ValidTo,
+            Token = new JwtSecurityTokenHandler().WriteToken(token),
+            Expiration = token.ValidTo,
         });
     }
 

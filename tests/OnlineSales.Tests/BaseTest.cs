@@ -138,6 +138,27 @@ public class BaseTest : IDisposable
         }
     }
 
+    protected async Task<T?> PostTest<T>(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Admin")
+        where T : class
+    {
+        var response = await Request(HttpMethod.Post, url, payload, authToken);
+
+        response.StatusCode.Should().Be(expectedCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (expectedCode == HttpStatusCode.OK)
+        {
+            CheckForRedundantProperties<T>(content);
+
+            return JsonHelper.Deserialize<T>(content);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Admin")
     {
         var response = await Request(HttpMethod.Post, url, payload, authToken);

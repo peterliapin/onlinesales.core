@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using CsvHelper.Configuration.Attributes;
 
 namespace OnlineSales.DTOs;
@@ -14,4 +15,13 @@ public class LoginDto
 
     [Optional]
     public string Password { get; set; } = string.Empty;
+}
+
+public class JWTokenDto
+{
+    [Required]
+    required public string Token { get; set; }
+
+    [Required]
+    required public DateTime Expiration { get; set; }
 }
