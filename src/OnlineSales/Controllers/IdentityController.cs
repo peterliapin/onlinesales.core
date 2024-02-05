@@ -85,12 +85,6 @@ public class IdentityController : ControllerBase
             return Forbid();
         }
 
-        var isAdmin = await signInManager.UserManager.IsInRoleAsync(user, "Admin");
-        if(!isAdmin)
-        {
-            return ValidationProblem();
-        }
-
         var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, false);
         if (!signResult.Succeeded)
         {
