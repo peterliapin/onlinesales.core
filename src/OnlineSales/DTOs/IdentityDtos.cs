@@ -3,18 +3,17 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using CsvHelper.Configuration.Attributes;
 
 namespace OnlineSales.DTOs;
 
 public class LoginDto
 {
     [Required]
+    [EmailAddress]
     required public string Email { get; set; }
 
-    [Optional]
-    public string Password { get; set; } = string.Empty;
+    [Required]
+    required public string Password { get; set; }
 }
 
 public class JWTokenDto

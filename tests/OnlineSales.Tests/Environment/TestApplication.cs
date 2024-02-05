@@ -37,7 +37,7 @@ public class TestApplication : WebApplicationFactory<Program>
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
             RenewDatabase(dataContaxt);
-            Program.CreateDefaultIdentity(WebApplication.CreateBuilder(), scope).Wait();
+            Program.CreateDefaultIdentity(scope).Wait();
 
             var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
             esDbContext.ElasticClient.Indices.Delete("*");

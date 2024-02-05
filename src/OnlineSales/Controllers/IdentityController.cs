@@ -69,6 +69,11 @@ public class IdentityController : ControllerBase
     }
 
     [HttpPost("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<ActionResult> Login([FromBody] LoginDto input)
     {
         var userManager = signInManager.UserManager;
@@ -77,18 +82,30 @@ public class IdentityController : ControllerBase
 
         if (user == null)
         {
-            return NotFound(input.Email);
+            throw new UnauthorizedException();
         }
 
         if(!user.EmailConfirmed)
         {
-            return Forbid();
+            throw new IdentityException("Email is not confirmed");
         }
 
-        var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, false);
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            throw new IdentityException("Account locked out");
+        }
+
+        var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, true);
         if (!signResult.Succeeded)
         {
-            return Unauthorized();
+            if (signResult.IsLockedOut)
+            {
+                throw new TooManyRequestsException();
+            }
+            else
+            {
+                throw new UnauthorizedException();
+            }
         }
 
         var authClaims = new List<Claim>
@@ -96,6 +113,7 @@ public class IdentityController : ControllerBase
                 new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             };
 
         var roles = await userManager.GetRolesAsync(user);
