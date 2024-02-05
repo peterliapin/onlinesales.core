@@ -91,14 +91,18 @@ public class IdentityController : ControllerBase
             return Unauthorized();
         }
 
-        // await signInManager.SignOutAsync();
-
         var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
+
+        var roles = await userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            authClaims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var token = GetToken(authClaims);
 

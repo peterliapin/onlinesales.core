@@ -10,7 +10,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
-public class TaskTests : BaseTest
+public class TaskTests : BaseTestAutoLogin
 {
     private readonly string tasksUrl = "api/tasks";
 
@@ -29,7 +29,7 @@ public class TaskTests : BaseTest
     [Fact]
     public async Task GetByNameFailureTest()
     {
-        await GetTest(tasksUrl + "/SomeUnexistedTask", HttpStatusCode.NotFound, "Admin");
+        await GetTest(tasksUrl + "/SomeUnexistedTask", HttpStatusCode.NotFound);
     }
 
     [Fact]
