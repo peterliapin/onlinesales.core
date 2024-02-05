@@ -7,15 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OnlineSales.Tests;
 
-public class IdentityLoginTests : BaseTest
+public class IdentityLoginTests : BaseTestAutoLogin
 {
-    private static readonly string Api = "/api/identity/login";
-    private static readonly LoginDto CorrectLoginData = new LoginDto()
-    {
-        Email = "admin@admin.com",
-        Password = "adminPass!123",
-    };
-
     [Theory]
     [InlineData("UnexpectedUser@admin.com", "WrongPassword")]
     [InlineData("UnexpectedUser@admin.com", "adminPass!123")]
@@ -24,9 +17,9 @@ public class IdentityLoginTests : BaseTest
     {
         var contentLoginDto = new LoginDto()
         { Email = username, Password = password };
-        Assert.NotEqual(contentLoginDto, CorrectLoginData);
+        Assert.NotEqual(contentLoginDto, AdminLoginData);
 
-        var token = await PostTest<JWTokenDto>(Api, contentLoginDto, HttpStatusCode.NotFound, string.Empty);
+        var token = await PostTest<JWTokenDto>(LoginApi, contentLoginDto, HttpStatusCode.NotFound);
         token.Should().BeNull();
     }
 
@@ -37,9 +30,9 @@ public class IdentityLoginTests : BaseTest
     {
         var contentLoginDto = new LoginDto()
         { Email = username, Password = password };
-        Assert.NotEqual(contentLoginDto, CorrectLoginData);
+        Assert.NotEqual(contentLoginDto, AdminLoginData);
 
-        var token = await PostTest<JWTokenDto>(Api, contentLoginDto, HttpStatusCode.Unauthorized, string.Empty);
+        var token = await PostTest<JWTokenDto>(LoginApi, contentLoginDto, HttpStatusCode.Unauthorized);
         token.Should().BeNull();
     }
 
@@ -61,17 +54,36 @@ public class IdentityLoginTests : BaseTest
 
         var contentLoginDto = new LoginDto()
         { Email = username, Password = password };
-        Assert.NotEqual(contentLoginDto, CorrectLoginData);
+        Assert.NotEqual(contentLoginDto, AdminLoginData);
 
-        var token = await PostTest<JWTokenDto>(Api, contentLoginDto, HttpStatusCode.Forbidden, string.Empty);
+        var token = await PostTest<JWTokenDto>(LoginApi, contentLoginDto, HttpStatusCode.Forbidden);
         token.Should().BeNull();
     }
 
     [Fact]
     public async Task LoginOkTest()
     {
-        var token = await PostTest<JWTokenDto>(Api, CorrectLoginData, HttpStatusCode.OK, string.Empty);
+        var token = await PostTest<JWTokenDto>(LoginApi, AdminLoginData, HttpStatusCode.OK);
         token.Should().NotBeNull();
         token!.Token.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task LoginLogoutTest()
+    {
+        string testApi = "/api/links";
+
+        GetAuthenticationHeaderValue().Should().NotBeNull();
+        await GetTest(testApi, HttpStatusCode.OK);
+
+        Logout();
+        await GetTest(testApi, HttpStatusCode.Unauthorized);
+
+        var token = await LoginAsAdmin();
+        token.Should().NotBeNull();
+        await GetTest(testApi, HttpStatusCode.OK);
+
+        Logout();
+        await GetTest(testApi, HttpStatusCode.Unauthorized);
     }
 }
