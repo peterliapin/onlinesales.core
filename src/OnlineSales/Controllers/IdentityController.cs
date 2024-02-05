@@ -85,13 +85,17 @@ public class IdentityController : ControllerBase
             return Forbid();
         }
 
+        var isAdmin = await signInManager.UserManager.IsInRoleAsync(user, "Admin");
+        if(!isAdmin)
+        {
+            return ValidationProblem();
+        }
+
         var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, false);
         if (!signResult.Succeeded)
         {
             return Unauthorized();
         }
-
-        // await signInManager.SignOutAsync();
 
         var authClaims = new List<Claim>
             {
@@ -99,6 +103,12 @@ public class IdentityController : ControllerBase
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
+
+        var roles = await userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            authClaims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         var token = GetToken(authClaims);
 
