@@ -8,17 +8,15 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using OnlineSales.Configuration;
 
 namespace OnlineSales.Tests;
 
 public class BaseTestAutoLogin : BaseTest
 {
     protected static readonly string LoginApi = "/api/identity/login";
-    protected static readonly LoginDto AdminLoginData = new LoginDto()
-    {
-        Email = "admin@admin.com",
-        Password = "adminPass!123",
-    };
+    protected static readonly LoginDto AdminLoginData = GetLoginDtoFromConfiguration();
 
     private JWTokenDto? authToken;
 
@@ -42,5 +40,15 @@ public class BaseTestAutoLogin : BaseTest
     protected override AuthenticationHeaderValue? GetAuthenticationHeaderValue()
     {
         return authToken != null ? new AuthenticationHeaderValue("Bearer", authToken!.Token) : null;
+    }
+
+    private static LoginDto GetLoginDtoFromConfiguration()
+    {
+        var defaultUser = Program.GetApp()!.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>()![0];
+        return new LoginDto()
+        {
+            Email = defaultUser.Email,
+            Password = defaultUser.Password,
+        };
     }
 }

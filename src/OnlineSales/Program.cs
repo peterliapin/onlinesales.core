@@ -161,9 +161,9 @@ public class Program
         app.Run();
     }
 
-    public static async Task CreateDefaultIdentity(WebApplicationBuilder builder, IServiceScope scope)
+    public static async Task CreateDefaultIdentity(IServiceScope scope)
     {
-        var defaultRoles = builder.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>()!;
+        var defaultRoles = app!.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>()!;
 
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -177,7 +177,7 @@ public class Program
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-        var defaultUsers = builder.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>()!;
+        var defaultUsers = app!.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>()!;
 
         foreach (var defaultUser in defaultUsers)
         {
@@ -282,7 +282,7 @@ public class Program
 
                     // var elasticClient = scope.ServiceProvider.GetRequiredService<ElasticClient>();
 
-                    await CreateDefaultIdentity(builder, scope);
+                    await CreateDefaultIdentity(scope);
                 }
             }
         }

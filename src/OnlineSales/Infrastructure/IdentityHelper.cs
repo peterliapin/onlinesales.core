@@ -20,8 +20,18 @@ namespace OnlineSales.Infrastructure
         {
             var jwtConfig = builder.Configuration.GetSection("Jwt").Get<JwtConfig>();
             var azureAdConfig = builder.Configuration.GetSection("AzureAd").Get<AzureADConfig>();
+            var lockoutConfig = builder.Configuration.GetSection("DefaultUserLockout").Get<DefaultUserLockoutConfig>();
 
-            builder.Services.AddIdentity<User, IdentityRole>()
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+                // Lockout settings
+                if (lockoutConfig != null)
+                {
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(lockoutConfig.LockoutTime);
+                    options.Lockout.MaxFailedAccessAttempts = lockoutConfig.MaxFailedAccessAttempts;
+                    options.Lockout.AllowedForNewUsers = true;
+                }
+            })
                 .AddEntityFrameworkStores<PgDbContext>()
                 .AddDefaultTokenProviders();
 
