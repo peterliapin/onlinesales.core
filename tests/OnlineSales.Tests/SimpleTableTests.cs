@@ -11,7 +11,7 @@ using OnlineSales.Infrastructure;
 
 namespace OnlineSales.Tests;
 
-public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
+public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTestAutoLogin
     where T : BaseEntityWithId
     where TC : class
     where TU : new()
@@ -29,7 +29,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [Fact]
     public async Task GetAllTest()
     {
-        await GetAllWithAuthentification();
+        await GetAllRecords(false);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
     [Fact]
     public async Task CreateAndGetItemTest()
     {
-        await CreateAndGetItemWithAuthentification();
+        await CreateAndGetItem(false);
     }
 
     [Fact]
@@ -300,11 +300,11 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         result.Should().BeEquivalentTo(expected);
     }
 
-    protected virtual async Task<(TC, string)> CreateItem(string authToken = "Admin")
+    protected virtual async Task<(TC, string)> CreateItem()
     {
         var testCreateItem = TestData.Generate<TC>();
 
-        var newItemUrl = await PostTest(itemsUrl, testCreateItem, HttpStatusCode.Created, authToken);
+        var newItemUrl = await PostTest(itemsUrl, testCreateItem, HttpStatusCode.Created);
 
         return (testCreateItem, newItemUrl);
     }
@@ -317,23 +317,33 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         App.PopulateBulkData<T, TS>(bulkEntitiesList);
     }
 
-    protected async Task GetAllWithAuthentification(string getAuthToken = "Admin")
+    protected async Task GetAllRecords(bool asAnonimus)
     {
         const int numberOfItems = 10;
 
         GenerateBulkRecords(numberOfItems);
 
-        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK, getAuthToken);
+        if (asAnonimus)
+        {
+            Logout();
+        }
+
+        var items = await GetTest<List<T>>(itemsUrl, HttpStatusCode.OK);
 
         items.Should().NotBeNull();
         items!.Count.Should().Be(numberOfItems);
     }
 
-    protected async Task CreateAndGetItemWithAuthentification(string authToken = "Admin")
+    protected async Task CreateAndGetItem(bool asAnonimus)
     {
         var testCreateItem = await CreateItem();
 
-        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK, authToken);
+        if (asAnonimus)
+        {
+            Logout();
+        }
+
+        var item = await GetTest<T>(testCreateItem.Item2, HttpStatusCode.OK);
 
         MustBeEquivalent(testCreateItem.Item1, item);
     }
@@ -351,10 +361,10 @@ public abstract class SimpleTableTests<T, TC, TU, TS> : BaseTest
         return (testCreateItem, testUpdateItem);
     }
 
-    private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
+    private async Task<TRet?> GetTestRawContentSerialize<TRet>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     where TRet : class
     {
-        var response = await GetTest(url, expectedCode, authToken);
+        var response = await GetTest(url, expectedCode);
 
         var content = await response.Content.ReadAsStringAsync();
 

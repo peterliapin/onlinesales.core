@@ -7,14 +7,15 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
-public class ErrorsTests : BaseTest
+public class ErrorsTests : BaseTestAutoLogin
 {
     [Fact]
     public async Task Http401ErrorTest()
     {
         var testContent = new TestContent();
 
-        var response = await Request(HttpMethod.Post, "/api/content", testContent, "Fail");
+        Logout();
+        var response = await Request(HttpMethod.Post, "/api/content", testContent);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
