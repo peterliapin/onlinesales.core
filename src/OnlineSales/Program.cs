@@ -161,6 +161,47 @@ public class Program
         app.Run();
     }
 
+    public static async Task CreateDefaultIdentity(IServiceScope scope)
+    {
+        var defaultRoles = app!.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>()!;
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        foreach (var defaultRole in defaultRoles)
+        {
+            if (!await roleManager.RoleExistsAsync(defaultRole))
+            {
+                await roleManager.CreateAsync(new IdentityRole(defaultRole));
+            }
+        }
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        var defaultUsers = app!.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>()!;
+
+        foreach (var defaultUser in defaultUsers)
+        {
+            var user = new User
+            {
+                CreatedAt = DateTime.UtcNow,
+                DisplayName = defaultUser.UserName,
+                UserName = defaultUser.UserName,
+                Email = defaultUser.Email,
+                EmailConfirmed = true,
+            };
+
+            if (await userManager.FindByEmailAsync(user.Email) == null)
+            {
+                var result = await userManager.CreateAsync(user, defaultUser.Password);
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRolesAsync(user, defaultUser.Roles);
+                }
+            }
+        }
+    }
+
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
     {
         var maxImportSizeConfig = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
@@ -241,43 +282,7 @@ public class Program
 
                     // var elasticClient = scope.ServiceProvider.GetRequiredService<ElasticClient>();
 
-                    var defaultRoles = builder.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>() !;
-
-                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-                    foreach (var defaultRole in defaultRoles)
-                    {
-                        if (!await roleManager.RoleExistsAsync(defaultRole))
-                        {
-                            await roleManager.CreateAsync(new IdentityRole(defaultRole));
-                        }
-                    }
-
-                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-                    var defaultUsers = builder.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>() !;
-
-                    foreach (var defaultUser in defaultUsers)
-                    {
-                        var user = new User
-                        {
-                            CreatedAt = DateTime.UtcNow,
-                            DisplayName = defaultUser.UserName,
-                            UserName = defaultUser.UserName,
-                            Email = defaultUser.Email,
-                            EmailConfirmed = true,
-                        };
-
-                        if (await userManager.FindByEmailAsync(user.Email) == null)
-                        {
-                            var result = await userManager.CreateAsync(user, defaultUser.Password);
-
-                            if (result.Succeeded)
-                            {
-                                await userManager.AddToRolesAsync(user, defaultUser.Roles);
-                            }
-                        }
-                    }
+                    await CreateDefaultIdentity(scope);
                 }
             }
         }

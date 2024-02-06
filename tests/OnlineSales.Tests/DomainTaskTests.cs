@@ -6,7 +6,7 @@ using OnlineSales.Helpers;
 
 namespace OnlineSales.Tests;
 
-public class DomainTaskTests : BaseTest
+public class DomainTaskTests : BaseTestAutoLogin
 {
     private readonly string tasksUrl = "/api/tasks";
 

@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests;
 
-public class LogTests : BaseTest
+public class LogTests : BaseTestAutoLogin
 {
     /// <summary>
     /// Simply verifies that logs API can be successfully executed and returns HTTP 200.

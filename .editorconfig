@@ -8,6 +8,7 @@ insert_final_newline = false
 trim_trailing_whitespace = true
 dotnet_diagnostic.SA1000.severity = silent
 dotnet_diagnostic.SA1009.severity = silent
+end_of_line = lf
 
 # Code files
 [*.{cs,csx,vb,vbx}]

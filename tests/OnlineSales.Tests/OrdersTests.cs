@@ -509,7 +509,7 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
                 CommentableType = Order.GetCommentableType(),    
             };
 
-            var response = await Request(HttpMethod.Post, itemsUrl + "/1/comments", comments[i], "Admin");
+            var response = await Request(HttpMethod.Post, itemsUrl + "/1/comments", comments[i]);
             response.StatusCode.Should().Be(HttpStatusCode.Created);
         }
 
@@ -541,13 +541,13 @@ public class OrdersTests : TableWithFKTests<Order, TestOrder, OrderUpdateDto, IE
         return from;
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Admin")
+    protected override async Task<(int, string)> CreateFKItem()
     {
         var fkItemCreate = new TestContact();
 
-        var fkUrl = await PostTest("/api/contacts", fkItemCreate, HttpStatusCode.Created, authToken);
+        var fkUrl = await PostTest("/api/contacts", fkItemCreate, HttpStatusCode.Created);
 
-        var fkItem = await GetTest<Contact>(fkUrl, HttpStatusCode.OK, authToken);
+        var fkItem = await GetTest<Contact>(fkUrl, HttpStatusCode.OK);
 
         fkItem.Should().NotBeNull();
 

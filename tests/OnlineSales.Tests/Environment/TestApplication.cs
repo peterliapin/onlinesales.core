@@ -2,14 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Nest;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Plugin.TestPlugin.Data;
 using OnlineSales.Tests.TestServices;
@@ -32,6 +37,7 @@ public class TestApplication : WebApplicationFactory<Program>
         {
             var dataContaxt = scope.ServiceProvider.GetRequiredService<PgDbContext>();
             RenewDatabase(dataContaxt);
+            Program.CreateDefaultIdentity(scope).Wait();
 
             var esDbContext = scope.ServiceProvider.GetRequiredService<EsDbContext>();
             esDbContext.ElasticClient.Indices.Delete("*");
@@ -94,14 +100,6 @@ public class TestApplication : WebApplicationFactory<Program>
             services.AddScoped<IEmailService, TestEmailService>();
             services.AddScoped<IEmailValidationExternalService, TestEmailValidationExternalService>();
             services.AddScoped<IAccountExternalService, TestAccountExternalService>();
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = TestAuthenticationHandler.SchemeName;
-                options.DefaultChallengeScheme = TestAuthenticationHandler.SchemeName;
-            })
-                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
-                    TestAuthenticationHandler.SchemeName, options => { });
         });
 
         return base.CreateHost(builder);

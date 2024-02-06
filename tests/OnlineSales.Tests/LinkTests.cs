@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests;
 
-public class LinkTests : BaseTest
+public class LinkTests : BaseTestAutoLogin
 {
     [Fact]
     public async Task CreateAndFollowLinkTest()
@@ -15,7 +15,8 @@ public class LinkTests : BaseTest
 
         location.Should().NotBeNull();
 
-        var response = await GetTest("/go/" + link.Uid, HttpStatusCode.TemporaryRedirect, "Anonymous");
+        Logout();
+        var response = await GetTest("/go/" + link.Uid, HttpStatusCode.TemporaryRedirect);
 
         var destination = response.Headers?.Location?.AbsoluteUri ?? string.Empty;
 

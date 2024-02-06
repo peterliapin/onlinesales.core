@@ -16,13 +16,13 @@ public class ContentTests : SimpleTableTests<Content, TestContent, ContentUpdate
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllWithAuthentification("Anonymous");
+        await GetAllRecords(true);
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemWithAuthentification("Anonymous");
+        await CreateAndGetItem(true);
     }
 
     [Fact]

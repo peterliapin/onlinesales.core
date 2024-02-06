@@ -173,3 +173,10 @@ public class DefaultUserConfig
 public class DefaultUsersConfig : List<DefaultUserConfig>
 {
 }
+
+public class DefaultUserLockoutConfig
+{
+    public double LockoutTime { get; set; } = 5;
+
+    public int MaxFailedAccessAttempts { get; set; } = 10;
+}

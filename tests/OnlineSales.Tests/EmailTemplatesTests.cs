@@ -20,11 +20,11 @@ public class EmailTemplatesTests : TableWithFKTests<EmailTemplate, TestEmailTemp
         return (emailTemplate, emailTemplateUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Admin")
+    protected override async Task<(int, string)> CreateFKItem()
     {
         var fkItemCreate = new TestEmailGroup();
 
-        var fkUrl = await PostTest("/api/email-groups", fkItemCreate, HttpStatusCode.Created, authToken);
+        var fkUrl = await PostTest("/api/email-groups", fkItemCreate, HttpStatusCode.Created);
 
         var fkItem = await GetTest<EmailGroup>(fkUrl);
 

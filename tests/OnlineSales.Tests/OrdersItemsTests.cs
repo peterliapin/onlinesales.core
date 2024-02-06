@@ -285,11 +285,11 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
         return from;
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Admin")
+    protected override async Task<(int, string)> CreateFKItem()
     {
         var contactCreate = new TestContact();
 
-        var contactUrl = await PostTest("/api/contacts", contactCreate, HttpStatusCode.Created, authToken);
+        var contactUrl = await PostTest("/api/contacts", contactCreate, HttpStatusCode.Created);
 
         var contact = await GetTest<Contact>(contactUrl);
 
@@ -297,7 +297,7 @@ public class OrdersItemsTests : TableWithFKTests<OrderItem, TestOrderItem, Order
 
         var orderCreate = new TestOrder(string.Empty, contact!.Id);
 
-        var orderUrl = await PostTest("/api/orders", orderCreate, HttpStatusCode.Created, authToken);
+        var orderUrl = await PostTest("/api/orders", orderCreate, HttpStatusCode.Created);
 
         var order = await GetTest<Order>(orderUrl);
 

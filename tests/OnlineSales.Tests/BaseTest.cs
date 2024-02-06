@@ -27,7 +27,7 @@ public class BaseTest : IDisposable
         AssertionOptions.AssertEquivalencyUsing(e => e.Using(new RelaxedEnumEquivalencyStep()));
     }
 
-    public BaseTest()
+    protected BaseTest()
     {
         client = App.CreateClient(
             new WebApplicationFactoryClientOptions
@@ -51,6 +51,11 @@ public class BaseTest : IDisposable
         return new StringContent(payloadString, Encoding.UTF8, "application/json");
     }
 
+    protected virtual AuthenticationHeaderValue? GetAuthenticationHeaderValue()
+    {
+        return null;
+    }
+
     protected async Task SyncElasticSearch()
     {
         var taskExecuteResponce = await GetRequest("/api/tasks/execute/SyncEsTask");
@@ -61,12 +66,12 @@ public class BaseTest : IDisposable
         task!.Completed.Should().BeTrue();
     }
 
-    protected Task<HttpResponseMessage> GetRequest(string url, string authToken = "Admin")
+    protected Task<HttpResponseMessage> GetRequest(string url)
     {
-        return Request(HttpMethod.Get, url, null, authToken);
+        return Request(HttpMethod.Get, url, null);
     }
 
-    protected Task<HttpResponseMessage> Request(HttpMethod method, string url, object? payload, string authToken = "Admin")
+    protected virtual Task<HttpResponseMessage> Request(HttpMethod method, string url, object? payload)
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -75,24 +80,24 @@ public class BaseTest : IDisposable
             request.Content = PayloadToStringContent(payload);
         }
 
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+        request.Headers.Authorization = GetAuthenticationHeaderValue();
 
         return client.SendAsync(request);
     }
 
-    protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
+    protected async Task<HttpResponseMessage> GetTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
-        var response = await GetRequest(url, authToken);
+        var response = await GetRequest(url);
 
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
     }
 
-    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
+    protected async Task<T?> GetTest<T>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
         where T : class
     {
-        var response = await GetTest(url, expectedCode, authToken);
+        var response = await GetTest(url, expectedCode);
 
         var content = await response.Content.ReadAsStringAsync();
 
@@ -108,11 +113,12 @@ public class BaseTest : IDisposable
         }
     }
 
-    protected async Task<List<TI>?> GetTestCSV<TI>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
+    protected async Task<List<TI>?> GetTestCSV<TI>(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     where TI : class
     {
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+        request.Headers.Authorization = GetAuthenticationHeaderValue();
+
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/csv"));
 
         var response = await client.SendAsync(request);
@@ -138,9 +144,30 @@ public class BaseTest : IDisposable
         }
     }
 
-    protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created, string authToken = "Admin")
+    protected async Task<T?> PostTest<T>(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created)
+        where T : class
     {
-        var response = await Request(HttpMethod.Post, url, payload, authToken);
+        var response = await Request(HttpMethod.Post, url, payload);
+
+        response.StatusCode.Should().Be(expectedCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (expectedCode == HttpStatusCode.OK)
+        {
+            CheckForRedundantProperties<T>(content);
+
+            return JsonHelper.Deserialize<T>(content);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    protected async Task<string> PostTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.Created)
+    {
+        var response = await Request(HttpMethod.Post, url, payload);
 
         response.StatusCode.Should().Be(expectedCode);
 
@@ -160,9 +187,9 @@ public class BaseTest : IDisposable
         return location;
     }
 
-    protected async virtual Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
+    protected async virtual Task<ImportResult> PostImportTest(string url, string importFileName, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
-        var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName, authToken);
+        var response = await ImportRequest(HttpMethod.Post, $"{url}/import", importFileName);
 
         response.StatusCode.Should().Be(expectedCode);
 
@@ -171,24 +198,24 @@ public class BaseTest : IDisposable
         return JsonHelper.Deserialize<ImportResult>(content)!;
     }
 
-    protected async Task<HttpResponseMessage> Patch(string url, object payload, string authToken = "Admin")
+    protected async Task<HttpResponseMessage> Patch(string url, object payload)
     {
-        var response = await Request(HttpMethod.Patch, url, payload, authToken);
+        var response = await Request(HttpMethod.Patch, url, payload);
         return response;
     }
 
-    protected async Task<HttpResponseMessage> PatchTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Admin")
+    protected async Task<HttpResponseMessage> PatchTest(string url, object payload, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
-        var response = await Patch(url, payload, authToken);
+        var response = await Patch(url, payload);
 
         response.StatusCode.Should().Be(expectedCode);
 
         return response;
     }
 
-    protected async Task<HttpResponseMessage> DeleteTest(string url, HttpStatusCode expectedCode = HttpStatusCode.NoContent, string authToken = "Admin")
+    protected async Task<HttpResponseMessage> DeleteTest(string url, HttpStatusCode expectedCode = HttpStatusCode.NoContent)
     {
-        var response = await Request(HttpMethod.Delete, url, null, authToken);
+        var response = await Request(HttpMethod.Delete, url, null);
 
         response.StatusCode.Should().Be(expectedCode);
 
@@ -250,7 +277,7 @@ public class BaseTest : IDisposable
         }
     }
 
-    private Task<HttpResponseMessage> ImportRequest(HttpMethod method, string url, string importFileName, string authToken = "Admin")
+    private Task<HttpResponseMessage> ImportRequest(HttpMethod method, string url, string importFileName)
     {
         StringContent content;
 
@@ -268,7 +295,7 @@ public class BaseTest : IDisposable
         }
 
         request.Content = content;
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+        request.Headers.Authorization = GetAuthenticationHeaderValue();
 
         return client.SendAsync(request);
     }
