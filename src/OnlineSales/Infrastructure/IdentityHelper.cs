@@ -16,19 +16,22 @@ namespace OnlineSales.Infrastructure
 {
     public static class IdentityHelper
     {
+        public const string AzureAdBearerAuthenticationScheme = "AzureAdBearer";
+        public const string AzureAdCookiesAuthenticationScheme = "AzureAdCookies";
+
         public static void ConfigureIdentity(WebApplicationBuilder builder)
         {
             var jwtConfig = builder.Configuration.GetSection("Jwt").Get<JwtConfig>();
             var azureAdConfig = builder.Configuration.GetSection("AzureAd").Get<AzureADConfig>();
-            var lockoutConfig = builder.Configuration.GetSection("DefaultUserLockout").Get<DefaultUserLockoutConfig>();
+            var identityConfig = builder.Configuration.GetSection("Identity").Get<IdentityConfig>();
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
                 // Lockout settings
-                if (lockoutConfig != null)
+                if (identityConfig != null)
                 {
-                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(lockoutConfig.LockoutTime);
-                    options.Lockout.MaxFailedAccessAttempts = lockoutConfig.MaxFailedAccessAttempts;
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(identityConfig.LockoutTime);
+                    options.Lockout.MaxFailedAccessAttempts = identityConfig.MaxFailedAccessAttempts;
                     options.Lockout.AllowedForNewUsers = true;
                 }
             })
@@ -79,13 +82,13 @@ namespace OnlineSales.Infrastructure
                         jwtOptions.Events = new AzureAdJwtBearerEventsHandler();
                     }, identityOptions =>
                     {
-                        ConfigureIdentityAuthOptions(builder, identityOptions);
+                        ConfigureIdentityAuthOptions(azureAdConfig, identityOptions);
                     });
 
                 builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(
                     identityOptions =>
                     {
-                        ConfigureIdentityAuthOptions(builder, identityOptions);
+                        ConfigureIdentityAuthOptions(azureAdConfig, identityOptions);
 
                         identityOptions.CallbackPath = "/api/identity/callback";
                         identityOptions.SkipUnrecognizedRequests = true;
@@ -106,6 +109,7 @@ namespace OnlineSales.Infrastructure
         public static async Task<ClaimsPrincipal> TryLoginOnRegister(SignInManager<User> signInManager, UserManager<User> userManager, string userEmail, string authProvider)
         {
             var user = await userManager.FindByEmailAsync(userEmail);
+
             if (user == null)
             {
                 user = new User
@@ -127,13 +131,13 @@ namespace OnlineSales.Infrastructure
             return claims;
         }
 
-        private static void ConfigureIdentityAuthOptions(WebApplicationBuilder builder, MicrosoftIdentityOptions options)
+        private static void ConfigureIdentityAuthOptions(AzureADConfig azureAdConfig, MicrosoftIdentityOptions options)
         {
-            options.Instance = builder.Configuration.GetValue<string>("AzureAD:Instance") ?? string.Empty;
-            options.TenantId = builder.Configuration.GetValue<string>("AzureAD:TenantId") ?? string.Empty;
-            options.Domain = builder.Configuration.GetValue<string>("AzureAD:Domain") ?? string.Empty;
-            options.ClientId = builder.Configuration.GetValue<string>("AzureAD:ClientId") ?? string.Empty;
-            options.ClientSecret = builder.Configuration.GetValue<string>("AzureAD:ClientSecret") ?? string.Empty;
+            options.Instance = azureAdConfig.Instance;
+            options.TenantId = azureAdConfig.TenantId;
+            options.Domain = azureAdConfig.Domain;
+            options.ClientId = azureAdConfig.ClientId;
+            options.ClientSecret = azureAdConfig.ClientSecret;
         }
     }
 }

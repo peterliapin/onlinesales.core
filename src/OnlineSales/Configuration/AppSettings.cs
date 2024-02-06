@@ -174,7 +174,7 @@ public class DefaultUsersConfig : List<DefaultUserConfig>
 {
 }
 
-public class DefaultUserLockoutConfig
+public class IdentityConfig
 {
     public double LockoutTime { get; set; } = 5;
 

@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
