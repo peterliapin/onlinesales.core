@@ -4,10 +4,10 @@
 
 using System.Reflection;
 using System.Text;
-using Microsoft.Extensions.Primitives;
 using Nest;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure
 {

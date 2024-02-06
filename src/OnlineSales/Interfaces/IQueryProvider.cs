@@ -4,7 +4,7 @@
 
 using OnlineSales.Entities;
 
-namespace OnlineSales.Infrastructure
+namespace OnlineSales.Interfaces
 {
     public interface IQueryProvider<T>
         where T : BaseEntityWithId

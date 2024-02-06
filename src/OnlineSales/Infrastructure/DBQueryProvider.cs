@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Collections;
 using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
+using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure
 {

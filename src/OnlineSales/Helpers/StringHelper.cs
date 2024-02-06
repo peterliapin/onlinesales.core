@@ -4,7 +4,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace OnlineSales.Infrastructure;
+namespace OnlineSales.Helpers;
 
 public static class StringHelper
 {

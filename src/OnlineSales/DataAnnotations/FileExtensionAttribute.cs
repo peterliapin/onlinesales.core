@@ -5,7 +5,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
 using OnlineSales.Configuration;
-using OnlineSales.Infrastructure;
+using OnlineSales.Helpers;
 
 namespace OnlineSales.DataAnnotations
 {
