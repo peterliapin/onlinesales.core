@@ -39,7 +39,7 @@ public class BaseTestAutoLogin : BaseTest
 
     protected override AuthenticationHeaderValue? GetAuthenticationHeaderValue()
     {
-        return authToken != null ? new AuthenticationHeaderValue("Bearer", authToken!.Token) : null;
+        return authToken != null ? new AuthenticationHeaderValue(authToken!.TokenType, authToken!.AccessToken) : null;
     }
 
     private static LoginDto GetLoginDtoFromConfiguration()

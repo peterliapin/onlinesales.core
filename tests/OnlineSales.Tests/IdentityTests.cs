@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.ComponentModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,8 +10,10 @@ using OnlineSales.Configuration;
 
 namespace OnlineSales.Tests;
 
-public class IdentityLoginTests : BaseTestAutoLogin
+public class IdentityTests : BaseTestAutoLogin
 {
+    private static readonly string RefreshApi = "/api/identity/refresh";
+
     [Theory]
     [InlineData("admin@admin.com", "")]
     [InlineData("UnexpectedUser@admin.com", "")]
@@ -52,7 +55,7 @@ public class IdentityLoginTests : BaseTestAutoLogin
     {
         var token = await PostTest<JWTokenDto>(LoginApi, AdminLoginData, HttpStatusCode.OK);
         token.Should().NotBeNull();
-        token!.Token.Should().NotBeEmpty();
+        token!.AccessToken.Should().NotBeEmpty();
     }
 
     [Fact]
@@ -102,6 +105,97 @@ public class IdentityLoginTests : BaseTestAutoLogin
         await PostTest<JWTokenDto>(LoginApi, testLoginDto, HttpStatusCode.Unauthorized);
     }
 
+    [Fact]
+    public async Task RefreshBadParamTest()
+    {
+        string emptyToken = string.Empty;
+        var refreshDto = new RefreshTokenDto()
+        { RefreshToken = emptyToken };
+        await PostTest<JWTokenDto>(RefreshApi, refreshDto, HttpStatusCode.UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task RefreshNotLoggedInTest()
+    {
+        var refreshDto = new RefreshTokenDto()
+        { RefreshToken = Guid.NewGuid().ToString() };
+        await PostTest<JWTokenDto>(RefreshApi, refreshDto, HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task RefreshLockedUserTest()
+    {
+        // Get token until the user blocked
+        var token = await GetTokens(AdminLoginData);
+        // Block the user
+        using (var scope = App.Services.CreateScope())
+        {
+            var config = Program.GetApp()!.Configuration;
+            var lockoutConfig = config.GetSection("Identity").Get<IdentityConfig>();
+
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            Assert.NotNull(userManager);
+            var user = await userManager.FindByEmailAsync(AdminLoginData.Email);
+            Assert.NotNull(user);
+
+            for(int i = 0; i < lockoutConfig!.MaxFailedAccessAttempts + 1; i++)
+            {
+                await userManager.AccessFailedAsync(user);
+            }
+
+            // Admin must be blocked here
+            Assert.True(await userManager.IsLockedOutAsync(user));
+        }
+
+        var refreshDto = new RefreshTokenDto()
+        { RefreshToken = token!.RefreshToken };
+        await PostTest<JWTokenDto>(RefreshApi, refreshDto, HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task RefreshTokenExpiredTest()
+    {
+        var token = await GetTokens(AdminLoginData);
+        using (var scope = App.Services.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            Assert.NotNull(userManager);
+            var user = await userManager.FindByEmailAsync(AdminLoginData.Email);
+            Assert.NotNull(user);
+            Assert.NotNull(user.RefreshToken);
+            user.RefreshTokenValidTo = DateTime.UtcNow - TimeSpan.FromHours(10);
+            await userManager.UpdateAsync(user);
+        }
+
+        var refreshDto = new RefreshTokenDto()
+        { RefreshToken = token!.RefreshToken };
+        await PostTest<JWTokenDto>(RefreshApi, refreshDto, HttpStatusCode.Unauthorized);
+
+        using (var scope = App.Services.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            Assert.NotNull(userManager);
+            var user = await userManager.FindByEmailAsync(AdminLoginData.Email);
+            Assert.NotNull(user);
+            Assert.Null(user.RefreshToken);
+            Assert.Null(user.RefreshTokenValidTo);
+        }
+    }
+
+    [Fact]
+    public async Task RefreshAccessTokenTest()
+    {
+        var token = await GetTokens(AdminLoginData);
+
+        var refreshDto = new RefreshTokenDto()
+        { RefreshToken = token!.RefreshToken };
+        var token2 = await PostTest<JWTokenDto>(RefreshApi, refreshDto, HttpStatusCode.OK);
+
+        token2.Should().NotBeNull();
+        Assert.Equal(token.RefreshToken, token2!.RefreshToken);
+        Assert.NotEqual(token.AccessToken, token2!.AccessToken);
+    }
+
     private async Task TestBody(string username, string password, HttpStatusCode expectedCode)
     {
         var testLoginDto = new LoginDto()
@@ -110,5 +204,10 @@ public class IdentityLoginTests : BaseTestAutoLogin
 
         var token = await PostTest<JWTokenDto>(LoginApi, testLoginDto, expectedCode);
         token.Should().BeNull();
+    }
+
+    private async Task<JWTokenDto?> GetTokens(LoginDto input)
+    {
+        return await PostTest<JWTokenDto>(LoginApi, input, HttpStatusCode.OK);
     }
 }

@@ -4,6 +4,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -107,6 +108,69 @@ public class IdentityController : ControllerBase
             }
         }
 
+        var authClaims = await GetAuthClaims(userManager, user);
+        var accessToken = GetAccessToken(authClaims);
+        var refreshToken = Guid.NewGuid().ToString();
+        var refreshValidTo = DateTime.UtcNow.AddMinutes(jwtConfig.Value.RefreshTokenExpiration);
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenValidTo = refreshValidTo;
+        await userManager.UpdateAsync(user);
+
+        return Ok(new JWTokenDto()
+        {
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+            Expiration = accessToken.ValidTo,
+            RefreshToken = refreshToken,
+            TokenType = JwtBearerDefaults.AuthenticationScheme,
+        });
+    }
+
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<ActionResult> Refresh([FromBody] RefreshTokenDto input)
+    {
+        var userManager = signInManager.UserManager;
+
+        var user = userManager.Users.Where(u => u.RefreshToken == input.RefreshToken).FirstOrDefault();
+
+        if (user == null)
+        {
+            throw new UnauthorizedException();
+        }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            throw new IdentityException("Account locked out");
+        }
+
+        if (user.RefreshTokenValidTo <= DateTime.UtcNow)
+        {
+            user.RefreshToken = null;
+            user.RefreshTokenValidTo = null;
+            await userManager.UpdateAsync(user);
+
+            throw new UnauthorizedException();
+        }
+
+        var authClaims = await GetAuthClaims(userManager, user);
+
+        var accessToken = GetAccessToken(authClaims);
+
+        return Ok(new JWTokenDto()
+        {
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+            Expiration = accessToken.ValidTo,
+            RefreshToken = input.RefreshToken,
+            TokenType = JwtBearerDefaults.AuthenticationScheme,
+        });
+    }
+
+    private async Task<List<Claim>> GetAuthClaims(UserManager<User> userManager, User user)
+    {
         var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email!),
@@ -121,22 +185,16 @@ public class IdentityController : ControllerBase
             authClaims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var token = GetToken(authClaims);
-
-        return Ok(new JWTokenDto()
-        {
-            Token = new JwtSecurityTokenHandler().WriteToken(token),
-            Expiration = token.ValidTo,
-        });
+        return authClaims;
     }
 
-    private JwtSecurityToken GetToken(List<Claim> authClaims)
+    private JwtSecurityToken GetAccessToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Value.Secret));
         var token = new JwtSecurityToken(
             issuer: jwtConfig.Value.Issuer,
             audience: jwtConfig.Value.Audience,
-            expires: DateTime.Now.AddYears(1),
+            expires: DateTime.UtcNow.AddMinutes(jwtConfig.Value.AccessTokenExpiration),
             claims: authClaims,
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 

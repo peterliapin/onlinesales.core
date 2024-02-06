@@ -140,6 +140,10 @@ public class JwtConfig
     public string Audience { get; set; } = string.Empty;
 
     public string Secret { get; set; } = string.Empty;
+
+    public double AccessTokenExpiration { get; set; } = 0;
+
+    public double RefreshTokenExpiration { get; set; } = 0;
 }
 
 public class AzureADConfig

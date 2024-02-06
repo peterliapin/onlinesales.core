@@ -18,4 +18,8 @@ public class User : IdentityUser
     public string DisplayName { get; set; } = string.Empty;
 
     public Dictionary<string, object>? Data { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenValidTo { get; set; }
 }

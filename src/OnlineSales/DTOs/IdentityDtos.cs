@@ -19,8 +19,20 @@ public class LoginDto
 public class JWTokenDto
 {
     [Required]
-    required public string Token { get; set; }
+    required public string AccessToken { get; set; }
+
+    [Required]
+    required public string RefreshToken { get; set; }
 
     [Required]
     required public DateTime Expiration { get; set; }
+
+    [Required]
+    required public string TokenType { get; set; }
+}
+
+public class RefreshTokenDto
+{
+    [Required]
+    required public string RefreshToken { get; set; }
 }
