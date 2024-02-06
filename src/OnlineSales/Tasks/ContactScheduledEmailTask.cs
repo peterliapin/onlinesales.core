@@ -107,7 +107,7 @@ public class ContactScheduledEmailTask : BaseTask
 
     private EmailTemplate? GetNextEmailTemplateToSend(EmailTemplate lastEmailTemplate, int groupId)
     {
-        var emailsOfGroup = this.dbContext.EmailTemplates!.Where(t => t.EmailGroupId == groupId).OrderBy(t => t.Id).ToList();
+        var emailsOfGroup = dbContext.EmailTemplates!.Where(t => t.EmailGroupId == groupId).OrderBy(t => t.Id).ToList();
 
         var indexOfLastEmail = lastEmailTemplate is not null
             ? emailsOfGroup.IndexOf(lastEmailTemplate)

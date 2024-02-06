@@ -67,6 +67,19 @@ namespace OnlineSales.Services
             // set default if not set
             language ??= defLang;
 
+            if (language.Length == 2)
+            {
+                var twoLetterBasedLangMatch = await pgDbContext.EmailTemplates!
+                    .Where(x => x.Name == name && x.Language.StartsWith(language))
+                    .OrderBy(x => x.Language)
+                    .FirstOrDefaultAsync();
+
+                if (twoLetterBasedLangMatch != null)
+                {
+                    return twoLetterBasedLangMatch;
+                }
+            }
+
             // try find template by provided language
             var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
 
