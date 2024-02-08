@@ -12,12 +12,13 @@ using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Identity;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure;
 
 public static class IdentityHelper
 {
+    public const string AzureAdJwtAuthScheeme = "AzureAdBearer";
+
     public static void ConfigureAuthentication(WebApplicationBuilder builder)
     {
         ConfigureIdentity(builder);
@@ -51,24 +52,6 @@ public static class IdentityHelper
         }
     }
 
-    public static void ConfigureIdentity(WebApplicationBuilder builder)
-    {
-        var identityConfig = builder.Configuration.GetSection("Identity").Get<IdentityConfig>();
-
-        builder.Services.AddIdentity<User, IdentityRole>(options =>
-        {
-            // Lockout settings
-            if (identityConfig != null)
-            {
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(identityConfig.LockoutTime);
-                options.Lockout.MaxFailedAccessAttempts = identityConfig.MaxFailedAccessAttempts;
-                options.Lockout.AllowedForNewUsers = true;
-            }
-        })
-        .AddEntityFrameworkStores<PgDbContext>()
-        .AddDefaultTokenProviders();
-    }
-
     public static void ConfigureCookies(WebApplicationBuilder builder, CookiesConfig cookiesConfig)
     {
         builder.Services.ConfigureApplicationCookie(options =>
@@ -90,12 +73,28 @@ public static class IdentityHelper
         });
     }
 
+    public static void ConfigureIdentity(WebApplicationBuilder builder)
+    {
+        var identityConfig = builder.Configuration.GetSection("Identity").Get<IdentityConfig>();
+
+        builder.Services.AddIdentity<User, IdentityRole>(options =>
+        {
+            // Lockout settings
+            if (identityConfig != null)
+            {
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(identityConfig.LockoutTime);
+                options.Lockout.MaxFailedAccessAttempts = identityConfig.MaxFailedAccessAttempts;
+                options.Lockout.AllowedForNewUsers = true;
+            }
+        })
+        .AddEntityFrameworkStores<PgDbContext>()
+        .AddDefaultTokenProviders();
+    }
+
     public static void ConfigureInternalJwt(AuthenticationBuilder authBuilder, JwtConfig jwtConfig)
     {
         authBuilder.AddJwtBearer(options =>
         {
-            options.SaveToken = true;
-            options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = new TokenValidationParameters()
             {
                 ValidateIssuer = true,
@@ -116,7 +115,7 @@ public static class IdentityHelper
             }, identityOptions =>
             {
                 ConfigureIdentityAuthOptions(azureAdConfig, identityOptions);
-            });
+            }, AzureAdJwtAuthScheeme);
 
         builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(
             identityOptions =>
@@ -132,7 +131,7 @@ public static class IdentityHelper
             });
     }
 
-    public static async Task<ClaimsPrincipal> TryLoginOnRegister(SignInManager<User> signInManager, UserManager<User> userManager, IIdentityService identityService, string userEmail, string authProvider)
+    public static async Task<ClaimsPrincipal> TryLoginOnRegister(SignInManager<User> signInManager, UserManager<User> userManager, string userEmail, string authProvider)
     {
         var user = await userManager.FindByEmailAsync(userEmail);
 
@@ -152,13 +151,9 @@ public static class IdentityHelper
         user.LastTimeLoggedIn = DateTime.UtcNow;
         await userManager.UpdateAsync(user);
 
-        // await signInManager.SignInAsync(user, false, authProvider);
+        await signInManager.SignInAsync(user, false, authProvider);
 
-        var claimsPrincipal = await identityService.CreateUserClaimsPrincipal(user);
-
-        var claimsPrincipal2 = await signInManager.CreateUserPrincipalAsync(user);
-
-        return claimsPrincipal ?? claimsPrincipal2;
+        return await signInManager.CreateUserPrincipalAsync(user);
     }
 
     private static void ConfigureIdentityAuthOptions(AzureADConfig azureAdConfig, MicrosoftIdentityOptions options)

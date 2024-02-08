@@ -83,7 +83,7 @@ public class Program
         ConfigureCacheProfiles(builder);
 
         ConfigureConventions(builder);
-        IdentityHelper.ConfigureIdentity(builder);
+        IdentityHelper.ConfigureAuthentication(builder);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using OnlineSales.Entities;
 using OnlineSales.Infrastructure;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Identity;
 
@@ -16,7 +15,6 @@ public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
     {
         var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>()!;
         var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>()!;
-        var identityService = context.HttpContext.RequestServices.GetService<IIdentityService>()!;
 
         var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
@@ -26,7 +24,7 @@ public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
             return;
         }
 
-        var claimsPrimcipal = await IdentityHelper.TryLoginOnRegister(signInManager, userManager, identityService, userEmail, "AzureAdCookie");
+        var claimsPrimcipal = await IdentityHelper.TryLoginOnRegister(signInManager, userManager, userEmail, "AzureAdCookie");
 
         context.HttpContext.User = claimsPrimcipal;
     }
