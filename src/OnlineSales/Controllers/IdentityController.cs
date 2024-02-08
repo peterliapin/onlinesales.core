@@ -95,6 +95,7 @@ public class IdentityController : ControllerBase
         }
 
         var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, true);
+        
         if (!signResult.Succeeded)
         {
             if (signResult.IsLockedOut)
@@ -133,6 +134,7 @@ public class IdentityController : ControllerBase
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Value.Secret));
+
         var token = new JwtSecurityToken(
             issuer: jwtConfig.Value.Issuer,
             audience: jwtConfig.Value.Audience,
