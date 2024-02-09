@@ -5,26 +5,35 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using OnlineSales.Entities;
-using OnlineSales.Infrastructure;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Identity;
+
 public class AzureAdJwtBearerEventsHandler : JwtBearerEvents
 {
     public override async Task TokenValidated(TokenValidatedContext context)
     {
+        var identityService = context.HttpContext.RequestServices.GetService<IIdentityService>()!;
         var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>()!;
         var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>()!;
 
-        var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
+        var email = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(userEmail))
+        if (string.IsNullOrWhiteSpace(email))
         {
             await AuthenticationFailed(new AuthenticationFailedContext(context.HttpContext, context.Scheme, context.Options));
             return;
         }
 
-        var claimsPrimcipal = await IdentityHelper.TryLoginOnRegister(signInManager, userManager, userEmail, "AzureAdBearer");
+        var user = await identityService.FindOnRegister(email);
 
-        context.HttpContext.User = claimsPrimcipal;
+        user.LastTimeLoggedIn = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);        
+
+        var userPrincipal = await signInManager.CreateUserPrincipalAsync(user);
+        
+        await signInManager.SignInAsync(user, false, "AzureAdBearer");
+
+        context.HttpContext.User = userPrincipal;
     }
 }

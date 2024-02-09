@@ -19,6 +19,26 @@ public class IdentityService : IIdentityService
         this.userManager = userManager;
     }
 
+    public async Task<User> FindOnRegister(string email)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            user = new User
+            {
+                UserName = email,
+                Email = email,
+                CreatedAt = DateTime.UtcNow,
+                DisplayName = email,
+            };
+
+            await userManager.CreateAsync(user);
+        }
+
+        return user;
+    }
+
     public async Task<ClaimsPrincipal> CreateUserClaimsPrincipal(User user)
     {
         var claims = await CreateUserClaims(user);

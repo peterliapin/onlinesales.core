@@ -1,7 +1,6 @@
 ﻿// <copyright file="IdentityHelper.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
-using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -129,31 +128,6 @@ public static class IdentityHelper
                 cookieOptions.Cookie.Name = "auth_ticket";
                 cookieOptions.Events = new AzureAdCookieEventsHandler();
             });
-    }
-
-    public static async Task<ClaimsPrincipal> TryLoginOnRegister(SignInManager<User> signInManager, UserManager<User> userManager, string userEmail, string authProvider)
-    {
-        var user = await userManager.FindByEmailAsync(userEmail);
-
-        if (user == null)
-        {
-            user = new User
-            {
-                UserName = userEmail,
-                Email = userEmail,
-                CreatedAt = DateTime.UtcNow,
-                DisplayName = userEmail,
-            };
-
-            await userManager.CreateAsync(user);
-        }
-
-        user.LastTimeLoggedIn = DateTime.UtcNow;
-        await userManager.UpdateAsync(user);
-
-        await signInManager.SignInAsync(user, false, authProvider);
-
-        return await signInManager.CreateUserPrincipalAsync(user);
     }
 
     private static void ConfigureIdentityAuthOptions(AzureADConfig azureAdConfig, MicrosoftIdentityOptions options)
