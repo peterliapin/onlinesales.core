@@ -110,11 +110,11 @@ public static class IdentityHelper
         authBuilder.AddMicrosoftIdentityWebApi(
             jwtOptions =>
             {
-                jwtOptions.Events = new AzureAdJwtBearerEventsHandler();
+                jwtOptions.Events = new AzureAdJwtBearerEventsHandler(builder.Configuration);
             }, identityOptions =>
             {
                 ConfigureIdentityAuthOptions(azureAdConfig, identityOptions);
-            }, AzureAdJwtAuthScheeme);
+            });
 
         builder.Services.AddAuthentication().AddMicrosoftIdentityWebApp(
             identityOptions =>
