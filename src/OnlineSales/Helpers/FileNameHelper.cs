@@ -6,47 +6,46 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Unidecode.NET;
 
-namespace OnlineSales.Helpers
+namespace OnlineSales.Helpers;
+
+public static class FileNameHelper
 {
-    public static class FileNameHelper
+    public static string Slugify(this string input)
     {
-        public static string Slugify(this string input)
-        {
-            return input.RemoveWhitespace().RemoveDeniedCharacters().RemoveDiacritics().ToLower();
-        }
+        return input.RemoveWhitespace().RemoveDeniedCharacters().RemoveDiacritics().ToLower();
+    }
 
-        public static string ToTranslit(this string input)
-        {
-            return input.Unidecode();
-        }
+    public static string ToTranslit(this string input)
+    {
+        return input.Unidecode();
+    }
 
-        private static string RemoveWhitespace(this string input)
-        {
-            return Regex.Replace(input, @"\s", " ");
-        }
+    private static string RemoveWhitespace(this string input)
+    {
+        return Regex.Replace(input, @"\s", " ");
+    }
 
-        private static string RemoveDeniedCharacters(this string input)
-        {
-            return Regex.Replace(input, @"[^a-zA-Z0-9\-\._]", string.Empty);
-        }
+    private static string RemoveDeniedCharacters(this string input)
+    {
+        return Regex.Replace(input, @"[^a-zA-Z0-9\-\._]", string.Empty);
+    }
 
-        private static string RemoveDiacritics(this string text)
-        {
-            var normalizedString = text.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
+    private static string RemoveDiacritics(this string text)
+    {
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
 
-            foreach(var c in normalizedString)
+        foreach(var c in normalizedString)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
             {
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
-                {
-                    stringBuilder.Append(c);
-                }
+                stringBuilder.Append(c);
             }
-
-            return stringBuilder
-                .ToString()
-                .Normalize(NormalizationForm.FormC);
         }
+
+        return stringBuilder
+            .ToString()
+            .Normalize(NormalizationForm.FormC);
     }
 }

@@ -59,6 +59,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
+        builder.Services.AddTransient<IIdentityService, IdentityService>();
         builder.Services.AddTransient<IDomainService, DomainService>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
@@ -82,7 +83,7 @@ public class Program
         ConfigureCacheProfiles(builder);
 
         ConfigureConventions(builder);
-        IdentityHelper.ConfigureIdentity(builder);
+        IdentityHelper.ConfigureAuthentication(builder);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();

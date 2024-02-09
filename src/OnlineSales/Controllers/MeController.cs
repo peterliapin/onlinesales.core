@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Infrastructure;
+using OnlineSales.Helpers;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace OnlineSales.Controllers;

@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -96,6 +95,7 @@ public class IdentityController : ControllerBase
         }
 
         var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, true);
+        
         if (!signResult.Succeeded)
         {
             if (signResult.IsLockedOut)
@@ -134,6 +134,7 @@ public class IdentityController : ControllerBase
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Value.Secret));
+
         var token = new JwtSecurityToken(
             issuer: jwtConfig.Value.Issuer,
             audience: jwtConfig.Value.Audience,
