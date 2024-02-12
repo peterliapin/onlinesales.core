@@ -79,6 +79,7 @@ public class Program
         builder.Services.AddScoped<IDealService, DealService>();
         builder.Services.AddTransient<IOrderService, OrderService>();
         builder.Services.AddTransient<IDiscountService, DiscountService>();
+        builder.Services.AddTransient<IEmailSchedulingService, EmailSchedulingService>();
 
         ConfigureCacheProfiles(builder);
 
