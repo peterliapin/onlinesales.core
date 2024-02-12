@@ -141,11 +141,11 @@ public class ContactScheduledEmailTask : BaseTask
         return false;
     }
 
-    private DateTime? GetNextExecutionTime(ContactEmailSchedule schedule, int retryDelay, EmailLog? lastEmailLog)
+    private DateTime? GetNextExecutionTime(ContactEmailSchedule contactEmailSchedule, int retryDelay, EmailLog? lastEmailLog)
     {
-        var contactSchedule = JsonSerializer.Deserialize<Schedule>(schedule.Schedule!.Schedule);
-        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + schedule.Contact!.Timezone!.Value;
-        var lastRunTime = lastEmailLog is null ? schedule.Contact!.CreatedAt : lastEmailLog.CreatedAt;
+        var contactSchedule = JsonSerializer.Deserialize<Schedule>(contactEmailSchedule.Schedule!.Schedule);
+        var userToServerTimeZoneOffset = TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes + contactEmailSchedule.Contact!.Timezone!.Value;
+        var lastRunTime = lastEmailLog is null ? contactEmailSchedule.CreatedAt : lastEmailLog.CreatedAt;
 
         // If a retry scenario, adding the retry interval. No need to evaluate schedule.
         if (retryDelay > 0)
@@ -170,12 +170,12 @@ public class ContactScheduledEmailTask : BaseTask
             var days = contactSchedule.Day!.Split(',').Select(int.Parse).ToArray();
 
             var emailSentCount = dbContext.EmailLogs!.Count(
-                            e => e.ScheduleId == schedule.ScheduleId
-                            && e.ContactId == schedule.ContactId
+                            e => e.ScheduleId == contactEmailSchedule.ScheduleId
+                            && e.ContactId == contactEmailSchedule.ContactId
                             && e.Status == EmailStatus.Sent);
 
             // Skip the days already the mail is sent 
-            var nextRunDate = schedule.Contact!.CreatedAt.AddDays(days[emailSentCount]);
+            var nextRunDate = contactEmailSchedule.Contact!.CreatedAt.AddDays(days[emailSentCount]);
             // Add given time in the schedule + user timezone adjustment.
             var nextRunDateTime = DateOnly.FromDateTime(nextRunDate).ToDateTime(contactSchedule!.Time!.Value).AddMinutes(userToServerTimeZoneOffset);
 
