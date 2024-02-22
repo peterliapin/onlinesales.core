@@ -166,22 +166,6 @@ public class Program
         app.Run();
     }
 
-<<<<<<< HEAD
-    private static void ConfigurePgDataSource(WebApplicationBuilder builder)
-    {
-        var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-        if (postgresConfig == null)
-        {
-            throw new MissingConfigurationException("Postgres configuration is mandatory.");
-        }
-
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
-        dataSourceBuilder.EnableDynamicJson();
-        var dataSource = dataSourceBuilder.Build();
-
-        builder.Services.AddSingleton(dataSource);
-=======
     public static async Task CreateDefaultIdentity(IServiceScope scope)
     {
         var defaultRoles = app!.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>()!;
@@ -221,7 +205,22 @@ public class Program
                 }
             }
         }
->>>>>>> develop
+    }
+
+    private static void ConfigurePgDataSource(WebApplicationBuilder builder)
+    {
+        var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+        if (postgresConfig == null)
+        {
+            throw new MissingConfigurationException("Postgres configuration is mandatory.");
+        }
+
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
+        dataSourceBuilder.EnableDynamicJson();
+        var dataSource = dataSourceBuilder.Build();
+
+        builder.Services.AddSingleton(dataSource);
     }
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
