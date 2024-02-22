@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OnlineSales.Controllers;
 
-[ApiExplorerSettings(IgnoreApi = true)]
 [AllowAnonymous]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorsController : Controller
 {
     [Route("/error")]
@@ -77,6 +77,18 @@ public class ErrorsController : Controller
                     HttpContext,
                     StatusCodes.Status400BadRequest,
                     identityException.ErrorMessage);
+                break;
+            case TooManyRequestsException tooManyRequestsException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status429TooManyRequests,
+                    tooManyRequestsException.Message);
+                break;
+            case UnauthorizedException unauthorizedException:
+                problemDetails = ProblemDetailsFactory.CreateProblemDetails(
+                    HttpContext,
+                    StatusCodes.Status401Unauthorized,
+                    unauthorizedException.Message);
                 break;
             default:
                 problemDetails = ProblemDetailsFactory.CreateProblemDetails(

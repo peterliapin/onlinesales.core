@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests;
 
-public class EmailTests : BaseTest
+public class EmailTests : BaseTestAutoLogin
 {
     [Fact]
     public async Task RetrieveInformationsFromEmail()

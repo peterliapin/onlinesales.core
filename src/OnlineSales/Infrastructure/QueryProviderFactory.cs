@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Web;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Nest;
 using OnlineSales.Configuration;
@@ -18,9 +17,10 @@ namespace OnlineSales.Infrastructure
         where T : BaseEntityWithId, new()
     {
         protected readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-        protected readonly IHttpContextHelper httpContextHelper;
-        protected readonly PgDbContext dbContext;
-        protected readonly ElasticClient elasticClient;        
+        protected readonly IHttpContextHelper httpContextHelper;        
+        protected readonly ElasticClient elasticClient;
+
+        protected PgDbContext dbContext;
 
         public QueryProviderFactory(PgDbContext dbContext, EsDbContext esDbContext, IOptions<ApiSettingsConfig> apiSettingsConfig, IHttpContextHelper? httpContextHelper)
         {
@@ -50,6 +50,11 @@ namespace OnlineSales.Infrastructure
             {
                 return new DBQueryProvider<T>(dbSet!.AsQueryable<T>(), queryBuilder);
             }
+        }
+
+        public void SetDBContext(PgDbContext dbContext)
+        {
+            this.dbContext = dbContext;
         }
     }
 }

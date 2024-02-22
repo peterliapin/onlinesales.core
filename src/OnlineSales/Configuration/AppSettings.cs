@@ -4,6 +4,13 @@
 
 namespace OnlineSales.Configuration;
 
+public class EntitiesConfig
+{
+    public string[] Include { get; set; } = Array.Empty<string>();
+
+    public string[] Exclude { get; set; } = Array.Empty<string>();
+}
+
 public class BaseServiceConfig
 {
     public string Server { get; set; } = string.Empty;
@@ -124,4 +131,64 @@ public class CorsConfig
 public class EmailConfig : BaseServiceConfig
 {
     public bool UseSsl { get; set; }
+}
+
+public class JwtConfig
+{
+    public string Issuer { get; set; } = string.Empty;
+
+    public string Audience { get; set; } = string.Empty;
+
+    public string Secret { get; set; } = string.Empty;
+}
+
+public class AzureADConfig
+{
+    public string Instance { get; set; } = string.Empty;
+
+    public string TenantId { get; set; } = string.Empty;
+
+    public string Domain { get; set; } = string.Empty;
+
+    public string ClientId { get; set; } = string.Empty;
+
+    public string ClientSecret { get; set; } = string.Empty;
+}
+
+public class DefaultRolesConfig : List<string>
+{
+}
+
+public class DefaultUserConfig
+{
+    public string UserName { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
+
+    public string Email { get; set; } = string.Empty;
+
+    public DefaultRolesConfig Roles { get; set; } = new DefaultRolesConfig();
+}
+
+public class DefaultUsersConfig : List<DefaultUserConfig>
+{
+}
+
+public class CookiesConfig
+{
+    public bool Enable { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets expiration time in hours.
+    /// </summary>
+    public int ExpireTime { get; set; } = 12;
+}
+
+public class IdentityConfig
+{
+    public double LockoutTime { get; set; } = 5;
+
+    public int MaxFailedAccessAttempts { get; set; } = 10;
 }

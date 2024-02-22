@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace OnlineSales.Tests;
 
-public class FilesTests : BaseTest
+public class FilesTests : BaseTestAutoLogin
 {
     [Theory]
     [InlineData("doc-2mb.doc", 1024 * 1024 * 2, false)]
@@ -66,7 +66,9 @@ public class FilesTests : BaseTest
     public async Task CreateFileAnonymousTest()
     {
         var testFile = new TestFile("zip-1mb.zip", 1024 * 1024);
-        await PostTest("/api/files", testFile, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
+
+        Logout();
+        await PostTest("/api/files", testFile, HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -77,7 +79,8 @@ public class FilesTests : BaseTest
         var postResult = await PostTest("/api/files", testFile);
         postResult.Item2.Should().BeTrue();
 
-        var fileStream = await GetFileTest(postResult.Item1, HttpStatusCode.OK, "NonSuccessAuthentification");
+        Logout();
+        var fileStream = await GetFileTest(postResult.Item1, HttpStatusCode.OK);
         fileStream.Should().NotBeNull();
 
         CompareStreams(testFile.DataBuffer, fileStream!).Should().BeTrue();
@@ -133,7 +136,7 @@ public class FilesTests : BaseTest
         return (string.Empty, false);
     }
 
-    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestFile? payload, string authToken = "Success")
+    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestFile? payload)
     {
         var request = new HttpRequestMessage(method, url);
 
@@ -146,14 +149,14 @@ public class FilesTests : BaseTest
             request.Content = content;
         }
 
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
+        request.Headers.Authorization = GetAuthenticationHeaderValue();
 
         return client.SendAsync(request);
     }
 
-    private async Task<Stream?> GetFileTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
+    private async Task<Stream?> GetFileTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
-        var response = await GetTest(url, expectedCode, authToken);
+        var response = await GetTest(url, expectedCode);
 
         if (expectedCode == HttpStatusCode.OK)
         {

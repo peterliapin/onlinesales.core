@@ -49,9 +49,9 @@ public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, 
         }
     }
 
-    protected abstract Task<(int, string)> CreateFKItem(string authToken = "Success");
+    protected abstract Task<(int, string)> CreateFKItem();
 
-    protected override async Task<(TC, string)> CreateItem(string authToken = "Success")
+    protected override async Task<(TC, string)> CreateItem()
     {
         var fkItem = await CreateFKItem();
 

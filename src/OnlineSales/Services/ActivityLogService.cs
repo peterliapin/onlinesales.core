@@ -2,13 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Configuration;
-using System.Diagnostics;
-using Microsoft.Identity.Client;
 using Nest;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
 
 namespace OnlineSales.Services

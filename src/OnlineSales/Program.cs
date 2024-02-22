@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -11,6 +12,7 @@ using Microsoft.OpenApi.Models;
 using Npgsql;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
+using OnlineSales.Entities;
 using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
@@ -20,6 +22,7 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
+using SwaggerFilters;
 
 namespace OnlineSales;
 
@@ -39,7 +42,7 @@ public class Program
         AppSettingsFiles.Add(path);
     }
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +62,7 @@ public class Program
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IHttpContextHelper, HttpContextHelper>();
         builder.Services.AddSingleton<IMxVerifyService, MxVerifyService>();
+        builder.Services.AddTransient<IIdentityService, IdentityService>();
         builder.Services.AddTransient<IDomainService, DomainService>();
         builder.Services.AddTransient<IOrderItemService, OrderItemService>();
         builder.Services.AddTransient<IContactService, ContactService>();
@@ -78,16 +82,17 @@ public class Program
         builder.Services.AddScoped<IDealService, DealService>();
         builder.Services.AddTransient<IOrderService, OrderService>();
         builder.Services.AddTransient<IDiscountService, DiscountService>();
+        builder.Services.AddTransient<IEmailSchedulingService, EmailSchedulingService>();
 
         ConfigureCacheProfiles(builder);
 
         ConfigureConventions(builder);
-        IdentityHelper.ConfigureIdentity(builder);
+        IdentityHelper.ConfigureAuthentication(builder);
         ConfigureControllers(builder);
 
         builder.Services.AddDbContext<PgDbContext>();
         builder.Services.AddSingleton<EsDbContext>();
-
+        
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureFileUpload(builder);
@@ -98,12 +103,14 @@ public class Program
         ConfigureImportSizeLimit(builder);
         ConfigureEmailVerification(builder);
         ConfigureAccountDetails(builder);
-        
+        ConfigureIdentity(builder);
+
         builder.Services.AddAutoMapper(x =>
         {
             x.AddProfile(new AutoMapperProfiles());
             x.AllowNullCollections = true;
         });
+
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddControllers(options =>
@@ -135,7 +142,7 @@ public class Program
         app.UseExceptionHandler("/error");
         app.UseForwardedHeaders();
 
-        MigrateOnStartIfRequired(app, builder);
+        await MigrateOnStartIfRequired(app, builder);
 
         app.UseSwagger();
         app.UseSwaggerUI();
@@ -159,6 +166,7 @@ public class Program
         app.Run();
     }
 
+<<<<<<< HEAD
     private static void ConfigurePgDataSource(WebApplicationBuilder builder)
     {
         var postgresConfig = builder.Configuration.GetSection("Postgres").Get<PostgresConfig>();
@@ -173,6 +181,47 @@ public class Program
         var dataSource = dataSourceBuilder.Build();
 
         builder.Services.AddSingleton(dataSource);
+=======
+    public static async Task CreateDefaultIdentity(IServiceScope scope)
+    {
+        var defaultRoles = app!.Configuration.GetSection("DefaultRoles").Get<DefaultRolesConfig>()!;
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        foreach (var defaultRole in defaultRoles)
+        {
+            if (!await roleManager.RoleExistsAsync(defaultRole))
+            {
+                await roleManager.CreateAsync(new IdentityRole(defaultRole));
+            }
+        }
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        var defaultUsers = app!.Configuration.GetSection("DefaultUsers").Get<DefaultUsersConfig>()!;
+
+        foreach (var defaultUser in defaultUsers)
+        {
+            var user = new User
+            {
+                CreatedAt = DateTime.UtcNow,
+                DisplayName = defaultUser.UserName,
+                UserName = defaultUser.UserName,
+                Email = defaultUser.Email,
+                EmailConfirmed = true,
+            };
+
+            if (await userManager.FindByEmailAsync(user.Email) == null)
+            {
+                var result = await userManager.CreateAsync(user, defaultUser.Password);
+
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRolesAsync(user, defaultUser.Roles);
+                }
+            }
+        }
+>>>>>>> develop
     }
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
@@ -228,7 +277,7 @@ public class Program
         };
     }
 
-    private static void MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
+    private static async Task MigrateOnStartIfRequired(WebApplication app, WebApplicationBuilder builder)
     {
         var migrateOnStart = builder.Configuration.GetValue<bool>("MigrateOnStart");
 
@@ -254,6 +303,8 @@ public class Program
                     }
 
                     // var elasticClient = scope.ServiceProvider.GetRequiredService<ElasticClient>();
+
+                    await CreateDefaultIdentity(scope);
                 }
             }
         }
@@ -336,6 +387,18 @@ public class Program
         builder.Services.Configure<EmailVerificationApiConfig>(emailVerificationConfig);
     }
 
+    private static void ConfigureIdentity(WebApplicationBuilder builder)
+    {
+        var jwtConfig = builder.Configuration.GetSection("Jwt");
+
+        if (jwtConfig == null)
+        {
+            throw new MissingConfigurationException("Jwt configuration is mandatory.");
+        }
+
+        builder.Services.Configure<JwtConfig>(jwtConfig);
+    }
+
     private static void ConfigureAccountDetails(WebApplicationBuilder builder)
     {
         var accountDetailsApiConfig = builder.Configuration.GetSection("AccountDetailsApi");
@@ -414,6 +477,9 @@ public class Program
             config.UseInlineDefinitionsForEnums();
 
             config.SwaggerDoc("v1", openApiInfo);
+
+            var conf = builder.Configuration.GetSection("Entities").Get<EntitiesConfig>();
+            config.DocumentFilter<SwaggerEntitiesFilter>(conf);
         });
     }
 

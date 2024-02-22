@@ -3,6 +3,8 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -11,13 +13,17 @@ namespace OnlineSales.Services
 {
     public class ContactService : IContactService
     {
-        private readonly IDomainService domainService;
+        private readonly IDomainService domainService;        
+        private readonly IEmailSchedulingService emailSchedulingService;
+        private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
         private PgDbContext pgDbContext;        
 
-        public ContactService(PgDbContext pgDbContext, IDomainService domainService)
+        public ContactService(PgDbContext pgDbContext, IDomainService domainService, IEmailSchedulingService emailSchedulingService, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {
             this.pgDbContext = pgDbContext;
             this.domainService = domainService;
+            this.apiSettingsConfig = apiSettingsConfig;
+            this.emailSchedulingService = emailSchedulingService;
         }
 
         public async Task SaveAsync(Contact contact)
@@ -55,6 +61,45 @@ namespace OnlineSales.Services
             }
         }
 
+        public async Task<Contact> FindOrCreate(string email, string language, int timezone)
+        {
+            var customer = pgDbContext.Contacts!.FirstOrDefault(c => c.Email == email);
+
+            if (customer == null)
+            {
+                customer = new Contact
+                {
+                    Email = email,
+                };
+            }
+
+            customer.Timezone = timezone;
+            customer.Language = language;
+
+            await SaveAsync(customer);
+
+            return customer;
+        }
+
+        public async Task Subscribe(Contact contact, string groupName)
+        {
+            var language = contact.Language ?? apiSettingsConfig.Value.DefaultLanguage;
+
+            var emailSchedule = await emailSchedulingService.FindByGroupAndLanguage(groupName, language);
+
+            if (emailSchedule == null)
+            {
+                throw new EntityNotFoundException(typeof(EmailSchedule).Name, groupName);
+            }
+
+            await pgDbContext.ContactEmailSchedules!.AddAsync(new ContactEmailSchedule
+            {
+                Contact = contact,
+                Schedule = emailSchedule,
+                CreatedAt = DateTime.UtcNow,
+            });
+        }
+
         public async Task Unsubscribe(string email, string reason, string source, DateTime createdAt, string? ip)
         {
             var contact = (from u in pgDbContext.Contacts
@@ -82,6 +127,7 @@ namespace OnlineSales.Services
         {
             this.pgDbContext = pgDbContext;
             domainService.SetDBContext(pgDbContext);
+            emailSchedulingService.SetDBContext(pgDbContext);
         }
 
         private async Task EnrichWithDomainId(Contact contact)

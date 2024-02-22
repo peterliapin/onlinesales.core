@@ -3,16 +3,12 @@
 // </copyright>
 
 using AutoMapper;
-using AutoMapper.Configuration.Conventions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Nest;
-using OnlineSales.Controllers;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
-using OnlineSales.Services;
 
 namespace OnlineSales.Interfaces;
 

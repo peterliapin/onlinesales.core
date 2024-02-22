@@ -5,24 +5,35 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using OnlineSales.Entities;
-using OnlineSales.Infrastructure;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Identity;
+
 public class AzureAdCookieEventsHandler : CookieAuthenticationEvents
 {
     public override async Task SigningIn(CookieSigningInContext context)
     {
+        var identityService = context.HttpContext.RequestServices.GetService<IIdentityService>()!;
         var signInManager = context.HttpContext.RequestServices.GetService<SignInManager<User>>()!;
         var userManager = context.HttpContext.RequestServices.GetService<UserManager<User>>()!;
 
-        var userEmail = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
+        var email = context.Principal?.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(userEmail))
+        if (string.IsNullOrWhiteSpace(email))
         {
             await RedirectToAccessDenied(((PropertiesContext<CookieAuthenticationOptions>)context as RedirectContext<CookieAuthenticationOptions>)!);
             return;
         }
 
-        context.HttpContext.User = await IdentityHelper.TryLoginOnRegister(signInManager, userManager, userEmail, "AzureAdCookie");
+        var user = await identityService.FindOnRegister(email);
+
+        user.LastTimeLoggedIn = DateTime.UtcNow;
+        await userManager.UpdateAsync(user);
+
+        var userPrincipal = await signInManager.CreateUserPrincipalAsync(user);
+
+        await signInManager.SignInAsync(user, false, "AzureAdCookie");
+
+        context.HttpContext.User = userPrincipal;
     }
 }

@@ -16,13 +16,13 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
     [Fact]
     public async Task GetAllTestAnonymous()
     {
-        await GetAllWithAuthentification("Anonymous");
+        await GetAllRecords(true);
     }
 
     [Fact]
     public async Task CreateAndGetItemTestAnonymous()
     {
-        await CreateAndGetItemWithAuthentification("Anonymous");
+        await CreateAndGetItem(true);
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         return (testComment, newCommentUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
+    protected override async Task<(int, string)> CreateFKItem()
     {
         var fkItemCreate = new TestContent();
 

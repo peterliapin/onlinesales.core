@@ -4,8 +4,8 @@
 
 using System.Reflection;
 using Nest;
-using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.Interfaces;
 
 namespace OnlineSales.Infrastructure
 {

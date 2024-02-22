@@ -16,4 +16,6 @@ public class User : IdentityUser
 
     [Searchable]
     public string DisplayName { get; set; } = string.Empty;
+
+    public Dictionary<string, object>? Data { get; set; }
 }

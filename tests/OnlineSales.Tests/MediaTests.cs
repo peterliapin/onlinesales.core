@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace OnlineSales.Tests;
 
-public class MediaTests : BaseTest
+public class MediaTests : BaseTestAutoLogin
 {
     [Theory]
     [InlineData("test1.png", 1024000, false)]
@@ -60,8 +60,9 @@ public class MediaTests : BaseTest
     [Fact]
     public async Task CreateImageAnonymousTest()
     {
+        Logout();
         var testMedia = new TestMedia("test1.png", 1024);
-        await PostTest("/api/media", testMedia, HttpStatusCode.Unauthorized, "NonSuccessAuthentification");
+        await PostTest("/api/media", testMedia, HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -70,7 +71,9 @@ public class MediaTests : BaseTest
         var testMedia = new TestMedia("test1.png", 1024);
         var postResult = await PostTest("/api/media", testMedia);
         postResult.Item2.Should().BeTrue();
-        var imageStream = await GetImageTest(postResult.Item1, HttpStatusCode.OK, "NonSuccessAuthentification");
+
+        Logout();
+        var imageStream = await GetImageTest(postResult.Item1, HttpStatusCode.OK);
         imageStream.Should().NotBeNull();
         CompareStreams(testMedia.DataBuffer, imageStream!).Should().BeTrue();
     }
@@ -91,6 +94,27 @@ public class MediaTests : BaseTest
         }
 
         return CompareStreams(testMedia.DataBuffer, imageStream!);
+    }
+
+    protected override Task<HttpResponseMessage> Request(HttpMethod method, string url, object? payload)
+    {
+        if(!(payload is TestMedia))
+        {
+            return base.Request(method, url, payload);
+        }
+
+        var request = new HttpRequestMessage(method, url);
+
+        var testMedia = (TestMedia)payload!;
+        var content = new MultipartFormDataContent();
+        content.Add(new StreamContent(testMedia.DataBuffer), "Image", testMedia.Image!.Name);
+        content.Add(new StringContent(testMedia.ScopeUid), "ScopeUid");
+
+        request.Content = content;
+
+        request.Headers.Authorization = GetAuthenticationHeaderValue();
+
+        return client.SendAsync(request);
     }
 
     private bool CompareStreams(Stream s1, Stream s2)
@@ -124,27 +148,9 @@ public class MediaTests : BaseTest
         return (string.Empty, false);
     }
 
-    private Task<HttpResponseMessage> Request(HttpMethod method, string url, TestMedia? payload, string authToken = "Success")
+    private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK)
     {
-        var request = new HttpRequestMessage(method, url);
-
-        if (payload != null)
-        {
-            var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(payload.DataBuffer), "Image", payload.Image!.Name);
-            content.Add(new StringContent(payload.ScopeUid), "ScopeUid");
-
-            request.Content = content;
-        }
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
-
-        return client.SendAsync(request);
-    }
-
-    private async Task<Stream?> GetImageTest(string url, HttpStatusCode expectedCode = HttpStatusCode.OK, string authToken = "Success")
-    {
-        var response = await GetTest(url, expectedCode, authToken);
+        var response = await GetTest(url, expectedCode);
 
         if (expectedCode == HttpStatusCode.OK)
         {

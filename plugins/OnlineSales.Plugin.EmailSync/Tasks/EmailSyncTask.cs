@@ -37,21 +37,21 @@ namespace OnlineSales.EmailSync.Tasks
             this.dbContext = dbContext;
             this.domainService = domainService;
 
-            var config = configuration.GetSection(this.configKey)!.Get<TaskWithBatchConfig>();            
+            var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();            
             if (config is not null)
             {
-                this.batchSize = config.BatchSize;
+                batchSize = config.BatchSize;
             }
             else
             {
-                throw new MissingConfigurationException($"The specified configuration section for the provided configKey {this.configKey} could not be found in the settings file.");
+                throw new MissingConfigurationException($"The specified configuration section for the provided configKey {configKey} could not be found in the settings file.");
             }
 
             var domains = configuration.GetSection("EmailSync:InternalDomains")!.Get<string[]>();
-            this.internalDomains = (domains != null) ? domains : new string[0];
+            internalDomains = (domains != null) ? domains : new string[0];
 
             var ignored = configuration.GetSection("EmailSync:IgnoredEmails")!.Get<string[]>();
-            this.ignoredEmails = (ignored != null) ? ignored : new string[0];
+            ignoredEmails = (ignored != null) ? ignored : new string[0];
         }
 
         public override async Task<bool> Execute(TaskExecutionLog currentJob)

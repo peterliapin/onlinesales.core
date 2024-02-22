@@ -55,11 +55,11 @@ public class DealPipelineStagesTests : TableWithFKTests<DealPipelineStage, TestP
         return (stage, emailTemplateUrl);
     }
 
-    protected override async Task<(int, string)> CreateFKItem(string authToken = "Success")
+    protected override async Task<(int, string)> CreateFKItem()
     {
         var fkItemCreate = new TestDealPipeline();
 
-        var fkUrl = await PostTest("/api/deal-pipelines", fkItemCreate, HttpStatusCode.Created, authToken);
+        var fkUrl = await PostTest("/api/deal-pipelines", fkItemCreate, HttpStatusCode.Created);
 
         var fkItem = await GetTest<DealPipeline>(fkUrl);
 
