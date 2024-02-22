@@ -22,9 +22,4 @@ public class TooManyRequestsException : Exception
         : base(message, innerException)
     {
     }
-
-    protected TooManyRequestsException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }

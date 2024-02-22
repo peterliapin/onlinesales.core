@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.SendGrid.Entities;
@@ -17,8 +18,8 @@ public class SendgridDbContext : PluginDbContextBase
     {
     }
 
-    public SendgridDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
-        : base(options, configuration, httpContextHelper)
+    public SendgridDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+        : base(options, configuration, httpContextHelper, dataSource)
     {
     }
 

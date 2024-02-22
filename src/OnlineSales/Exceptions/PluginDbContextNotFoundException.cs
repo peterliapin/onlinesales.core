@@ -25,9 +25,4 @@ public class PluginDbContextNotFoundException : PluginDbContextException
         : base(HardcodedMessage, unregisteredDbContext, innerException)
     {
     }
-
-    protected PluginDbContextNotFoundException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }

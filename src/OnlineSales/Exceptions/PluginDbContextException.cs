@@ -25,10 +25,5 @@ public class PluginDbContextException : Exception
         UnregisteredDbContext = unregisteredDbContext;
     }
 
-    protected PluginDbContextException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
-
     public Type? UnregisteredDbContext { get; private set; }
 }

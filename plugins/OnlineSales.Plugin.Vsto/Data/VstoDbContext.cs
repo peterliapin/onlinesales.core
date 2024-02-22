@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Entities;
 
@@ -16,8 +17,8 @@ public class VstoDbContext : PluginDbContextBase
     {
     }
 
-    public VstoDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
-        : base(options, configuration, httpContextHelper)
+    public VstoDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+        : base(options, configuration, httpContextHelper, dataSource)
     {
     }
 

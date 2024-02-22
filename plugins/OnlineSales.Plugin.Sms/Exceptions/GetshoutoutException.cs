@@ -22,9 +22,4 @@ public class GetshoutoutException : Exception
         : base(message, innerException)
     {
     }
-
-    protected GetshoutoutException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }
