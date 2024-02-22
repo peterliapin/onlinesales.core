@@ -3,17 +3,11 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
-using OnlineSales.DTOs;
 using OnlineSales.Entities;
-using OnlineSales.Exceptions;
 using OnlineSales.Helpers;
-using OnlineSales.Interfaces;
 using OnlineSales.Services;
-using OnlineSales.Tasks;
-using Serilog;
 
 namespace OnlineSales.Tasks
 {

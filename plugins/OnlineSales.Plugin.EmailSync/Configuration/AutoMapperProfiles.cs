@@ -12,12 +12,12 @@ public class AutoMapperProfiles : Profile
 {
     public AutoMapperProfiles()
     {
-        this.CreateMap<ImapAccount, ImapAccountCreateDto>().ReverseMap();
-        this.CreateMap<ImapAccount, ImapAccountUpdateDto>()
+        CreateMap<ImapAccount, ImapAccountCreateDto>().ReverseMap();
+        CreateMap<ImapAccount, ImapAccountUpdateDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        this.CreateMap<ImapAccountUpdateDto, ImapAccount>()
+        CreateMap<ImapAccountUpdateDto, ImapAccount>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
-        this.CreateMap<ImapAccount, ImapAccountDetailsDto>();
+        CreateMap<ImapAccount, ImapAccountDetailsDto>();
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)
