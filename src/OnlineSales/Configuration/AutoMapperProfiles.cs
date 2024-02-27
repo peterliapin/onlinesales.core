@@ -17,9 +17,12 @@ public class AutoMapperProfiles : Profile
         CreateMap<decimal?, decimal>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<List<DnsRecord>?, List<DnsRecord>>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<Dictionary<string, string>?, Dictionary<string, string>>().ConvertUsing((src, dest) => src ?? dest);
-        CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);
-        CreateMap<DateTime?, DateTime>().ConvertUsing((src, dest) => src ?? dest);
+        CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);        
         CreateMap<CommentStatus?, CommentStatus>().ConvertUsing((src, dest) => src ?? dest);
+
+        CreateMap<DateTime, DateTime>().ConvertUsing(new DateTimeToUtcConverter());
+        CreateMap<DateTime?, DateTime?>().ConvertUsing(new DateTimeToUtcConverter());
+        CreateMap<DateTime?, DateTime>().ConvertUsing(new DateTimeToUtcConverter());
 
         CreateMap<Comment, CommentCreateDto>().ReverseMap();
         CreateMap<Comment, CommentCreateBaseDto>().ReverseMap();
@@ -174,5 +177,38 @@ public class AutoMapperProfiles : Profile
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)
     {
         return sourceValue != null;
+    }
+}
+
+public class DateTimeToUtcConverter : ITypeConverter<DateTime, DateTime>, ITypeConverter<DateTime?, DateTime?>, ITypeConverter<DateTime?, DateTime>
+{
+    public DateTime Convert(DateTime source, DateTime destination, ResolutionContext context)
+    {
+        if (source.Kind == DateTimeKind.Unspecified || source.Kind == DateTimeKind.Local)
+        {
+            return DateTime.SpecifyKind(source, DateTimeKind.Utc);
+        }
+
+        return source;
+    }
+
+    public DateTime? Convert(DateTime? source, DateTime? destination, ResolutionContext context)
+    {
+        if (source == null)
+        {
+            return destination;
+        }
+
+        return Convert(source.Value, destination ?? DateTime.MinValue, context);
+    }
+
+    public DateTime Convert(DateTime? source, DateTime destination, ResolutionContext context)
+    {
+        if (source == null)
+        {
+            return destination;
+        }
+
+        return Convert(source.Value, destination, context);
     }
 }
