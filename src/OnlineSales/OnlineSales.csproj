@@ -7,7 +7,7 @@
     <RootNamespace>OnlineSales</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <UserSecretsId>98270385-43f2-4d3c-98d5-02d0d77fc2d9</UserSecretsId>
-    <ReleaseVersion>1.2.21-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.22-pre</ReleaseVersion>
     <AssemblyName>OnlineSales</AssemblyName>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>OnlineSales</PackageId>
@@ -32,6 +32,12 @@
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Migration|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DocumentationFile></DocumentationFile>
+    <RunWithWarnings>true</RunWithWarnings>
+    <CheckForOverflowUnderflow></CheckForOverflowUnderflow>
+    <DocumentationFile>obj\Release\net7.0\OnlineSales.xml</DocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DistributedLock.Postgres" Version="1.0.5" />
     <PackageReference Include="DnsClient" Version="1.7.0" />
