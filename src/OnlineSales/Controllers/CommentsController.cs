@@ -6,6 +6,7 @@ using System.Reflection;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
@@ -81,11 +82,47 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public override async Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
     {
+        var commentableUid = string.Empty;
+        ICommentable? commentable = null;        
+
+        if (CommentableTypes.TryGetValue(value.CommentableType, out var type))
+        {
+            var commentableDbSet = dbContext.SetDbEntity(type);
+
+            if (value.CommentableId != null)
+            {
+                commentableUid = value.CommentableId!.ToString();
+                commentable = (await commentableDbSet.FirstOrDefaultAsync(c => ((BaseEntityWithId)c).Id == value.CommentableId.Value)) as ICommentable;
+            }
+            else if (!string.IsNullOrEmpty(value.CommentableUid) && type == typeof(Content))
+            {
+                commentableUid = value.CommentableUid;
+                commentable = (await commentableDbSet.FirstOrDefaultAsync(c => ((Content)c).Slug == value.CommentableUid)) as ICommentable; 
+            }
+        }
+
+        if (string.IsNullOrEmpty(commentableUid))
+        {
+            ModelState.AddModelError("CommentableId", "CommentableId or CommentableUid is required");
+            throw new InvalidModelStateException(ModelState);
+        }
+
+        if (commentable == null)
+        {
+            throw new EntityNotFoundException(value.CommentableType, commentableUid);
+        }
+
+        value.CommentableId = ((BaseEntityWithId)commentable).Id;
+
         var comment = mapper.Map<Comment>(value);
 
-        if (!CheckCommentableEntity(comment.CommentableType, comment.CommentableId))
+        if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return UnprocessableEntity(value);
+            comment.Status = CommentStatus.Approved;
+        }
+        else
+        {
+            comment.Status = CommentStatus.NotApproved;
         }
 
         return await commentableControllerExtension.PostComment(comment, this);
@@ -100,18 +137,6 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     {
         var assembly = Assembly.GetAssembly(typeof(ICommentable));
         return assembly!.GetTypes().Where(t => t.IsClass && typeof(ICommentable).IsAssignableFrom(t)).ToDictionary(t => ICommentable.GetCommentableType(t), t => t);
-    }
-
-    private bool CheckCommentableEntity(string ct, int id)
-    {
-        var contains = CommentableTypes.TryGetValue(ct, out var type);
-        if (contains)
-        {
-            var data = dbContext.SetDbEntity(type!);
-            return data.Any(d => ((BaseEntityWithId)d).Id == id);
-        }
-
-        return false;
     }
 
     private sealed class CommentsImportChecker : AdditionalImportChecker

@@ -45,8 +45,9 @@ public class CommentCreateBaseDto
 
 public class CommentCreateDto : CommentCreateBaseDto
 {
-    [Required]
-    public int CommentableId { get; set; }
+    public int? CommentableId { get; set; }
+
+    public string? CommentableUid { get; set; }
 
     [Required]
     public string CommentableType { get; set; } = string.Empty;
