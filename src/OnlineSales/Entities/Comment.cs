@@ -50,6 +50,7 @@ public class Comment : BaseEntity
     [Required]
     public int ContactId { get; set; }
 
+    [JsonIgnore]
     [ForeignKey("ContactId")]
     public virtual Contact? Contact { get; set; }
 

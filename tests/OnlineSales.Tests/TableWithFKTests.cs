@@ -19,7 +19,7 @@ public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, 
     public virtual async Task CreateItemWithNonExistedFKItemTest()
     {
         var testItem = TestData.Generate<TC>(string.Empty, 0);
-        await PostTest(itemsUrl, testItem, HttpStatusCode.UnprocessableEntity);
+        await PostTest(itemsUrl, testItem, HttpStatusCode.NotFound);
     }
 
     [Fact]
