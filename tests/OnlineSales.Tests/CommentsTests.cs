@@ -208,6 +208,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         throw new NotImplementedException();
     }
 
+    [Fact]
     public override async Task CreateItemWithNonExistedFKItemTest()
     {
         var testItem = TestData.Generate<TestComment>(string.Empty, 0);

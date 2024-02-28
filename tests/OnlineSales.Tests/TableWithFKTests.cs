@@ -23,7 +23,6 @@ public abstract class TableWithFKTests<T, TC, TU, TS> : SimpleTableTests<T, TC, 
     }
 
     [Fact]
-
     public virtual async Task CascadeDeleteTest()
     {
         var fkItem = await CreateFKItem();
