@@ -208,6 +208,12 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         throw new NotImplementedException();
     }
 
+    public override async Task CreateItemWithNonExistedFKItemTest()
+    {
+        var testItem = TestData.Generate<TestComment>(string.Empty, 0);
+        await PostTest(itemsUrl, testItem, HttpStatusCode.NotFound);
+    }
+
     protected override void MustBeEquivalent(object? expected, object? result)
     {
         result.Should().BeEquivalentTo(expected, options => options
