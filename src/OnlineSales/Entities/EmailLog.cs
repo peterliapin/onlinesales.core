@@ -83,9 +83,8 @@ namespace OnlineSales.Entities
         /// <summary>
         /// Gets or sets the email body.
         /// </summary>
-        [Required]
         [Searchable]        
-        public string HtmlBody { get; set; } = string.Empty;
+        public string? HtmlBody { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the email body.
