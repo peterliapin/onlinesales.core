@@ -37,6 +37,11 @@ public sealed class VstoFileProvider : IFileProvider
 
     public IFileInfo GetFileInfo(string subpath)
     {
+        if (!subpath.ToLower().StartsWith("/" + VstoPlugin.Configuration.Vsto.SubPathPrefix))
+        {
+            subpath = "/" + VstoPlugin.Configuration.Vsto.SubPathPrefix + subpath;
+        }
+
         // Fix Unix CaseSensetive mode ---------------------------
         var validFilesByExtension = Directory.GetFiles(Path.Combine(vstoRootPath, Path.GetDirectoryName(subpath)![1..]), $"*{Path.GetExtension(subpath)}", SearchOption.TopDirectoryOnly).ToArray();
 

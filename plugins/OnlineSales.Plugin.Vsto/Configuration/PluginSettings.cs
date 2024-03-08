@@ -14,4 +14,6 @@ public class VstoConfig
     public string RequestPath { get; set; } = string.Empty;
 
     public string LocalPath { get; set; } = string.Empty;
+
+    public string SubPathPrefix { get; set; } = string.Empty;
 }

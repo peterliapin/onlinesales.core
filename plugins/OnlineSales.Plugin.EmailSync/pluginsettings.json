@@ -10,7 +10,7 @@
       "CronSchedule": "0/30 * * * * ?",
       "RetryCount": "2",
       "RetryInterval": "1",
-      "BatchSize": "5000"
+      "BatchSize": "20"
     }
   }
 }

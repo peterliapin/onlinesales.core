@@ -48,18 +48,18 @@ namespace OnlineSales.Tasks
 
                     var maxId = await logService.GetMaxId(SourceName);
                     var batch = await dbContext.EmailLogs!.Where(e => e.Id > maxId).OrderBy(e => e.Id).Take(batchSize).ToListAsync();
-                    var batchContacts = batch.Select(b => b.Recipient).ToArray();
+                    var batchContacts = batch.Select(b => b.Recipients).ToArray();
                     var existingContacts = await dbContext.Contacts!.Where(contact => batchContacts.Contains(contact.Email)).ToDictionaryAsync(k => k.Email);
 
                     var converted = batch.Select(log =>
                     {
                         Contact? contact;
 
-                        if (!existingContacts.TryGetValue(log.Recipient, out contact))
+                        if (!existingContacts.TryGetValue(log.Recipients, out contact))
                         {
                             contact = new Contact
                             {
-                                Email = log.Recipient,
+                                Email = log.Recipients,
                             };
 
                             contactService.SaveAsync(contact).Wait();
@@ -72,7 +72,7 @@ namespace OnlineSales.Tasks
                             Type = "Message",
                             ContactId = contact.Id,
                             CreatedAt = log.CreatedAt,
-                            Data = JsonHelper.Serialize(new { Id = log.Id, Status = log.Status, Sender = log.FromEmail, Recipient = log.Recipient, Subject = log.Subject }),
+                            Data = JsonHelper.Serialize(new { Id = log.Id, Status = log.Status, Sender = log.FromEmail, Recipient = log.Recipients, Subject = log.Subject }),
                         };
                     }).ToList();
 

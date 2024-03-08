@@ -1,6 +1,7 @@
 ﻿{
   "Vsto": {
     "RequestPath": "/vsto",
-    "LocalPath": "vsto"
+    "LocalPath": "vsto",
+    "SubPathPrefix": "pro"
   } 
 }
