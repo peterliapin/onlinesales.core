@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities
@@ -12,6 +13,7 @@ namespace OnlineSales.Entities
     {
         NotSent = 0,
         Sent = 1,
+        Received = 2,
     }
 
     [SupportsElastic]
@@ -19,6 +21,9 @@ namespace OnlineSales.Entities
     [Table("email_log")]
     public class EmailLog : BaseEntity
     {
+        private string fromEmail = string.Empty;
+        private string recipients = string.Empty;
+
         /// <summary>
         /// Gets or sets reference to the ContactEmailSchedule table.
         /// </summary>
@@ -28,6 +33,10 @@ namespace OnlineSales.Entities
         /// Gets or sets reference to the contact table.
         /// </summary>
         public int? ContactId { get; set; }
+
+        [JsonIgnore]
+        [ForeignKey("ContactId")]
+        public virtual Contact? Contact { get; set; }
 
         /// <summary>
         /// Gets or sets reference to the EmailTemplate table.
@@ -43,18 +52,46 @@ namespace OnlineSales.Entities
         /// </summary>
         [Searchable]
         [Required]
-        public string Recipient { get; set; } = string.Empty;
+        public string Recipients
+        {
+            get
+            {
+                return recipients;
+            }
 
-        [Searchable]
+            set
+            {
+                recipients = value.ToLower();
+            }
+        }
+
         [Required]
-        public string FromEmail { get; set; } = string.Empty;
+        [Searchable]
+        public string FromEmail
+        {
+            get
+            {
+                return fromEmail;
+            }
+
+            set
+            {
+                fromEmail = value.ToLower();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the email body.
         /// </summary>
-        [Searchable]
         [Required]
-        public string Body { get; set; } = string.Empty;
+        [Searchable]        
+        public string HtmlBody { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the email body.
+        /// </summary>        
+        [Searchable]        
+        public string? TextBody { get; set; }
 
         public string MessageId { get; set; } = string.Empty;
 

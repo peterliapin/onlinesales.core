@@ -1304,11 +1304,6 @@ namespace OnlineSales.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("body");
-
                     b.Property<int?>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
@@ -1334,15 +1329,20 @@ namespace OnlineSales.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_email");
 
+                    b.Property<string>("HtmlBody")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("html_body");
+
                     b.Property<string>("MessageId")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("message_id");
 
-                    b.Property<string>("Recipient")
+                    b.Property<string>("Recipients")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("recipient");
+                        .HasColumnName("recipients");
 
                     b.Property<int?>("ScheduleId")
                         .HasColumnType("integer")
@@ -1365,6 +1365,10 @@ namespace OnlineSales.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("template_id");
 
+                    b.Property<string>("TextBody")
+                        .HasColumnType("text")
+                        .HasColumnName("text_body");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
@@ -1383,6 +1387,9 @@ namespace OnlineSales.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_email_log");
+
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_email_log_contact_id");
 
                     b.ToTable("email_log", (string)null);
                 });
@@ -2555,6 +2562,16 @@ namespace OnlineSales.Migrations
                         .HasConstraintName("fk_domain_account_account_id");
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailLog", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .HasConstraintName("fk_email_log_contact_contact_id");
+
+                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>

@@ -45,9 +45,12 @@ public class SyncSuppressionsTask : BaseTask
     private async Task Unsubscribe<T>(string suppressionType)
         where T : SuppressionDto
     {
-        var sourceAndKeyDictionary = new Dictionary<string, string>();
-
-        sourceAndKeyDictionary.Add(CreateSourceString(primaryApiKeyName, suppressionType), SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey);
+        var sourceAndKeyDictionary = new Dictionary<string, string>
+        {
+            {
+                CreateSourceString(primaryApiKeyName, suppressionType), SendGridPlugin.Configuration.SendGridApi.PrimaryApiKey
+            },
+        };
 
         for (var i = 0; i < SendGridPlugin.Configuration.SendGridApi.SecondaryApiKeys.Count; ++i)
         {
@@ -77,6 +80,11 @@ public class SyncSuppressionsTask : BaseTask
         var lastCreateAt = query.FirstOrDefault();
 
         var lastSuppression = new SuppressionDto { CreatedAt = lastCreateAt };
+
+        if (lastSuppression.Created < 0)
+        {
+            lastSuppression.Created = 0;
+        }
 
         var sendGridClient = new SendGridClient(apiKeyValue);
 

@@ -19,7 +19,7 @@ public static class UserHelper
 
         var userId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (!string.IsNullOrEmpty(userId))
+        if (!string.IsNullOrEmpty(userId) && Guid.TryParse(userId, out Guid guid))
         {
             return userId;
         }

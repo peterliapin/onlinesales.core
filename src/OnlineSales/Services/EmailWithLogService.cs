@@ -99,8 +99,8 @@ namespace OnlineSales.Services
 
                 log.Subject = subject;
                 log.FromEmail = fromEmail;
-                log.Body = body;
-                log.Recipient = recipient;
+                log.HtmlBody = body;
+                log.Recipients = recipient;
                 log.Status = status ? EmailStatus.Sent : EmailStatus.NotSent;
                 log.CreatedAt = DateTime.UtcNow;
                 log.MessageId = messageId;
