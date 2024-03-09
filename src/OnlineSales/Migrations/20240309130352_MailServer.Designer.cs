@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineSales.Data;
@@ -13,9 +14,11 @@ using OnlineSales.Entities;
 namespace OnlineSales.Migrations
 {
     [DbContext(typeof(PgDbContext))]
-    partial class PgDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240309130352_MailServer")]
+    partial class MailServer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1855,10 +1858,6 @@ namespace OnlineSales.Migrations
                     b.Property<bool>("Verified")
                         .HasColumnType("boolean")
                         .HasColumnName("verified");
-
-                    b.Property<bool>("WellKnown")
-                        .HasColumnType("boolean")
-                        .HasColumnName("well_known");
 
                     b.HasKey("Id")
                         .HasName("pk_mail_server");

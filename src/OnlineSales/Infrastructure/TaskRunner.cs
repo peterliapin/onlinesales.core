@@ -57,7 +57,7 @@ namespace OnlineSales.Infrastructure
 
                     if (taskLock is null)
                     {
-                        Log.Error($"Skipping the task {task.Name} as the previous run is not completed yet.");
+                        Log.Information($"Skipping the task {task.Name} as the previous run is not completed yet.");
                         continue;
                     }
 

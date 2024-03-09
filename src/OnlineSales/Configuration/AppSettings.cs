@@ -107,6 +107,11 @@ public class TaskWithBatchConfig : TaskConfig
     public int BatchSize { get; set; }
 }
 
+public class DomainVerificationTaskConfig : TaskWithBatchConfig
+{
+    public int BatchInterval { get; set; }
+}
+
 public class CacheProfileSettings
 {
     public string Type { get; set; } = string.Empty;

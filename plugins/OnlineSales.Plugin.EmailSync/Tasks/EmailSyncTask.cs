@@ -55,6 +55,9 @@ namespace OnlineSales.EmailSync.Tasks
 
             var ignored = configuration.GetSection("EmailSync:IgnoredEmails")!.Get<string[]>();
             ignoredEmails = (ignored != null) ? ignored : new string[0];
+
+            domainService.SetDBContext(dbContext);
+            contactsService.SetDBContext(dbContext);            
         }
 
         public override async Task<bool> Execute(TaskExecutionLog currentJob)

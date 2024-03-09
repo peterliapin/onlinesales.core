@@ -3,6 +3,9 @@
 // </copyright>
 
 using System.Net.Sockets;
+using Microsoft.EntityFrameworkCore;
+using OnlineSales.Data;
+using OnlineSales.Entities;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Services;
@@ -23,6 +26,13 @@ public class MxVerifyService : IMxVerifyService
     private const string SenderSourceHostName = "waveaccess.global";
     private static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
 
+    private readonly PgDbContext dbContext;
+
+    public MxVerifyService(PgDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+
     public async Task<bool> Verify(string mxValue)
     {
         await SemaphoreSlim.WaitAsync();
@@ -31,6 +41,36 @@ public class MxVerifyService : IMxVerifyService
         try
         {
             var hostName = mxValue.TrimEnd('.');
+
+            var mailServer = dbContext.MailServers!.Local.FirstOrDefault(mx => mx.Name == hostName);
+
+            if (mailServer == null)
+            {
+                mailServer = await dbContext.MailServers.FirstOrDefaultAsync(mx => mx.Name == hostName);
+            }
+
+            if (mailServer != null)
+            {
+                if (mailServer.WellKnown)
+                {
+                    return true;
+                }
+                else if (mailServer.Verified && (mailServer.UpdatedAt ?? mailServer.CreatedAt) > DateTime.Now.AddMonths(-1))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                mailServer = new MailServer
+                {
+                    Name = hostName,
+                    CreatedAt = DateTime.UtcNow,                    
+                };
+
+                await dbContext.MailServers!.AddAsync(mailServer);
+            }
+
             foreach (var port in ports)
             {
                 try
@@ -41,7 +81,7 @@ public class MxVerifyService : IMxVerifyService
 
                     if (!connected || !tcp.Connected)
                     {
-                        return false;
+                        continue;
                     }
 
                     using var stream = tcp.GetStream();
@@ -54,15 +94,20 @@ public class MxVerifyService : IMxVerifyService
                     returned = await ReadLine(reader);
                     Log.Information($"SMTP server {mxValue}, port {port} replied with the following welcome message: {returned.value}");
 
-                    Console.WriteLine(returned.value);
+                    mailServer.Port = port;
+                    mailServer.JoinMessage = returned.value;
 
                     // Send HELO code and get answer
                     returned = await WriteLineAndGetAnswer(writer, $"{(port == 587 ? "EHLO" : "HELO")} {SenderSourceHostName}", reader);
                     Log.Information($"SMTP server {mxValue}, port {port} replied to {(port == 587 ? "EHLO" : "HELO")} request: {returned.value}");
 
+                    mailServer.HeloMessage = returned.value;
+
                     SendLine(writer, "QUIT");
 
                     tcp.EndConnect(connecting);
+
+                    mailServer.Verified = true;
 
                     return true;
                 }

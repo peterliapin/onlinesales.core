@@ -17,6 +17,7 @@ public class DomainVerificationTask : BaseTask
     protected readonly PgDbContext dbContext;
     private readonly IDomainService domainService;
     private readonly int batchSize;
+    private readonly int batchInterval;
 
     public DomainVerificationTask(PgDbContext dbContext, IConfiguration configuration, IDomainService domainService, TaskStatusService taskStatusService)
         : base(ConfigKey, configuration, taskStatusService)
@@ -24,11 +25,12 @@ public class DomainVerificationTask : BaseTask
         this.dbContext = dbContext;
         this.domainService = domainService;
 
-        var config = configuration.GetSection(ConfigKey)!.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(ConfigKey)!.Get<DomainVerificationTaskConfig>();
 
         if (config is not null)
         {
             batchSize = config.BatchSize;
+            batchInterval = config.BatchInterval;
         }
         else
         {
@@ -45,9 +47,10 @@ public class DomainVerificationTask : BaseTask
 
             for (var start = 0; start < totalSize; start += batchSize)
             {
-                domains.Skip(start).Take(batchSize).AsParallel().ForAll(domain =>
+                domains.Skip(start).Take(batchSize)/*.AsParallel()*/.ToList().ForEach(domain =>
                 {
                     domainService.Verify(domain).Wait();
+                    Thread.Sleep(new TimeSpan(0, 0, batchInterval));
                 });
 
                 await dbContext.SaveChangesAsync();
