@@ -123,12 +123,15 @@ namespace OnlineSales.Tasks
         private HashSet<string> GetExistedIndices()
         {
             var response = esDbContext.ElasticClient.Indices.GetAlias(Indices.All);
+
             if (!response.IsValid)
             {
-                throw new ESSyncTaskException("Cannot get existed indices list");
+                throw new ESSyncTaskException("Failed to read all existing indices and aliases from Elastic database");
             }
 
-            return response.Indices.Keys.Select(k => k.Name).ToHashSet();
+            return response.Indices
+                .SelectMany(index => new[] { index.Key.Name }.Concat(index.Value.Aliases.Keys))
+                .ToHashSet();
         }
 
         public class ESSyncTaskException : Exception
