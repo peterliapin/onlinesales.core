@@ -172,6 +172,12 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<ActivityLog, ActivityLogDetailsDto>()
             .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+
+        CreateMap<Unsubscribe, UnsubscribeDto>().ReverseMap();
+        CreateMap<Unsubscribe, UnsubscribeDetailsDto>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
+        CreateMap<UnsubscribeImportDto, Unsubscribe>()
+            .ForAllMembers(m => m.Condition(PropertyNeedsMapping));
     }
 
     private static bool PropertyNeedsMapping(object source, object target, object sourceValue, object targetValue)
