@@ -17,6 +17,7 @@ public class DomainVerificationTask : BaseTask
     protected readonly PgDbContext dbContext;
     private readonly IDomainService domainService;
     private readonly int batchSize;
+    private readonly int batchInterval;
 
     public DomainVerificationTask(PgDbContext dbContext, IConfiguration configuration, IDomainService domainService, TaskStatusService taskStatusService)
         : base(ConfigKey, configuration, taskStatusService)
@@ -24,11 +25,12 @@ public class DomainVerificationTask : BaseTask
         this.dbContext = dbContext;
         this.domainService = domainService;
 
-        var config = configuration.GetSection(ConfigKey)!.Get<TaskWithBatchConfig>();
+        var config = configuration.GetSection(ConfigKey)!.Get<DomainVerificationTaskConfig>();
 
         if (config is not null)
         {
             batchSize = config.BatchSize;
+            batchInterval = config.BatchInterval;
         }
         else
         {
@@ -40,17 +42,34 @@ public class DomainVerificationTask : BaseTask
     {
         try
         {
-            var domains = dbContext.Domains!.Where(d => d.HttpCheck == null || d.DnsCheck == null /*|| d.MxCheck == null*/);
-            var totalSize = domains.Count();
+            bool continueToNextBatch = true;
+            int lastId = 0;
 
-            for (var start = 0; start < totalSize; start += batchSize)
+            while (continueToNextBatch)
             {
-                domains.Skip(start).Take(batchSize).AsParallel().ForAll(domain =>
-                {
-                    domainService.Verify(domain).Wait();
-                });
+                var domainsBatch = dbContext.Domains!
+                    .Where(d => d.HttpCheck == null || d.DnsCheck == null)
+                    .Where(d => d.Id > lastId)
+                    .OrderBy(d => d.Id)
+                    .Take(batchSize)
+                    .ToList();
 
-                await dbContext.SaveChangesAsync();
+                if (domainsBatch.Count == 0)
+                {
+                    continueToNextBatch = false;
+                }
+                else
+                {
+                    foreach (var domain in domainsBatch)
+                    {
+                        await domainService.Verify(domain);
+                        Thread.Sleep(new TimeSpan(0, 0, batchInterval));
+                    }
+
+                    lastId = domainsBatch.Last().Id;
+
+                    await dbContext.SaveChangesAsync();
+                }
             }
         }
         catch (Exception ex)

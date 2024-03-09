@@ -109,6 +109,8 @@ public class PgDbContext : IdentityDbContext<User>
 
     public virtual DbSet<Discount>? Discounts { get; set; }
 
+    public virtual DbSet<MailServer>? MailServers { get; set; }
+
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         var result = 0;
