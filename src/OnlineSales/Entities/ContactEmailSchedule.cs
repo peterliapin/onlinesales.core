@@ -13,6 +13,7 @@ namespace OnlineSales.Entities
     {
         Pending = 0,
         Completed = 1,
+        Failed = 2,
     }
 
     [Table("contact_email_schedule")]

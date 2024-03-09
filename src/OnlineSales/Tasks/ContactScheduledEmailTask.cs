@@ -35,64 +35,72 @@ public class ContactScheduledEmailTask : BaseTask
 
             foreach (var schedule in schedules)
             {
-                EmailTemplate? nextEmailTemplateToSend;
-                var retryDelay = 0;
-
-                var lastEmailLog = dbContext.EmailLogs!.Where(
-                        e => e.ScheduleId == schedule.ScheduleId &&
-                        e.ContactId == schedule.ContactId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-
-                var lastEmailTemplate = lastEmailLog is not null
-                    ? dbContext.EmailTemplates!.FirstOrDefault(e => e.Id == lastEmailLog!.TemplateId)
-                    : null;
-
-                // Retry logic if the last email is not sent
-                if (lastEmailLog is not null && lastEmailLog!.Status is EmailStatus.NotSent)
+                try
                 {
-                    var emailNotSentCount = dbContext.EmailLogs!.Count(
-                            e => e.ScheduleId == schedule.ScheduleId
-                            && e.ContactId == schedule.ContactId
-                            && e.TemplateId == lastEmailLog.TemplateId
-                            && e.Status == EmailStatus.NotSent);
+                    EmailTemplate? nextEmailTemplateToSend;
+                    var retryDelay = 0;
 
-                    // If all retry attempts completed, get the next email template to send.
-                    if (emailNotSentCount > lastEmailTemplate!.RetryCount)
+                    var lastEmailLog = dbContext.EmailLogs!.Where(
+                            e => e.ScheduleId == schedule.ScheduleId &&
+                            e.ContactId == schedule.ContactId).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
+
+                    var lastEmailTemplate = lastEmailLog is not null
+                        ? dbContext.EmailTemplates!.FirstOrDefault(e => e.Id == lastEmailLog!.TemplateId)
+                        : null;
+
+                    // Retry logic if the last email is not sent
+                    if (lastEmailLog is not null && lastEmailLog!.Status is EmailStatus.NotSent)
                     {
-                        nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate, schedule.Schedule!.GroupId);
+                        var emailNotSentCount = dbContext.EmailLogs!.Count(
+                                e => e.ScheduleId == schedule.ScheduleId
+                                && e.ContactId == schedule.ContactId
+                                && e.TemplateId == lastEmailLog.TemplateId
+                                && e.Status == EmailStatus.NotSent);
+
+                        // If all retry attempts completed, get the next email template to send.
+                        if (emailNotSentCount > lastEmailTemplate!.RetryCount)
+                        {
+                            nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate, schedule.Schedule!.GroupId);
+                        }
+                        else
+                        {
+                            // Retry attempt available. sending the same email template.
+                            nextEmailTemplateToSend = dbContext.EmailTemplates!.FirstOrDefault(t => t.Id == lastEmailTemplate.Id);
+                            retryDelay = lastEmailTemplate!.RetryInterval;
+                        }
                     }
                     else
                     {
-                        // Retry attempt available. sending the same email template.
-                        nextEmailTemplateToSend = dbContext.EmailTemplates!.FirstOrDefault(t => t.Id == lastEmailTemplate.Id);
-                        retryDelay = lastEmailTemplate!.RetryInterval;
+                        nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate!, schedule.Schedule!.GroupId);
                     }
-                }
-                else
-                {
-                    nextEmailTemplateToSend = GetNextEmailTemplateToSend(lastEmailTemplate!, schedule.Schedule!.GroupId);
-                }
 
-                // All emails in the schedule are sent for the given contact.
-                if (nextEmailTemplateToSend is null)
-                {
-                    var contactSchedule = dbContext.ContactEmailSchedules!.FirstOrDefault(c => c.Id == schedule.Id);
-                    contactSchedule!.Status = ScheduleStatus.Completed;
-                    await dbContext.SaveChangesAsync();
-
-                    break;
-                }
-
-                var nextExecutionTime = GetNextExecutionTime(schedule, retryDelay, lastEmailLog);
-
-                if (nextExecutionTime is not null)
-                {
-                    // check IsRightTimeToExecute()
-                    var executeNow = IsRightTimeToExecute(nextExecutionTime.Value);
-
-                    if (executeNow)
+                    // All emails in the schedule are sent for the given contact.
+                    if (nextEmailTemplateToSend is null)
                     {
-                        await emailFromTemplateService.SendToContactAsync(schedule.ContactId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                        schedule.Status = ScheduleStatus.Completed;
+                        await dbContext.SaveChangesAsync();
+
+                        break;
                     }
+
+                    var nextExecutionTime = GetNextExecutionTime(schedule, retryDelay, lastEmailLog);
+
+                    if (nextExecutionTime is not null)
+                    {
+                        // check IsRightTimeToExecute()
+                        var executeNow = IsRightTimeToExecute(nextExecutionTime.Value);
+
+                        if (executeNow)
+                        {
+                            await emailFromTemplateService.SendToContactAsync(schedule.ContactId, nextEmailTemplateToSend!.Name, GetTemplateArguments(), null, schedule.ScheduleId);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"Failed to complete email sending for contact schedule Id = {schedule.Id}");
+                    schedule.Status = ScheduleStatus.Failed;
+                    await dbContext.SaveChangesAsync();
                 }
             }
 
