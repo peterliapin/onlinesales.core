@@ -71,10 +71,11 @@ public abstract class ChangeLogTask : BaseTask
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, $"Error occurred when executing task {Name}");
+                    Log.Error(ex, $"Error occurred when executing task {taskAndEntity}");
 
                     UpdateChangeLogTaskLogRecord(taskLog, 0, TaskExecutionState.Failed);
-                    throw;
+
+                    return Task.FromResult(false);
                 }
 
                 changeLogBatch = GetNextOrFailedChangeLogBatch(taskAndEntity, loggedType);

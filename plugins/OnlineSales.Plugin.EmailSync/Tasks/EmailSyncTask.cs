@@ -196,6 +196,7 @@ namespace OnlineSales.EmailSync.Tasks
                                 MessageId = message.MessageId,
                                 Source = userName + " - " + folder.FullName,
                                 Status = status,
+                                CreatedAt = message.Date.UtcDateTime,
                             };
 
                             emailLogs.Add(emailLog);

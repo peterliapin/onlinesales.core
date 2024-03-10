@@ -85,7 +85,7 @@ namespace OnlineSales.Tasks
 
             if (!bulkResponse.Success)
             {
-                throw new ESSyncTaskException("Cannot write bulk data into elastic");
+                throw bulkResponse.OriginalException;
             }
 
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());

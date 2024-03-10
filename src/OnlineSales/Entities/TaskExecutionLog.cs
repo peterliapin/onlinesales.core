@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineSales.Entities;
@@ -15,7 +16,8 @@ public enum TaskExecutionStatus
 [Table("task_execution_log")]
 public class TaskExecutionLog : BaseEntityWithId
 {
-    public string? TaskName { get; set; }
+    [Required]
+    public string TaskName { get; set; } = string.Empty;
 
     public DateTime ScheduledExecutionTime { get; set; }
 
@@ -23,7 +25,7 @@ public class TaskExecutionLog : BaseEntityWithId
 
     public TaskExecutionStatus Status { get; set; }
 
-    public int? RetryCount { get; set; }
+    public int RetryCount { get; set; } = 0;
 
     public string? Comment { get; set; }
 }

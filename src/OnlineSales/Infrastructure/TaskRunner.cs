@@ -27,7 +27,7 @@ namespace OnlineSales.Infrastructure
 
             if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
             {
-#pragma warning disable S3010
+                #pragma warning disable S3010
                 primaryNodeStatus = GetPrimaryStatus();
             }
 
@@ -149,7 +149,7 @@ namespace OnlineSales.Infrastructure
                 TaskName = task.Name,
                 ScheduledExecutionTime = GetExecutionTimeByCronSchedule(task.CronSchedule, DateTime.UtcNow),
                 Status = TaskExecutionStatus.Pending,
-                RetryCount = null,
+                RetryCount = 0,
             };
 
             await dbContext.TaskExecutionLogs!.AddAsync(pendingTask);
@@ -176,6 +176,7 @@ namespace OnlineSales.Infrastructure
         {
             if (job.RetryCount >= task.RetryCount)
             {
+                task.SetRunning(false); // no need to execute task when failed more than RetryCount times
                 return false;
             }
 
