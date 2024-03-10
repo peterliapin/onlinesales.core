@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Data;
+using OnlineSales.Entities;
 using OnlineSales.Plugin.Vsto.Data;
 using Quartz.Util;
 using Serilog;
@@ -13,6 +14,8 @@ namespace OnlineSales.Plugin.Vsto;
 
 public class VstoLocalLinksWatcher : IDisposable
 {
+    public const string VstoLinkSource = "Vsto";
+
     public readonly string VstoLocalPath;
 
     public readonly string VstoRequestPath;
@@ -95,7 +98,7 @@ public class VstoLocalLinksWatcher : IDisposable
             exeFiles = Directory.GetFiles(VstoLocalPath, "*.exe", SearchOption.AllDirectories);
         }
 
-        var allLinks = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
+        var allLinks = new HashSet<Link>(new LinkComparer());
         foreach (var exeFile in exeFiles)
         {
             var parentDir = Directory.GetParent(exeFile);
@@ -113,29 +116,32 @@ public class VstoLocalLinksWatcher : IDisposable
             using (var scope = serviceProvider.CreateScope())
             {
                 var dbContext = PluginDbContextBase.GetPluginDbContext<VstoDbContext>(scope);
-                if (dbContext.Links != null)
-                {
-                    foreach (var link in dbContext.Links)
-                    {
-                        if (!allLinks.Contains(link, new LinkComparer()))
-                        {
-                            dbContext.Links.Remove(link);
-                        }
-                    }
 
-                    dbContext.SaveChangesAsync().Wait();
+                var vstoLinks = dbContext.Links!
+                        .Where(l => l.Source == VstoLinkSource)
+                        .ToHashSet();
+
+                foreach (var link in vstoLinks)
+                {
+                    if (!allLinks.Contains(link, new LinkComparer()))
+                    {
+                        dbContext.Links!.Remove(link);
+                    }
                 }
+
+                dbContext.SaveChangesAsync().Wait();
             }
         }
     }
 
-    private void RemoveLinks(HashSet<OnlineSales.Entities.Link> removedLinks)
+    private void RemoveLinks(HashSet<Link> removedLinks)
     {
         using (var serviceProvider = services!.BuildServiceProvider())
         {
             using (var scope = serviceProvider.CreateScope())
             {
                 var dbContext = PluginDbContextBase.GetPluginDbContext<VstoDbContext>(scope);
+
                 if (dbContext.Links != null)
                 {
                     foreach (var link in removedLinks)
@@ -149,7 +155,7 @@ public class VstoLocalLinksWatcher : IDisposable
         }
     }
 
-    private void AddLinks(HashSet<OnlineSales.Entities.Link> addedLinks)
+    private void AddLinks(HashSet<Link> addedLinks)
     {
         using (var serviceProvider = services!.BuildServiceProvider())
         {
@@ -172,9 +178,9 @@ public class VstoLocalLinksWatcher : IDisposable
         }
     }
 
-    private sealed class LinkComparer : IEqualityComparer<OnlineSales.Entities.Link>
+    private sealed class LinkComparer : IEqualityComparer<Link>
     {
-        public bool Equals(OnlineSales.Entities.Link? l1, OnlineSales.Entities.Link? l2)
+        public bool Equals(Link? l1, Link? l2)
         {
             if (l1 == null && l2 == null)
             {
@@ -190,7 +196,7 @@ public class VstoLocalLinksWatcher : IDisposable
             }
         }
 
-        public int GetHashCode(OnlineSales.Entities.Link obj)
+        public int GetHashCode(Link obj)
         {
             return obj.Uid.GetHashCode();
         }
@@ -206,7 +212,7 @@ public class VstoLocalLinksWatcher : IDisposable
 
         private readonly DirectoryInfo parenDir;
 
-        private HashSet<OnlineSales.Entities.Link> links;
+        private HashSet<Link> links;
 
         private bool valid = false;
 
@@ -239,7 +245,7 @@ public class VstoLocalLinksWatcher : IDisposable
             watcher.EnableRaisingEvents = true;
         }
 
-        public HashSet<OnlineSales.Entities.Link> GetLinks()
+        public HashSet<Link> GetLinks()
         {
             return links;
         }
@@ -258,15 +264,16 @@ public class VstoLocalLinksWatcher : IDisposable
             }
         }
 
-        private HashSet<OnlineSales.Entities.Link> CreateLinks()
+        private HashSet<Link> CreateLinks()
         {
-            var result = new HashSet<OnlineSales.Entities.Link>(new LinkComparer());
+            var result = new HashSet<Link>(new LinkComparer());
 
             if (valid)
             {
                 var resourceName = Path.GetFileNameWithoutExtension(vstoFile!.Name) + "_";
                 var relPath = Path.GetRelativePath(linksWatcher.VstoLocalPath, parenDir.FullName).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
                 var versionDirs = GetVersionDirs(resourceName);
+
                 foreach (var versionDir in versionDirs)
                 {
                     if (versionDir != null)
@@ -274,11 +281,12 @@ public class VstoLocalLinksWatcher : IDisposable
                         var version = versionDir.Name.Substring(resourceName.Length).Replace('_', '.');
                         var name = relPath.Replace(Path.AltDirectorySeparatorChar, '_') + "_" + version;
 
-                        result.Add(new OnlineSales.Entities.Link
+                        result.Add(new Link
                         {
                             Uid = name,
                             Destination = Path.Combine(linksWatcher.VstoRequestPath, relPath, exeFile!.Name).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + "?=" + version,
                             Name = name,
+                            Source = VstoLinkSource,
                         });
                     }
                 }
