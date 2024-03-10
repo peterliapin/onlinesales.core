@@ -161,6 +161,11 @@ namespace OnlineSales.EmailSync.Tasks
 
             foreach (var message in messages)
             {
+                if (string.IsNullOrEmpty(message.MessageId))
+                {
+                    continue;
+                }
+
                 if (!existedMessagesUids.Contains(message.MessageId))
                 {
                     var fromEmail = message.From.Mailboxes.Single().Address;

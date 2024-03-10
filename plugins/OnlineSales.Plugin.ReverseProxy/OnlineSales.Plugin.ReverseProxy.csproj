@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.2.25-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.26-pre</ReleaseVersion>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
 

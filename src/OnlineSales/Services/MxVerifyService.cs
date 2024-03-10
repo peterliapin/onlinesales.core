@@ -40,7 +40,7 @@ public class MxVerifyService : IMxVerifyService
 
         try
         {
-            var hostName = mxValue.TrimEnd('.');
+            var hostName = mxValue.TrimEnd('.').ToLower();
 
             var mailServer = dbContext.MailServers!.Local.FirstOrDefault(mx => mx.Name == hostName);
 
@@ -55,9 +55,9 @@ public class MxVerifyService : IMxVerifyService
                 {
                     return true;
                 }
-                else if (mailServer.Verified && (mailServer.UpdatedAt ?? mailServer.CreatedAt) > DateTime.Now.AddMonths(-1))
+                else if ((mailServer.UpdatedAt ?? mailServer.CreatedAt) > DateTime.Now.AddMonths(-1))
                 {
-                    return true;
+                    return mailServer.Verified;
                 }
             }
             else
