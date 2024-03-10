@@ -55,9 +55,9 @@ public class MxVerifyService : IMxVerifyService
                 {
                     return true;
                 }
-                else if (mailServer.Verified && (mailServer.UpdatedAt ?? mailServer.CreatedAt) > DateTime.Now.AddMonths(-1))
+                else if ((mailServer.UpdatedAt ?? mailServer.CreatedAt) > DateTime.Now.AddMonths(-1))
                 {
-                    return true;
+                    return mailServer.Verified;
                 }
             }
             else
