@@ -40,7 +40,7 @@ public class MxVerifyService : IMxVerifyService
 
         try
         {
-            var hostName = mxValue.TrimEnd('.');
+            var hostName = mxValue.TrimEnd('.').ToLower();
 
             var mailServer = dbContext.MailServers!.Local.FirstOrDefault(mx => mx.Name == hostName);
 
