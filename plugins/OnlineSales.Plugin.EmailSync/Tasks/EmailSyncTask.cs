@@ -168,7 +168,14 @@ namespace OnlineSales.EmailSync.Tasks
 
                 if (!existedMessagesUids.Contains(message.MessageId))
                 {
-                    var fromEmail = message.From.Mailboxes.Single().Address;
+                    var fromMailbox = message.From.Mailboxes.FirstOrDefault();
+
+                    if (fromMailbox == null)
+                    {
+                        continue;
+                    }
+
+                    var fromEmail = fromMailbox.Address;
 
                     if (!ignoredEmails.Contains(fromEmail))
                     {
