@@ -19,10 +19,29 @@ namespace OnlineSales.Plugin.Vsto.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ContactDeal", b =>
+                {
+                    b.Property<int>("ContactsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("contacts_id");
+
+                    b.Property<int>("DealsId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deals_id");
+
+                    b.HasKey("ContactsId", "DealsId")
+                        .HasName("pk_contact_deal");
+
+                    b.HasIndex("DealsId")
+                        .HasDatabaseName("ix_contact_deal_deals_id");
+
+                    b.ToTable("contact_deal", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -231,6 +250,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -283,6 +306,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -424,17 +451,26 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("body");
 
+                    b.Property<int>("CommentableId")
+                        .HasColumnType("integer")
+                        .HasColumnName("commentable_id");
+
+                    b.Property<string>("CommentableType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("commentable_type");
+
                     b.Property<int>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
 
-                    b.Property<int>("ContentId")
-                        .HasColumnType("integer")
-                        .HasColumnName("content_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
 
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
@@ -470,6 +506,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
@@ -483,9 +523,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
                     b.HasIndex("ContactId")
                         .HasDatabaseName("ix_comment_contact_id");
-
-                    b.HasIndex("ContentId")
-                        .HasDatabaseName("ix_comment_content_id");
 
                     b.HasIndex("ParentId")
                         .HasDatabaseName("ix_comment_parent_id");
@@ -517,9 +554,17 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("address2");
 
+                    b.Property<DateTime?>("Birthday")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("birthday");
+
                     b.Property<string>("CityName")
                         .HasColumnType("text")
                         .HasColumnName("city_name");
+
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("text")
+                        .HasColumnName("company_name");
 
                     b.Property<int?>("ContinentCode")
                         .HasColumnType("integer")
@@ -533,6 +578,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -540,6 +589,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<string>("CreatedByUserAgent")
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Department")
+                        .HasColumnType("text")
+                        .HasColumnName("department");
 
                     b.Property<int>("DomainId")
                         .HasColumnType("integer")
@@ -554,6 +607,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("first_name");
 
+                    b.Property<string>("JobTitle")
+                        .HasColumnType("text")
+                        .HasColumnName("job_title");
+
                     b.Property<string>("Language")
                         .HasColumnType("text")
                         .HasColumnName("language");
@@ -562,9 +619,21 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text")
+                        .HasColumnName("middle_name");
+
                     b.Property<string>("Phone")
                         .HasColumnType("text")
                         .HasColumnName("phone");
+
+                    b.Property<string>("Prefix")
+                        .HasColumnType("text")
+                        .HasColumnName("prefix");
+
+                    b.Property<Dictionary<string, string>>("SocialMedia")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("social_media");
 
                     b.Property<string>("Source")
                         .HasColumnType("text")
@@ -585,6 +654,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -637,6 +710,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -660,6 +737,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -726,6 +807,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -743,6 +828,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("language");
+
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("published_at");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -772,6 +861,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
@@ -788,6 +881,314 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasDatabaseName("ix_content_slug");
 
                     b.ToTable("content", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Deal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("integer")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTime?>("ActualCloseDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("actual_close_date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("DealCurrency")
+                        .HasColumnType("text")
+                        .HasColumnName("deal_currency");
+
+                    b.Property<int>("DealPipelineId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deal_pipeline_id");
+
+                    b.Property<int>("DealPipelineStageId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deal_pipeline_stage_id");
+
+                    b.Property<decimal?>("DealValue")
+                        .HasColumnType("numeric")
+                        .HasColumnName("deal_value");
+
+                    b.Property<DateTime?>("ExpectedCloseDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expected_close_date");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_deal");
+
+                    b.HasIndex("AccountId")
+                        .HasDatabaseName("ix_deal_account_id");
+
+                    b.HasIndex("DealPipelineId")
+                        .HasDatabaseName("ix_deal_deal_pipeline_id");
+
+                    b.HasIndex("DealPipelineStageId")
+                        .HasDatabaseName("ix_deal_deal_pipeline_stage_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_deal_user_id");
+
+                    b.ToTable("deal", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.DealPipeline", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_deal_pipeline");
+
+                    b.ToTable("deal_pipeline", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.DealPipelineStage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int>("DealPipelineId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deal_pipeline_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer")
+                        .HasColumnName("order");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_deal_pipeline_stage");
+
+                    b.HasIndex("DealPipelineId")
+                        .HasDatabaseName("ix_deal_pipeline_stage_deal_pipeline_id");
+
+                    b.ToTable("deal_pipeline_stage", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Discount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("order_id");
+
+                    b.Property<int?>("OrderItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("order_item_id");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("numeric")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_discount");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ix_discount_order_id");
+
+                    b.HasIndex("OrderItemId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_discount_order_item_id");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_discount_promotion_id");
+
+                    b.ToTable("discount", null, t =>
                         {
                             t.ExcludeFromMigrations();
                         });
@@ -900,6 +1301,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -925,6 +1330,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -952,11 +1361,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("body");
-
                     b.Property<int?>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
@@ -964,6 +1368,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
 
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
@@ -978,10 +1386,19 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("from_email");
 
-                    b.Property<string>("Recipient")
+                    b.Property<string>("HtmlBody")
+                        .HasColumnType("text")
+                        .HasColumnName("html_body");
+
+                    b.Property<string>("MessageId")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("recipient");
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Recipients")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("recipients");
 
                     b.Property<int?>("ScheduleId")
                         .HasColumnType("integer")
@@ -1004,9 +1421,17 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("template_id");
 
+                    b.Property<string>("TextBody")
+                        .HasColumnType("text")
+                        .HasColumnName("text_body");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -1018,6 +1443,9 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_email_log");
+
+                    b.HasIndex("ContactId")
+                        .HasDatabaseName("ix_email_log_contact_id");
 
                     b.ToTable("email_log", null, t =>
                         {
@@ -1037,6 +1465,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
 
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
@@ -1062,6 +1494,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -1101,6 +1537,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -1108,6 +1548,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<string>("CreatedByUserAgent")
                         .HasColumnType("text")
                         .HasColumnName("created_by_user_agent");
+
+                    b.Property<int>("EmailGroupId")
+                        .HasColumnType("integer")
+                        .HasColumnName("email_group_id");
 
                     b.Property<string>("FromEmail")
                         .IsRequired()
@@ -1118,10 +1562,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("from_name");
-
-                    b.Property<int>("GroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("group_id");
 
                     b.Property<string>("Language")
                         .IsRequired()
@@ -1154,6 +1594,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
@@ -1165,10 +1609,93 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.HasKey("Id")
                         .HasName("pk_email_template");
 
-                    b.HasIndex("GroupId")
-                        .HasDatabaseName("ix_email_template_group_id");
+                    b.HasIndex("EmailGroupId")
+                        .HasDatabaseName("ix_email_template_email_group_id");
 
                     b.ToTable("email_template", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.File", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("data");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("extension");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("mime_type");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ScopeUid")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("scope_uid");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint")
+                        .HasColumnName("size");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_file");
+
+                    b.ToTable("file", null, t =>
                         {
                             t.ExcludeFromMigrations();
                         });
@@ -1227,6 +1754,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -1257,6 +1788,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -1291,6 +1826,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
 
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
@@ -1329,6 +1868,89 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         });
                 });
 
+            modelBuilder.Entity("OnlineSales.Entities.MailServer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<string>("HeloMessage")
+                        .HasColumnType("text")
+                        .HasColumnName("helo_message");
+
+                    b.Property<string>("JoinMessage")
+                        .HasColumnType("text")
+                        .HasColumnName("join_message");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<int?>("Port")
+                        .HasColumnType("integer")
+                        .HasColumnName("port");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.Property<bool>("Verified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("verified");
+
+                    b.Property<bool>("WellKnown")
+                        .HasColumnType("boolean")
+                        .HasColumnName("well_known");
+
+                    b.HasKey("Id")
+                        .HasName("pk_mail_server");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("ix_mail_server_name");
+
+                    b.ToTable("mail_server", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("OnlineSales.Entities.Media", b =>
                 {
                     b.Property<int>("Id")
@@ -1341,6 +1963,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
 
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
@@ -1387,6 +2013,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
@@ -1417,6 +2047,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("affiliate_name");
 
+                    b.Property<decimal>("Commission")
+                        .HasColumnType("numeric")
+                        .HasColumnName("commission");
+
                     b.Property<int>("ContactId")
                         .HasColumnType("integer")
                         .HasColumnName("contact_id");
@@ -1428,6 +2062,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
 
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
@@ -1467,6 +2105,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("text")
                         .HasColumnName("ref_no");
 
+                    b.Property<decimal>("Refund")
+                        .HasColumnType("numeric")
+                        .HasColumnName("refund");
+
                     b.Property<string>("Source")
                         .HasColumnType("text")
                         .HasColumnName("source");
@@ -1482,6 +2124,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
 
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
@@ -1520,6 +2166,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -1536,11 +2186,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<decimal>("CurrencyTotal")
                         .HasColumnType("numeric")
                         .HasColumnName("currency_total");
-
-                    b.Property<string>("LicenseCode")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("license_code");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("integer")
@@ -1571,6 +2216,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
                     b.Property<string>("UpdatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("updated_by_ip");
@@ -1586,6 +2235,82 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasDatabaseName("ix_order_item_order_id");
 
                     b.ToTable("order_item", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Promotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_ip");
+
+                    b.Property<string>("CreatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_agent");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_date");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_id");
+
+                    b.Property<string>("UpdatedByIp")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_ip");
+
+                    b.Property<string>("UpdatedByUserAgent")
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_agent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_promotion_code");
+
+                    b.ToTable("promotion", null, t =>
                         {
                             t.ExcludeFromMigrations();
                         });
@@ -1654,6 +2379,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("CreatedById")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_id");
+
                     b.Property<string>("CreatedByIp")
                         .HasColumnType("text")
                         .HasColumnName("created_by_ip");
@@ -1706,6 +2435,10 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<Dictionary<string, object>>("Data")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("data");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -1818,6 +2551,23 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.ToTable("vsto_user_version", (string)null);
                 });
 
+            modelBuilder.Entity("ContactDeal", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Contact", null)
+                        .WithMany()
+                        .HasForeignKey("ContactsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_contact_deal_contact_contacts_id");
+
+                    b.HasOne("OnlineSales.Entities.Deal", null)
+                        .WithMany()
+                        .HasForeignKey("DealsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_contact_deal_deal_deals_id");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1884,13 +2634,6 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_comment_contact_contact_id");
 
-                    b.HasOne("OnlineSales.Entities.Content", "Content")
-                        .WithMany("Comments")
-                        .HasForeignKey("ContentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_comment_content_content_id");
-
                     b.HasOne("OnlineSales.Entities.Comment", "Parent")
                         .WithMany()
                         .HasForeignKey("ParentId")
@@ -1898,21 +2641,19 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
                     b.Navigation("Contact");
 
-                    b.Navigation("Content");
-
                     b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
+                        .WithMany("Contacts")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_contact_account_account_id");
 
                     b.HasOne("OnlineSales.Entities.Domain", "Domain")
-                        .WithMany()
+                        .WithMany("Contacts")
                         .HasForeignKey("DomainId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
@@ -1952,15 +2693,100 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Navigation("Schedule");
                 });
 
+            modelBuilder.Entity("OnlineSales.Entities.Deal", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Account", "Account")
+                        .WithMany("Deals")
+                        .HasForeignKey("AccountId")
+                        .HasConstraintName("fk_deal_account_account_id");
+
+                    b.HasOne("OnlineSales.Entities.DealPipeline", "DealPipeline")
+                        .WithMany()
+                        .HasForeignKey("DealPipelineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_deal_deal_pipeline_deal_pipeline_id");
+
+                    b.HasOne("OnlineSales.Entities.DealPipelineStage", "DealPipelineStage")
+                        .WithMany()
+                        .HasForeignKey("DealPipelineStageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_deal_deal_pipeline_stage_deal_pipeline_stage_id");
+
+                    b.HasOne("OnlineSales.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_deal_users_user_id");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DealPipeline");
+
+                    b.Navigation("DealPipelineStage");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.DealPipelineStage", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.DealPipeline", "DealPipeline")
+                        .WithMany("PipelineStages")
+                        .HasForeignKey("DealPipelineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_deal_pipeline_stage_deal_pipeline_deal_pipeline_id");
+
+                    b.Navigation("DealPipeline");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Discount", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Order", "Order")
+                        .WithMany("Discounts")
+                        .HasForeignKey("OrderId")
+                        .HasConstraintName("fk_discount_order_order_id");
+
+                    b.HasOne("OnlineSales.Entities.OrderItem", "OrderItem")
+                        .WithOne("Discount")
+                        .HasForeignKey("OnlineSales.Entities.Discount", "OrderItemId")
+                        .HasConstraintName("fk_discount_order_item_order_item_id");
+
+                    b.HasOne("OnlineSales.Entities.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_discount_promotion_promotion_id");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("OrderItem");
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Account", "Account")
-                        .WithMany()
+                        .WithMany("Domains")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_domain_account_account_id");
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailLog", b =>
+                {
+                    b.HasOne("OnlineSales.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .HasConstraintName("fk_email_log_contact_contact_id");
+
+                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.EmailSchedule", b =>
@@ -1977,14 +2803,14 @@ namespace OnlineSales.Plugin.Vsto.Migrations
 
             modelBuilder.Entity("OnlineSales.Entities.EmailTemplate", b =>
                 {
-                    b.HasOne("OnlineSales.Entities.EmailGroup", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
+                    b.HasOne("OnlineSales.Entities.EmailGroup", "EmailGroup")
+                        .WithMany("EmailTemplates")
+                        .HasForeignKey("EmailGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_email_template_email_group_group_id");
+                        .HasConstraintName("fk_email_template_email_group_email_group_id");
 
-                    b.Navigation("Group");
+                    b.Navigation("EmailGroup");
                 });
 
             modelBuilder.Entity("OnlineSales.Entities.LinkLog", b =>
@@ -2002,7 +2828,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
             modelBuilder.Entity("OnlineSales.Entities.Order", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Contact", "Contact")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2014,7 +2840,7 @@ namespace OnlineSales.Plugin.Vsto.Migrations
             modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
                 {
                     b.HasOne("OnlineSales.Entities.Order", "Order")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2033,9 +2859,45 @@ namespace OnlineSales.Plugin.Vsto.Migrations
                     b.Navigation("Contact");
                 });
 
-            modelBuilder.Entity("OnlineSales.Entities.Content", b =>
+            modelBuilder.Entity("OnlineSales.Entities.Account", b =>
                 {
-                    b.Navigation("Comments");
+                    b.Navigation("Contacts");
+
+                    b.Navigation("Deals");
+
+                    b.Navigation("Domains");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Contact", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.DealPipeline", b =>
+                {
+                    b.Navigation("PipelineStages");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Domain", b =>
+                {
+                    b.Navigation("Contacts");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.EmailGroup", b =>
+                {
+                    b.Navigation("EmailTemplates");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.Order", b =>
+                {
+                    b.Navigation("Discounts");
+
+                    b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("OnlineSales.Entities.OrderItem", b =>
+                {
+                    b.Navigation("Discount");
                 });
 #pragma warning restore 612, 618
         }
