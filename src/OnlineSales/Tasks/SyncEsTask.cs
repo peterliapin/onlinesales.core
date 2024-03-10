@@ -85,7 +85,7 @@ namespace OnlineSales.Tasks
 
             if (!bulkResponse.Success)
             {
-                throw new ESSyncTaskException("Cannot write bulk data into elastic");
+                throw bulkResponse.OriginalException;
             }
 
             Log.Information("ES Sync Bulk Saved : {0}", bulkResponse.ToString());
@@ -120,7 +120,7 @@ namespace OnlineSales.Tasks
             return prefix + loggedTypeName.ToLower();
         }
 
-        private HashSet<string> GetExistedIndices()
+        /*private HashSet<string> GetExistedIndices()
         {
             var response = esDbContext.ElasticClient.Indices.GetAlias(Indices.All);
 
@@ -132,7 +132,7 @@ namespace OnlineSales.Tasks
             return response.Indices
                 .SelectMany(index => new[] { index.Key.Name }.Concat(index.Value.Aliases.Keys))
                 .ToHashSet();
-        }
+        }*/
 
         public class ESSyncTaskException : Exception
         {
