@@ -1,7 +1,7 @@
 name: 'Test Reporter'
 on:
   workflow_run:
-    workflows: ['.NET Build and Test', '.NET NuGet & Docker Publish']                     # runs after CI workflow
+    workflows: ['.NET Build and Test', '.NET NuGet & Docker Publish', 'Manual Docker Publish from Develop'] # runs after CI workflow
     types:
       - completed
 jobs:
