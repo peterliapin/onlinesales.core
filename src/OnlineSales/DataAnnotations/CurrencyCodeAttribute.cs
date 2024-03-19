@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
-using Npgsql.Internal.TypeHandlers.NetworkHandlers;
 
 namespace OnlineSales.DataAnnotations;
 
@@ -19,17 +18,20 @@ public class CurrencyCodeAttribute : ValidationAttribute
         {
             try
             {
-                var ri = new RegionInfo(c.Name);
-                if (ri.CurrencyNativeName.Length > 0)
+                if (!string.IsNullOrEmpty(c.Name))
                 {
-                    sb.Append(ri.ISOCurrencySymbol);
-                }
+                    var ri = new RegionInfo(c.Name);
+                    if (ri.CurrencyNativeName.Length > 0)
+                    {
+                        sb.Append(ri.ISOCurrencySymbol);
+                    }
 
-                sb.Append("|");
+                    sb.Append("|");
+                }
             }
             catch
             {
-                Log.Error("Cannot get CurrencySymbol for culture. CultureName: " + c.Name);
+                Log.Information("Cannot get ISOCurrencySymbol for culture. CultureName: " + c.Name);
             }
         });
 

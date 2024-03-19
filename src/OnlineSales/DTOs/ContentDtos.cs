@@ -102,13 +102,13 @@ public class ContentDetailsDto : ContentCreateDto
 public class ContentImportDto : BaseImportDto
 {
     [Optional]
-    public string? Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
 
     [Optional]
-    public string? Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     [Optional]
-    public string? Body { get; set; } = string.Empty;
+    public string? Body { get; set; }
 
     [Optional]
     public string? CoverImageUrl { get; set; }
@@ -118,10 +118,10 @@ public class ContentImportDto : BaseImportDto
 
     [Optional]
     [SwaggerUnique]
-    public string? Slug { get; set; } = string.Empty;
+    public string? Slug { get; set; }
 
     [Optional]
-    public string? Type { get; set; } = string.Empty;
+    public string? Type { get; set; }
 
     [Optional]
     public string? Author { get; set; }

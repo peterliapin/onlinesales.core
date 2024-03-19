@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.EmailSyn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.TestPlugin", "plugins\OnlineSales.Plugin.TestPlugin\OnlineSales.Plugin.TestPlugin.csproj", "{5F7301E4-CD13-4F21-A289-683C6D962D13}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnlineSales.Plugin.XLTools", "..\..\XLTools\plugin-xltools\OnlineSales.Plugin.XLTools.csproj", "{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,12 @@ Global
 		{5F7301E4-CD13-4F21-A289-683C6D962D13}.Migration|Any CPU.Build.0 = Debug|Any CPU
 		{5F7301E4-CD13-4F21-A289-683C6D962D13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5F7301E4-CD13-4F21-A289-683C6D962D13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}.Migration|Any CPU.ActiveCfg = Migration|Any CPU
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}.Migration|Any CPU.Build.0 = Migration|Any CPU
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,6 +125,7 @@ Global
 		{5FFB36F9-CA3A-4B57-90F0-88970A67F49C} = {0F2716C8-A043-4743-A8AD-54B86635D567}
 		{075AC92F-979C-41CD-A30B-C73E0AE7DD49} = {0F2716C8-A043-4743-A8AD-54B86635D567}
 		{5F7301E4-CD13-4F21-A289-683C6D962D13} = {0F2716C8-A043-4743-A8AD-54B86635D567}
+		{E8467742-F05B-4A30-8BCB-EB4E7AFDAB46} = {0F2716C8-A043-4743-A8AD-54B86635D567}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6EF3C125-1622-4B2D-8E00-69AF3F2CF063}
