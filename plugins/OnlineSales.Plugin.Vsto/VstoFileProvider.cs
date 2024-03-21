@@ -153,7 +153,8 @@ public sealed class VstoFileProvider : IFileProvider
                     manifestPath,
                     Path.Join(
                         "Application Files",
-                        Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')));
+                        Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')),
+                    Path.GetFileName(subpath));
             }
             else
             {
