@@ -284,7 +284,7 @@ public class VstoLocalLinksWatcher : IDisposable
                         result.Add(new Link
                         {
                             Uid = name,
-                            Destination = Path.Combine(linksWatcher.VstoRequestPath, relPath, exeFile!.Name).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + "?=" + version,
+                            Destination = Path.Combine(linksWatcher.VstoRequestPath, relPath, exeFile!.Name).Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + "?v=" + version,
                             Name = name,
                             Source = VstoLinkSource,
                         });
