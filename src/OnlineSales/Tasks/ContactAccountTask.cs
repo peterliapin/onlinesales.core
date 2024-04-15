@@ -3,7 +3,6 @@
 // </copyright>
 
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
@@ -98,7 +97,7 @@ public class ContactAccountTask : BaseTask
                     domain.AccountStatus = AccountSyncStatus.Successful;
                 }
 
-                var existingAccount = dbContext.Accounts!.Where(a => a.Name == accInfo.Name).FirstOrDefault();
+                var existingAccount = dbContext.Accounts!.FirstOrDefault(a => a.Name == accInfo.Name);
                 if (existingAccount == null)
                 {
                     existingAccount = newAccounts.FirstOrDefault(a => a.Name == accInfo.Name);

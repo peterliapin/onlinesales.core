@@ -63,7 +63,7 @@ public class CommentService : ICommentService
     {
         if (comment.ContactId == 0)
         {
-            var contact = await pgDbContext.Contacts!.Where(contact => contact.Email == comment.AuthorEmail).FirstOrDefaultAsync();
+            var contact = await pgDbContext.Contacts!.FirstOrDefaultAsync(contact => contact.Email == comment.AuthorEmail);
 
             if (contact == null)
             {

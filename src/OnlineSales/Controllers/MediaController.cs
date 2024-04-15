@@ -103,7 +103,7 @@ public class MediaController : ControllerBase
         var scope = Path.GetDirectoryName(pathToFile)!.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var fname = Path.GetFileName(pathToFile);
 
-        var uploadedImageData = await pgDbContext!.Media!.Where(e => e.ScopeUid == scope && e.Name == fname).FirstOrDefaultAsync();
+        var uploadedImageData = await pgDbContext!.Media!.FirstOrDefaultAsync(e => e.ScopeUid == scope && e.Name == fname);
 
         return uploadedImageData == null
             ? throw new EntityNotFoundException(nameof(Media), pathToFile)

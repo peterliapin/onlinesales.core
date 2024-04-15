@@ -107,7 +107,7 @@ public class ImapAccountsController : ControllerBase
 
     private async Task<ImapAccount> FindOrThrowNotFound(string userId, int id)
     {
-        var result = await dbContext.ImapAccounts!.Where(a => a.UserId == userId && a.Id == id).FirstOrDefaultAsync();
+        var result = await dbContext.ImapAccounts!.FirstOrDefaultAsync(a => a.UserId == userId && a.Id == id);
         if (result == null)
         {
             throw new EntityNotFoundException(typeof(ImapAccount).Name, id.ToString());

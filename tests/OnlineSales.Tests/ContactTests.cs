@@ -34,7 +34,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
 
         foreach (var contact in contacts)
         {
-            var domain = App.GetDbContext()!.Domains!.Where(d => d.Id == contact!.DomainId).FirstOrDefault();
+            var domain = App.GetDbContext()!.Domains!.FirstOrDefault(d => d.Id == contact!.DomainId);
             domain.Should().NotBeNull();
             if (contact.Email == notinitializedEmail)
             {

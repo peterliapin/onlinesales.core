@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
+using OnlineSales.Controllers;
 using OnlineSales.Data;
 using OnlineSales.Entities;
+using OnlineSales.Filters;
 using OnlineSales.Formatters.Csv;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
@@ -21,7 +23,6 @@ using OnlineSales.Tasks;
 using Quartz;
 using Serilog.Exceptions;
 using Serilog.Sinks.Elasticsearch;
-using SwaggerFilters;
 
 namespace OnlineSales;
 
@@ -325,7 +326,7 @@ public class Program
 
         if (geolocationApiConfig == null)
         {
-            throw new MissingConfigurationException("Geo Location Api configuraiton is mandatory.");
+            throw new MissingConfigurationException("Geo Location Api configuration is mandatory.");
         }
 
         builder.Services.Configure<GeolocationApiConfig>(geolocationApiConfig);
@@ -397,7 +398,7 @@ public class Program
 
         if (apiSettingsConfig == null)
         {
-            throw new MissingConfigurationException("Api settings configuraiton is mandatory.");
+            throw new MissingConfigurationException("Api settings configuration is mandatory.");
         }
 
         builder.Services.Configure<ApiSettingsConfig>(apiSettingsConfig);

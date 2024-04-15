@@ -4,7 +4,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using CsvHelper.Configuration.Attributes;
-using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.DTOs;
 

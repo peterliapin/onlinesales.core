@@ -34,27 +34,23 @@ public class EmailSchedulingService : IEmailSchedulingService
 
         if (languageCode.Length == 2)
         {
-            result = await emailSchedulesQuery.Where(
-                            e => e.Group!.Language.StartsWith(languageCode)).FirstOrDefaultAsync();
+            result = await emailSchedulesQuery.FirstOrDefaultAsync(e => e.Group!.Language.StartsWith(languageCode));
         }
         else
         {
-            result = await emailSchedulesQuery.Where(
-                            e => e.Group!.Language == languageCode).FirstOrDefaultAsync();
+            result = await emailSchedulesQuery.FirstOrDefaultAsync(e => e.Group!.Language == languageCode);
 
             if (result == null)
             {
                 var lang = languageCode.Split('-')[0];
 
-                result = await emailSchedulesQuery.Where(
-                                e => e.Group!.Language.StartsWith(lang)).FirstOrDefaultAsync();
+                result = await emailSchedulesQuery.FirstOrDefaultAsync(e => e.Group!.Language.StartsWith(lang));
             }
         }
 
         if (result == null)
         {
-            result = await emailSchedulesQuery.Where(
-                            e => e.Group!.Language == apiSettingsConfig.Value.DefaultLanguage).FirstOrDefaultAsync();
+            result = await emailSchedulesQuery.FirstOrDefaultAsync(e => e.Group!.Language == apiSettingsConfig.Value.DefaultLanguage);
         }
 
         return result;

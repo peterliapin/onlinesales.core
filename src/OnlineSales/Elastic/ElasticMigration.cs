@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OnlineSales.Elastic;
 

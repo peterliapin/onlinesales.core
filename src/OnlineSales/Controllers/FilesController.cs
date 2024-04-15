@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using OnlineSales.Data;
 using OnlineSales.DTOs;
-using OnlineSales.Entities;
 using OnlineSales.Helpers;
 
 namespace OnlineSales.Controllers
@@ -101,7 +100,7 @@ namespace OnlineSales.Controllers
             var scope = Path.GetDirectoryName(pathToFile)!.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             var fname = Path.GetFileName(pathToFile);
 
-            var uploadedFileData = await pgDbContext!.Files!.Where(e => e.ScopeUid == scope && e.Name == fname).FirstOrDefaultAsync();
+            var uploadedFileData = await pgDbContext!.Files!.FirstOrDefaultAsync(e => e.ScopeUid == scope && e.Name == fname);
 
             return uploadedFileData == null
                 ? throw new EntityNotFoundException(nameof(Entities.File), $"{pathToFile}")
