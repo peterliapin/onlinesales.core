@@ -8,7 +8,7 @@
       "DefaultRegion": "$SMSGATEWAYS__AMAZONSNS__DEFAULTREGION"
     },
     "Smsc": {
-      "ApiUrl": "https://smsc.ru/sys/send.php",
+      "ApiUrl": "https://smsc.ru/rest/send/",
       "SenderId": "$SMSGATEWAYS__SMSC__SENDERID",
       "Login": "$SMSGATEWAYS__SMSC__LOGIN",
       "Password": "$SMSGATEWAYS__SMSC__PASSWORD"
