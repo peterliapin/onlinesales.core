@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Reflection;
-using System.Web;
+using System.Text;
 using Newtonsoft.Json;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Exceptions;
-using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Services;
 
@@ -23,18 +21,20 @@ public class SmscService : ISmsService
     public async Task SendAsync(string recipient, string message)
     {
         var responseString = string.Empty;
-        var args =
-            $"login={HttpUtility.UrlEncode(smscConfig.Login)}" +
-            $"&psw={HttpUtility.UrlEncode(smscConfig.Password)}" +
-            $"&phones={HttpUtility.UrlEncode(recipient)}" +
-            $"&mes={HttpUtility.UrlEncode(message)}" +
-            $"&sender={HttpUtility.UrlEncode(smscConfig.SenderId)}" +
-            "&fmt=3" + // Use JSON return format
-            "&charset=utf-8";
+        var data = JsonConvert.SerializeObject(new
+        {
+            login = smscConfig.Login,
+            psw = smscConfig.Password,
+            phones = recipient,
+            mes = message,
+            sender = smscConfig.SenderId,
+            fmt = 3,
+            charset = "utf-8",
+        });
 
         using (var httpClient = new HttpClient())
         {
-            var response = await httpClient.GetAsync(smscConfig.ApiUrl + "?" + args);
+            var response = await httpClient.PostAsync(smscConfig.ApiUrl, new StringContent(data, Encoding.UTF8));
             responseString = await response.Content.ReadAsStringAsync();
         }
 
