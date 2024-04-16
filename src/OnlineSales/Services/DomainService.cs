@@ -269,7 +269,7 @@ public class DomainService : IDomainService
                     case ARecord a:
                         if (dnsRecord.DomainName != d.Name + ".")
                         {
-                            // we are only interesting in an A record for the main domain
+                            // we are only interested in an A record for the main domain
                             continue;
                         }
 
@@ -363,7 +363,7 @@ public class DomainService : IDomainService
     {
         string? GetNodeContent(HtmlDocument htmlDoc, string attrName, string value)
         {
-            var htmlNode = htmlDoc.DocumentNode.SelectSingleNode(string.Format("//meta[@{0}='{1}']", attrName, value));
+            var htmlNode = htmlDoc.DocumentNode.SelectSingleNode($"//meta[@{attrName}='{value}']");
             if (htmlNode != null && htmlNode.Attributes.Contains("content"))
             {
                 return htmlNode.GetAttributeValue("content", null);

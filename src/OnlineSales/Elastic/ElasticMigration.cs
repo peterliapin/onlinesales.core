@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OnlineSales.Elastic;
 
@@ -19,9 +18,7 @@ public class ElasticMigration
 
         ProductVersion = fileVersionInfo.ProductVersion!;
 
-        var elasticMigrationAttribute = GetType().GetCustomAttributes(typeof(ElasticMigrationAttribute), true).FirstOrDefault() as ElasticMigrationAttribute;
-
-        if (elasticMigrationAttribute != null)
+        if (GetType().GetCustomAttributes(typeof(ElasticMigrationAttribute), true).FirstOrDefault() is ElasticMigrationAttribute elasticMigrationAttribute)
         {
             MigrationId = elasticMigrationAttribute.Id;
         }

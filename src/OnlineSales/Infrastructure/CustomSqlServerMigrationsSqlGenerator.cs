@@ -130,9 +130,9 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                 }
                 else if (operation.ClrType == typeof(DateTime))
                 {
-                    if (operation.DefaultValue is DateTime)
+                    if (operation.DefaultValue is DateTime dateTime)
                     {
-                        strValue = $"'{((DateTime)operation.DefaultValue).ToUniversalTime().ToString("O")}'";
+                        strValue = $"'{dateTime.ToUniversalTime():O}'";
                     }
                     else
                     {
@@ -267,7 +267,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
             else
             {
                 // TODO: update items not just on id key
-                throw new ChangeLogMigrationException("UpdateDataOperation or DeleteDataOperation must containt just id key column. Please, use SqlOperation instead for your purposes");
+                throw new ChangeLogMigrationException("UpdateDataOperation or DeleteDataOperation must contain just id key column. Please, use SqlOperation instead for your purposes");
             }
         }
     }

@@ -1,12 +1,7 @@
 ﻿// <copyright file="TwilioService.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Resources;
-using System.Text;
-using System.Threading.Tasks;
+
 using OnlineSales.Plugin.Sms.Configuration;
 using Serilog;
 using Twilio;

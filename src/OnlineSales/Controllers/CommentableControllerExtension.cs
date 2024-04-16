@@ -9,8 +9,9 @@ using OnlineSales.Data;
 using OnlineSales.DTOs;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Interfaces;
 
-namespace OnlineSales.Interfaces;
+namespace OnlineSales.Controllers;
 
 public class CommentableControllerExtension
 {

@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;

@@ -12,7 +12,6 @@ namespace OnlineSales.Plugin.Sms.Entities;
 [Table("sms_log")]
 [SupportsElastic]
 [SupportsChangeLog]
-
 public class SmsLog : BaseCreateByEntity
 {
     public enum SmsStatus

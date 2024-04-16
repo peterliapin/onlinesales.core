@@ -26,6 +26,7 @@ public class LocksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public ActionResult Lock(string key)
     {
+        // todo: what is key exists for?
         return Ok();
     }
 
@@ -35,6 +36,7 @@ public class LocksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public ActionResult Release(string key)
     {
+        // todo: what is key exists for?
         return Ok();
     }
 }

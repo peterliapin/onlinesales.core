@@ -134,7 +134,7 @@ namespace OnlineSales.Services
         {
             var domainName = domainService.GetDomainNameByEmail(contact.Email);
 
-            var domainsQueryResult = await pgDbContext!.Domains!.Where(domain => domain.Name == domainName).FirstOrDefaultAsync();
+            var domainsQueryResult = await pgDbContext!.Domains!.FirstOrDefaultAsync(domain => domain.Name == domainName);
 
             if (domainsQueryResult != null)
             {

@@ -1,6 +1,7 @@
 ﻿// <copyright file="IdentityController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -84,7 +85,7 @@ public class IdentityController : ControllerBase
             throw new UnauthorizedException();
         }
 
-        if(!user.EmailConfirmed)
+        if (!user.EmailConfirmed)
         {
             throw new IdentityException("Email is not confirmed");
         }
@@ -95,7 +96,7 @@ public class IdentityController : ControllerBase
         }
 
         var signResult = await signInManager.CheckPasswordSignInAsync(user, input.Password, true);
-        
+
         if (!signResult.Succeeded)
         {
             if (signResult.IsLockedOut)
@@ -109,12 +110,12 @@ public class IdentityController : ControllerBase
         }
 
         var authClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim(ClaimTypes.Name, user.UserName!),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            };
+        {
+            new Claim(ClaimTypes.Email, user.Email!),
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        };
 
         var roles = await userManager.GetRolesAsync(user);
         foreach (var role in roles)

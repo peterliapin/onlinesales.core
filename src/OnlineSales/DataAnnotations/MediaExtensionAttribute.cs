@@ -19,9 +19,7 @@ namespace OnlineSales.DataAnnotations
                 throw new MissingConfigurationException("Failed to resolve IOptions<ImagesConfig> object.");
             }
 
-            var file = value as IFormFile;
-
-            if (file == null)
+            if (value is not IFormFile file)
             {
                 return ValidationResult.Success!;
             }

@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using OnlineSales.Tests.TestEntities;
-
 namespace OnlineSales.Tests;
+
 public class PromotionTests : SimpleTableTests<Promotion, TestPromotion, PromotionUpdateDto, IEntityService<Promotion>>
 {
     public PromotionTests()

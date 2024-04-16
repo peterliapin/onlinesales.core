@@ -255,10 +255,10 @@ To extend the core project's database context, use the `PluginDbContextBase` abs
 * Override `OnModelCreating` method to seed plugin-level default data into the database.
 
 * Use [entity framework core commands](https://learn.microsoft.com/en-us/ef/core/cli/dotnet#using-the-tools) to add a new migration script if a new model is added or perform a data seeding.
-    * Note: `--Configuration` option with the value `Migration` should be used for plugin-level migrations
+    * Note: `--configuration` option with the value `Migration` should be used for plugin-level migrations
         * Example:
             ```
-            dotnet ef migrations add "[SampleMigrationName]" --Configuration Migration
+            dotnet ef migrations add "[SampleMigrationName]" --configuration Migration
             ```
 * Register the extended database context class in the `ConfigureServices` method.
     * Example:
