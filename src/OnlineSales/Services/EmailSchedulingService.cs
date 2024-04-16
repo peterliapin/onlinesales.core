@@ -61,4 +61,3 @@ public class EmailSchedulingService : IEmailSchedulingService
         dbContext = pgDbContext;
     }
 }
-

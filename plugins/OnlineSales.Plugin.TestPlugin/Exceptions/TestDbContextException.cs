@@ -3,6 +3,7 @@
 // </copyright>
 
 namespace OnlineSales.Plugin.TestPlugin.Exceptions;
+
 public class TestDbContextException : Exception
 {
     public TestDbContextException(string message)

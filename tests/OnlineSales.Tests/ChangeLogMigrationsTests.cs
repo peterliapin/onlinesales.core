@@ -11,6 +11,7 @@ using OnlineSales.Plugin.TestPlugin.Entities;
 using OnlineSales.Plugin.TestPlugin.TestData;
 
 namespace OnlineSales.Tests;
+
 public class ChangeLogMigrationsTests : BaseTest
 {
     [Fact]
@@ -113,8 +114,7 @@ public class ChangeLogMigrationsTests : BaseTest
             foreach (var cl in changeLogs)
             {
                 var jsonData = JsonSerializer.Deserialize<JsonDocument>(cl.Data);
-                int value;
-                var res = GetIntProperty(jsonData!.RootElement, key, out value);
+                var res = GetIntProperty(jsonData!.RootElement, key, out var value);
                 res.Should().Be(true);
                 value.Should().Be(ChangeLogMigrationsTestData.AddedColumnDefaultValue);
             }

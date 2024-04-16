@@ -165,16 +165,12 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
     private void FixDateKindIfNeeded(T record)
     {
-        var createdAtRecord = record as IHasCreatedAt;
-
-        if (createdAtRecord != null && createdAtRecord.CreatedAt.Kind != DateTimeKind.Utc)
+        if (record is IHasCreatedAt createdAtRecord && createdAtRecord.CreatedAt.Kind != DateTimeKind.Utc)
         {
             createdAtRecord.CreatedAt = createdAtRecord.CreatedAt.ToUniversalTime();
         }
 
-        var updatedAtRecord = record as IHasUpdatedAt;
-
-        if (updatedAtRecord != null && updatedAtRecord.UpdatedAt is not null && updatedAtRecord.UpdatedAt.Value.Kind != DateTimeKind.Utc)
+        if (record is IHasUpdatedAt updatedAtRecord && updatedAtRecord.UpdatedAt is not null && updatedAtRecord.UpdatedAt.Value.Kind != DateTimeKind.Utc)
         {
             updatedAtRecord.UpdatedAt = updatedAtRecord.UpdatedAt.Value.ToUniversalTime();
         }
@@ -297,16 +293,14 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
 
         foreach (var property in importProperties)
         {
-            var surrpogateForeignKeyAttribute = property.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).FirstOrDefault() as SurrogateForeignKeyAttribute;
-
-            if (surrpogateForeignKeyAttribute == null)
+            if (property.GetCustomAttributes(typeof(SurrogateForeignKeyAttribute), true).FirstOrDefault() is not SurrogateForeignKeyAttribute surrogateForeignKeyAttribute)
             {
                 continue;
             }
 
-            var type = surrpogateForeignKeyAttribute.RelatedType;
+            var type = surrogateForeignKeyAttribute.RelatedType;
 
-            var identifierName = surrpogateForeignKeyAttribute.RelatedTypeUniqeIndex;
+            var identifierName = surrogateForeignKeyAttribute.RelatedTypeUniqeIndex;
 
             var identifierValues = importRecords
                                    .Where(r => property.GetValue(r) != null && property.GetValue(r)!.ToString() != string.Empty)
@@ -334,7 +328,7 @@ public class BaseControllerWithImport<T, TC, TU, TD, TI> : BaseController<T, TC,
             typeIdentifiersMap[type][identifierName] = typeIdentifiersMap[type][identifierName].Distinct().ToList();
 
             typeIdentifiersMap[typeof(T)].SurrogateKeyPropertyNames.Add(property.Name);
-            typeIdentifiersMap[typeof(T)].SurrogateKeyPropertyAttributes.Add(surrpogateForeignKeyAttribute);
+            typeIdentifiersMap[typeof(T)].SurrogateKeyPropertyAttributes.Add(surrogateForeignKeyAttribute);
         }
 
         return typeIdentifiersMap;
@@ -415,7 +409,7 @@ public class ImportResult
     public void AddError(int row, string message)
     {
         Failed++;
-        Errors = Errors ?? new List<ImportError>();
+        Errors ??= new List<ImportError>();
 
         Errors.Add(new ImportError
         {

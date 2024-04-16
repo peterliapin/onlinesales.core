@@ -1,6 +1,7 @@
 ﻿// <copyright file="SyncSuppressionsTask.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using Microsoft.Extensions.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;

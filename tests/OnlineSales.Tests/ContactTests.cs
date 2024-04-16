@@ -3,9 +3,9 @@
 // </copyright>
 
 using System.Text.Json;
-using OnlineSales.Interfaces;
 
 namespace OnlineSales.Tests;
+
 public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdateDto, IContactService>
 {
     public ContactTests()

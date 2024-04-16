@@ -10,7 +10,6 @@ public enum Country
 {
     [Description("Unknown")]
     ZZ = 0,
-
     [Description("Afghanistan")]
     AF = 4,
     [Description("Åland Islands")]

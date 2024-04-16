@@ -36,7 +36,7 @@ public static class FileNameHelper
         var normalizedString = text.Normalize(NormalizationForm.FormD);
         var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
 
-        foreach(var c in normalizedString)
+        foreach (var c in normalizedString)
         {
             var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
             if (unicodeCategory != UnicodeCategory.NonSpacingMark)

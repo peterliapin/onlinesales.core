@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 

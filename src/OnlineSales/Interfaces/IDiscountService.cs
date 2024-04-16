@@ -9,4 +9,3 @@ namespace OnlineSales.Interfaces;
 public interface IDiscountService : IEntityService<Discount>
 {
 }
-

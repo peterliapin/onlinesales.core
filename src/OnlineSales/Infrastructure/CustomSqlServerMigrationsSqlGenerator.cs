@@ -130,9 +130,9 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                 }
                 else if (operation.ClrType == typeof(DateTime))
                 {
-                    if (operation.DefaultValue is DateTime)
+                    if (operation.DefaultValue is DateTime dateTime)
                     {
-                        strValue = $"'{((DateTime)operation.DefaultValue).ToUniversalTime():O}'";
+                        strValue = $"'{dateTime.ToUniversalTime():O}'";
                     }
                     else
                     {
