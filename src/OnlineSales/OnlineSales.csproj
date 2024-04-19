@@ -39,7 +39,7 @@
     <DocumentationFile>obj\Release\net7.0\OnlineSales.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DistributedLock.Postgres" Version="1.1.0" />
+    <PackageReference Include="DistributedLock.Postgres" Version="1.0.5" />
     <PackageReference Include="DnsClient" Version="1.7.0" />
     <PackageReference Include="EntityFrameworkCore.EncryptColumn" Version="6.0.8" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.60" />

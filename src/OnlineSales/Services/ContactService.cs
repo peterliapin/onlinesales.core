@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
@@ -120,6 +121,17 @@ namespace OnlineSales.Services
                 await pgDbContext.Unsubscribes!.AddAsync(unsubscribe);
 
                 contact.Unsubscribe = unsubscribe;
+
+                var schedules = pgDbContext.ContactEmailSchedules!
+                    .Include(c => c.Schedule)
+                    .Include(c => c.Contact)
+                    .Where(s => s.Status == ScheduleStatus.Pending && s.ContactId == contact.Id)
+                    .ToList();
+
+                foreach (var schedule in schedules)
+                {
+                    schedule.Status = ScheduleStatus.Unsubscribed;
+                }
             }
         }
 
