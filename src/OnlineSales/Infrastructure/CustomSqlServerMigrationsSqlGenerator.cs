@@ -137,7 +137,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                     else
                     {
                         throw new ChangeLogMigrationException($"Cannot convert default value to DateTime in column {operation.Name} in table {operation.Table}");
-                    }                    
+                    }
                 }
                 else
                 {
@@ -190,14 +190,19 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
         }
     }
 
-    private static IEntityType GetIEntityType(IModel model, string tableName)
+    private static IEntityType? GetIEntityType(IModel model, string tableName)
     {
         var ets = model.GetEntityTypes();
-        return ets.First(et => et.GetTableName() == tableName);
+        return ets.FirstOrDefault(et => et.GetTableName() == tableName);
     }
 
-    private static Type? GetType(IEntityType etype)
+    private static Type? GetType(IEntityType? etype)
     {
+        if (etype == null)
+        {
+            return null;
+        }
+
         var res = Assembly.GetExecutingAssembly()!.GetType(etype.Name);
 
         if (res == null)
