@@ -104,8 +104,8 @@ namespace OnlineSales.Controllers
             var qp = queryProviderFactory.BuildQueryProvider();
 
             var result = await qp.GetResult();
-            Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
-            Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+            Response.Headers.Append(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
+            Response.Headers.Append(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
             var res = mapper.Map<List<TD>>(result.Records);
             RemoveSecondLevelObjects(res);
             return Ok(res);
@@ -120,8 +120,8 @@ namespace OnlineSales.Controllers
             var qp = queryProviderFactory.BuildQueryProvider(int.MaxValue);
 
             var result = await qp.GetResult();
-            Response.Headers.Add(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
-            Response.Headers.Add(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
+            Response.Headers.Append(ResponseHeaderNames.TotalCount, result.TotalCount.ToString());
+            Response.Headers.Append(ResponseHeaderNames.AccessControlExposeHeader, ResponseHeaderNames.TotalCount);
             var res = mapper.Map<List<TD>>(result.Records);
             RemoveSecondLevelObjects(res);
             return Ok(res);

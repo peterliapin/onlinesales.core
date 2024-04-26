@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;
@@ -15,8 +16,8 @@ public abstract class PluginDbContextBase : PgDbContext
     {
     }
 
-    protected PluginDbContextBase(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
-        : base(options, configuration, httpContextHelper)
+    protected PluginDbContextBase(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+        : base(options, configuration, httpContextHelper, dataSource)
     {
     }
 

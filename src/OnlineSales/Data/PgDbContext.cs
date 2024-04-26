@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -22,6 +23,7 @@ public class PgDbContext : IdentityDbContext<User>
     public readonly IConfiguration Configuration;
 
     private readonly IHttpContextHelper? httpContextHelper;
+    private readonly NpgsqlDataSource dataSource;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PgDbContext"/> class.
@@ -39,6 +41,17 @@ public class PgDbContext : IdentityDbContext<User>
                 .AddUserSecrets(typeof(Program).Assembly)
                 .Build();
 
+            var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+            if (postgresConfig == null)
+            {
+                throw new MissingConfigurationException("Postgres configuration is mandatory.");
+            }
+
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
+            dataSourceBuilder.EnableDynamicJson();
+            dataSource = dataSourceBuilder.Build();
+
             Console.WriteLine("PgDbContext initialized");
         }
         catch (Exception ex)
@@ -48,11 +61,12 @@ public class PgDbContext : IdentityDbContext<User>
         }
     }
 
-    public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+    public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
         : base(options)
     {
         Configuration = configuration;
         this.httpContextHelper = httpContextHelper;
+        this.dataSource = dataSource;
     }
 
     public bool IsImportRequest { get; set; }
@@ -204,18 +218,11 @@ public class PgDbContext : IdentityDbContext<User>
         {
             Console.WriteLine("Configuring PgDbContext...");
 
-            var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-            if (postgresConfig == null)
-            {
-                throw new MissingConfigurationException("Postgres configuration is mandatory.");
-            }
-
             optionsBuilder.UseNpgsql(
-                postgresConfig.ConnectionString,
+                dataSource,
                 b => b.MigrationsHistoryTable("_migrations"))
-                        .UseSnakeCaseNamingConvention()
-                        .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
+                .UseSnakeCaseNamingConvention()
+                .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
 
             Console.WriteLine("PgDbContext successfully configured");
         }

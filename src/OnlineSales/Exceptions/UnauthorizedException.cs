@@ -13,9 +13,4 @@ public class UnauthorizedException : Exception
         : base("Failed to login")
     {
     }
-
-    protected UnauthorizedException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
-    {
-    }
 }
