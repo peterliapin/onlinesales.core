@@ -13,14 +13,12 @@ public class WebhookEventDto : EmailDto
     public string Event { get; set; } = string.Empty;
 
     [JsonProperty("sg_message_id")]
-    public string SendGridMessageId { get; set; } = string.Empty;
+    public string MessageId { get; set; } = string.Empty;
 
     [JsonProperty("sg_event_id")]
-    public string SendGridEventId { get; set; } = string.Empty;
+    public string EventId { get; set; } = string.Empty;
 
     public string Reason { get; set; } = string.Empty;
-
-    public string? Ip { get; set; } = string.Empty;
 
     public string Type { get; set; } = string.Empty;
 }
