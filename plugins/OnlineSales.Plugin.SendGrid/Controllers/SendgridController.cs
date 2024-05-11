@@ -5,9 +5,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
+using OnlineSales.Infrastructure;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.SendGrid.Data;
 using OnlineSales.Plugin.SendGrid.DTOs;
@@ -145,15 +147,19 @@ public class SendgridController : ControllerBase
     {
         try
         {
-            var emailRecords = records.GroupBy(r => r.Email);
+            // lock is required here because if two webhook events or imports start at the same time and try to create new contacts - one may fail later due too dupliacate email error
+            using (LockManager.GetWaitLock("SendGridAddEventsWaitLock", dbContext.Database.GetConnectionString()!))
+            {
+                var emailRecords = records.GroupBy(r => r.Email);
 
-            var contactRecords = await CreateNonExistedContacts(emailRecords);
+                var contactRecords = await CreateNonExistedContacts(emailRecords);
 
-            await AddEventRecords(contactRecords);
+                await AddEventRecords(contactRecords);
 
-            await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
-            return Ok();
+                return Ok();
+            }
         }
         catch (Exception e)
         {
