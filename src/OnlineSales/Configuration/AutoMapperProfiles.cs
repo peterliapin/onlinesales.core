@@ -190,7 +190,7 @@ public class DateTimeToUtcConverter : ITypeConverter<DateTime, DateTime>, ITypeC
 {
     public DateTime Convert(DateTime source, DateTime destination, ResolutionContext context)
     {
-        if (source.Kind == DateTimeKind.Unspecified || source.Kind == DateTimeKind.Local)
+        if (source.Kind == DateTimeKind.Unspecified/* || source.Kind == DateTimeKind.Local*/)
         {
             return DateTime.SpecifyKind(source, DateTimeKind.Utc);
         }
