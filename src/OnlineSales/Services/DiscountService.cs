@@ -39,4 +39,3 @@ public class DiscountService : IDiscountService
         this.pgDbContext = pgDbContext;
     }
 }
-

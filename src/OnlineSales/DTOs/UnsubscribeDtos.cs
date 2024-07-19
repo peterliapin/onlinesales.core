@@ -26,13 +26,26 @@ public class UnsubscribeDetailsDto : UnsubscribeDto
 
 public class UnsubscribeImportDto : BaseImportDtoWithIdAndSource
 {
+    private string contactEmail = string.Empty;
+
     public string Reason { get; set; } = string.Empty;
 
     public int ContactId { get; set; }
 
     [Optional]
     [SurrogateForeignKey(typeof(Contact), "Email", "ContactId")]
-    public string ContactEmail { get; set; } = string.Empty;
+    public string ContactEmail
+    {
+        get
+        {
+            return contactEmail;
+        }
+
+        set
+        {
+            contactEmail = value.ToLower();
+        }
+    }
 
     [Optional]
     public DateTime? CreatedAt { get; set; }

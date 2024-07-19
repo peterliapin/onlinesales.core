@@ -3,6 +3,7 @@
 // </copyright>
 
 namespace OnlineSales.Entities;
+
 public interface ICommentable 
 {
     public static string GetCommentableType(Type t)

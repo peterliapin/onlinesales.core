@@ -16,9 +16,7 @@ namespace OnlineSales.DataAnnotations
             var configuration = (IOptions<FileConfig>?)validationContext!.GetService(typeof(IOptions<FileConfig>)) 
                 ?? throw new MissingConfigurationException("Failed to resolve IOptions<FileConfig> object.");
 
-            var file = value as IFormFile;
-
-            if (file == null)
+            if (value is not IFormFile file)
             {
                 return ValidationResult.Success!;
             }

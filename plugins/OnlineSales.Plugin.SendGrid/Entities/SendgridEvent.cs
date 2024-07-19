@@ -20,11 +20,9 @@ public class SendgridEvent : BaseEntityWithId
 
     public string Reason { get; set; } = string.Empty;
 
-    public string? Ip { get; set; } = string.Empty;
-
     public string? EventId { get; set; } = string.Empty;
 
-    public int? ContactId { get; set; }
+    public int ContactId { get; set; }
 
     [Ignore]
     [JsonIgnore]

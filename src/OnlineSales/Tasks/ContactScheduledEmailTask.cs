@@ -31,12 +31,20 @@ public class ContactScheduledEmailTask : BaseTask
             var schedules = dbContext.ContactEmailSchedules!
                 .Include(c => c.Schedule)
                 .Include(c => c.Contact)
-                .Where(s => s.Status == ScheduleStatus.Pending).ToList();
+                .Where(s => s.Status == ScheduleStatus.Pending)
+                .ToList();
 
             foreach (var schedule in schedules)
             {
                 try
                 {
+                    if (schedule.Contact?.UnsubscribeId is not null)
+                    {
+                        schedule.Status = ScheduleStatus.Unsubscribed;
+                        await dbContext.SaveChangesAsync();
+                        continue;
+                    }
+
                     EmailTemplate? nextEmailTemplateToSend;
                     var retryDelay = 0;
 
@@ -80,7 +88,7 @@ public class ContactScheduledEmailTask : BaseTask
                         schedule.Status = ScheduleStatus.Completed;
                         await dbContext.SaveChangesAsync();
 
-                        break;
+                        continue;
                     }
 
                     var nextExecutionTime = GetNextExecutionTime(schedule, retryDelay, lastEmailLog);

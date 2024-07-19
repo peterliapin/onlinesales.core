@@ -13,4 +13,3 @@ public interface IEmailSchedulingService
 
     void SetDBContext(PgDbContext pgDbContext);
 }
-

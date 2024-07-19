@@ -14,6 +14,7 @@ namespace OnlineSales.Entities
         Pending = 0,
         Completed = 1,
         Failed = 2,
+        Unsubscribed = 3,
     }
 
     [Table("contact_email_schedule")]

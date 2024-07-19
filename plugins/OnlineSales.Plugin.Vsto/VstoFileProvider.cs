@@ -143,7 +143,7 @@ public sealed class VstoFileProvider : IFileProvider
 
     private void HandleManifestRequest(string ipAddress, string subpath, VstoDbContext db, ref VstoFileInfo result)
     {
-        var stat = db.VstoUserVersions!.Where(r => r.IpAddress == ipAddress).FirstOrDefault();
+        var stat = db.VstoUserVersions!.FirstOrDefault(r => r.IpAddress == ipAddress);
         if (stat != null)
         {
             var manifestPath = stat.Subfolder;
@@ -153,7 +153,8 @@ public sealed class VstoFileProvider : IFileProvider
                     manifestPath,
                     Path.Join(
                         "Application Files",
-                        Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')));
+                        Path.GetFileNameWithoutExtension(subpath) + "_" + stat.Version.Replace('.', '_')),
+                    Path.GetFileName(subpath));
             }
             else
             {

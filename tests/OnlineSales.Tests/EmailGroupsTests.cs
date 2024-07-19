@@ -5,6 +5,7 @@
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Tests;
+
 public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, EmailGroupUpdateDto, IEntityService<EmailGroup>>
 {
     public EmailGroupsTests()

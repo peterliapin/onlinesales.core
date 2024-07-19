@@ -97,7 +97,7 @@ public class DealService : IDealService
 
     private int GetStartStageId(int pipelineId)
     {
-        var pipeline = pgDbContext.DealPipelines!.Include(p => p.PipelineStages).Where(p => p.Id == pipelineId).FirstOrDefault();
+        var pipeline = pgDbContext.DealPipelines!.Include(p => p.PipelineStages).FirstOrDefault(p => p.Id == pipelineId);
         if (pipeline == null)
         {
             throw new DealPipelineStageException($"Cannot find pipeline with id = {pipelineId}");

@@ -15,4 +15,3 @@ public interface IIdentityService
 
     Task<List<Claim>> CreateUserClaims(User user);
 }
-

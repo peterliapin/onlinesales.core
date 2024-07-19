@@ -7,7 +7,7 @@ using Microsoft.OpenApi.Models;
 using OnlineSales.Configuration;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace SwaggerFilters
+namespace OnlineSales.Filters
 {
     public class SwaggerEntitiesFilter : IDocumentFilter
     {

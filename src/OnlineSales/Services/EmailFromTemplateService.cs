@@ -81,7 +81,7 @@ namespace OnlineSales.Services
                 }
             }
 
-            // try find template by provided language
+            // try to find template by provided language
             var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
 
             // if template not found, try find with default language

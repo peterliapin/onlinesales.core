@@ -123,6 +123,10 @@ public class PgDbContext : IdentityDbContext<User>
                    || e.State == EntityState.Modified
                    || e.State == EntityState.Deleted));
 
+        var currentUserId = await httpContextHelper!.GetCurrentUserIdAsync();
+        var userIpAddress = httpContextHelper!.IpAddressV4;
+        var userAgent = httpContextHelper!.UserAgent;
+
         if (entries.Any())
         {
             foreach (var entityEntry in entries)
@@ -140,9 +144,9 @@ public class PgDbContext : IdentityDbContext<User>
 
                     if (createdByEntity is not null)
                     {
-                        createdByEntity.CreatedById = await httpContextHelper!.GetCurrentUserIdAsync();
-                        createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? httpContextHelper!.IpAddressV4 : createdByEntity.CreatedByIp;
-                        createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? httpContextHelper!.UserAgent : createdByEntity.CreatedByUserAgent;
+                        createdByEntity.CreatedById = currentUserId;
+                        createdByEntity.CreatedByIp = string.IsNullOrEmpty(createdByEntity.CreatedByIp) ? userIpAddress : createdByEntity.CreatedByIp;
+                        createdByEntity.CreatedByUserAgent = string.IsNullOrEmpty(createdByEntity.CreatedByUserAgent) ? userAgent : createdByEntity.CreatedByUserAgent;
                     }
                 }
 
@@ -159,9 +163,9 @@ public class PgDbContext : IdentityDbContext<User>
 
                     if (updatedByEntity is not null)
                     {
-                        updatedByEntity.UpdatedById = await httpContextHelper!.GetCurrentUserIdAsync();
-                        updatedByEntity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : httpContextHelper!.IpAddressV4;
-                        updatedByEntity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : httpContextHelper!.UserAgent;
+                        updatedByEntity.UpdatedById = currentUserId;
+                        updatedByEntity.UpdatedByIp = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByIp) ? updatedByEntity.UpdatedByIp : userIpAddress;
+                        updatedByEntity.UpdatedByUserAgent = IsImportRequest && !string.IsNullOrEmpty(updatedByEntity.UpdatedByUserAgent) ? updatedByEntity.UpdatedByUserAgent : userAgent;
                     }
                 }
 
@@ -244,7 +248,7 @@ public class PgDbContext : IdentityDbContext<User>
 
     private DateTime GetDateWithKind(DateTime date)
     {
-        if (date.Kind == DateTimeKind.Unspecified || date.Kind == DateTimeKind.Local)
+        if (date.Kind == DateTimeKind.Unspecified /*|| date.Kind == DateTimeKind.Local*/)
         {
             return DateTime.SpecifyKind(date, DateTimeKind.Utc);
         }

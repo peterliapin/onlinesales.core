@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
+
 public class User : IdentityUser
 {
     public string AvatarUrl { get; set; } = string.Empty;

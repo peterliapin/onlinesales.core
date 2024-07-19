@@ -1,7 +1,17 @@
-name: Manual Docker Publish from Develop
+name: Docker Publish from Develop
 
 on:
   workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run Tests'
+        required: false
+        default: true
+        type: boolean
+      version:
+        description: 'Release Version'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -16,7 +26,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         ref: 'develop'
-    
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -28,6 +38,7 @@ jobs:
         nuget-version: 'latest'
 
     - name: Docker Compose Setup
+      if: ${{ github.event.inputs.run_tests == 'true' }}
       run: docker compose -f ./docker-compose/docker-compose.tests.yml up -d
 
     - name: Restore dependencies
@@ -37,11 +48,12 @@ jobs:
       run: dotnet build --configuration $BUILD_CONFIG -p:Version=${{ github.event.inputs.version }} --no-restore
 
     - name: Test
+      if: ${{ github.event.inputs.run_tests == 'true' }}
       run: dotnet test --no-build --configuration $BUILD_CONFIG --logger "trx" --verbosity d --results-directory "./"
 
     - name: Upload test results
+      if: ${{ github.event.inputs.run_tests == 'true' }} && (success() || failure())
       uses: actions/upload-artifact@v3
-      if: success() || failure()
       with:
         name: test-results
         path: ./*.trx

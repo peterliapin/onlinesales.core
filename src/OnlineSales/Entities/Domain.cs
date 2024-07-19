@@ -10,6 +10,7 @@ using Nest;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
+
 public enum AccountSyncStatus
 {
     NotIntended = 0,

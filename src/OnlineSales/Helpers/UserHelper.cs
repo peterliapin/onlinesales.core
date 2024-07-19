@@ -55,11 +55,18 @@ public static class UserHelper
 
         var userEmail = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type.Contains("emailaddress"))?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(userEmail))
+        if (!string.IsNullOrWhiteSpace(userEmail))
         {
-            return null;                
+            return await userManager.FindByEmailAsync(userEmail);
         }
 
-        return await userManager.FindByEmailAsync(userEmail);
+        var userIdentifier = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type.Contains("nameidentifier"))?.Value ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(userIdentifier))
+        {
+            return await userManager.FindByIdAsync(userIdentifier);
+        }
+
+        return null;
     }
 }

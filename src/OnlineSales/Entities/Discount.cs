@@ -11,7 +11,6 @@ namespace OnlineSales.Entities;
 
 [Table("discount")]
 [SupportsChangeLog]
-
 public class Discount : BaseEntity
 {
     [Required]

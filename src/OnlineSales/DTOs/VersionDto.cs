@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Primitives;
 
 namespace OnlineSales.DTOs;
+
 public class VersionDto
 {
     public string? Version { get; set; } = string.Empty;

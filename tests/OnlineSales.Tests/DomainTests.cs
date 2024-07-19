@@ -3,6 +3,7 @@
 // </copyright>
 
 namespace OnlineSales.Tests;
+
 public class DomainTests : SimpleTableTests<Domain, TestDomain, DomainUpdateDto, IDomainService>
 {
     public DomainTests()

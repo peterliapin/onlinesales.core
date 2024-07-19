@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Nest;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;

@@ -1,6 +1,7 @@
 ﻿// <copyright file="FileNameHelper.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -35,7 +36,7 @@ public static class FileNameHelper
         var normalizedString = text.Normalize(NormalizationForm.FormD);
         var stringBuilder = new StringBuilder(capacity: normalizedString.Length);
 
-        foreach(var c in normalizedString)
+        foreach (var c in normalizedString)
         {
             var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
             if (unicodeCategory != UnicodeCategory.NonSpacingMark)

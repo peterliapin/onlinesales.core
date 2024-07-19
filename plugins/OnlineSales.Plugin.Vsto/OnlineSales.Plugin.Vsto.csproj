@@ -5,7 +5,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.2.28-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.33-pre</ReleaseVersion>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>

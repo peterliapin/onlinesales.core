@@ -3,6 +3,7 @@
 // </copyright>
 
 namespace OnlineSales.Exceptions;
+
 public class ChangeLogMigrationException : Exception
 {
     public ChangeLogMigrationException(string message)

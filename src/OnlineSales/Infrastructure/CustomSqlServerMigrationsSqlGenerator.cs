@@ -130,14 +130,14 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
                 }
                 else if (operation.ClrType == typeof(DateTime))
                 {
-                    if (operation.DefaultValue is DateTime)
+                    if (operation.DefaultValue is DateTime dateTime)
                     {
-                        strValue = $"'{((DateTime)operation.DefaultValue).ToUniversalTime().ToString("O")}'";
+                        strValue = $"'{dateTime.ToUniversalTime():O}'";
                     }
                     else
                     {
                         throw new ChangeLogMigrationException($"Cannot convert default value to DateTime in column {operation.Name} in table {operation.Table}");
-                    }                    
+                    }
                 }
                 else
                 {
@@ -190,14 +190,19 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
         }
     }
 
-    private static IEntityType GetIEntityType(IModel model, string tableName)
+    private static IEntityType? GetIEntityType(IModel model, string tableName)
     {
         var ets = model.GetEntityTypes();
-        return ets.First(et => et.GetTableName() == tableName);
+        return ets.FirstOrDefault(et => et.GetTableName() == tableName);
     }
 
-    private static Type? GetType(IEntityType etype)
+    private static Type? GetType(IEntityType? etype)
     {
+        if (etype == null)
+        {
+            return null;
+        }
+
         var res = Assembly.GetExecutingAssembly()!.GetType(etype.Name);
 
         if (res == null)
@@ -267,7 +272,7 @@ public class CustomSqlServerMigrationsSqlGenerator : NpgsqlMigrationsSqlGenerato
             else
             {
                 // TODO: update items not just on id key
-                throw new ChangeLogMigrationException("UpdateDataOperation or DeleteDataOperation must containt just id key column. Please, use SqlOperation instead for your purposes");
+                throw new ChangeLogMigrationException("UpdateDataOperation or DeleteDataOperation must contain just id key column. Please, use SqlOperation instead for your purposes");
             }
         }
     }

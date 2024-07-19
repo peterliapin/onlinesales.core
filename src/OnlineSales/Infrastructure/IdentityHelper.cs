@@ -1,6 +1,7 @@
 ﻿// <copyright file="IdentityHelper.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
+
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,8 +17,6 @@ namespace OnlineSales.Infrastructure;
 
 public static class IdentityHelper
 {
-    public const string AzureAdJwtAuthScheeme = "AzureAdBearer";
-
     public static void ConfigureAuthentication(WebApplicationBuilder builder)
     {
         ConfigureIdentity(builder);
