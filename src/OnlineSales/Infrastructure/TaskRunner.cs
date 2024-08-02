@@ -27,7 +27,7 @@ namespace OnlineSales.Infrastructure
 
             if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
             {
-                #pragma warning disable S3010
+#pragma warning disable S3010
                 primaryNodeStatus = GetPrimaryStatus();
             }
 

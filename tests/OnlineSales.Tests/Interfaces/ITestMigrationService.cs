@@ -4,7 +4,7 @@
 
 namespace OnlineSales.Tests.Interfaces
 {
-    public interface ITestMigrationService 
+    public interface ITestMigrationService
     {
         (bool, string) MigrateUpToAndCheck(string name);
     }

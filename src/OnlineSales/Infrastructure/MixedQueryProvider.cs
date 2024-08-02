@@ -36,7 +36,7 @@ namespace OnlineSales.Infrastructure
             var includeData = new List<PropertyInfo>();
             includeData.AddRange(queryBuilder.IncludeData);
 
-            var idSelectData = new QueryModelBuilder<T>.SelectCommandData() { SelectedProperties = new List<PropertyInfo> { typeof(T).GetProperty("Id") ! }, IsSelect = true };
+            var idSelectData = new QueryModelBuilder<T>.SelectCommandData() { SelectedProperties = new List<PropertyInfo> { typeof(T).GetProperty("Id")! }, IsSelect = true };
 
             queryBuilder.SelectData = idSelectData;
             queryBuilder.IncludeData.Clear();
