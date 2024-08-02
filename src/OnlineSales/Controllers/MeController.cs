@@ -25,7 +25,7 @@ public class MeController : ControllerBase
         this.mapper = mapper;
         this.userManager = userManager;
     }
-    
+
     [HttpGet("me")]
     [SwaggerOperation(Tags = new[] { "Users" })]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -48,7 +48,7 @@ public class MeController : ControllerBase
     public virtual async Task<ActionResult<UserDetailsDto>> Patch([FromBody] UserUpdateDto value)
     {
         var user = await UserHelper.GetCurrentUserOrThrowAsync(userManager, User);
-            
+
         mapper.Map(value, user);
 
         await userManager.UpdateAsync(user);
@@ -58,4 +58,3 @@ public class MeController : ControllerBase
         return Ok(userDetails);
     }
 }
-

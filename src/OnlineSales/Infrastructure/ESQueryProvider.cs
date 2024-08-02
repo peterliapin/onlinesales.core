@@ -92,7 +92,7 @@ namespace OnlineSales.Infrastructure
                 elasticClient.ClosePointInTime(new ClosePointInTimeRequest() { Id = pit.Id });
             }
         }
-                
+
         private void AddSortConditions(SearchRequest<T> sr)
         {
             var sortedConditions = new List<ISort>();

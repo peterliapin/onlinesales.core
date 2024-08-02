@@ -220,7 +220,7 @@ public class CommentsTests : TableWithFKTests<Comment, TestComment, CommentUpdat
         result.Should().BeEquivalentTo(expected, options => options
             .Excluding(o => ((TestComment)o!).ContactId)
             .Excluding(o => ((TestComment)o!).CommentableUid));
-            
+
         ((Comment)result!).ContactId.Should().BePositive();
     }
 

@@ -105,7 +105,7 @@ public class Contact : BaseEntity, ICommentable
     [ForeignKey("AccountId")]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Account? Account { get; set; }
-    
+
     public int? UnsubscribeId { get; set; }
 
     [JsonIgnore]

@@ -84,7 +84,7 @@ public class IdentityLoginTests : BaseTestAutoLogin
         lockoutConfig.Should().NotBeNull();
 
         var testLoginDto = new LoginDto()
-            { Email = AdminLoginData.Email, Password = "WrongPassword" };
+        { Email = AdminLoginData.Email, Password = "WrongPassword" };
         // The first times login returns Unauthorized
         int count = lockoutConfig!.MaxFailedAccessAttempts - 1;
         for (int i = 0; i < count; i++)
@@ -105,7 +105,7 @@ public class IdentityLoginTests : BaseTestAutoLogin
     private async Task TestBody(string username, string password, HttpStatusCode expectedCode)
     {
         var testLoginDto = new LoginDto()
-            { Email = username, Password = password };
+        { Email = username, Password = password };
         Assert.NotEqual(testLoginDto, AdminLoginData);
 
         var token = await PostTest<JWTokenDto>(LoginApi, testLoginDto, expectedCode);

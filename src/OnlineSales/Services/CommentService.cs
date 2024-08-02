@@ -12,7 +12,7 @@ namespace OnlineSales.Services;
 public class CommentService : ICommentService
 {
     private readonly IContactService contactsService;
-    private PgDbContext pgDbContext;    
+    private PgDbContext pgDbContext;
 
     public CommentService(PgDbContext pgDbContext, IContactService contactsService)
     {

@@ -17,7 +17,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<decimal?, decimal>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<List<DnsRecord>?, List<DnsRecord>>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<Dictionary<string, string>?, Dictionary<string, string>>().ConvertUsing((src, dest) => src ?? dest);
-        CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);        
+        CreateMap<string?[], string?[]>().ConvertUsing((src, dest) => src ?? dest);
         CreateMap<CommentStatus?, CommentStatus>().ConvertUsing((src, dest) => src ?? dest);
 
         CreateMap<DateTime, DateTime>().ConvertUsing(new DateTimeToUtcConverter());

@@ -26,7 +26,7 @@ public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, 
     }
 
     [AllowAnonymous]
-    [HttpGet("{id}/comments")]    
+    [HttpGet("{id}/comments")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -37,7 +37,7 @@ public class OrdersController : BaseControllerWithImport<Order, OrderCreateDto, 
     }
 
     [AllowAnonymous]
-    [HttpPost("{id}/comments")]    
+    [HttpPost("{id}/comments")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
