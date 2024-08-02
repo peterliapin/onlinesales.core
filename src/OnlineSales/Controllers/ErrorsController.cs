@@ -21,7 +21,7 @@ public class ErrorsController : Controller
 
         ProblemDetails problemDetails;
 
-        Log.Error(error, $"Exception caught by the error controller.");
+        Log.Error(error, "Exception caught by the error controller.");
 
         switch (error)
         {
