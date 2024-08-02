@@ -14,10 +14,10 @@ namespace OnlineSales.Services
 {
     public class ContactService : IContactService
     {
-        private readonly IDomainService domainService;        
+        private readonly IDomainService domainService;
         private readonly IEmailSchedulingService emailSchedulingService;
         private readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-        private PgDbContext pgDbContext;        
+        private PgDbContext pgDbContext;
 
         public ContactService(PgDbContext pgDbContext, IDomainService domainService, IEmailSchedulingService emailSchedulingService, IOptions<ApiSettingsConfig> apiSettingsConfig)
         {

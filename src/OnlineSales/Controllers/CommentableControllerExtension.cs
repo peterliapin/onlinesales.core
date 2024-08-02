@@ -23,7 +23,7 @@ public class CommentableControllerExtension
     {
         this.mapper = mapper;
         this.commentService = commentService;
-        this.dbContext = dbContext; 
+        this.dbContext = dbContext;
     }
 
     public async Task<List<CommentDetailsDto>> GetCommentsForICommentable<T>(int commentableId)

@@ -46,7 +46,7 @@ public class Deal : BaseEntity
 
     public DateTime? ActualCloseDate { get; set; }
 
-    public string UserId { get; set; } = string.Empty; 
+    public string UserId { get; set; } = string.Empty;
 
     [JsonIgnore]
     [ForeignKey("UserId")]

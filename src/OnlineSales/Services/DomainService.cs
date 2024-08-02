@@ -74,11 +74,11 @@ public class DomainService : IDomainService
 
         if (domain.Id > 0)
         {
-           pgDbContext.Domains!.Update(domain);
+            pgDbContext.Domains!.Update(domain);
         }
         else
         {
-           await pgDbContext.Domains!.AddAsync(domain);
+            await pgDbContext.Domains!.AddAsync(domain);
         }
     }
 

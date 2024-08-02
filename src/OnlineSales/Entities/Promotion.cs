@@ -14,7 +14,7 @@ namespace OnlineSales.Entities;
 [SupportsChangeLog]
 [Index(nameof(Code), IsUnique = true)]
 
-public class Promotion : BaseEntity 
+public class Promotion : BaseEntity
 {
     [Required]
     public string Code { get; set; } = string.Empty;

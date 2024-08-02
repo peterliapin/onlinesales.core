@@ -39,6 +39,5 @@ public class MailServer : BaseEntity
 
     public string? JoinMessage { get; set; }
 
-    public string? HeloMessage { get; set; }    
+    public string? HeloMessage { get; set; }
 }
-

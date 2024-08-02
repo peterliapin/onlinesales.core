@@ -37,7 +37,7 @@ public class DealsController : BaseController<Deal, DealCreateDto, DealUpdateDto
         newValue.Contacts = GetContactsFromContactIds(value.ContactIds);
 
         await dealService.SaveAsync(newValue);
-        
+
         await dbContext.SaveChangesAsync();
 
         var resultsToClient = mapper.Map<DealDetailsDto>(newValue);

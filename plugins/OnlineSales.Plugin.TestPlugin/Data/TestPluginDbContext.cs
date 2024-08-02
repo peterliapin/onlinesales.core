@@ -69,6 +69,6 @@ public class TestPluginDbContext : PluginDbContextBase
             throw new TestDbContextException($"Cannot find migration with name containig '{name}'");
         }
 
-        return migration;    
+        return migration;
     }
 }

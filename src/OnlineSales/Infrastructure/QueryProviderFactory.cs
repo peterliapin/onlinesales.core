@@ -17,7 +17,7 @@ namespace OnlineSales.Infrastructure
         where T : BaseEntityWithId, new()
     {
         protected readonly IOptions<ApiSettingsConfig> apiSettingsConfig;
-        protected readonly IHttpContextHelper httpContextHelper;        
+        protected readonly IHttpContextHelper httpContextHelper;
         protected readonly ElasticClient elasticClient;
 
         protected PgDbContext dbContext;

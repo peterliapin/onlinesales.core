@@ -9,7 +9,7 @@ using OnlineSales.Interfaces;
 namespace OnlineSales.Services
 {
     public class OrderItemService : IOrderItemService
-    {        
+    {
         private readonly IOrderService orderService;
         private PgDbContext pgDbContext;
 
