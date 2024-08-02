@@ -76,7 +76,7 @@ public class ContactTests : SimpleTableTests<Contact, TestContact, ContactUpdate
         result.Should().NotBeNull();
         result!.Count.Should().Be(1);
 
-        result = await GetTest<List<Contact>>(itemsUrl + $"?query=Some");
+        result = await GetTest<List<Contact>>(itemsUrl + "?query=Some");
         result.Should().NotBeNull();
         result!.Count.Should().Be(1);
     }

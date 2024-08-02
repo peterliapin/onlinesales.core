@@ -1,4 +1,4 @@
-﻿// <copyright file="ErrorsController.cs" company="WavePoint Co. Ltd.">
+// <copyright file="ErrorsController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -21,7 +21,7 @@ public class ErrorsController : Controller
 
         ProblemDetails problemDetails;
 
-        Log.Error(error, $"Exception caught by the error controller.");
+        Log.Error(error, "Exception caught by the error controller.");
 
         switch (error)
         {

@@ -49,6 +49,6 @@ public class SpamReportDto : SuppressionDto
 
     public override string GetReason()
     {
-        return $"Reported As Spam";
+        return "Reported As Spam";
     }
 }

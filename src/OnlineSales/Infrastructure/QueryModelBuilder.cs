@@ -239,7 +239,7 @@ namespace OnlineSales.Infrastructure
 
                 if (res < 0)
                 {
-                    throw new QueryException(skipCommand.Source, $"Invalid skip size");
+                    throw new QueryException(skipCommand.Source, "Invalid skip size");
                 }
             }
 
