@@ -266,7 +266,7 @@ namespace OnlineSales.Infrastructure
             }
 
             return result;
-        }     
+        }
 
         public sealed class SelectCommandData
         {
