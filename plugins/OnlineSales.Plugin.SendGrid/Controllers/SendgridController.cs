@@ -36,7 +36,7 @@ public class SendgridController : ControllerBase
         this.contactService.SetDBContext(this.dbContext);
     }
 
-    [HttpPost]    
+    [HttpPost]
     [Route("import")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]

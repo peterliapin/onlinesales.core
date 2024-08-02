@@ -35,7 +35,7 @@ public class CommentCreateBaseDto
 
     public int? ContactId { get; set; }
 
-    public int? ParentId { get; set; }    
+    public int? ParentId { get; set; }
 
     [Optional]
     public string? Source { get; set; }

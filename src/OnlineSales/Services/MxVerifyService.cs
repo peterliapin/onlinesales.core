@@ -65,7 +65,7 @@ public class MxVerifyService : IMxVerifyService
                 mailServer = new MailServer
                 {
                     Name = hostName,
-                    CreatedAt = DateTime.UtcNow,                    
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 await dbContext.MailServers!.AddAsync(mailServer);

@@ -90,7 +90,7 @@ public class Program
 
         builder.Services.AddDbContext<PgDbContext>();
         builder.Services.AddSingleton<EsDbContext>();
-        
+
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureFileUpload(builder);

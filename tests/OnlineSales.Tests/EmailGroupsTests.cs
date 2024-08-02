@@ -166,7 +166,7 @@ public class EmailGroupsTests : SimpleTableTests<EmailGroup, TestEmailGroup, Ema
         {
             foreach (var et in eg.EmailTemplates!)
             {
-                et.EmailGroup.Should().BeNull(); 
+                et.EmailGroup.Should().BeNull();
             }
         }
 

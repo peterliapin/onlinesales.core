@@ -13,7 +13,7 @@ namespace OnlineSales.DataAnnotations
     {
         protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
         {
-            var configuration = (IOptions<FileConfig>?)validationContext!.GetService(typeof(IOptions<FileConfig>)) 
+            var configuration = (IOptions<FileConfig>?)validationContext!.GetService(typeof(IOptions<FileConfig>))
                 ?? throw new MissingConfigurationException("Failed to resolve IOptions<FileConfig> object.");
 
             if (value is not IFormFile file)

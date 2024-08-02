@@ -31,7 +31,7 @@ public class ImapAccountsController : ControllerBase
     [SwaggerOperation(Tags = new[] { "Users" })]
     [HttpGet("{userId}/imap-accounts/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]    
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ImapAccountDetailsDto>> GetAccountForUser(string userId, int id)

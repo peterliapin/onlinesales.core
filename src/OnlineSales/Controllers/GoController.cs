@@ -48,4 +48,3 @@ public class GoController : ControllerBase
         return new RedirectResult(linkLog.Destination, false, true);
     }
 }
-

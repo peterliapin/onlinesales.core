@@ -83,7 +83,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
     public override async Task<ActionResult<CommentDetailsDto>> Post([FromBody] CommentCreateDto value)
     {
         var commentableUid = string.Empty;
-        ICommentable? commentable = null;        
+        ICommentable? commentable = null;
 
         if (CommentableTypes.TryGetValue(value.CommentableType, out var type))
         {
@@ -97,7 +97,7 @@ public class CommentsController : BaseControllerWithImport<Comment, CommentCreat
             else if (!string.IsNullOrEmpty(value.CommentableUid) && type == typeof(Content))
             {
                 commentableUid = value.CommentableUid;
-                commentable = (await commentableDbSet.FirstOrDefaultAsync(c => ((Content)c).Slug == value.CommentableUid)) as ICommentable; 
+                commentable = (await commentableDbSet.FirstOrDefaultAsync(c => ((Content)c).Slug == value.CommentableUid)) as ICommentable;
             }
         }
 

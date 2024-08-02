@@ -40,7 +40,7 @@ namespace OnlineSales.EmailSync.Tasks
             this.domainService = domainService;
             this.contactsService = contactsService;
 
-            var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();            
+            var config = configuration.GetSection(configKey)!.Get<TaskWithBatchConfig>();
             if (config is not null)
             {
                 batchSize = config.BatchSize;
@@ -57,7 +57,7 @@ namespace OnlineSales.EmailSync.Tasks
             ignoredEmails = (ignored != null) ? ignored : new string[0];
 
             domainService.SetDBContext(dbContext);
-            contactsService.SetDBContext(dbContext);            
+            contactsService.SetDBContext(dbContext);
         }
 
         public override async Task<bool> Execute(TaskExecutionLog currentJob)
@@ -95,7 +95,7 @@ namespace OnlineSales.EmailSync.Tasks
                 }
             }
 
-            return true;            
+            return true;
         }
 
         private async Task DeleteUnexistedFolders(List<ImapAccountFolder> imapAccountFolders, IList<IMailFolder> folders)
@@ -201,7 +201,7 @@ namespace OnlineSales.EmailSync.Tasks
 
                             emailLogs.Add(emailLog);
                         }
-                    }                    
+                    }
                 }
             }
 
@@ -274,4 +274,3 @@ namespace OnlineSales.EmailSync.Tasks
         }
     }
 }
-
