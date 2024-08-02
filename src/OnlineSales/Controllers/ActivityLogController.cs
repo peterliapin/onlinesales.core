@@ -14,12 +14,12 @@ namespace OnlineSales.Controllers;
 [Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 public class ActivityLogController : ControllerBase
-{    
+{
     private readonly IMapper mapper;
     private readonly ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory;
 
     public ActivityLogController(IMapper mapper, ESOnlyQueryProviderFactory<ActivityLog> queryProviderFactory)
-    {        
+    {
         this.mapper = mapper;
         this.queryProviderFactory = queryProviderFactory;
     }

@@ -27,7 +27,7 @@ public class EmailSyncDbContext : PluginDbContextBase
         : base(options, configuration, httpContextHelper, dataSource)
     {
         var key = configuration.GetSection("EmailSync:EncryptionKey").Get<string>();
-        if (key == null )
+        if (key == null)
         {
             throw new ArgumentNullException(key);
         }
@@ -45,6 +45,6 @@ public class EmailSyncDbContext : PluginDbContextBase
         if (encryptionProvider != null)
         {
             builder.UseEncryption(encryptionProvider);
-        }            
+        }
     }
 }

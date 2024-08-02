@@ -50,7 +50,7 @@ public class Program
         {
             builder.Configuration.AddJsonFile(path, false, true);
         });
-       
+
         ConfigureLogs(builder);
 
         ConfigurePgDataSource(builder);
@@ -92,7 +92,7 @@ public class Program
 
         builder.Services.AddDbContext<PgDbContext>();
         builder.Services.AddSingleton<EsDbContext>();
-        
+
         ConfigureQuartz(builder);
         ConfigureImageUpload(builder);
         ConfigureFileUpload(builder);
