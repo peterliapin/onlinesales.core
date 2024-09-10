@@ -46,7 +46,7 @@ services:
     container_name: mailhog
     image: mailhog/mailhog
     ports:
-      - "25:1025"  # SMTP
+      - "1025:1025"  # SMTP
       - "8025:8025"  # Web
 
 volumes:
