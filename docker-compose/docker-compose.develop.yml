@@ -42,6 +42,13 @@ services:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    ports:
+      - "25:1025"  # SMTP
+      - "8025:8025"  # Web
+
 volumes:
   postgres-data:
   elastic-data:  
