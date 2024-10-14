@@ -55,7 +55,7 @@ namespace OnlineSales.Services
             }
 
             return TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("<%", "%>"), template);
-        }        
+        }
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
