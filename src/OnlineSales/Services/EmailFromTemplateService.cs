@@ -31,19 +31,31 @@ namespace OnlineSales.Services
         {
             var template = await GetEmailTemplate(templateName, language);
 
-            var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
+            var body = EvaluateTemplate(template.BodyTemplate, templateArguments);
+            var subject = EvaluateTemplate(template.Subject, templateArguments);
 
-            await emailWithLogService.SendAsync(template.Subject, template.FromEmail, template.FromName, recipients, updatedBodyTemplate, attachments, template.Id);
+            await emailWithLogService.SendAsync(subject, template.FromEmail, template.FromName, recipients, body, attachments, template.Id);
         }
 
         public async Task SendToContactAsync(int contactId, string templateName, Dictionary<string, string>? templateArguments, List<AttachmentDto>? attachments, int scheduleId = 0)
         {
             var template = await GetEmailTemplate(templateName, contactId);
 
-            var updatedBodyTemplate = GetUpdatedBodyTemplate(template.BodyTemplate, templateArguments);
+            var body = EvaluateTemplate(template.BodyTemplate, templateArguments);
+            var subject = EvaluateTemplate(template.Subject, templateArguments);
 
-            await emailWithLogService.SendToContactAsync(contactId, template.Subject, template.FromEmail, template.FromName, updatedBodyTemplate, attachments, scheduleId, template.Id);
+            await emailWithLogService.SendToContactAsync(contactId, subject, template.FromEmail, template.FromName, body, attachments, scheduleId, template.Id);
         }
+
+        private static string EvaluateTemplate(string template, Dictionary<string, string>? templateArguments)
+        {
+            if (templateArguments is null)
+            {
+                return template;
+            }
+
+            return TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("<%", "%>"), template);
+        }        
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, string language)
         {
@@ -54,19 +66,21 @@ namespace OnlineSales.Services
 
         private async Task<EmailTemplate> GetEmailTemplate(string name, int contactId)
         {
-            var contactLanguage = pgDbContext.Contacts!.FirstOrDefault(c => c.Id == contactId)!.Language;
+            var contact = await pgDbContext.Contacts!.FirstOrDefaultAsync(c => c.Id == contactId);
 
-            var template = await GetEmailTemplateByLanguage(name, contactLanguage);
+            var language = contact!.Language;
+
+            var template = await GetEmailTemplateByLanguage(name, language);
 
             return template!;
         }
 
         private async Task<EmailTemplate?> GetEmailTemplateByLanguage(string name, string? language)
         {
-            string defLang = apiSettingsConfig.Value.DefaultLanguage!;
+            string defaultLang = apiSettingsConfig.Value.DefaultLanguage!;
 
             // set default if not set
-            language ??= defLang;
+            language ??= defaultLang;
 
             if (language.Length == 2)
             {
@@ -85,19 +99,9 @@ namespace OnlineSales.Services
             var template = await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == language);
 
             // if template not found, try find with default language
-            template ??= await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == defLang);
+            template ??= await pgDbContext.EmailTemplates!.FirstOrDefaultAsync(x => x.Name == name && x.Language == defaultLang);
 
             return template;
-        }
-
-        private string GetUpdatedBodyTemplate(string bodyTemplate, Dictionary<string, string>? templateArguments)
-        {
-            if (templateArguments is null)
-            {
-                return bodyTemplate;
-            }
-
-            return TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("<%", "%>"), bodyTemplate);
         }
     }
 }
