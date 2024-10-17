@@ -13,21 +13,19 @@ using Serilog;
 namespace OnlineSales.Plugin.Sms.Controllers;
 
 [Route("api/messages")]
-public class MessagesController : Controller
+public class MessagesController : MessagesControllerBase
 {
     private readonly ISmsService smsService;
-    private readonly SmsControllerHelper controllerHelper;
 
     public MessagesController(SmsDbContext dbContext, ISmsService smsService)
+        : base(dbContext)
     {
         this.smsService = smsService;
-
-        controllerHelper = new SmsControllerHelper(dbContext);
     }
 
     [HttpPost]
     [Route("sms")]
-    [AllowAnonymous] // @@ why?
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
@@ -36,24 +34,16 @@ public class MessagesController : Controller
         [FromBody] SmsDetailsDto smsDetails,
         [FromHeader(Name = "Authentication")] string accessToken)
     {
-        try
-        {
-            SmsControllerHelper.CheckAuthentication(accessToken);
-            var recipient = controllerHelper.GetRecipient(smsDetails.Recipient, ModelState);
+        return await SendMessage(accessToken, smsDetails.Recipient, smsDetails.Message);
+    }
 
-            var smsLog = await controllerHelper.AddLog(recipient, smsService.GetSender(recipient), smsDetails.Message);
+    protected override string GetSender(string recipient)
+    {
+        return smsService.GetSender(recipient);
+    }
 
-            await smsService.SendAsync(recipient, smsDetails.Message);
-
-            await controllerHelper.UpdateLogStatus(smsLog, SmsLog.SmsStatus.Sent);
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
-
-            throw;
-        }
+    protected override async Task SendMessage(string recipient, string message)
+    {
+        await smsService.SendAsync(recipient, message);
     }
 }
