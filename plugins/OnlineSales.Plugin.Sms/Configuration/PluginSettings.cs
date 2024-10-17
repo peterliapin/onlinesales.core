@@ -10,6 +10,8 @@ public class PluginConfig
 
     public GatewaysConfig SmsGateways { get; set; } = new GatewaysConfig();
 
+    public OtpGatewaysConfig OtpGateways { get; set; } = new OtpGatewaysConfig();
+
     public List<CountryGatewayConfig> SmsCountryGateways { get; set; } = new List<CountryGatewayConfig>();
 }
 
@@ -99,4 +101,18 @@ public class TwilioConfig
     public string AuthToken { get; set; } = string.Empty;
 
     public string SenderId { get; set; } = string.Empty;
+}
+
+public class OtpGatewaysConfig
+{
+    public TelegramConfig Telegram { get; set; } = new TelegramConfig();
+}
+
+public class TelegramConfig
+{
+    public string ApiUrl { get; set; } = string.Empty;
+
+    public string AuthToken { get; set; } = string.Empty;
+
+    public string? SenderUserName { get; set; }
 }

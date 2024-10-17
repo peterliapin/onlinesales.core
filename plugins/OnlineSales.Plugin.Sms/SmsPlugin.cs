@@ -29,6 +29,8 @@ public class SmsPlugin : IPlugin
         services.AddScoped<SmsDbContext, SmsDbContext>();
 
         services.AddSingleton<ISmsService, SmsService>();
+        services.AddScoped<IOtpService, OtpService>();
+        services.AddScoped<ITelegramService, TelegramService>();
 
         services.AddScoped<ITask, SyncSmsLogTask>();
     }

@@ -1,4 +1,4 @@
-﻿// <copyright file="MessagesController.cs" company="WavePoint Co. Ltd.">
+﻿// <copyright file="OTPController.cs" company="WavePoint Co. Ltd.">
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
@@ -7,51 +7,50 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OnlineSales.Plugin.Sms.Data;
 using OnlineSales.Plugin.Sms.DTOs;
-using OnlineSales.Plugin.Sms.Entities;
 using Serilog;
 
 namespace OnlineSales.Plugin.Sms.Controllers;
 
-[Route("api/messages")]
-public class MessagesController : Controller
+[Route("api/otp")]
+public class OtpController : Controller
 {
-    private readonly ISmsService smsService;
+    private readonly IOtpService otpService;
     private readonly SmsControllerHelper controllerHelper;
 
-    public MessagesController(SmsDbContext dbContext, ISmsService smsService)
+    public OtpController(SmsDbContext dbContext, IOtpService otpService)
     {
-        this.smsService = smsService;
+        this.otpService = otpService;
 
         controllerHelper = new SmsControllerHelper(dbContext);
     }
 
     [HttpPost]
-    [Route("sms")]
+    [Route("otp")]
     [AllowAnonymous] // @@ why?
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> SendSms(
-        [FromBody] SmsDetailsDto smsDetails,
+        [FromBody] OtpDetailsDto otpDetails,
         [FromHeader(Name = "Authentication")] string accessToken)
     {
         try
         {
             SmsControllerHelper.CheckAuthentication(accessToken);
-            var recipient = controllerHelper.GetRecipient(smsDetails.Recipient, ModelState);
+            var recipient = controllerHelper.GetRecipient(otpDetails.Recipient, ModelState);
+            
+            // @@var smsLog = await controllerHelper.AddLog(recipient, "OTP", otpDetails.OtpCode);
 
-            var smsLog = await controllerHelper.AddLog(recipient, smsService.GetSender(recipient), smsDetails.Message);
+            await otpService.SendOtpAsync(recipient, otpDetails.OtpCode);
 
-            await smsService.SendAsync(recipient, smsDetails.Message);
-
-            await controllerHelper.UpdateLogStatus(smsLog, SmsLog.SmsStatus.Sent);
+            // @@await controllerHelper.UpdateLogStatus(smsLog, SmsLog.SmsStatus.Sent);
 
             return Ok();
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to send SMS message to {0}: {1}", smsDetails.Recipient, smsDetails.Message);
+            Log.Error(ex, "Failed to send OTP code to {0}: {1}", otpDetails.Recipient, otpDetails.OtpCode);
 
             throw;
         }
