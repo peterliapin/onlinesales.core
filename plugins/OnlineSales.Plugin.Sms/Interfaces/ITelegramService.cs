@@ -4,12 +4,11 @@
 
 using OnlineSales.Plugin.Sms.DTOs;
 
-namespace OnlineSales.Interfaces
-{
-    public interface ITelegramService
-    {
-        Task<TelegramRequestStatusDto?> CanDeliverAsync(string recipient);
+namespace OnlineSales.Interfaces;
 
-        Task SendAsync(string recipient, string requestId, string otpCode);
-    }
+public interface ITelegramService
+{
+    Task<TelegramRequestStatusDto?> CanDeliverAsync(string recipient);
+
+    Task SendAsync(string recipient, string requestId, string otpCode);
 }

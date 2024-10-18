@@ -25,7 +25,7 @@ internal class TelegramService : ITelegramService, IDisposable
         {
             client = new HttpClient()
             {
-                BaseAddress = new(telegramConfig.ApiUrl),
+                BaseAddress = telegramConfig.ApiUrl,
             };
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", telegramConfig.AuthToken);
         }
@@ -53,12 +53,12 @@ internal class TelegramService : ITelegramService, IDisposable
 
         var responseContent = await response.Content.ReadAsStringAsync();
         var respResult = JsonSerializer.Deserialize<TelegramResponseDto>(responseContent);
-        if (!(respResult?.ok ?? false))
+        if (respResult?.ok == false)
         {
             return null;
         }
 
-        return respResult.result;
+        return respResult?.result;
     }
 
     public async Task SendAsync(string recipient, string requestId, string otpCode)
@@ -92,9 +92,9 @@ internal class TelegramService : ITelegramService, IDisposable
 
         var responseContent = await response.Content.ReadAsStringAsync();
         var checkResult = JsonSerializer.Deserialize<TelegramResponseDto>(responseContent);
-        if (!(checkResult?.ok ?? false))
+        if (checkResult?.ok == false)
         {
-            throw new TelegramFailedResultException(checkResult?.error);
+            throw new TelegramFailedResultException(checkResult.error);
         }
     }
 

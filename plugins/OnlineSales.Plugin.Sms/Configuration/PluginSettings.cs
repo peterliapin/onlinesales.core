@@ -110,7 +110,7 @@ public class OtpGatewaysConfig
 
 public class TelegramConfig
 {
-    public string ApiUrl { get; set; } = string.Empty;
+    public Uri ApiUrl { get; set; } = new Uri("https://gatewayapi.telegram.org/");
 
     public string AuthToken { get; set; } = string.Empty;
 

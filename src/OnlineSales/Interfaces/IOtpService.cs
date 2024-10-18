@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-namespace OnlineSales.Interfaces
+namespace OnlineSales.Interfaces;
+
+public interface IOtpService
 {
-    public interface IOtpService
-    {
-        Task SendOtpAsync(string recepient, string code);
-    }
+    Task SendOtpAsync(string recepient, string code);
 }
