@@ -57,6 +57,13 @@
       "Gateway": "Smsc"
     }
   ],
+  "OtpGateways": {
+    "Telegram": {
+      "ApiUrl": "https://gatewayapi.telegram.org/",
+      "AuthToken": "$SMSGATEWAYS__TELEGRAM__AUTHTOKEN",
+      "SenderUserName": "$OTPGATEWAYS__TELEGRAM__SENDERUSERNAME"  // Optional
+    }
+  },
   "Tasks": [
     {
       "SyncSmsLogTask": {
