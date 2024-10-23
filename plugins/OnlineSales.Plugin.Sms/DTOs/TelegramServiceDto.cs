@@ -18,8 +18,6 @@ public class TelegramSendVerificationMessageDto
     required public string request_id { get; set; }
 
     required public string code { get; set; }
-
-    public string? sender { get; set; }
 }
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "This is the Telegram name convinion")]

@@ -16,6 +16,8 @@ public class OtpController : MessagesControllerBase
 {
     private readonly IOtpService otpService;
 
+    private string language = string.Empty;
+
     public OtpController(SmsDbContext dbContext, IOtpService otpService)
         : base(dbContext)
     {
@@ -33,17 +35,17 @@ public class OtpController : MessagesControllerBase
         [FromBody] OtpDetailsDto otpDetails,
         [FromHeader(Name = "Authentication")] string accessToken)
     {
+        language = otpDetails.Language;
         return await SendMessage(accessToken, otpDetails.Recipient, otpDetails.OtpCode);
     }
 
     protected override string GetSender(string recipient)
     {
-        var sender = SmsPlugin.Configuration.OtpGateways.Telegram.SenderUserName;
-        return string.IsNullOrEmpty(sender) || sender == "$OTPGATEWAYS__TELEGRAM__SENDERUSERNAME" ? "Telegram" : sender;
+        return otpService.GetSender();
     }
 
     protected override async Task SendMessage(string recipient, string message)
     {
-        await otpService.SendOtpAsync(recipient, message);
+        await otpService.SendOtpAsync(recipient, language, message);
     }
 }

@@ -75,12 +75,6 @@ internal class TelegramService : ITelegramService, IDisposable
             code = otpCode,
         };
 
-        var sender = SmsPlugin.Configuration.OtpGateways.Telegram.SenderUserName;
-        if (!string.IsNullOrEmpty(sender) && sender != "$OTPGATEWAYS__TELEGRAM__SENDERUSERNAME")
-        {
-            dto.sender = sender;
-        }
-
         var jsonDto = JsonSerializer.Serialize(dto);
         var content = new StringContent(jsonDto, Encoding.UTF8, new MediaTypeHeaderValue("application/json"));
 

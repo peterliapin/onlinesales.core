@@ -28,6 +28,8 @@ public class GatewaysConfig
     public NotifyLkConfig NotifyLk { get; set; } = new NotifyLkConfig();
 
     public TwilioConfig Twilio { get; set; } = new TwilioConfig();
+
+    public WhatsAppConfig WhatsApp { get; set; } = new WhatsAppConfig();
 }
 
 public class CountryGatewayConfig
@@ -103,9 +105,24 @@ public class TwilioConfig
     public string SenderId { get; set; } = string.Empty;
 }
 
+public class WhatsAppConfig
+{
+    public Uri ApiUrl { get; set; } = new Uri("https://graph.facebook.com/");
+
+    public string ApiVersion { get; set; } = string.Empty;
+
+    public string AuthToken { get; set; } = string.Empty;
+
+    public string BusinessPhoneId { get; set; } = string.Empty;
+
+    public bool EnableLinkPreviewByDefault { get; set; } = true;
+}
+
 public class OtpGatewaysConfig
 {
     public TelegramConfig Telegram { get; set; } = new TelegramConfig();
+
+    public WhatsAppOtpConfig WhatsApp { get; set; } = new WhatsAppOtpConfig();
 }
 
 public class TelegramConfig
@@ -113,6 +130,25 @@ public class TelegramConfig
     public Uri ApiUrl { get; set; } = new Uri("https://gatewayapi.telegram.org/");
 
     public string AuthToken { get; set; } = string.Empty;
+}
 
-    public string? SenderUserName { get; set; }
+public class WhatsAppOtpConfig
+{
+    public WhatsAppTemplateMessageConfig Default { get; set; } = new WhatsAppTemplateMessageConfig();
+
+    public Dictionary<string, WhatsAppTemplateMessageConfig> Language { get; set; } = new Dictionary<string, WhatsAppTemplateMessageConfig>();
+
+    public WhatsAppTemplateMessageConfig GetByLanguage(string? language)
+    {
+        return language != null && Language.TryGetValue(language, out var config)
+            ? config
+            : Default;
+    }
+}
+
+public class WhatsAppTemplateMessageConfig
+{
+    public string TemplateName { get; set; } = string.Empty;
+
+    public string LanguageCode { get; set; } = string.Empty;
 }

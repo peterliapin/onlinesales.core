@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Sms.Configuration;
 using OnlineSales.Plugin.Sms.Data;
+using OnlineSales.Plugin.Sms.Interfaces;
 using OnlineSales.Plugin.Sms.Services;
 using OnlineSales.Plugin.Sms.Tasks;
 
@@ -31,6 +32,7 @@ public class SmsPlugin : IPlugin
         services.AddSingleton<ISmsService, SmsService>();
         services.AddScoped<IOtpService, OtpService>();
         services.AddScoped<ITelegramService, TelegramService>();
+        services.AddScoped<IWhatsAppService, WhatsAppService>();
 
         services.AddScoped<ITask, SyncSmsLogTask>();
     }

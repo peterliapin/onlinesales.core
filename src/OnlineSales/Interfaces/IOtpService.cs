@@ -6,5 +6,7 @@ namespace OnlineSales.Interfaces;
 
 public interface IOtpService
 {
-    Task SendOtpAsync(string recepient, string code);
+    Task SendOtpAsync(string recepient, string language, string code);
+
+    string GetSender();
 }
