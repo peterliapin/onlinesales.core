@@ -15,11 +15,21 @@ public class WhatsAppSendAuthTemplateMessageDto
 
     public string type { get; set; } = "template";
 
-    public AuthTemplateDto template { get; set; } = new AuthTemplateDto();
+    public AuthTemplateMessageDto? template { get; set; }
+
+    public TextMessageDto? text { get; set; }
 }
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "This is the WhatsApp naming convention")]
-public class AuthTemplateDto
+public class TextMessageDto
+{
+    public bool preview_url { get; set; }
+
+    public string body { get; set; } = string.Empty;
+}
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "This is the WhatsApp naming convention")]
+public class AuthTemplateMessageDto
 {
     public string name { get; set; } = string.Empty;
 
