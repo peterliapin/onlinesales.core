@@ -143,10 +143,10 @@ public class Program
         await MigrateOnStartIfRequired(app, builder);
 
         app.UseSwagger();
-        app.UseSwaggerUI();        
+        app.UseSwaggerUI();
         app.UseDefaultFiles();
         app.UseCors();
-        app.UseStaticFiles();        
+        app.UseStaticFiles();
 
         app.UseAuthentication();
         app.UseAuthorization();
