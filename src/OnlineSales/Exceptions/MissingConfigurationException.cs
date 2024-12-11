@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Runtime.Serialization;
-
 namespace OnlineSales.Exceptions;
 
-[Serializable]
 public class MissingConfigurationException : Exception
 {
     public MissingConfigurationException()
@@ -20,11 +17,6 @@ public class MissingConfigurationException : Exception
 
     public MissingConfigurationException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    protected MissingConfigurationException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }

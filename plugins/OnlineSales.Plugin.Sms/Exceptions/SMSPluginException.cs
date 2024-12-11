@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Runtime.Serialization;
-
 namespace OnlineSales.Plugin.Sms.Exceptions
 {
-    [Serializable]
     public class SmsPluginException : Exception
     {
         public SmsPluginException()
@@ -20,11 +17,6 @@ namespace OnlineSales.Plugin.Sms.Exceptions
 
         public SmsPluginException(string? message, Exception? innerException)
             : base(message, innerException)
-        {
-        }
-
-        protected SmsPluginException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

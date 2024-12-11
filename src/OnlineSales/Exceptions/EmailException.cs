@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the samples root for full license information.
 // </copyright>
 
-using System.Runtime.Serialization;
-
 namespace OnlineSales.Exceptions;
 
-[Serializable]
 public class EmailException : Exception
 {
     public EmailException()
@@ -20,11 +17,6 @@ public class EmailException : Exception
 
     public EmailException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    protected EmailException(SerializationInfo info, StreamingContext context)
-        : base(info, context)
     {
     }
 }
