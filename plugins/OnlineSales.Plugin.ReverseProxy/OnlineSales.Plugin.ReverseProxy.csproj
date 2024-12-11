@@ -28,7 +28,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="4.9.0" />
     <PackageReference Include="Yarp.ReverseProxy" Version="2.1.0" />
   </ItemGroup>
 
