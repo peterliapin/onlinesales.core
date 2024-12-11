@@ -145,8 +145,8 @@ public class Program
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseDefaultFiles();
-        app.UseStaticFiles();
         app.UseCors();
+        app.UseStaticFiles();
 
         app.UseAuthentication();
         app.UseAuthorization();
