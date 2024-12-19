@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
 using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
@@ -207,6 +208,10 @@ public class PgDbContext : IdentityDbContext<User>
         try
         {
             Console.WriteLine("Configuring PgDbContext...");
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
 

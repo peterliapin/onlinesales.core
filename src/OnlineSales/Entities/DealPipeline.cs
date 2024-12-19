@@ -4,7 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using OnlineSales.DataAnnotations;
 
 namespace OnlineSales.Entities;
