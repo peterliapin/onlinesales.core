@@ -209,10 +209,6 @@ public class PgDbContext : IdentityDbContext<User>
         {
             Console.WriteLine("Configuring PgDbContext...");
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
-#pragma warning restore CS0618 // Type or member is obsolete
-
             var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
 
             if (postgresConfig == null)
@@ -220,8 +216,12 @@ public class PgDbContext : IdentityDbContext<User>
                 throw new MissingConfigurationException("Postgres configuration is mandatory.");
             }
 
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
+            dataSourceBuilder.EnableDynamicJson();
+            var dataSource = dataSourceBuilder.Build();
+
             optionsBuilder.UseNpgsql(
-                postgresConfig.ConnectionString,
+                dataSource,
                 b => b.MigrationsHistoryTable("_migrations"))
                         .UseSnakeCaseNamingConvention()
                         .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
