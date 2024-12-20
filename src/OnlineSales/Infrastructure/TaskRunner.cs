@@ -4,6 +4,7 @@
 
 using Medallion.Threading.Postgres;
 using Microsoft.EntityFrameworkCore;
+using OnlineSales.Configuration;
 using OnlineSales.Data;
 using OnlineSales.Entities;
 using OnlineSales.Interfaces;
@@ -15,6 +16,7 @@ namespace OnlineSales.Infrastructure
     {
         private const string TaskRunnerNodeLockKey = "TaskRunnerPrimaryNodeLock";
 
+        private static readonly object PrimaryNodeStatusLock = new();
         private static (PostgresDistributedLockHandle?, PrimaryNodeStatus) primaryNodeStatus = (null, PrimaryNodeStatus.Unknown);
 
         private readonly IEnumerable<ITask> tasks;
@@ -25,10 +27,13 @@ namespace OnlineSales.Infrastructure
             this.dbContext = dbContext;
             this.tasks = tasks;
 
-            if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
+            lock (PrimaryNodeStatusLock)
             {
+                if (primaryNodeStatus.Item2 == PrimaryNodeStatus.Unknown)
+                {
 #pragma warning disable S3010
-                primaryNodeStatus = GetPrimaryStatus();
+                    primaryNodeStatus = GetPrimaryStatus();
+                }
             }
 
             Log.Information("This node: " + (IsPrimaryNode() ? "is primary" : "isn't primary"));
@@ -53,7 +58,8 @@ namespace OnlineSales.Infrastructure
 
                 foreach (var task in tasks.Where(t => t.IsRunning))
                 {
-                    var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString()!).Item1;
+                    var postgresConfig = dbContext.Configuration.GetSection("Postgres").Get<PostgresConfig>()!;
+                    var taskLock = LockManager.GetNoWaitLock(task.Name, postgresConfig.ConnectionString).Item1;
 
                     if (taskLock is null)
                     {
@@ -87,7 +93,8 @@ namespace OnlineSales.Infrastructure
                 throw new NonPrimaryNodeException();
             }
 
-            var taskLock = LockManager.GetNoWaitLock(task.Name, dbContext.Database.GetConnectionString()!).Item1;
+            var postgresConfig = dbContext.Configuration.GetSection("Postgres").Get<PostgresConfig>()!;
+            var taskLock = LockManager.GetNoWaitLock(task.Name, postgresConfig.ConnectionString).Item1;
 
             if (taskLock is null)
             {
@@ -123,7 +130,8 @@ namespace OnlineSales.Infrastructure
 
         private (PostgresDistributedLockHandle?, PrimaryNodeStatus) GetPrimaryStatus()
         {
-            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, dbContext.Database.GetConnectionString()!);
+            var postgresConfig = dbContext.Configuration.GetSection("Postgres").Get<PostgresConfig>()!;
+            var primaryNodeLockData = LockManager.GetNoWaitLock(TaskRunnerNodeLockKey, postgresConfig.ConnectionString);
             if (primaryNodeLockData.Item2)
             {
                 return (primaryNodeLockData.Item1, (primaryNodeLockData.Item1 != null) ? PrimaryNodeStatus.Primary : PrimaryNodeStatus.NonPrimary);

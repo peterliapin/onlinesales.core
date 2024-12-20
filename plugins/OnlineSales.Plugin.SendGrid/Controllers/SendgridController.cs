@@ -5,8 +5,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using OnlineSales.Configuration;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
 using OnlineSales.Infrastructure;
@@ -148,7 +149,8 @@ public class SendgridController : ControllerBase
         try
         {
             // lock is required here because if two webhook events or imports start at the same time and try to create new contacts - one may fail later due too dupliacate email error
-            using (LockManager.GetWaitLock("SendGridAddEventsWaitLock", dbContext.Database.GetConnectionString()!))
+            var postgresConfig = dbContext.Configuration.GetSection("Postgres").Get<PostgresConfig>()!;
+            using (LockManager.GetWaitLock("SendGridAddEventsWaitLock", postgresConfig.ConnectionString))
             {
                 var emailRecords = records.GroupBy(r => r.Email);
 

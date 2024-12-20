@@ -52,6 +52,7 @@ public class Program
         });
 
         ConfigureLogs(builder);
+        ConfigurePgDataSource(builder);
         PluginManager.Init(builder.Configuration);
 
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
@@ -205,6 +206,13 @@ public class Program
         }
     }
 
+    private static void ConfigurePgDataSource(WebApplicationBuilder builder)
+    {
+        var dataSource = PgDbContext.BuildDataSource(builder.Configuration);
+
+        builder.Services.AddSingleton(dataSource);
+    }
+
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)
     {
         var maxImportSizeConfig = builder.Configuration.GetValue<string>("ApiSettings:MaxImportSize");
@@ -267,8 +275,8 @@ public class Program
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-
-                using (LockManager.GetWaitLock("MigrationWaitLock", context.Database.GetConnectionString()!))
+                var postgresConfig = context.Configuration.GetSection("Postgres").Get<PostgresConfig>()!;
+                using (LockManager.GetWaitLock("MigrationWaitLock", postgresConfig.ConnectionString))
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<PgDbContext>();
                     dbContext.Database.Migrate();

@@ -24,6 +24,8 @@ public class PgDbContext : IdentityDbContext<User>
 
     private readonly IHttpContextHelper? httpContextHelper;
 
+    private readonly NpgsqlDataSource dataSource;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PgDbContext"/> class.
     /// Constructor with no parameters and manual configuration building is required for the case when you would like to use PgDbContext as a base class for a new context (let's say in a plugin).
@@ -40,6 +42,8 @@ public class PgDbContext : IdentityDbContext<User>
                 .AddUserSecrets(typeof(Program).Assembly)
                 .Build();
 
+            dataSource = BuildDataSource(Configuration);
+
             Console.WriteLine("PgDbContext initialized");
         }
         catch (Exception ex)
@@ -49,11 +53,12 @@ public class PgDbContext : IdentityDbContext<User>
         }
     }
 
-    public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+    public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
         : base(options)
     {
         Configuration = configuration;
         this.httpContextHelper = httpContextHelper;
+        this.dataSource = dataSource;
     }
 
     public bool IsImportRequest { get; set; }
@@ -111,6 +116,20 @@ public class PgDbContext : IdentityDbContext<User>
     public virtual DbSet<Discount>? Discounts { get; set; }
 
     public virtual DbSet<MailServer>? MailServers { get; set; }
+
+    public static NpgsqlDataSource BuildDataSource(IConfiguration configuration)
+    {
+        var config = configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+        if (config == null)
+        {
+            throw new MissingConfigurationException("Postgres configuration is mandatory.");
+        }
+
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(config.ConnectionString);
+        dataSourceBuilder.EnableDynamicJson();
+        return dataSourceBuilder.Build();
+    }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
@@ -208,17 +227,6 @@ public class PgDbContext : IdentityDbContext<User>
         try
         {
             Console.WriteLine("Configuring PgDbContext...");
-
-            var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-            if (postgresConfig == null)
-            {
-                throw new MissingConfigurationException("Postgres configuration is mandatory.");
-            }
-
-            var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
-            dataSourceBuilder.EnableDynamicJson();
-            var dataSource = dataSourceBuilder.Build();
 
             optionsBuilder.UseNpgsql(
                 dataSource,

@@ -7,6 +7,7 @@ using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.EmailSync.Entities;
@@ -22,8 +23,8 @@ public class EmailSyncDbContext : PluginDbContextBase
     {
     }
 
-    public EmailSyncDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
-        : base(options, configuration, httpContextHelper)
+    public EmailSyncDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+        : base(options, configuration, httpContextHelper, dataSource)
     {
         var key = configuration.GetSection("EmailSync:EncryptionKey").Get<string>();
         if (key == null)
