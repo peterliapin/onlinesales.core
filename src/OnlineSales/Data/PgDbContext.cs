@@ -24,8 +24,6 @@ public class PgDbContext : IdentityDbContext<User>
 
     private readonly IHttpContextHelper? httpContextHelper;
 
-    private readonly NpgsqlDataSource dataSource;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="PgDbContext"/> class.
     /// Constructor with no parameters and manual configuration building is required for the case when you would like to use PgDbContext as a base class for a new context (let's say in a plugin).
@@ -37,12 +35,10 @@ public class PgDbContext : IdentityDbContext<User>
             Console.WriteLine("Initializing PgDbContext...");
 
             Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", false)
-                .AddEnvironmentVariables()
-                .AddUserSecrets(typeof(Program).Assembly)
-                .Build();
-
-            dataSource = BuildDataSource(Configuration);
+            .AddJsonFile("appsettings.json", false)
+            .AddEnvironmentVariables()
+            .AddUserSecrets(typeof(Program).Assembly)
+            .Build();
 
             Console.WriteLine("PgDbContext initialized");
         }
@@ -53,12 +49,11 @@ public class PgDbContext : IdentityDbContext<User>
         }
     }
 
-    public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
+    public PgDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
         : base(options)
     {
         Configuration = configuration;
         this.httpContextHelper = httpContextHelper;
-        this.dataSource = dataSource;
     }
 
     public bool IsImportRequest { get; set; }
@@ -229,7 +224,7 @@ public class PgDbContext : IdentityDbContext<User>
             Console.WriteLine("Configuring PgDbContext...");
 
             optionsBuilder.UseNpgsql(
-                dataSource,
+                DataSourceSingleton.GetInstance(Configuration),
                 b => b.MigrationsHistoryTable("_migrations"))
                         .UseSnakeCaseNamingConvention()
                         .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();

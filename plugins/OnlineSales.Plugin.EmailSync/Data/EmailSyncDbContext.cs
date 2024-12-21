@@ -23,8 +23,8 @@ public class EmailSyncDbContext : PluginDbContextBase
     {
     }
 
-    public EmailSyncDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
-        : base(options, configuration, httpContextHelper, dataSource)
+    public EmailSyncDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+        : base(options, configuration, httpContextHelper)
     {
         var key = configuration.GetSection("EmailSync:EncryptionKey").Get<string>();
         if (key == null)

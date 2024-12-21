@@ -18,8 +18,8 @@ public class SendgridDbContext : PluginDbContextBase
     {
     }
 
-    public SendgridDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
-        : base(options, configuration, httpContextHelper, dataSource)
+    public SendgridDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+        : base(options, configuration, httpContextHelper)
     {
     }
 

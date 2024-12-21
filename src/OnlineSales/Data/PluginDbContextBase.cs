@@ -16,8 +16,8 @@ public abstract class PluginDbContextBase : PgDbContext
     {
     }
 
-    protected PluginDbContextBase(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
-        : base(options, configuration, httpContextHelper, dataSource)
+    protected PluginDbContextBase(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+        : base(options, configuration, httpContextHelper)
     {
     }
 

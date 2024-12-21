@@ -24,8 +24,8 @@ public class TestPluginDbContext : PluginDbContextBase
         migrations = new SortedSet<string>();
     }
 
-    public TestPluginDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper, NpgsqlDataSource dataSource)
-        : base(options, configuration, httpContextHelper, dataSource)
+    public TestPluginDbContext(DbContextOptions<PgDbContext> options, IConfiguration configuration, IHttpContextHelper httpContextHelper)
+        : base(options, configuration, httpContextHelper)
     {
         migrations = new SortedSet<string>(Database.GetPendingMigrations());
     }
