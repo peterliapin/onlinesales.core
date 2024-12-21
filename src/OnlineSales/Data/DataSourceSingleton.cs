@@ -5,30 +5,29 @@
 using Npgsql;
 using OnlineSales.Configuration;
 
-namespace OnlineSales.Data
+namespace OnlineSales.Data;
+
+public class DataSourceSingleton
 {
-    public class DataSourceSingleton
+    private static NpgsqlDataSource? instance = null;
+
+    public static NpgsqlDataSource GetInstance(IConfiguration configuration)
     {
-        private static NpgsqlDataSource? instance = null;
+        instance ??= BuildDataSource(configuration);
+        return instance;
+    }
 
-        public static NpgsqlDataSource GetInstance(IConfiguration configuration)
+    private static NpgsqlDataSource BuildDataSource(IConfiguration configuration)
+    {
+        var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
+
+        if (postgresConfig == null)
         {
-            instance ??= BuildDataSource(configuration);
-            return instance;
+            throw new MissingConfigurationException("Postgres configuration is mandatory.");
         }
 
-        private static NpgsqlDataSource BuildDataSource(IConfiguration configuration)
-        {
-            var postgresConfig = configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-            if (postgresConfig == null)
-            {
-                throw new MissingConfigurationException("Postgres configuration is mandatory.");
-            }
-
-            var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
-            dataSourceBuilder.EnableDynamicJson();
-            return dataSourceBuilder.Build();
-        }
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresConfig.ConnectionString);
+        dataSourceBuilder.EnableDynamicJson();
+        return dataSourceBuilder.Build();
     }
 }
