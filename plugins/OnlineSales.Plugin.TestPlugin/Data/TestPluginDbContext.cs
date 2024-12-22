@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.TestPlugin.Entities;

@@ -4,7 +4,6 @@
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using OnlineSales.Interfaces;
 
 namespace OnlineSales.Data;

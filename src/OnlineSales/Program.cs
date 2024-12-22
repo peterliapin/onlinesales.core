@@ -52,7 +52,6 @@ public class Program
         });
 
         ConfigureLogs(builder);
-        ConfigurePgDataSource(builder);
         PluginManager.Init(builder.Configuration);
 
         builder.Configuration.AddUserSecrets(typeof(Program).Assembly);
@@ -204,13 +203,6 @@ public class Program
                 }
             }
         }
-    }
-
-    private static void ConfigurePgDataSource(WebApplicationBuilder builder)
-    {
-        var dataSource = PgDbContext.BuildDataSource(builder.Configuration);
-
-        builder.Services.AddSingleton(dataSource);
     }
 
     private static void ConfigureImportSizeLimit(WebApplicationBuilder builder)

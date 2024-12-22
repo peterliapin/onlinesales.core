@@ -4,7 +4,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Plugin.Vsto.Entities;
 

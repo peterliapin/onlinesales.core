@@ -7,7 +7,6 @@ using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
 using OnlineSales.Data;
 using OnlineSales.Interfaces;
 using OnlineSales.Plugin.EmailSync.Entities;

@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql;
-using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
@@ -111,20 +109,6 @@ public class PgDbContext : IdentityDbContext<User>
     public virtual DbSet<Discount>? Discounts { get; set; }
 
     public virtual DbSet<MailServer>? MailServers { get; set; }
-
-    public static NpgsqlDataSource BuildDataSource(IConfiguration configuration)
-    {
-        var config = configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-        if (config == null)
-        {
-            throw new MissingConfigurationException("Postgres configuration is mandatory.");
-        }
-
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(config.ConnectionString);
-        dataSourceBuilder.EnableDynamicJson();
-        return dataSourceBuilder.Build();
-    }
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
