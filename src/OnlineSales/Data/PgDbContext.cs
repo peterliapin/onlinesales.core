@@ -33,10 +33,10 @@ public class PgDbContext : IdentityDbContext<User>
             Console.WriteLine("Initializing PgDbContext...");
 
             Configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", false)
-            .AddEnvironmentVariables()
-            .AddUserSecrets(typeof(Program).Assembly)
-            .Build();
+                .AddJsonFile("appsettings.json", false)
+                .AddEnvironmentVariables()
+                .AddUserSecrets(typeof(Program).Assembly)
+                .Build();
 
             Console.WriteLine("PgDbContext initialized");
         }

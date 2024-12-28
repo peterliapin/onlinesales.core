@@ -7,7 +7,7 @@ using OnlineSales.Configuration;
 
 namespace OnlineSales.Data;
 
-public class DataSourceSingleton
+public static class DataSourceSingleton
 {
     private static NpgsqlDataSource? instance = null;
 
