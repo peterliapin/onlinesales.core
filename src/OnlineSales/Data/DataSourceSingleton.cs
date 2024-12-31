@@ -9,11 +9,22 @@ namespace OnlineSales.Data;
 
 public static class DataSourceSingleton
 {
+    private static readonly object InstanceLock = new object();
     private static NpgsqlDataSource? instance = null;
 
     public static NpgsqlDataSource GetInstance(IConfiguration configuration)
     {
-        instance ??= BuildDataSource(configuration);
+        if (instance == null)
+        {
+            lock (InstanceLock)
+            {
+                if (instance == null)
+                {
+                    instance = BuildDataSource(configuration);
+                }
+            }
+        }
+
         return instance;
     }
 
