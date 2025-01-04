@@ -267,8 +267,8 @@ public class Program
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<PgDbContext>();
-
-                using (LockManager.GetWaitLock("MigrationWaitLock", context.Database.GetConnectionString()!))
+                var postgresConfig = context.Configuration.GetSection("Postgres").Get<PostgresConfig>()!;
+                using (LockManager.GetWaitLock("MigrationWaitLock", postgresConfig.ConnectionString))
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<PgDbContext>();
                     dbContext.Database.Migrate();

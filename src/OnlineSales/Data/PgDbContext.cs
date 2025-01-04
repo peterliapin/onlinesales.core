@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Migrations;
-using OnlineSales.Configuration;
 using OnlineSales.DataAnnotations;
 using OnlineSales.Entities;
 using OnlineSales.Helpers;
@@ -208,15 +207,8 @@ public class PgDbContext : IdentityDbContext<User>
         {
             Console.WriteLine("Configuring PgDbContext...");
 
-            var postgresConfig = Configuration.GetSection("Postgres").Get<PostgresConfig>();
-
-            if (postgresConfig == null)
-            {
-                throw new MissingConfigurationException("Postgres configuration is mandatory.");
-            }
-
             optionsBuilder.UseNpgsql(
-                postgresConfig.ConnectionString,
+                DataSourceSingleton.GetInstance(Configuration),
                 b => b.MigrationsHistoryTable("_migrations"))
                         .UseSnakeCaseNamingConvention()
                         .ReplaceService<IMigrationsSqlGenerator, CustomSqlServerMigrationsSqlGenerator>();
