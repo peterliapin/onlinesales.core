@@ -5,7 +5,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ReleaseVersion>1.2.35-pre</ReleaseVersion>
+    <ReleaseVersion>1.2.36-pre</ReleaseVersion>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <Configurations>Debug;Release;Migration</Configurations>
   </PropertyGroup>
@@ -41,7 +41,7 @@
   <!--This ItemGroup is required to support migration generating with the "dotnet ef migrations add" command-->
   <ItemGroup Condition="'$(Configuration)'=='Migration'">
     <ProjectReference Include="..\..\src\OnlineSales\OnlineSales.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
