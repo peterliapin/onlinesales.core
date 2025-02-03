@@ -55,6 +55,7 @@ namespace OnlineSales.Services
             }
 
             var result = TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("<%", "%>"), template);
+            result = TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("&lt;%", "%&gt;"), result); // the case when template is html encoded
             result = TokenHelper.ReplaceTokensFromVariables(templateArguments!.ConvertKeys("${", "}"), result);
             return result;
         }

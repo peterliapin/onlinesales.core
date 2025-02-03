@@ -193,7 +193,9 @@ public class Program
                 EmailConfirmed = true,
             };
 
-            if (await userManager.FindByEmailAsync(user.Email) == null)
+            var existingUser = await userManager.FindByEmailAsync(user.Email);
+
+            if (existingUser == null)
             {
                 var result = await userManager.CreateAsync(user, defaultUser.Password);
 
