@@ -26,7 +26,7 @@ public class IdentityController : ControllerBase
     private readonly IOptions<AzureADConfig> azureAdConfig;
 
     public IdentityController(
-        SignInManager<User> signInManager, 
+        SignInManager<User> signInManager,
         IOptions<JwtConfig> jwtConfig,
         IOptions<AzureADConfig> azureAdConfig)
     {
@@ -39,7 +39,7 @@ public class IdentityController : ControllerBase
     public IActionResult AzureLogin(string returnUrl = "/")
     {
         // Check if Azure AD is properly configured
-        if (string.IsNullOrEmpty(azureAdConfig.Value.TenantId) || 
+        if (string.IsNullOrEmpty(azureAdConfig.Value.TenantId) ||
             azureAdConfig.Value.TenantId == "$AZUREAD__TENANTID")
         {
             return BadRequest("Azure AD authentication is not configured.");
@@ -48,7 +48,7 @@ public class IdentityController : ControllerBase
         // Use the AzureAd OpenID Connect scheme for the challenge
         var redirectUri = Url.Action(nameof(AzureLoginCallback), new { returnUrl });
         var properties = new AuthenticationProperties { RedirectUri = redirectUri };
-        
+
         // Challenge with Azure AD OpenID Connect scheme
         return Challenge(properties, "AzureAdOpenID");
     }

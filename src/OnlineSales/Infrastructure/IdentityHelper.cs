@@ -37,10 +37,10 @@ public static class IdentityHelper
         // Determine if both authentication methods are enabled
         var jwtConfig = builder.Configuration.GetSection("Jwt").Get<JwtConfig>();
         var azureAdConfig = builder.Configuration.GetSection("AzureAd").Get<AzureADConfig>();
-        
+
         bool jwtEnabled = jwtConfig != null && jwtConfig.Secret != "$JWT__SECRET";
         bool azureAdEnabled = azureAdConfig != null && azureAdConfig.TenantId != "$AZUREAD__TENANTID";
-        
+
         // Configure authentication with policy scheme as default
         var authBuilder = builder.Services.AddAuthentication(options =>
         {
@@ -79,7 +79,7 @@ public static class IdentityHelper
                                 {
                                     return AzureAdScheme;
                                 }
-                                
+
                                 if (jwtEnabled && issuer == localIssuer)
                                 {
                                     return JwtBearerScheme;
@@ -191,7 +191,7 @@ public static class IdentityHelper
             jwtOptions =>
             {
                 jwtOptions.Events = new AzureAdJwtBearerEventsHandler(builder.Configuration);
-                
+
                 // Add the following to handle CORS preflight requests
                 jwtOptions.Events.OnChallenge = async context =>
                 {
@@ -201,14 +201,14 @@ public static class IdentityHelper
                         context.HandleResponse();
                         return;
                     }
-                    
+
                     await Task.CompletedTask;
                 };
-            }, 
+            },
             identityOptions =>
             {
                 ConfigureIdentityAuthOptions(azureAdConfig, identityOptions);
-            }, 
+            },
             schemeName);
 
         // Add OpenID Connect for interactive login - no need to register cookie handler separately
@@ -220,16 +220,16 @@ public static class IdentityHelper
                 identityOptions.CallbackPath = "/api/identity/azure-login-callback";
                 identityOptions.SignedOutCallbackPath = "/api/identity/signout-callback-oidc";
                 identityOptions.SkipUnrecognizedRequests = true;
-                
+
                 // Ensure correct redirect behavior
                 identityOptions.ResetPasswordPath = "/api/identity/reset-password";
                 identityOptions.ErrorPath = "/api/identity/error";
-            }, 
+            },
             cookieOptions =>
             {
                 cookieOptions.Cookie.Name = "AzureAdAuth_ticket";
                 cookieOptions.Events = new AzureAdCookieEventsHandler();
-                
+
                 // Make sure cookie can be shared with the frontend
                 cookieOptions.Cookie.SameSite = SameSiteMode.None;
                 cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;
